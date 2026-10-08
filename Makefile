@@ -51,7 +51,7 @@ essais: ## pytest complet : les essais qui demandent un vrai serveur échouent a
 	cd $(BACK) && GESTIONMPPRO_ESSAIS_COMPLETS=1 .venv/bin/pytest
 
 matrice: ## Régénère tests/matrice_droits.csv depuis les routes (jamais à la main)
-	$(call exige,$(BACK)/gestion_mp_pro/securite.py,S2)
+	$(call exige,$(BACK)/gestion_mp_pro/securite,S2)
 	cd $(BACK) && .venv/bin/python -m gestion_mp_pro.securite matrice > tests/matrice_droits.csv
 
 types: ## openapi.json → frontend/src/lib/types.gen.ts
