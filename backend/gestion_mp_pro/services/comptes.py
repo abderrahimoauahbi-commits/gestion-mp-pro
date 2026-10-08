@@ -16,6 +16,7 @@ import hashlib
 import hmac
 import re
 import secrets
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 from sqlalchemy import func, select, text
@@ -77,6 +78,21 @@ def acteur_de(u: Utilisateur, adresse: str = "") -> Acteur:
 def libelle_role(role: str | None) -> str:
     """« Responsable achats »."""
     return ROLES_LIBELLES.get(role or "", role or "")
+
+
+def message_refus(roles: Iterable[str]) -> str:
+    """« Cette action est réservée à : responsable achats. » (KR14, mot pour mot).
+
+    Comme dans Gestion MP, la direction n'est pas citée quand un rôle métier est permis ; une
+    route de la direction seule dit « la direction ».
+    """
+    permis = set(roles)
+    noms = [libelle_role(r).lower() for r in (Role.achats, Role.alimentation) if r in permis]
+    if not noms:
+        noms = ["la direction"] if Role.direction in permis else []
+        if Role.administrateur in permis:
+            noms.append("l'administrateur technique")
+    return f"Cette action est réservée à : {', '.join(noms)}."
 
 
 # ── Codes ───────────────────────────────────────────────────────────────────

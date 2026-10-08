@@ -22,9 +22,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
-from typing import Protocol
+from typing import Any, Protocol
 
-from sqlalchemy import inspect, select
+from sqlalchemy import inspect, null, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
@@ -32,6 +32,9 @@ from gestion_mp_pro.modeles import Base, Journal
 from gestion_mp_pro.modeles import longueurs as L
 from gestion_mp_pro.modeles.enums import ObjetJournal
 from gestion_mp_pro.services import horloge
+
+_NULL: Any = null()
+"""NULL SQL (et non le `null` JSON) pour un avant/après vide."""
 
 SYSTEME = "système"
 """Nom écrit quand le geste n'a pas d'auteur (tâche de fond, enrôlement d'un appareil)."""
@@ -129,8 +132,8 @@ def journal(
         objet_id=objet_id,
         numero=(numero or "")[: L.NUMERO_DOCUMENT],
         detail=(detail or "")[: L.DETAIL],
-        avant=dict(avant) if avant else None,
-        apres=dict(apres) if apres else None,
+        avant=dict(avant) if avant else _NULL,
+        apres=dict(apres) if apres else _NULL,
         requete=(qui.requete if qui is not None else "")[: L.REQUETE],
         adresse=(qui.adresse if qui is not None else "")[: L.ADRESSE_IP],
     )

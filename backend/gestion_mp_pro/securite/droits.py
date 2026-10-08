@@ -12,14 +12,12 @@ Les droits fins (un geste dans une route ouverte à plusieurs rôles) sont décl
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-
 from fastapi import Depends, params
 
 from gestion_mp_pro.api.dependances import ActeurDep, ActeurProtocole
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles.enums import Role
-from gestion_mp_pro.services.comptes import libelle_role
+from gestion_mp_pro.services.comptes import message_refus
 
 D, A, L, T = Role.direction, Role.achats, Role.alimentation, Role.administrateur
 C: tuple[Role, ...] = (D, A, L)
@@ -28,21 +26,6 @@ TOUS: tuple[Role, ...] = (D, A, L, T)
 """Tous les comptes connectés, administrateur compris."""
 
 ATTRIBUT_ROLES = "roles"
-
-
-def message_refus(roles: Iterable[str]) -> str:
-    """« Cette action est réservée à : responsable achats. » (KR14, mot pour mot).
-
-    Comme dans Gestion MP, la direction n'est pas citée quand un rôle métier est permis ; une
-    route de la direction seule dit « la direction ».
-    """
-    permis = set(roles)
-    metier = [libelle_role(r).lower() for r in (A, L) if r in permis]
-    if not metier:
-        metier = ["la direction"] if D in permis else []
-        if T in permis:
-            metier.append("l'administrateur technique")
-    return f"Cette action est réservée à : {', '.join(metier)}."
 
 
 def droit(*roles: Role) -> params.Depends:
