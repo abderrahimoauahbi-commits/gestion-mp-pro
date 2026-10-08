@@ -19,6 +19,7 @@ from pathlib import Path
 import pytest
 from alembic import command
 from sqlalchemy import Connection, text
+from sqlalchemy.exc import SQLAlchemyError
 
 from gestion_mp_pro import modeles
 from gestion_mp_pro.db import moteur
@@ -103,7 +104,44 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002"]
+    assert installation.migrer() == ["0002", "0003"]
+    assert not installation.schema_en_retard()
+
+
+def _cles_reglages(c: Connection) -> tuple[int, int]:
+    """(réglages semés, clés admises par `ck_parametre_cle_connue`)."""
+    semes = c.execute(text("SELECT count(*) FROM parametre")).scalar()
+    definition = c.execute(
+        text(
+            "SELECT pg_get_constraintdef(oid) FROM pg_constraint"
+            " WHERE conname = 'ck_parametre_cle_connue'"
+        )
+    ).scalar()
+    return int(semes or 0), str(definition).count("::character varying")
+
+
+def test_0003_tolerance_tva_import_aller_retour(base_vide: None) -> None:
+    installation.migrer()
+    cfg = installation.configuration()
+    with moteur().connect() as c, c.begin():
+        assert _cles_reglages(c) == (57, 57)
+        c.execute(
+            text(
+                "INSERT INTO parametre_historique (cle, avant, apres)"
+                " VALUES ('toler_tva_import', '0.05', '0.1')"
+            )
+        )
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, "0002")
+        assert _cles_reglages(c) == (56, 56)
+        refus = c.begin_nested()
+        with pytest.raises(SQLAlchemyError):
+            c.execute(text("INSERT INTO parametre (cle) VALUES ('toler_tva_import')"))
+        refus.rollback()
+        command.upgrade(cfg, "0003")
+        assert _cles_reglages(c) == (57, 57)
+        valeur = "SELECT valeur FROM parametre WHERE cle = 'toler_tva_import'"
+        assert c.execute(text(valeur)).scalar() == "0.05"
     assert not installation.schema_en_retard()
 
 

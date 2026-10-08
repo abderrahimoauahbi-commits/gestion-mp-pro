@@ -35,7 +35,7 @@ fond · 13. Exploitation · 14. Coexistence et comparaison avec Gestion MP · 15
 | Couche | Technologie (versions minimales) | Rôle |
 |---|---|---|
 | Écran | React 19, TypeScript 5 strict, Vite 7, React Router 7, TanStack Query 5 | ≈ 26 écrans de bureau, 11 écrans d'atelier, système de composants maison |
-| API | FastAPI ≥ 0.115, Pydantic 2, uvicorn | 244 routes typées (entrée **et** sortie), OpenAPI `/api/docs` |
+| API | FastAPI ≥ 0.115, Pydantic 2, uvicorn | 245 routes typées (entrée **et** sortie), OpenAPI `/api/docs` |
 | Métier | Python 3.12, paquet `gestion_mp_pro` | `services/` (un module par domaine), `calcul/` (moteur sans base) |
 | Données | SQLAlchemy 2 (`Mapped[...]`), psycopg 3, PostgreSQL 16, Alembic | 71 tables, `NUMERIC`, CHECK, FK, index, verrous, `version` |
 | Documents | Jinja2, segno (QR), openpyxl | bon de commande anglais A4, étiquettes QR, feuille de comptage, bilan |
@@ -92,14 +92,17 @@ gestion-mp-pro/
 │   │   ├── journalisation.py       configuration de logging (format, niveau, rotation), middleware de trace
 │   │   ├── modeles/
 │   │   │   ├── __init__.py         importe tout (métadonnées complètes pour Alembic)
-│   │   │   ├── base.py             Base, MetaData(naming_convention), colonnes communes (version, cree_le…)
-│   │   │   ├── types.py            Quantite, Prix, Montant, Cours, Taux, Pourcentage, Mesure ; arrondir()
-│   │   │   ├── enums.py            les 32 énumérations (MODELE-DONNEES § 2)
+│   │   │   ├── base.py             Base, MetaData(naming_convention), colonnes communes (version, cree_le…),
+│   │   │   │                       fk(), enfants()/vers(), completer_le_schema() (CHECK _enum et _nombre)
+│   │   │   ├── types.py            QUANTITE, PRIX, MONTANT, COURS, TAUX, POURCENTAGE, MESURE… ; arrondir(valeur, categorie)
+│   │   │   ├── enums.py            les 36 énumérations (MODELE-DONNEES § 2)
 │   │   │   ├── longueurs.py        longueurs partagées modèle ↔ schémas
-│   │   │   ├── socle.py            utilisateur, session, tentative, appareil, journal, parametre(_historique), compteur
+│   │   │   ├── socle.py            utilisateur, session (modèle SessionOuverte), tentative, appareil, journal,
+│   │   │   │                       parametre(_historique) et CLES_REGLAGES (57 clés), compteur
 │   │   │   ├── communication.py    notification(_lecture), courriel, tache_execution, sauvegarde
 │   │   │   ├── referentiels.py     devise(_cours), composition, type_fil, titrage, couleur, role_nomenclature,
-│   │   │   │                       fournisseur, code_douanier, matiere, magasin, poste_frais, motif
+│   │   │   │                       code_douanier, magasin, poste_frais, motif
+│   │   │   ├── catalogue.py        fournisseur, matiere
 │   │   │   ├── qualites.py         qualite, qualite_poids, qualite_saison, recette, recette_version(_ligne/_poids),
 │   │   │   │                       plan_version(_saison)
 │   │   │   ├── metiers.py          metier, metier_etage, montage, montage_evenement
@@ -111,7 +114,9 @@ gestion-mp-pro/
 │   │   │   ├── inventaires.py      inventaire, inventaire_critere, inventaire_matiere, inventaire_ligne
 │   │   │   ├── importations.py     dossier, dossier_ligne, dossier_frais, dossier_frais_part
 │   │   │   ├── suivi.py            reclamation, signalement, piece_jointe, indicateur_jour
-│   │   │   └── reprise.py          reprise_correspondance, reprise_execution
+│   │   │   ├── reprise.py          reprise_correspondance, reprise_execution
+│   │   │   └── recherche.py        normaliser() (règle unique, la même que l'écran), écouteur before_flush de
+│   │   │                           texte_recherche, recalculer_table() après une écriture SQL directe
 │   │   ├── migrations/
 │   │   │   ├── env.py  script.py.mako
 │   │   │   └── versions/0001_schema_initial.py  0002_semences.py  (puis 0003…, contiguës)
@@ -138,10 +143,10 @@ gestion-mp-pro/
 │   │   │   ├── periode.py          date_permise(), fin_de_periode_close(), cout_hors_periode_close(), clore()
 │   │   │   ├── installation.py     migrer() (Alembic sous verrou), premier compte, vérification des semences
 │   │   │   ├── notifications.py    notifier(role|personne, texte, lien, ton, cle) ; règles d'émission
-│   │   │   ├── recherche.py        recherche globale filtrée par rôle ; normaliser() (texte_recherche)
+│   │   │   ├── recherche.py        recherche globale filtrée par rôle (normaliser() de modeles/recherche.py)
 │   │   │   ├── comptes.py          comptes, codes (scrypt), sessions, tentatives, visages
 │   │   │   ├── appareils.py        enrôlement, jetons, révocation
-│   │   │   ├── reglages.py         lire, écrire (bornes, ordres), historique ; registre_reglages.py (55 + techniques)
+│   │   │   ├── reglages.py         lire, écrire (bornes, ordres), historique ; registre_reglages.py (les clés de CLES_REGLAGES)
 │   │   │   ├── devises.py          cours, historique ; taux(devise)
 │   │   │   ├── classification.py   valeurs, rôles de nomenclature
 │   │   │   ├── fournisseurs.py     fiches, usages, délai mesuré

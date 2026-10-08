@@ -33,7 +33,7 @@ MIGRATIONS = Path(__file__).resolve().parents[1] / "migrations"
 """Le dossier des migrations, dans le paquet (aucun `alembic.ini` nécessaire au serveur)."""
 
 SEMENCES = {"roles": 8, "postes": 11, "motifs": 16}
-"""Ce que sème la révision 0002 (et les 56 réglages de `modeles.CLES_REGLAGES`)."""
+"""Ce que sème la révision 0002 (et les 57 réglages de `modeles.CLES_REGLAGES`, 0002 et 0003)."""
 
 
 def configuration() -> Config:

@@ -23,16 +23,9 @@ from sqlalchemy import create_engine, inspect
 RACINE = Path(__file__).resolve().parents[1]
 DOCUMENT = RACINE / "docs" / "MODELE-DONNEES.md"
 
-ECARTS_DECLARES: dict[tuple[str, str], str] = {
-    ("inventaire", "annule_le"): "inventaire validé puis annulé (étape 17 de Gestion MP)",
-    ("inventaire", "annule_par_id"): "inventaire validé puis annulé (étape 17 de Gestion MP)",
-    ("inventaire", "annulation_motif"): "inventaire validé puis annulé (étape 17 de Gestion MP)",
-    ("inventaire_ligne", "matiere_id"): "lot trouvé créé à la validation (étape 17)",
-    ("inventaire_ligne", "lot_numero"): "lot trouvé créé à la validation (étape 17)",
-    ("inventaire_ligne", "lot_interne"): "lot trouvé créé à la validation (étape 17)",
-    ("reclamation", "reception_ligne_id"): "ligne reçue en cause (étape 15 de Gestion MP)",
-}
-"""Colonnes ajoutées par S1 pour suivre Gestion MP corrigé (étapes 15 à 18)."""
+ECARTS_DECLARES: dict[tuple[str, str], str] = {}
+"""Aucun : les sept colonnes ajoutées par S1 (étapes 15 à 18 de Gestion MP corrigé) sont au
+document depuis b8c6d60."""
 
 _JETON = re.compile(r"`([^`]+)`")
 _MOT = re.compile(r"[a-z_][a-z0-9_]*")
