@@ -6,16 +6,18 @@ repos:
     hooks:
       - id: ruff
         name: ruff (serveur)
-        entry: backend/.venv/bin/ruff check --config backend/pyproject.toml
+        entry: bash -c 'cd backend && .venv/bin/ruff check .'
         language: system
         types: [python]
         files: ^backend/
+        pass_filenames: false
       - id: ruff-format
         name: ruff format (serveur)
-        entry: backend/.venv/bin/ruff format --check --config backend/pyproject.toml
+        entry: bash -c 'cd backend && .venv/bin/ruff format --check .'
         language: system
         types: [python]
         files: ^backend/
+        pass_filenames: false
       - id: mypy
         name: mypy strict (services, calcul)
         entry: bash -c 'cd backend && .venv/bin/mypy'
