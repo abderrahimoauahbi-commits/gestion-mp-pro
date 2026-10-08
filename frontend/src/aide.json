@@ -1,0 +1,751 @@
+{
+  "ecran": {
+    "accueil": {
+      "titre": "Ma journée",
+      "resume": "Ce qui attend aujourd’hui : les tâches à faire, ce qui est à valider, les arrivées des sept prochains jours et les besoins signalés par l’atelier.",
+      "points": [
+        "Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.",
+        "Achats : commandes en retard, prix à confirmer, brouillons à envoyer, réceptions à valider, factures sans dossier d’importation.",
+        "Alimentation au bureau : les sorties en brouillon, les retours à saisir, les besoins signalés et leur réponse."
+      ]
+    },
+    "administration": {
+      "titre": "Administration",
+      "resume": "Les comptes, les appareils de l’atelier, les sauvegardes, le journal des actions, le courriel du lundi, l’état du serveur et l’accès au téléphone.",
+      "points": [
+        "Comptes : un compte par personne ; l’alimentation a un code d’exactement 4 chiffres, les achats et la direction 8 caractères au moins, l’administrateur technique 12.",
+        "Appareils : un téléphone enrôlé (QR à usage unique, 15 minutes) montre les visages à la connexion ; ailleurs, on tape son identifiant.",
+        "Sauvegardes : la dernière a moins d’un jour ; une restauration se confirme puis se relit dans une fenêtre (« J’ai compris »).",
+        "Journal des actions : qui a fait quoi, sur quoi, et quand, avec l’avant et l’après."
+      ]
+    },
+    "aide": {
+      "titre": "Mode d’emploi",
+      "resume": "Les règles qui tiennent le stock juste, qui fait quoi, les gestes pas à pas, les calculs, l’analyse, où est passé chaque écran de l’ERP Fil, et le téléphone.",
+      "points": [
+        "Un onglet par question ; l’onglet ouvert est dans l’adresse, à garder en favori.",
+        "Les écrans que votre rôle ne voit pas sont indiqués sans lien.",
+        "Le bouton « ? » de chaque écran ouvre l’aide de cet écran."
+      ]
+    },
+    "analyse": {
+      "titre": "Analyse",
+      "resume": "Une question par onglet : la valeur du stock, les prix et leur évolution, les opportunités d’économies, les fournisseurs, le coût de revient, l’échéancier, les contrôles et la production.",
+      "points": [
+        "Chaque liste s’exporte en Excel avec ses filtres ; chaque onglet a son adresse.",
+        "Les montants ne s’additionnent jamais entre devises : un axe ou un panneau par devise.",
+        "La pastille du menu compte les contrôles à corriger ; elle mène à l’onglet Contrôles."
+      ]
+    },
+    "atelier": {
+      "titre": "Écran atelier (téléphone)",
+      "resume": "Au pied du métier : envoyer aux machines, retour des machines, trouver un lot (mots ou QR), déplacer un lot, monter un fil, signaler un besoin.",
+      "points": [
+        "Une tâche par écran, de grands boutons ; la saisie en cours est gardée sur le téléphone jusqu’à l’enregistrement.",
+        "Ce qui sera refusé (inventaire en cours, date, quarantaine) est dit en tête, et « Valider » est grisé avec la raison écrite dessous.",
+        "Aucun prix ni montant n’y est jamais montré."
+      ]
+    },
+    "catalogue": {
+      "titre": "Matières, classification, fournisseurs",
+      "resume": "Les matières (la référence se compose depuis la classification), les quatre listes de la classification, et les fournisseurs.",
+      "points": [
+        "Une référence de fil : composition, type de fil, titrage, couleur.",
+        "Le stock se tient en kilos ; le cuir, les franges et le ruban portent une densité (kg par mètre).",
+        "Une fiche modifiée entre-temps par quelqu’un d’autre est refusée : « Recharger » repart de sa dernière version.",
+        "L’alimentation lit les matières, sans prix."
+      ]
+    },
+    "cockpit": {
+      "titre": "Cockpit",
+      "resume": "Ce qui demande une décision de la direction : à faire et à valider, matières en alerte, vue d’ensemble, évolution, opportunités d’économies.",
+      "points": [
+        "Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur sa liste.",
+        "« Bilan du mois » imprime le mois écoulé sur le papier à en-tête.",
+        "{{sur_les_metiers}}"
+      ]
+    },
+    "commandes": {
+      "titre": "Commandes",
+      "resume": "Les bons de commande, du brouillon au solde : approbation, envoi, prix confirmés, suivi de l’expédition, réceptions, pièces jointes.",
+      "points": [
+        "Un brouillon n’a pas de numéro ; il le reçoit à l’envoi. Au-delà du seuil, la direction approuve d’abord.",
+        "Le bon fournisseur s’imprime en anglais, sans prix, sur le papier à en-tête.",
+        "« Confirmer ces prix » fige le cours et met à jour le catalogue."
+      ]
+    },
+    "compte": {
+      "titre": "Mon compte",
+      "resume": "Votre nom, votre identifiant, votre rôle et votre courriel ; changer votre code ; l’apparence de l’écran.",
+      "points": [
+        "Changer son code demande l’ancien ; vos autres sessions sont alors fermées.",
+        "L’alimentation a un code d’exactement 4 chiffres ; les achats et la direction 8 caractères au moins ; l’administrateur technique 12.",
+        "L’apparence (claire, sombre, ou celle du poste) ne vaut que pour ce navigateur."
+      ]
+    },
+    "connexion": {
+      "titre": "Connexion",
+      "resume": "Touchez votre nom, puis tapez votre code ; hors du poste de l’usine et des téléphones enrôlés, tapez votre identifiant.",
+      "points": [
+        "L’alimentation entre au 4e chiffre ; les autres valident par Entrée.",
+        "Cinq essais manqués font patienter, de plus en plus longtemps (30 secondes, puis le double, 15 minutes au plus).",
+        "Code oublié : la direction ou l’administrateur le remet à zéro dans Administration › Comptes."
+      ]
+    },
+    "importations": {
+      "titre": "Importations & coût de revient",
+      "resume": "Un dossier d’importation par facture : ses marchandises, ses frais répartis, son échéancier, ses pièces ; ce que chaque fil a coûté rendu usine.",
+      "points": [
+        "Le dossier s’ouvre depuis la facture apportée par une réception.",
+        "Coût hors TVA (le coût de revient) = achat au cours de la banque + charges non récupérables ; la TVA est à part (Coût TTC).",
+        "Les frais non répartis sont dits à part, partout."
+      ]
+    },
+    "installation": {
+      "titre": "Première installation",
+      "resume": "Au tout premier lancement, aucun compte n’existe : on crée celui de la direction, qui crée ensuite les autres comptes (Administration › Comptes).",
+      "points": [
+        "L’identifiant retenu est annoncé sous le champ.",
+        "Le code de la direction fait 8 caractères au moins."
+      ]
+    },
+    "inventaire": {
+      "titre": "Inventaire",
+      "resume": "Ouvrir un inventaire sur un périmètre, compter, justifier les écarts au-delà de la tolérance, valider : un ajustement par écart.",
+      "points": [
+        "Pendant l’inventaire, les mouvements du périmètre compté sont suspendus ; le reste de l’usine travaille.",
+        "Le stock théorique est figé à l’ouverture ; la feuille de comptage s’imprime à l’aveugle."
+      ]
+    },
+    "lot": {
+      "titre": "Fiche de lot",
+      "resume": "Où est le lot, combien il en reste, d’où il vient, quels ordres il a servis ; la libération de quarantaine et l’étiquette QR.",
+      "points": [
+        "« Où ce lot est-il allé ? » ouvre la traçabilité.",
+        "Libérer une quarantaine est une décision des achats ou de la direction, après contrôle de la matière.",
+        "L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche."
+      ]
+    },
+    "metiers": {
+      "titre": "Métiers à tisser",
+      "resume": "Les métiers, leurs étages et les fils montés ; la direction règle le métier, l’alimentation monte les fils.",
+      "points": [
+        "{{sur_les_metiers}}",
+        "Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25)."
+      ]
+    },
+    "operations": {
+      "titre": "Ouvertures, transferts, ajustements",
+      "resume": "Un document par geste de stock : ouverture, transfert, ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.",
+      "points": [
+        "L’alimentation y fait ses transferts et ses retours des machines ; le reste est aux achats.",
+        "Un document validé ne s’efface pas : il s’annule (contre-passation)."
+      ]
+    },
+    "plan_achat": {
+      "titre": "Plan d’achat",
+      "resume": "Ce qu’il faut commander, par fournisseur et par référence, et la préparation de la commande en kilos et en conditionnements.",
+      "points": [
+        "Les fournisseurs sont classés par budget, les matières par urgence.",
+        "« Préparer la commande » ouvre l’arbitrage ; les bons partent en brouillon, un par devise."
+      ]
+    },
+    "production": {
+      "titre": "Production & besoins",
+      "resume": "Le plan de production, le plan glissant, le plan face au réalisé, et les besoins matière qui en découlent.",
+      "points": [
+        "La direction saisit le plan ; une saisie non enregistrée est gardée en changeant d’onglet.",
+        "Le besoin d’une matière dit d’où il vient : qualités, mètres carrés, recettes."
+      ]
+    },
+    "qualites": {
+      "titre": "Qualités et recettes",
+      "resume": "Les qualités de tapis, leur poids par rôle, leur recette à 100 % par rôle, leurs versions et leur coût au m².",
+      "points": [
+        "Une recette se juge sur la version de son époque.",
+        "Le cuir, les franges et le ruban se disent en mètres par m² dans la recette."
+      ]
+    },
+    "receptions": {
+      "titre": "Réceptions",
+      "resume": "La saisie d’un camion (pesées, lots, magasins), sa validation, les réclamations au fournisseur, le poids des bobines et l’archive des pesées.",
+      "points": [
+        "La pesée fait foi ; l’Annoncé BL (kg) est celui du bon de livraison.",
+        "Conforme → magasin ; sous réserve → quarantaine ; refusé → n’entre pas.",
+        "Un brouillon se modifie, se supprime et se remet à jour seul ; la validation fait entrer le stock."
+      ]
+    },
+    "reglages": {
+      "titre": "Réglages",
+      "resume": "Les paramètres de calcul, les devises et leurs cours, les magasins, les postes de frais, les codes douaniers et la période close.",
+      "points": [
+        "La direction règle tout ; les achats tiennent les devises et lisent le reste.",
+        "Chaque changement de paramètre est daté, signé et recalcule tout le pilotage."
+      ]
+    },
+    "sorties": {
+      "titre": "Sorties vers les machines",
+      "resume": "Les ordres de fabrication : ce qui est sorti du magasin pour chaque qualité tissée, et ce qui en est revenu.",
+      "points": [
+        "Les lots les plus anciens présents à la date de l’ordre sont proposés.",
+        "Un retour se saisit contre son ordre ; annuler l’ordre annule ses retours.",
+        "Le numéro OF est donné à la validation."
+      ]
+    },
+    "stock": {
+      "titre": "Stock, lots & mouvements",
+      "resume": "Le stock par matière, lot par lot, chaque mouvement de stock, les ordres de fabrication, et ce qui attend d’être validé.",
+      "points": [
+        "Le stock se tient en kilos ; le cuir, les franges et le ruban disent aussi leurs mètres, à titre indicatif.",
+        "{{sur_les_metiers}}",
+        "La pastille du menu compte l’alerte rouge : matières en rupture ou critiques."
+      ]
+    },
+    "tracabilite": {
+      "titre": "Suivi de traçabilité",
+      "resume": "Le chemin de la matière dans les deux sens : d’un lot aux ordres qu’il a servis, d’un ordre aux lots qu’il a pris.",
+      "points": [
+        "« Entré » est ce qui a été reçu ; les retours se déduisent du sorti ; les annulations sont marquées."
+      ]
+    }
+  },
+  "formule": {
+    "abc": {
+      "grandeur": "Classe ABC",
+      "texte": "Sur la valeur consommée par an, en MAD : jusqu’à 80 % cumulés → A, jusqu’à 95 % → B, sinon C (réglables)."
+    },
+    "alerte": {
+      "grandeur": "Matières en alerte",
+      "texte": "Trois comptes nommés, servis par le serveur : « alerte rouge » = en rupture ou critiques (pastille du menu, bandeaux) ; « à commander vite » = rupture, critiques et urgentes (Ma journée) ; « en alerte » = les quatre statuts RUPTURE, CRITIQUE, URGENT, ATTENTION (onglet Matières en alerte)."
+    },
+    "besoin_mois": {
+      "grandeur": "Besoin matière du mois",
+      "texte": "(1 + taux de perte) × Σ des recettes : kg / m² de chaque fil × m² planifiés ce mois-là. Pour le cuir, les franges, le ruban : kg / m² = ml / m² de la recette × densité de la matière."
+    },
+    "besoin_retenu": {
+      "grandeur": "Besoin retenu",
+      "texte": "Le besoin du plan corrigé par le réel : sorties nettes des trois derniers mois clos ÷ ce que le plan et les recettes de l’époque prévoyaient (un plan changé en cours de mois compte pour ses jours), borné entre 0,5 et 1,5 ; pas de baisse pour un fil en rupture. Un fil qui en remplace un autre dans une recette prend le coefficient de l’ancien. Un fil consommé hors de toute recette se prévoit sur ce qui sort, sauf un fil sorti des recettes dans l’année, que l’atelier finit."
+    },
+    "cout_hors_tva": {
+      "grandeur": "Coût hors TVA d’une marchandise",
+      "texte": "Valeur au cours de la banque + sa part des charges non récupérables (droits, fret, transit…), à la valeur ou au poids selon le poste. La TVA est à part (Coût TTC)."
+    },
+    "couverture": {
+      "grandeur": "Couverture",
+      "texte": "Stock projeté ÷ consommation journalière. Couverture pondérée (Cockpit) : la même, pondérée par la valeur."
+    },
+    "cycle_tresorerie": {
+      "grandeur": "Cycle de trésorerie",
+      "texte": "Jours de stock + délai client − délai de paiement fournisseur (pondéré par les montants)."
+    },
+    "opportunite": {
+      "grandeur": "Opportunité d’économies",
+      "texte": "(prix actuel − prix du comparable le moins cher) × consommation annuelle, entre fils de même composition, type et titrage, payés à la même époque, au coût rendu usine."
+    },
+    "otif": {
+      "grandeur": "OTIF",
+      "texte": "Une réception est parfaite si elle est à l’heure, complète (à la tolérance près) et conforme. À l’heure se juge sur la date promise du bon (l’ETA ne la repousse pas). Score fournisseur = OTIF × 60 + jusqu’à 20 points pour peu de retours (0 dès 5 % renvoyés) + jusqu’à 20 pour un délai court."
+    },
+    "prix_kilo": {
+      "grandeur": "Prix au kilo",
+      "texte": "Le prix de la fiche s’il est au kilo ; s’il est au mètre, prix ÷ densité (kg / ml). La valeur du stock, le coût moyen, le coût au m² et le budget d’achat le lisent au kilo."
+    },
+    "quantite_a_commander": {
+      "grandeur": "Quantité à commander",
+      "texte": "Sorties prévues + le plus grand de (sécurité de la classe sur la période, seuil d’alerte) − stock projeté − commandé arrivant pendant la période couverte − déjà en préparation (bons en brouillon ou à approuver), portée au minimum de commande et arrondie au conditionnement. Sous le gramme : rien. Une matière désactivée, d’un fournisseur désactivé, ou non consommée ne se rachète pas."
+    },
+    "rotation": {
+      "grandeur": "Rotation du stock",
+      "texte": "Ce que l’atelier a consommé sur les douze derniers mois clos, au coût moyen (CMUP), ÷ valeur du stock au coût moyen, les deux sur la même base. Sans consommation encore : le plan au prix du catalogue, face au stock au catalogue. Le stock couvre 365 ÷ rotation jours de consommation."
+    },
+    "seuil_alerte": {
+      "grandeur": "Seuil d’alerte",
+      "texte": "Le plus grand de : stock minimum de la fiche (plafonné à N mois de la consommation à venir ; aucun pour une matière non consommée), couverture minimum de la fiche × (1 + marge de sécurité), jours de sécurité de la classe ABC. Le délai du fournisseur n’y est plus : il est déjà retiré du stock projeté."
+    },
+    "sorties_prevues": {
+      "grandeur": "Sorties prévues",
+      "texte": "La demande entre la livraison et la commande suivante : ce que la commande doit couvrir."
+    },
+    "statut": {
+      "grandeur": "Statut (au seuil)",
+      "texte": "RUPTURE (plus rien), CRITIQUE, URGENT, ATTENTION, OK : le stock projeté face au seuil d’alerte."
+    },
+    "statut_couverture": {
+      "grandeur": "Statut de couverture",
+      "texte": "La couverture en jours face aux réglages « couverture critique » et « couverture d’ATTENTION »."
+    },
+    "stock_detenu": {
+      "grandeur": "Stock détenu",
+      "texte": "Le stock est dans les magasins (stock courant + quarantaine) ou sur les métiers. {{sur_les_metiers}} Disponible = magasins hors quarantaine, plus le fil sur les métiers : c’est lui qui décide de ce qu’il faut commander."
+    },
+    "stock_projete": {
+      "grandeur": "Stock projeté",
+      "texte": "Stock disponible + commandé attendu dans le délai − demande pendant le délai du fournisseur : ce qu’il restera quand arrivera une commande passée aujourd’hui. Un bon en brouillon ou à approuver n’y compte pas (il n’est pas parti)."
+    },
+    "sur_les_metiers": {
+      "grandeur": "Fil sur les métiers",
+      "texte": "Un fil monté à un étage pèse mètres × densité × poids d’une bobine × pourcentage. {{sur_les_metiers}} Il revient au magasin par un retour des machines."
+    },
+    "valeur_stock": {
+      "grandeur": "Valeur du stock (CMUP)",
+      "texte": "Coût moyen unitaire pondéré, recalculé à chaque entrée au Coût hors TVA (frais d’importation compris quand le dossier est saisi), appliqué au stock détenu (magasins et sur les métiers, quarantaine comprise) ; à défaut d’achat, au prix du catalogue. Le Cockpit et la Valorisation disent « dont X sur les métiers »."
+    },
+    "xyz": {
+      "grandeur": "Classe XYZ",
+      "texte": "Sur la régularité de la demande mensuelle : coefficient de variation sous 0,25 → X, sous 0,5 → Y, sinon Z (réglables)."
+    }
+  },
+  "mode_emploi": {
+    "analyse": {
+      "lignes": [
+        {
+          "nom": "Valorisation",
+          "onglet": "valorisation",
+          "texte": "Ce que vaut le stock détenu (magasins et sur les métiers), au coût moyen pondéré, dont le fil sur les métiers ; l’écart avec le catalogue."
+        },
+        {
+          "nom": "Matrice",
+          "onglet": "matrice",
+          "texte": "Le prix de chaque fil mois par mois, dans la monnaie de la facture, coloré face au précédent (baisse, stable, hausse, forte hausse). Filtres liés, courbe d’un fil, comparaison de plusieurs fils sur une même courbe à la couleur du fil."
+        },
+        {
+          "nom": "Prix payés",
+          "onglet": "historique",
+          "texte": "Chaque prix payé, son précédent et son évolution, le plus récent d’abord."
+        },
+        {
+          "nom": "Opportunités d’économies",
+          "onglet": "opportunites",
+          "texte": "Les fils comparables (même composition, type, titrage et, par défaut, même couleur) qui coûtent moins cher ailleurs à la même époque, au coût rendu usine ; et ce qui a été écarté (prix non datés, trop éloignés)."
+        },
+        {
+          "nom": "Fournisseurs",
+          "onglet": "fournisseurs",
+          "texte": "OTIF, retours, écart de pesée, score sur 100, classement et action conseillée ; les réceptions notées une à une."
+        },
+        {
+          "nom": "Coût de revient",
+          "onglet": "revient",
+          "texte": "Ce que chaque fil a coûté rendu usine, par référence, caractéristique, qualité ou période."
+        },
+        {
+          "nom": "Échéancier",
+          "onglet": "echeancier",
+          "texte": "Ce qu’il faudra payer, et quand : factures des fournisseurs et frais d’importation, en retard en rouge, par mois ; et ce qui est dû sans échéance (« À dater »)."
+        },
+        {
+          "nom": "Contrôles",
+          "onglet": "controles",
+          "texte": "Trente-huit vérifications de cohérence, chacune avec ses lignes fautives et ce qu’il faut faire."
+        },
+        {
+          "nom": "Production",
+          "onglet": "production",
+          "texte": "Le sorti net de chaque ordre face au prévu par la recette. Le plan et le réalisé par qualité sont dans Production & besoins."
+        }
+      ],
+      "note_permise": "Menu « Analyse ». Chaque liste s’exporte en Excel ; chaque onglet a son adresse, à garder en favori.",
+      "note_reservee": "L’analyse est réservée aux achats et à la direction.",
+      "titre": "L’analyse : une question par onglet"
+    },
+    "calculs": {
+      "lignes": [
+        "besoin_mois",
+        "prix_kilo",
+        "besoin_retenu",
+        "stock_detenu",
+        "sur_les_metiers",
+        "stock_projete",
+        "sorties_prevues",
+        "seuil_alerte",
+        "statut",
+        "alerte",
+        "statut_couverture",
+        "couverture",
+        "quantite_a_commander",
+        "abc",
+        "xyz",
+        "valeur_stock",
+        "cout_hors_tva",
+        "opportunite",
+        "otif",
+        "rotation",
+        "cycle_tresorerie"
+      ],
+      "pied": "Les seuils, taux et tolérances se règlent dans [Réglages › Paramètres](/reglages?onglet=parametres) (direction) ; chaque changement est daté et recalcule tout le pilotage. Les indicateurs des écrans disent la même formule dans leur « ? ».",
+      "titre": "Les calculs à connaître"
+    },
+    "ecrans": {
+      "lignes": [
+        {
+          "erp": "Cockpit",
+          "note": "Les mêmes chiffres, plus ce qui attend une décision, l’Évolution jour après jour et le Bilan du mois.",
+          "ou": "Cockpit (direction) · Ma journée (achats, alimentation)",
+          "vers": "/cockpit"
+        },
+        {
+          "erp": "Stock",
+          "note": "Toutes les colonnes de couverture, filtrables, exportables.",
+          "ou": "Stock, lots & mouvements › Par matière",
+          "vers": "/stock"
+        },
+        {
+          "erp": "Plan d’achat",
+          "note": "Par fournisseur, par référence, et la préparation de commande.",
+          "ou": "Plan d’achat",
+          "vers": "/plan-achat"
+        },
+        {
+          "erp": "Production & besoins",
+          "note": "Plan, plan glissant, plan et réalisé, besoins matière.",
+          "ou": "Production & besoins",
+          "vers": "/production"
+        },
+        {
+          "erp": "Métiers à tisser",
+          "note": "L’alimentation y monte les fils ; la direction règle le métier.",
+          "ou": "Métiers à tisser",
+          "vers": "/metiers"
+        },
+        {
+          "erp": "Mouvements (journal)",
+          "note": "Les mouvements de stock, filtrés, exportables ; chaque n° de document mène à son document.",
+          "ou": "Stock › Mouvements de stock",
+          "vers": "/stock?onglet=mouvements"
+        },
+        {
+          "erp": "Mouvements (saisie)",
+          "note": "Ouvertures, transferts, ajustements, retours : un document par geste, en brouillon puis validé.",
+          "ou": "Ouvertures, transferts, ajustements",
+          "vers": "/operations"
+        },
+        {
+          "erp": "Bon de sortie",
+          "note": "Au bureau ou au téléphone ; l’ordre (OF) à la validation.",
+          "ou": "Sorties vers les machines · écran atelier",
+          "vers": "/sorties"
+        },
+        {
+          "erp": "Commandes",
+          "note": "Approbation, prix confirmés, suivi d’expédition, bon imprimable et Excel, historique.",
+          "ou": "Commandes",
+          "vers": "/commandes"
+        },
+        {
+          "erp": "Réceptions",
+          "note": "Avec les réclamations, le poids des bobines et l’archive des pesées.",
+          "ou": "Réceptions",
+          "vers": "/receptions"
+        },
+        {
+          "erp": "Lots & traçabilité",
+          "note": "Fiche de lot, QR, chemin de la matière dans les deux sens.",
+          "ou": "Stock › Lots · Ordres de fabrication",
+          "vers": "/stock?onglet=lots"
+        },
+        {
+          "erp": "Importations",
+          "note": "Un dossier par facture, ouvert depuis la réception ; ses frais, sa répartition.",
+          "ou": "Importations & coût de revient",
+          "vers": "/importations"
+        },
+        {
+          "erp": "Coût de revient",
+          "note": "La même recherche, combinable.",
+          "ou": "Analyse › Coût de revient",
+          "vers": "/analyse?onglet=revient"
+        },
+        {
+          "erp": "Inventaire",
+          "note": "Comptage sur un périmètre, écarts justifiés, ajustements à la validation.",
+          "ou": "Inventaire",
+          "vers": "/inventaire"
+        },
+        {
+          "erp": "Catalogue",
+          "note": "La référence se compose depuis la classification.",
+          "ou": "Matières, classification, fournisseurs › Matières",
+          "vers": "/catalogue"
+        },
+        {
+          "erp": "Classification des fils",
+          "note": "Compositions, types, titrages, couleurs.",
+          "ou": "Matières, classification, fournisseurs › Classification",
+          "vers": "/catalogue?onglet=classification"
+        },
+        {
+          "erp": "Fournisseurs",
+          "note": "La fiche ; le score est dans Analyse › Fournisseurs.",
+          "ou": "Matières, classification, fournisseurs › Fournisseurs",
+          "vers": "/catalogue?onglet=fournisseurs"
+        },
+        {
+          "erp": "Qualités & recettes",
+          "note": "Poids par rôle, recette à 100 % par rôle, versions, coût au m².",
+          "ou": "Qualités et recettes",
+          "vers": "/qualites"
+        },
+        {
+          "erp": "Valorisation du stock",
+          "note": "Le stock détenu (magasins et sur les métiers), au coût moyen pondéré, dont X sur les métiers.",
+          "ou": "Analyse › Valorisation",
+          "vers": "/analyse?onglet=valorisation"
+        },
+        {
+          "erp": "Prix & matrice",
+          "note": "Trois onglets au lieu de trois vues dans un écran.",
+          "ou": "Analyse › Matrice · Prix payés · Opportunités",
+          "vers": "/analyse?onglet=matrice"
+        },
+        {
+          "erp": "Contrôles",
+          "note": "Chaque contrôle dit quoi faire ; la pastille du menu y mène.",
+          "ou": "Analyse › Contrôles",
+          "vers": "/analyse?onglet=controles"
+        },
+        {
+          "erp": "Paramètres",
+          "note": "Réglages (Paramètres, Devises, Magasins, Frais, Douane, Période) · Administration (Comptes, Appareils, Sauvegardes, Journal des actions, Courriel, Serveur, Téléphone).",
+          "ou": "Réglages · Administration",
+          "vers": "/reglages"
+        },
+        {
+          "erp": "Guide",
+          "note": "Cette page.",
+          "ou": "Mode d’emploi",
+          "vers": "/aide"
+        },
+        {
+          "erp": "— (nouveau)",
+          "note": "Chacun son compte et son rôle ; qui a fait quoi.",
+          "ou": "Administration › Comptes · Journal des actions",
+          "vers": "/administration?onglet=comptes"
+        },
+        {
+          "erp": "— (nouveau)",
+          "note": "Envoyer, retour, trouver un lot, déplacer, monter un fil, signaler un besoin, au pied du métier.",
+          "ou": "Écran atelier (téléphone)",
+          "vers": "/atelier"
+        }
+      ],
+      "pied": "Les écrans que votre rôle ne voit pas sont indiqués sans lien.",
+      "titre": "Où est passé chaque écran de l’ERP Fil"
+    },
+    "pas": {
+      "procedures": [
+        {
+          "etapes": [
+            "Plan d’achat › Par fournisseur : les fournisseurs sont classés par budget, les matières par urgence.",
+            "« Préparer la commande » ouvre l’arbitrage : quantité suggérée en kilos et dans l’unité de commande (palette, fût, sac…), palettes par conteneur.",
+            "Créer le bon : il part sans les prix, un bon par devise, en brouillon.",
+            "Commandes › Brouillons : relire, puis « Envoyer » (au-delà du seuil, la direction approuve d’abord).",
+            "Au retour du fournisseur : « Saisir les prix », puis « Confirmer ces prix » : ils vont au bon et au catalogue, le cours est figé.",
+            "Suivre l’expédition : proforma, acompte, embarquement, ETA, port, dédouanement, arrivée usine. L’ETA remplace la date prévue dans la projection."
+          ],
+          "titre": "Passer une commande depuis le plan",
+          "vers": "/plan-achat"
+        },
+        {
+          "etapes": [
+            "Commandes › « Nouvelle commande », choisir le fournisseur.",
+            "La préparation s’ouvre avec ce que Gestion MP PRO suggère : ajuster, ou tout mettre à zéro.",
+            "Dans le bon en brouillon, ajouter les matières de ce fournisseur qui manquent."
+          ],
+          "titre": "Commander sans passer par le plan",
+          "vers": "/commandes/nouvelle"
+        },
+        {
+          "etapes": [
+            "Réceptions › Nouvelle réception : le fournisseur (ou taper le n° du bon de commande), cocher les bons que le camion apporte.",
+            "Pour chaque lot : son numéro (ou « Lot interne »), l’Annoncé BL (kg), la pesée (c’est elle qui fait foi), palettes et bobines, le magasin.",
+            "Conforme → magasin ; sous réserve → quarantaine ; refusé → n’entre pas.",
+            "Enregistrer crée un brouillon, qui se modifie et se remet à jour seul. Valider fait entrer le stock et écrit le prix.",
+            "Imprimer les étiquettes QR des lots."
+          ],
+          "titre": "Réceptionner une livraison",
+          "vers": "/receptions/nouvelle"
+        },
+        {
+          "etapes": [
+            "Métiers à tisser : choisir le métier (laize d’un étage, nombre d’étages, densité, réglés par la direction).",
+            "Choisir l’étage, chercher le fil, saisir les mètres montés et le pourcentage.",
+            "L’écran calcule bobines = mètres × densité × pourcentage, poids = bobines × kg / bobine. {{sur_les_metiers}} Deux fils qui se partagent les mêmes mètres (60 et 40 %) n’occupent qu’une fois la laize.",
+            "Le fil monté doit avoir été sorti vers les machines : sinon le magasin le compte encore (contrôle C25)."
+          ],
+          "titre": "Monter un fil sur un métier",
+          "vers": "/metiers"
+        },
+        {
+          "etapes": [
+            "Au téléphone : « Envoyer aux machines » ; au bureau : Sorties vers les machines › Nouvelle sortie.",
+            "Dire ce qu’on tisse : une ou plusieurs qualités en service et leurs m². Les recettes donnent les fils et les kilos ; les lots les plus anciens présents à la date de l’ordre sont proposés (un ordre daté d’hier ne prend pas un lot arrivé ce matin).",
+            "Corriger au réel (kg, bobines ou palettes), ajouter un fil hors recette si besoin.",
+            "Valider : le stock baisse, l’ordre reçoit son numéro OF. Un retour se saisit ensuite contre cet ordre, daté au plus tôt du jour de l’ordre. Annuler l’ordre annule aussi ses retours, ceux repris de l’ERP Fil compris."
+          ],
+          "titre": "Sortir de la matière pour un ordre",
+          "vers": "/ordres/nouveau"
+        },
+        {
+          "etapes": [
+            "Analyse › Coût de revient (ou Importations) : chercher par référence, composition, titrage, couleur, qualité, fournisseur, période.",
+            "Plusieurs combinaisons d’un coup : composer « PES + 1500 », « + Ajouter cette combinaison », puis « PP + 1800 ».",
+            "À lire : Achat (la facture), Charges hors TVA, Coût hors TVA au kilo, TVA, Coût TTC.",
+            "Dans le temps : Analyse › Matrice, puis « Courbe » sur la ligne du fil."
+          ],
+          "titre": "Savoir ce qu’un fil a coûté",
+          "vers": "/analyse?onglet=revient"
+        },
+        {
+          "etapes": [
+            "Lire le QR de la palette, ou taper quelques mots : la fiche du lot s’ouvre (où il est, combien, son histoire).",
+            "Fiche du lot › « Où ce lot est-il allé ? » : le chemin d’un lot, de la réception aux ordres qu’il a servis. Stock › Ordres de fabrication : les lots partis dans un ordre.",
+            "Un tapis qui revient ? Son ordre donne les lots ; les lots donnent les autres ordres concernés."
+          ],
+          "titre": "Retrouver d’où vient un fil",
+          "vers": "/stock?onglet=lots"
+        },
+        {
+          "etapes": [
+            "Inventaire › Ouvrir : choisir le périmètre ; le stock théorique est figé, les mouvements du périmètre compté sont suspendus.",
+            "Compter, saisir en palettes, bobines ou kilos. Au-delà de la tolérance, l’écart se justifie.",
+            "Valider : un ajustement par écart est écrit aux mouvements de stock, le périmètre reprend vie."
+          ],
+          "titre": "Faire l’inventaire",
+          "vers": "/inventaires/nouveau"
+        },
+        {
+          "etapes": [
+            "Analyse › Contrôles : aucun bloquant ? Chaque anomalie dit quoi faire.",
+            "Cockpit (direction) ou Ma journée (achats) : ruptures, retards, prix à confirmer, brouillons à valider.",
+            "Analyse › Matrice : quels prix ont bougé ? Opportunités d’économies : quelle négociation ouvrir ?",
+            "Plan d’achat : ce qu’il faut engager cette semaine. Analyse › Échéancier : ce qu’il faudra payer.",
+            "Administration › Sauvegardes : la dernière (de cette base) a moins d’un jour.",
+            "En début de mois : Cockpit › « Bilan du mois » (le mois écoulé, à imprimer) et Cockpit › Évolution."
+          ],
+          "titre": "Le point hebdomadaire",
+          "vers": "/cockpit",
+          "vers_par_role": {
+            "achats": "/accueil",
+            "direction": "/cockpit"
+          }
+        }
+      ],
+      "titre": "Pas à pas"
+    },
+    "regles": {
+      "elements": [
+        {
+          "texte": "Le stock détenu, la couverture, la valeur, le plan d’achat : tout se recalcule à partir d’eux, à chaque affichage. Les soldes par lot et par magasin en sont la somme, et un contrôle vérifie à tout moment qu’ils retombent dessus ([Analyse › Contrôles](/analyse?onglet=controles), C12).",
+          "titre": "Les mouvements de stock sont la seule écriture de stock."
+        },
+        {
+          "texte": "Tout document (commande, réception, sortie vers les machines, ouverture, transfert, ajustement, retour, inventaire) naît en **brouillon** : il se modifie, se supprime, et rien ne bouge au stock. La **validation** l’écrit. Le numéro de série (REC-…, OF-…, BC-…) n’est donné qu’à la validation ou à l’envoi : un brouillon supprimé ne laisse pas de trou. Avant, l’écran le désigne « Brouillon » ; un bon soumis à la direction, « À approuver ».",
+          "titre": "Brouillon, puis validation."
+        },
+        {
+          "texte": "Annuler écrit l’écriture inverse, datée comme l’original, signée par qui annule ; les deux restent dans les mouvements de stock. (Les annulations reprises de l’ERP Fil portent, elles, la date de la reprise : le Bilan du mois les compte à part, sur la ligne « annulations ».) On ne réécrit jamais une écriture validée.",
+          "titre": "Un document validé ne s’efface pas : il s’annule (contre-passation)."
+        },
+        {
+          "texte": "Un fil s’achète en palettes, une colle en fûts, un intrant au kilo. La matière porte son unité d’achat et sa contenance (déduite sinon : la palette si l’on connaît le poids d’une bobine et les bobines par palette, la bobine, sinon le kilo). La préparation de commande parle palettes et conteneur ; le bon écrit « 12 × Palette de 900 kg ». Le cuir, les franges et le ruban aussi se tiennent en kilos.",
+          "titre": "Le stock se tient en kilos ; la commande se passe en conditionnements."
+        },
+        {
+          "texte": "Ils se pèsent à la réception, sortent vers les machines, se comptent à l’inventaire et se commandent **en kilos**, comme tout. Leur fiche porte une **densité** (kg par mètre linéaire), obligatoire. Le **prix** se saisit au kilo (par défaut) ou au mètre, au choix, sur la fiche ; tous les calculs le lisent au kilo (prix au mètre ÷ densité). La recette dit des **mètres par m²** de tapis ; la densité en fait des kilos par m², qui font les besoins, la sortie proposée, le prévu des ordres et le coût au m². Leurs mètres s’affichent à titre indicatif à côté des kilos (« 14,3 kg ≈ 1 020 ml ») : fiche, stock, sortie, besoins, plan d’achat, bon de commande.",
+          "titre": "Le cuir, les franges, le ruban : des kilos en stock, des mètres dans la recette."
+        },
+        {
+          "texte": "Droits, fret, transit, port, banque s’ajoutent, et se paient à chaque livraison : le dossier d’importation suit donc la **facture** (un dossier par facture, ouvert depuis la réception qui l’a apportée), pas la commande. Il porte ces frais et les répartit sur les marchandises, à la valeur ou au poids selon le poste de frais. La TVA, récupérable, reste hors du coût : c’est le **Coût hors TVA** (le coût de revient) qui valorise le stock ; le **Coût TTC** dit ce qui a été décaissé.",
+          "titre": "Le prix de la facture n’est pas le coût du fil."
+        },
+        {
+          "texte": "Le lot dit *d’où vient* la matière (fournisseur, réception, dossier), l’ordre de fabrication (OF-…) dit *dans quoi elle est partie*. L’un sans l’autre laisse la moitié de la question sans réponse. Un fournisseur sans numéro de lot : « Lot interne » en donne un.",
+          "titre": "Le lot sur toutes les écritures, l’ordre sur les sorties."
+        },
+        {
+          "texte": "Composition (PP, PES…), type de fil (frisé, shrink…), titrage (2900 Dtex…), couleur : quatre listes tenues en référentiels ([Classification](/catalogue?onglet=classification)), qui composent la référence à la saisie et servent à chercher un fil sans connaître sa référence par cœur.",
+          "titre": "Une référence de fil se compose de quatre parties."
+        },
+        {
+          "texte": "{{sur_les_metiers}} Un fil monté à un étage pèse mètres × densité × poids d’une bobine × pourcentage. Le stock de l’usine, et sa valeur, sont ceux des magasins plus ceux des métiers ; le disponible et le stock projeté comptent aussi le fil sur les métiers : on ne rachète pas ce qui est déjà dans le cantre. Le détail magasins / métiers se lit sur la fiche matière, le Cockpit, la Valorisation et Métiers à tisser. Il revient au magasin par un retour des machines. Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25).",
+          "titre": "Le stock est dans les magasins ou sur les métiers."
+        },
+        {
+          "texte": "Un fournisseur peut facturer la colle en euros et la chaîne en dollars. Les montants ne s’additionnent jamais entre devises : un bon de commande part par devise, et les totaux se font en MAD. Le cours est figé à la confirmation des prix d’une commande ; un dossier d’importation porte le cours de la banque.",
+          "titre": "La devise appartient au prix, pas au fournisseur."
+        },
+        {
+          "texte": "L’**historique est figé** : ce qui a été saisi l’a été à sa date. La **projection est glissante** : le plan, les besoins et les alertes se recalculent sur les douze mois à venir, à partir d’aujourd’hui (l’heure de l’usine, celle du serveur), à chaque ouverture.",
+          "titre": "Deux horloges."
+        },
+        {
+          "texte": "À plusieurs sur la même palette, le second lit le solde à jour et est refusé s’il ne reste pas assez. La matière en **quarantaine** est détenue mais pas disponible : comptée dans le stock et sa valeur, elle n’est ni proposée aux machines, ni comptée dans le disponible, le stock projeté et la couverture ; elle se libère par un transfert motivé.",
+          "titre": "Le stock ne passe jamais sous zéro."
+        },
+        {
+          "texte": "Pas d’écriture dans le futur ; une **période close** ([Réglages › Période close](/reglages?onglet=periode)) ne bouge plus ; pendant un **inventaire**, le périmètre compté ne bouge plus ; un ordre de fabrication ne se valide pas à une date antérieure au dernier ordre validé.",
+          "titre": "Les dates tiennent."
+        },
+        {
+          "texte": "Chacun a son compte : tout ce qui s’enregistre porte son nom (colonne « Par »), chaque fiche a son « Historique », et le [Journal des actions](/administration?onglet=journal) garde qui a fait quoi, sur quoi, et quand, avec l’avant et l’après. Le serveur refuse ce que le menu cache : un rôle ne peut pas faire par une autre porte ce que son écran ne propose pas.",
+          "titre": "Chaque geste est signé."
+        }
+      ],
+      "titre": "Les règles qui tiennent le stock juste"
+    },
+    "roles": {
+      "cartes": [
+        {
+          "points": [
+            "Voit et peut tout le métier. Le [Cockpit](/cockpit) réunit ce qui demande une décision : commandes à approuver, ruptures, retards, prix à confirmer, brouillons, contrôles, sauvegarde.",
+            "Approuve les commandes au-delà du seuil réglé (le bon s’ouvre en entier, puis « Approuver ») ou les renvoie aux achats.",
+            "Règle les [Réglages](/reglages) (paramètres de calcul, devises, magasins, postes de frais, codes douaniers, période close) et l’[Administration](/administration) (comptes, appareils, sauvegardes, journal des actions). Règle les métiers (laize, étages, densité) et saisit le plan de production."
+          ],
+          "role": "direction",
+          "titre": "Direction"
+        },
+        {
+          "points": [
+            "Plan d’achat, commandes, réceptions (avec le poids des bobines et l’archive des pesées), importations et coût de revient, inventaire, ouvertures, transferts, ajustements, retours au fournisseur.",
+            "Matières, classification, fournisseurs ; qualités et recettes en lecture ; production en lecture.",
+            "L’[Analyse](/analyse) : prix, opportunités d’économies, fournisseurs, valorisation, coût de revient, contrôles.",
+            "[Réglages](/reglages?onglet=devises) en lecture, devises en écriture ; ni comptes, ni sauvegardes, ni approbation des commandes."
+          ],
+          "role": "achats",
+          "titre": "Achats"
+        },
+        {
+          "points": [
+            "Au téléphone ([écran atelier](/atelier)) : envoyer aux machines (qualité et m², les fils et les lots sont proposés), retour des machines, trouver un lot (mots ou QR), déplacer un lot, monter un fil, signaler un besoin.",
+            "Au bureau : sorties vers les machines, [Opérations de stock](/operations?onglet=transfert) (transferts et retours des machines), stock et lots, matières en lecture, métiers à tisser (monter les fils), production en lecture. Les ouvertures, ajustements et retours au fournisseur restent aux achats.",
+            "Ne voit ni les prix, ni les montants, ni les budgets, ni le pilotage des achats."
+          ],
+          "role": "alimentation",
+          "titre": "Alimentation des machines"
+        },
+        {
+          "points": [
+            "Tient l’[Administration](/administration) : comptes, appareils de l’atelier, sauvegardes et restauration, journal des actions, courriel, serveur, accès au téléphone.",
+            "Ne voit aucune donnée métier : ni stock, ni commandes, ni prix."
+          ],
+          "role": "administrateur",
+          "titre": "Administrateur technique"
+        }
+      ],
+      "titre": "Qui fait quoi"
+    },
+    "sous_titre": "Les règles, qui fait quoi, les gestes pas à pas, les calculs, et où est passé chaque écran de l’ERP Fil.",
+    "telephone": {
+      "etapes": [
+        "**Dans l’usine (Wi-Fi)** : ouvrir dans le navigateur du téléphone l’adresse HTTPS du serveur ([Administration › Téléphone](/administration?onglet=telephone) donne l’adresse exacte et un QR).",
+        "**Enrôler le téléphone** : Administration › Appareils crée un QR à usage unique (15 minutes) ; le lire avec le téléphone. Un téléphone enrôlé montre les visages à la connexion ; ailleurs, on tape son identifiant.",
+        "**Partout (4G / 5G)** : installer l’application gratuite *Tailscale* sur le serveur et sur le téléphone, connectées au même compte. Le serveur n’est jamais exposé sur Internet.",
+        "Dans le navigateur, *Partager › Sur l’écran d’accueil* (iPhone) ou *Ajouter à l’écran d’accueil* (Android) : Gestion MP PRO s’ouvre ensuite d’un toucher, comme une application. Il faut le réseau : rien n’est gardé sur le téléphone.",
+        "L’appareil photo lit les étiquettes QR des palettes et ouvre directement la fiche du lot."
+      ],
+      "titre": "Gestion MP PRO sur le téléphone"
+    },
+    "titre": "Mode d’emploi"
+  },
+  "sur_les_metiers": "Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre."
+}
