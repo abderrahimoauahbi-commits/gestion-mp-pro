@@ -1,0 +1,19 @@
+.cadre {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Avant la première mesure : les replis de Gestion MP (HAUT.page, HAUT.court). */
+.page {
+  max-height: max(320px, calc(100vh - 290px));
+}
+
+.court {
+  max-height: max(240px, calc(100vh - 470px));
+}
+
+.fenetre {
+  max-height: var(--cadre-fenetre);
+}

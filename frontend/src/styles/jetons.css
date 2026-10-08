@@ -1,16 +1,26 @@
 /*
- * Gestion MP PRO — jetons de l'écran : les SEULES couleurs du projet (stylelint l'impose).
+ * Gestion MP PRO — jetons de l'écran : les SEULES couleurs du projet (stylelint l'impose ;
+ * `lib/teintes.ts` garde la couleur des fils pour les graphiques, seule autre exception).
  *
- * Amorce posée par le lot E0 pour que l'écran se construise ; le lot E1 en est le propriétaire
- * (LOTS-DE-TRAVAIL § 0.3) et la complète. Fond, surfaces et texte : système de GMAO PRO (sobre,
- * dense, lisible huit heures par jour) ; tons des statuts : ceux de Gestion MP, à l'identique
- * (ECRANS-PRO, briques lib/ : « jetons CSS identiques »).
+ * Propriétaire : lot E1 (LOTS-DE-TRAVAIL § 0.3) ; un jeton nouveau se demande, il ne s'invente
+ * pas dans un composant. Fond, surfaces et texte : système de GMAO PRO (sobre, dense, lisible
+ * huit heures par jour) ; tons des statuts : ceux de Gestion MP, à l'identique en clair.
+ *
+ * Deux thèmes : clair (défaut) et sombre. Le thème suit le réglage du poste
+ * (`prefers-color-scheme`) ; `<html data-theme="clair|sombre">` le force (choix de « Mon compte »).
+ * Les deux blocs sombres sont identiques : le premier suit le poste, le second le choix forcé
+ * (`light-dark()` les fondrait en un, mais les iPhone d'avant iOS 17.5 de l'atelier l'ignorent).
  */
 :root {
+  color-scheme: light;
+
   /* Surfaces et texte */
   --fond: #f4f6f8;
   --surface: #fff;
   --surface-2: #f8fafc;
+  --surface-3: #eef2f6;
+  --survol: #f3f7fd;
+  --ligne-marquee: #fff8f1;
   --bord: #e2e8f0;
   --bord-fort: #cbd5e1;
   --texte: #0f172a;
@@ -22,9 +32,15 @@
   --accent: #1f5fa8;
   --accent-fonce: #164a85;
   --accent-clair: #e8f0fd;
+  --sur-accent: #fff;
   --focus: #2f6fe4;
+  --anneau: #2f6fe433;
+  --bulle: #0f1f35;
+  --sur-bulle: #fff;
+  --entete-atelier: #17497f;
+  --sur-entete-atelier: #fff;
 
-  /* Tons des statuts (Badge, Kpi, Pastille) : couleur forte et fond pâle */
+  /* Tons des statuts (Badge, Kpi, Pastille, Note) : couleur forte et fond pâle */
   --ton-ok: #146c44;
   --ton-ok-clair: #e7f6ec;
   --ton-attention: #8d5c07;
@@ -39,14 +55,20 @@
   --ton-neutre-clair: #eef2f6;
   --ton-accent: #1f5fa8;
   --ton-accent-clair: #e8f0fd;
+  --sur-ton: #fff;
+
+  /* Graphiques (les séries prennent leur couleur dans lib/teintes.ts) */
+  --graphe-grille: #e2e8f0;
+  --graphe-axe: #94a3b8;
+  --graphe-texte: #64748b;
 
   /* Formes */
   --rayon: 8px;
   --rayon-petit: 6px;
   --filet-ton: 3px;
-  --ombre: 0 1px 2px rgb(15 23 42 / 6%), 0 1px 3px rgb(15 23 42 / 4%);
-  --ombre-haute: 0 10px 30px rgb(15 23 42 / 18%);
-  --voile: rgb(15 23 42 / 45%);
+  --ombre: 0 1px 2px #0f172a0f, 0 1px 3px #0f172a0a;
+  --ombre-haute: 0 10px 30px #0f172a2e;
+  --voile: #0f172a73;
 
   /* Typographie */
   --police:
@@ -54,11 +76,142 @@
   --mono: ui-monospace, 'SF Mono', menlo, consolas, monospace;
   --taille: 14px;
   --taille-petite: 12px;
+  --taille-tableau: 13px;
+  --taille-note-atelier: 14px;
 
-  /* Mesures de la coque (1366 × 768) et de l'atelier */
+  /* Espacements */
+  --espace-1: 4px;
+  --espace-2: 8px;
+  --espace-3: 12px;
+  --espace-4: 16px;
+  --espace-5: 24px;
+
+  /* Hauteurs des contrôles au bureau */
+  --hauteur-bouton: 34px;
+  --hauteur-bouton-petit: 28px;
+  --hauteur-champ: 34px;
+
+  /* Mesures de la coque (1366 × 768) et des fenêtres */
   --barre: 248px;
   --entete: 56px;
+  --fenetre-normale: 640px;
+  --fenetre-large: 960px;
+  --fenetre-tres-large: 1240px;
+  --tiroir: 560px;
+  --cadre-plancher: 200px;
+  --cadre-fenetre: max(280px, calc(100vh - 420px));
+
+  /* Atelier (téléphone) : cibles « en gants », champs sans zoom d'iOS */
   --cible-tactile: 44px;
   --champ-atelier: 46px;
   --texte-atelier: 16px;
+  --barre-bas: 64px;
+  --largeur-atelier: 720px;
+
+  /* Empilement */
+  --plan-liste: 20;
+  --plan-fenetre: 100;
+  --plan-messages: 200;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='clair']) {
+    color-scheme: dark;
+
+    --fond: #0d1420;
+    --surface: #151e2c;
+    --surface-2: #1a2535;
+    --surface-3: #212e41;
+    --survol: #1d2a3d;
+    --ligne-marquee: #2a2418;
+    --bord: #2a3647;
+    --bord-fort: #3a4a60;
+    --texte: #e6ebf2;
+    --texte-2: #b4c0cf;
+    --texte-3: #8d9aac;
+    --marine: #0a111b;
+    --marine-2: #121c2b;
+    --marque: #7fb0ea;
+    --accent: #5b9be6;
+    --accent-fonce: #82b3ee;
+    --accent-clair: #1b2d46;
+    --sur-accent: #0d1420;
+    --focus: #79aef0;
+    --anneau: #79aef040;
+    --bulle: #e6ebf2;
+    --sur-bulle: #0d1420;
+    --entete-atelier: #1b3a5f;
+    --sur-entete-atelier: #e6ebf2;
+    --ton-ok: #5cc791;
+    --ton-ok-clair: #15301f;
+    --ton-attention: #e0b04f;
+    --ton-attention-clair: #33280f;
+    --ton-urgent: #ef9a52;
+    --ton-urgent-clair: #3a2412;
+    --ton-critique: #f07b7b;
+    --ton-critique-clair: #3d1a1a;
+    --ton-rupture: #c9d1dc;
+    --ton-rupture-clair: #2b3442;
+    --ton-neutre: #a3afbf;
+    --ton-neutre-clair: #222d3c;
+    --ton-accent: #5b9be6;
+    --ton-accent-clair: #1b2d46;
+    --sur-ton: #0d1420;
+    --graphe-grille: #2a3647;
+    --graphe-axe: #5d6b7e;
+    --graphe-texte: #8d9aac;
+    --ombre: 0 1px 2px #0000004d, 0 1px 3px #0003;
+    --ombre-haute: 0 10px 30px #00000080;
+    --voile: #000000a6;
+  }
+}
+
+:root[data-theme='sombre'] {
+  color-scheme: dark;
+
+  --fond: #0d1420;
+  --surface: #151e2c;
+  --surface-2: #1a2535;
+  --surface-3: #212e41;
+  --survol: #1d2a3d;
+  --ligne-marquee: #2a2418;
+  --bord: #2a3647;
+  --bord-fort: #3a4a60;
+  --texte: #e6ebf2;
+  --texte-2: #b4c0cf;
+  --texte-3: #8d9aac;
+  --marine: #0a111b;
+  --marine-2: #121c2b;
+  --marque: #7fb0ea;
+  --accent: #5b9be6;
+  --accent-fonce: #82b3ee;
+  --accent-clair: #1b2d46;
+  --sur-accent: #0d1420;
+  --focus: #79aef0;
+  --anneau: #79aef040;
+  --bulle: #e6ebf2;
+  --sur-bulle: #0d1420;
+  --entete-atelier: #1b3a5f;
+  --sur-entete-atelier: #e6ebf2;
+  --ton-ok: #5cc791;
+  --ton-ok-clair: #15301f;
+  --ton-attention: #e0b04f;
+  --ton-attention-clair: #33280f;
+  --ton-urgent: #ef9a52;
+  --ton-urgent-clair: #3a2412;
+  --ton-critique: #f07b7b;
+  --ton-critique-clair: #3d1a1a;
+  --ton-rupture: #c9d1dc;
+  --ton-rupture-clair: #2b3442;
+  --ton-neutre: #a3afbf;
+  --ton-neutre-clair: #222d3c;
+  --ton-accent: #5b9be6;
+  --ton-accent-clair: #1b2d46;
+  --sur-ton: #0d1420;
+  --graphe-grille: #2a3647;
+  --graphe-axe: #5d6b7e;
+  --graphe-texte: #8d9aac;
+  --ombre: 0 1px 2px #0000004d, 0 1px 3px #0003;
+  --ombre-haute: 0 10px 30px #00000080;
+  --voile: #000000a6;
 }

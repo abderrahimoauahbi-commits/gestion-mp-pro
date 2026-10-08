@@ -1,0 +1,44 @@
+.pieces {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  padding: 2px;
+  border: 2px dashed transparent;
+  border-radius: var(--rayon);
+}
+
+.survol {
+  border-color: var(--accent);
+  background: var(--accent-clair);
+}
+
+.joindre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+}
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--hauteur-bouton);
+  padding: 0 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon-petit);
+  background: var(--accent);
+  color: var(--sur-accent);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.bouton[aria-disabled='true'] {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}

@@ -1,0 +1,21 @@
+.texte {
+  color: var(--texte-2);
+  line-height: 1.55;
+}
+
+.compris {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espace-2);
+  padding: var(--espace-2) var(--espace-3);
+  border-radius: var(--rayon-petit);
+  background: var(--ton-attention-clair);
+  color: var(--ton-attention);
+  font-weight: 600;
+}
+
+.compris input {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}

@@ -1,0 +1,13 @@
+.blocages {
+  padding: var(--espace-2) var(--espace-3);
+  border-left: var(--filet-ton) solid var(--ton-critique);
+  border-radius: var(--rayon-petit);
+  background: var(--ton-critique-clair);
+  color: var(--ton-critique);
+  font-size: 13px;
+}
+
+.blocages ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

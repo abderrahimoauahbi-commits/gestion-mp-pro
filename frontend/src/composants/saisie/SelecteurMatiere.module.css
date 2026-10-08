@@ -1,0 +1,29 @@
+.selecteurMatiere {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+.criteres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.critere {
+  max-width: 180px;
+  height: var(--hauteur-bouton-petit);
+  padding: 0 6px;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  font-size: 12.5px;
+}
+
+.compte {
+  margin-left: auto;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}

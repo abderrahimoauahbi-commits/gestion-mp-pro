@@ -1,0 +1,66 @@
+/* L'apparence commune des graphiques SVG (Barres, Courbes, Sparkline). */
+.graphique {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.grille {
+  stroke: var(--graphe-grille);
+  stroke-width: 1;
+}
+
+.zero {
+  stroke: var(--graphe-axe);
+  stroke-width: 1;
+}
+
+.texte {
+  fill: var(--graphe-texte);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.unite {
+  fill: var(--graphe-texte);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-2) var(--espace-4);
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.entree {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.echantillon {
+  width: 22px;
+  height: 10px;
+}
+
+.vide {
+  padding: var(--espace-4);
+  color: var(--texte-3);
+  text-align: center;
+}
+
+.sparkline {
+  display: inline-block;
+  vertical-align: middle;
+}

@@ -1,0 +1,46 @@
+.historique {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligne {
+  padding: var(--espace-2) 0 var(--espace-2) var(--espace-3);
+  border-left: 2px solid var(--bord);
+}
+
+.tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espace-2);
+}
+
+.qui {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.detail {
+  margin: 2px 0 0;
+  color: var(--texte-2);
+}
+
+.changements {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--texte-2);
+  font-size: 13px;
+}
+
+.avant {
+  color: var(--texte-3);
+  text-decoration: line-through;
+}
+
+.apres {
+  color: var(--texte);
+  font-weight: 600;
+}

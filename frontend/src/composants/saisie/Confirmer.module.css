@@ -1,0 +1,39 @@
+.confirmer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  padding: 4px 6px 4px 10px;
+  border: 1px solid var(--ton-attention);
+  border-radius: var(--rayon-petit);
+  background: var(--ton-attention-clair);
+}
+
+.question {
+  color: var(--texte);
+  font-weight: 600;
+}
+
+.motif {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.atelier {
+  display: flex;
+  width: 100%;
+  padding: var(--espace-3);
+}
+
+.atelier .question {
+  flex-basis: 100%;
+  font-size: var(--texte-atelier);
+}
+
+.atelier .motif {
+  flex-basis: 100%;
+}
+
+.atelier > button {
+  flex: 1 1 0;
+}

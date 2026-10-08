@@ -1,0 +1,14 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--espace-4) var(--espace-5);
+}
+
+@media (width <= 700px) {
+  .page {
+    padding: var(--espace-3);
+  }
+}

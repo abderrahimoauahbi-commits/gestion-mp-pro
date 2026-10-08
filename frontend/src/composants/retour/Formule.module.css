@@ -1,0 +1,53 @@
+.formule {
+  position: relative;
+  display: inline-flex;
+}
+
+.bouton {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--bord-fort);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--texte-3);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: help;
+}
+
+.bulle {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  z-index: var(--plan-liste);
+  width: 280px;
+  padding: 8px 10px;
+  border-radius: var(--rayon-petit);
+  background: var(--bulle);
+  color: var(--sur-bulle);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: normal;
+  text-transform: none;
+  display: none;
+  transform: translateX(-50%);
+}
+
+.ouverte .bulle,
+.formule:hover .bulle,
+.formule:focus-within .bulle {
+  display: block;
+}
+
+@media (width <= 700px) {
+  .bouton {
+    width: var(--cible-tactile);
+    height: var(--cible-tactile);
+    border: 0;
+    background: none;
+  }
+}

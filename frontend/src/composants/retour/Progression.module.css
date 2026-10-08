@@ -1,0 +1,36 @@
+.progression {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-3);
+}
+
+.barre {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ton-accent);
+}
+
+.ok .barre {
+  background: var(--ton-ok);
+}
+
+.attention .barre {
+  background: var(--ton-attention);
+}
+
+.urgent .barre {
+  background: var(--ton-urgent);
+}
+
+.critique .barre {
+  background: var(--ton-critique);
+}
+
+.rupture .barre {
+  background: var(--ton-rupture);
+}
+
+.neutre .barre {
+  background: var(--ton-neutre);
+}

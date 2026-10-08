@@ -1,0 +1,82 @@
+.kpi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--espace-3) var(--espace-4);
+  border: 1px solid var(--bord);
+  border-top: var(--filet-ton) solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre);
+  color: var(--texte);
+}
+
+.lien:hover {
+  border-color: var(--bord-fort);
+  text-decoration: none;
+}
+
+.titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  font-weight: 500;
+}
+
+.valeur {
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unite {
+  color: var(--texte-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.detail {
+  margin-top: 2px;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.grand .valeur {
+  font-size: 26px;
+}
+
+.ok {
+  border-top-color: var(--ton-ok);
+}
+
+.attention {
+  border-top-color: var(--ton-attention);
+}
+
+.urgent {
+  border-top-color: var(--ton-urgent);
+}
+
+.critique {
+  border-top-color: var(--ton-critique);
+}
+
+.rupture {
+  border-top-color: var(--ton-rupture);
+}
+
+.neutre {
+  border-top-color: var(--ton-neutre);
+}
+
+.accent {
+  border-top-color: var(--ton-accent);
+}

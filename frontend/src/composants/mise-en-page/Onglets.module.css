@@ -1,0 +1,66 @@
+.barre {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espace-3);
+  border-bottom: 1px solid var(--bord);
+}
+
+.onglets {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.onglet {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 var(--espace-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--texte-2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.onglet:hover {
+  color: var(--texte);
+}
+
+.actif {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.compte {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--surface-3);
+  color: var(--texte-2);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
+}
+
+.actif .compte {
+  background: var(--accent-clair);
+  color: var(--accent);
+}
+
+.sale {
+  color: var(--ton-urgent);
+  font-weight: 700;
+}
+
+.apres {
+  padding-bottom: 4px;
+}

@@ -1,0 +1,22 @@
+.chargement {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  padding: var(--espace-4);
+  color: var(--texte-3);
+}
+
+.roue {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--bord-fort);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: tourner 0.8s linear infinite;
+}
+
+@keyframes tourner {
+  to {
+    transform: rotate(360deg);
+  }
+}

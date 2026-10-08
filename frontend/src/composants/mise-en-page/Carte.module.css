@@ -1,0 +1,97 @@
+.carte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+}
+
+.remplir {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-3);
+  min-height: 48px;
+  padding: var(--espace-2) var(--espace-4);
+  border-bottom: 1px solid var(--bord);
+}
+
+.titres {
+  flex: 1;
+  min-width: 0;
+}
+
+.sous {
+  margin: 1px 0 0;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.corps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-height: 0;
+  padding: var(--espace-4);
+}
+
+.serre {
+  padding: 0;
+  gap: 0;
+}
+
+.ton-ok,
+.ton-attention,
+.ton-urgent,
+.ton-critique,
+.ton-rupture,
+.ton-neutre,
+.ton-accent {
+  border-left-width: var(--filet-ton);
+}
+
+.ton-ok {
+  border-left-color: var(--ton-ok);
+}
+
+.ton-attention {
+  border-left-color: var(--ton-attention);
+}
+
+.ton-urgent {
+  border-left-color: var(--ton-urgent);
+}
+
+.ton-critique {
+  border-left-color: var(--ton-critique);
+}
+
+.ton-rupture {
+  border-left-color: var(--ton-rupture);
+}
+
+.ton-neutre {
+  border-left-color: var(--ton-neutre);
+}
+
+.ton-accent {
+  border-left-color: var(--ton-accent);
+}
+
+/* Un bouton posé seul dans le corps garde sa largeur (la colonne étire ses enfants). */
+.corps > button {
+  align-self: flex-start;
+}

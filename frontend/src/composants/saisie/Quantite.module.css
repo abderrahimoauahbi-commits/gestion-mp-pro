@@ -1,0 +1,37 @@
+.quantite,
+.tactile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.quantite .rangee > :first-child {
+  flex: 0 1 140px;
+}
+
+.tactile .rangee {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.unite {
+  color: var(--texte-3);
+}
+
+.note {
+  margin: 0;
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.tactile .note {
+  font-size: var(--taille-note-atelier);
+}

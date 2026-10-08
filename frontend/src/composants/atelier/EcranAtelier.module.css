@@ -1,0 +1,62 @@
+.ecran {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: calc(var(--barre-bas) + env(safe-area-inset-bottom));
+  background: var(--fond);
+  font-size: 15px;
+}
+
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: var(--plan-liste);
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  min-height: 52px;
+  padding: env(safe-area-inset-top) var(--espace-2) 0;
+  background: var(--entete-atelier);
+  color: var(--sur-entete-atelier);
+}
+
+.retour,
+.place {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--cible-tactile);
+  height: var(--cible-tactile);
+  border: 0;
+  border-radius: var(--rayon-petit);
+  background: none;
+  color: inherit;
+}
+
+.titre {
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.corps {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--espace-3);
+  width: 100%;
+  max-width: var(--largeur-atelier);
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.pied {
+  position: sticky;
+  bottom: calc(var(--barre-bas) + env(safe-area-inset-bottom));
+  z-index: var(--plan-liste);
+  width: 100%;
+  max-width: var(--largeur-atelier);
+  margin: 0 auto;
+  padding: 0 14px 8px;
+}
