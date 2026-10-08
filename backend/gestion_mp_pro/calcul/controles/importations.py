@@ -3,11 +3,9 @@
 
 from __future__ import annotations
 
-from gestion_mp_pro.calcul.constantes import TOLERANCE_TVA_IMPORT
 from gestion_mp_pro.calcul.controles.base import Contexte, Ligne, colonne, controle
 from gestion_mp_pro.calcul.importations import (
     ecart_facture,
-    ecart_tva_tolere,
     lignes_aberrantes,
     revient_dossier,
     tva_attendue,
@@ -70,7 +68,8 @@ def dossier_sans_frais(ctx: Contexte) -> tuple[str, list[Ligne]]:
 )
 def tva_douteuse(ctx: Contexte) -> tuple[str, list[Ligne]]:
     """La TVA de la douane (seul le poste TVA) face à l'attendue : le taux réglé sur la valeur
-    en douane augmentée des droits et de la TPI, à l'écart toléré près."""
+    en douane augmentée des droits et de la TPI, à l'écart toléré près (réglage
+    `toler_tva_import`, 5 % : Gestion MP 26459d4, E-10)."""
     parametres = ctx.parametres
     lignes: list[Ligne] = []
     for dossier in ctx.donnees.dossiers_import:
@@ -78,7 +77,7 @@ def tva_douteuse(ctx: Contexte) -> tuple[str, list[Ligne]]:
         if not tva:
             continue
         attendue = tva_attendue(dossier, parametres)
-        if attendue and abs(tva - attendue) > ecart_tva_tolere(attendue):
+        if attendue and abs(tva - attendue) > abs(attendue) * parametres.toler_tva_import:
             lignes.append(
                 {
                     "dossier": dossier.numero,
@@ -88,7 +87,8 @@ def tva_douteuse(ctx: Contexte) -> tuple[str, list[Ligne]]:
                 }
             )
     libelle = (
-        f"TVA d'importation à plus de {pourcentage(TOLERANCE_TVA_IMPORT)} de la TVA attendue "
+        f"TVA d'importation à plus de {pourcentage(parametres.toler_tva_import)} "
+        "de la TVA attendue "
         f"({pourcentage(parametres.taux_tva_import)} de la valeur en douane, droits et TPI "
         "compris)"
     )

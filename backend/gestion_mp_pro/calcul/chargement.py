@@ -61,6 +61,20 @@ def statut_moteur(statut: str, numero: str | None, prix_confirmes: list[bool]) -
     return STATUTS_MOTEUR[statut]
 
 
+def soldes_a_la_main(
+    journal: list[tuple[int, datetime, str]],
+) -> dict[int, datetime]:
+    """Les bons soldés à la main et quand : le dernier « commande soldée » du journal (dans
+    l'ordre du journal : (bon, quand, détail)), sauf s'il vient d'une réception qui a tout
+    apporté (détail finissant par « tout reçu »)."""
+    dernier: dict[int, tuple[datetime, str]] = {}
+    for bon, quand, detail in journal:
+        dernier[bon] = (quand, detail)
+    return {
+        bon: quand for bon, (quand, detail) in dernier.items() if not detail.endswith("tout reçu")
+    }
+
+
 def code_motif(motif: str | None) -> str:
     """Le code R1…R6 d'un motif de retour, d'après son libellé (ou son code s'il est écrit)."""
     texte = (motif or "").strip()
@@ -225,7 +239,11 @@ def lignes_des_receptions(
 
 @dataclass
 class EcritureLue:
-    """Une écriture du journal de la base : quantité signée, un lot, un magasin."""
+    """Une écriture du journal de la base : quantité signée, un lot, un magasin.
+
+    `fournisseur` : celui du lot ; un lot qui n'en a pas (stock d'ouverture) compte son
+    retour pour le fournisseur de l'opération (`fournisseur_operation`, quand `document` vaut
+    « operation » — Gestion MP 26459d4, A-30)."""
 
     id: int
     type: str
@@ -244,6 +262,8 @@ class EcritureLue:
     contrepasse_id: int | None = None
     cours: float = 0.0
     paire: int | None = None
+    document: str = ""
+    fournisseur_operation: str = ""
     ligne_reception_id: int | None = None
 
 
@@ -263,7 +283,7 @@ def _traduire(x: EcritureLue, quantite: float, source: str, destination: str) ->
         numero_of=x.numero_of,
         motif_retour=code_motif(x.motif),
         utilisateur=x.auteur,
-        fournisseur=x.fournisseur,
+        fournisseur=x.fournisseur or (x.fournisseur_operation if x.document == "operation" else ""),
         id=x.id,
         contrepasse_id=x.contrepasse_id,
         cours=x.cours or 0.0,

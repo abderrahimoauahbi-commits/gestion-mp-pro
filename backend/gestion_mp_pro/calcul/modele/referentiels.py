@@ -53,6 +53,7 @@ class Parametres:
     taux_tpi_import: float = 0.0025
     seuil_surcout_import: float = 1.0
     toler_facture_import: float = 0.02
+    toler_tva_import: float = 0.05
     delai_frais_import_jours: float = 30
     taux_eur_mad: float = 11.0
     taux_usd_mad: float = 9.5
