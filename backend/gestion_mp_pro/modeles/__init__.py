@@ -73,7 +73,7 @@ from gestion_mp_pro.modeles.socle import (
     Journal,
     Parametre,
     ParametreHistorique,
-    Session,
+    SessionOuverte,
     Tentative,
     Utilisateur,
 )
@@ -156,7 +156,7 @@ __all__ = [
     "RepriseCorrespondance",
     "RepriseExecution",
     "Sauvegarde",
-    "Session",
+    "SessionOuverte",
     "Signalement",
     "Solde",
     "TacheExecution",

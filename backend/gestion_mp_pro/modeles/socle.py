@@ -75,7 +75,7 @@ class Utilisateur(AvecVersion, Base):
     vu_le: Mapped[datetime | None] = instant()
 
 
-class Session(Base):
+class SessionOuverte(Base):
     """Une session ouverte (jeton gardé par son empreinte SHA-256)."""
 
     __tablename__ = "session"
