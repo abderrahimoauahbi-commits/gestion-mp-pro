@@ -1,22 +1,17 @@
 """Côté Gestion MP : les sorties attendues de la parité unitaire du moteur (lot S3).
 
-ARCHITECTURE § 3 : « côté Gestion MP : copie de comparaison_calcul (lancée par le Python de
-~/gestion-mp) ». Ce script n'importe pas `gestion_mp_pro` : il tourne dans l'environnement de
-Gestion MP (`~/gestion-mp/.venv/bin/python`) et calcule avec son moteur, une fois, ce que le
-moteur porté doit retrouver à l'identique sur les jeux figés de `tests/moteur/jeux/`.
+ARCHITECTURE § 3 : copie de `outils/comparaison_calcul.py`, lancée par le Python de ~/gestion-mp ;
+calcule une fois ce que le moteur porté doit retrouver sur les jeux de `tests/moteur/jeux/`.
 
     python essais/gestion_mp_calcul.py extraire <url_base> <jour> <nom> <perimetre_json> \\
         <description> <sortie_jeu.json[.xz]>
     python essais/gestion_mp_calcul.py calculer <jeu.json[.xz]> <sortie_attendu.json[.xz]>
 
-`extraire` fige les données COMPLÈTES d'une base (`depot.charger`, journal et soldes compris),
-réduites à un périmètre de références : c'est le moteur qui rejoue la date (`a_la_date`), des
-deux côtés. `calculer` relit un jeu en dataclasses de `gestion_mp.calcul.modele` et écrit toutes
-les sorties du moteur, sans arrondi : la parité se juge à l'égalité exacte.
-
-Format (relu par `tests/moteur/jeux_outils.py`) : une dataclass = l'objet de ses champs ;
-dates en ISO ; tuples en listes ; clés entières (`parts`) en texte ; `soldes` = liste triée
-`[réf, lot, magasin, q]`. Un fichier `.xz` est compressé. Les annotations disent les types.
+`extraire` fige les données COMPLÈTES d'une base (`depot.charger`), réduites à un périmètre ;
+le moteur rejoue la date (`a_la_date`) des deux côtés. `calculer` écrit toutes les sorties,
+sans arrondi. Format (relu par `tests/moteur/jeux_outils.py`) : une dataclass = l'objet de ses
+champs ; dates en ISO ; tuples en listes ; clés entières en texte ; `soldes` = liste triée
+`[réf, lot, magasin, q]` ; `.xz` : compressé.
 """
 
 from __future__ import annotations
@@ -34,7 +29,6 @@ from pathlib import Path
 from typing import Any
 
 GESTION_MP = Path(os.getenv("GESTION_MP_CODE", str(Path.home() / "gestion-mp")))
-# Le jour de la production des jeux, figé : le montage des métiers n'est connu qu'à partir de lui.
 AUJOURDHUI = date(2026, 10, 8)
 CHAMP_DU_PERIMETRE = {"fournisseurs": "fournisseur", "roles": "role_bom", "references": "reference"}
 CHAMP_DU_PERIMETRE["compositions"] = "composition"
@@ -141,9 +135,15 @@ def depuis_json(v: Any, annotation: Any) -> Any:
 
 
 def relire_dataclass(cls: Any, v: dict[str, Any]) -> Any:
-    """Une dataclass reconstruite champ par champ (son constructeur : `__post_init__` joue)."""
+    """Une dataclass reconstruite (`__post_init__` joue) ; un champ ajouté prend son défaut."""
     hints = _annotations(cls)
-    return cls(**{f.name: depuis_json(v[f.name], hints[f.name]) for f in dataclasses.fields(cls)})
+    return cls(
+        **{
+            n: depuis_json(v[n], hints[n])
+            for n in (f.name for f in dataclasses.fields(cls))
+            if n in v
+        }
+    )
 
 
 def relire(donnees: dict[str, Any]) -> Any:
