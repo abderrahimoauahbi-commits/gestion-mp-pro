@@ -192,7 +192,7 @@ def test_semences_motifs(lien: Connection) -> None:
 
 def test_semences_reglages(lien: Connection) -> None:
     valeurs = dict(lien.execute(text("SELECT cle, valeur FROM parametre")).all())
-    assert len(valeurs) == 56
+    assert len(valeurs) == 57
     assert set(valeurs) == set(modeles.CLES_REGLAGES)
     assert valeurs["seuil_critique"] == "60"
     assert valeurs["marge_securite"] == "0.2"
@@ -200,6 +200,7 @@ def test_semences_reglages(lien: Connection) -> None:
     assert valeurs["croissance_annuelle"] == "0"
     assert valeurs["seuil_surcout_import"] == "1"
     assert valeurs["delai_frais_import_jours"] == "30"
+    assert valeurs["toler_tva_import"] == "0.05"
     assert valeurs["seuil_bc_urgent"] == "300000"
     assert valeurs["secteur"] == "Fabrication de tapis mécaniques"
     assert valeurs["date_cloture"] == ""

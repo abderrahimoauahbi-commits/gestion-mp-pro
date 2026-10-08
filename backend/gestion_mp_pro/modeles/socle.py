@@ -39,12 +39,13 @@ CLES_REGLAGES: tuple[str, ...] = (
     "tolerance_inventaire", "toler_retard_jours", "cible_otif", "score_strategique",
     "score_standard", "score_surveiller", "seuil_hausse_forte", "fenetre_prix_jours",
     "taux_tva_import", "taux_tpi_import", "seuil_surcout_import", "toler_facture_import",
-    "delai_frais_import_jours", "dso", "nom_entreprise", "forme_juridique", "secteur",
-    "adresse", "ville", "telephone", "banques", "ice", "rc", "identifiant_fiscal", "cnss",
-    "patente", "date_cloture", "courriel_destinataires", "adresse_publique",
+    "toler_tva_import", "delai_frais_import_jours", "dso", "nom_entreprise", "forme_juridique",
+    "secteur", "adresse", "ville", "telephone", "banques", "ice", "rc", "identifiant_fiscal",
+    "cnss", "patente", "date_cloture", "courriel_destinataires", "adresse_publique",
 )  # fmt: skip
-"""Les 56 clés : les 55 réglages de Gestion MP corrigé (`delai_frais_import_jours` compris)
-et `seuil_bc_urgent`, sans effet, gardé pour mémoire (ECRANS-PRO E6)."""
+"""Les 57 clés : les 56 réglages de Gestion MP corrigé (`delai_frais_import_jours` compris,
+`toler_tva_import` ajouté par la révision 0003) et `seuil_bc_urgent`, sans effet, gardé pour
+mémoire (ECRANS-PRO E6). L'ordre est celui du CHECK posé par la dernière révision."""
 
 
 def _dans(colonne_sql: str, valeurs: tuple[str, ...]) -> str:
