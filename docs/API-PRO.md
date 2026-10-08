@@ -143,6 +143,13 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 | 41 | DELETE | `/codes-douaniers/{id}` | D | — | 204 | A47 |
 | 42 | GET | `/motifs` | C | — | `Motifs` {types [{type, libelle, roles}], motifs [{id, type, libelle, code_r, impose_role}]} | B32 |
 
+Clés des routes 23–25 : la liste fermée `modeles.CLES_REGLAGES` (MODELE-DONNEES § 3.1.6 ; une clé
+inconnue → 422), soit 56 clés semées par la révision 0002, dont `delai_frais_import_jours`
+(« Dossier sans frais à signaler après », famille Prix, jours, défaut 30, bornes 1–365 ; lu par C28)
+et `seuil_bc_urgent` (sans effet, gardé pour mémoire). `toler_tva_import` (« TVA d'importation à
+vérifier au-delà de », famille Prix, %, défaut 5 %, bornes 0–100 % ; lu par C29 et par la fiche du
+dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
+
 ### 1.4 Exploitation (`api/exploitation`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
@@ -293,7 +300,17 @@ quarantaine » → D, A ; motif « Mise en quarantaine » → D, A, L (commentai
 | 130 | POST | `/inventaires/{id}/lots-trouves` | D, A | `{version, matiere_id, lot_numero, lot_interne, magasin_id, compte, palettes, bobines, justification}` | `InventaireFiche` | B45 (lot trouvé) |
 | 131 | POST | `/inventaires/{id}/valider` | D, A | `{version}` | `InventaireFiche` | B46 |
 | 132 | POST | `/inventaires/{id}/abandonner` | D, A | `{version, motif}` | `InventaireFiche` | B47 |
+| 245 | POST | `/inventaires/{id}/annuler` | D, A | `{version, motif}` (motif ≥ 3 caractères, obligatoire) | `InventaireFiche` (statut `annule`, numéro gardé, ajustements contre-passés) | nouveau : Gestion MP corrigé, étape 17 (`POST /inventaires/{iid}/annuler`, U19) |
 | 133 | GET | `/documents/inventaires/{id}/feuille` | C | `?recomptage=&theorique=` | HTML A4 paysage | B48 |
+
+États d'un inventaire (`?statut=` de 124 et 239) : `ouvert`, `valide`, `abandonne`, **`annule`**. Un
+inventaire **en cours** s'abandonne (132 : rien n'est ajusté) ; un inventaire **validé** s'annule (245) :
+chacun de ses ajustements est contre-passé **une fois** (UQ `mouvement.contrepasse_id`), daté comme lui ;
+refus 409 si l'inventaire n'est pas validé (« Seul un inventaire validé s'annule ; un inventaire en cours
+s'abandonne. »), s'il est déjà annulé, si la période est close, si la matière ajustée est déjà repartie
+(stock insuffisant), ou si un inventaire ouvert couvre ses magasins ; 422 sans motif (« Dire pourquoi
+l'inventaire est annulé. »). `valide_le` reste posé ; `annule_le`, `annule_par_id`, `annulation_motif`
+s'y ajoutent ; journal « annulation inventaire » « {n°} · {motif} ».
 
 ### 1.15 Ordres de fabrication (`api/ordres`)
 
@@ -384,7 +401,7 @@ quarantaine » → D, A ; motif « Mise en quarantaine » → D, A, L (commentai
 |---|---|---|---|---|---|---|
 | 187 | GET | `/dossiers` | D, A | `?statut=ouvert\|clos\|annule&q=` | `[DossierResume]` | A71 |
 | 188 | GET | `/dossiers/a-rattacher` | D, A | `?locaux=` | `[FactureARattacher]` | A73 |
-| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (marchandise, frais, répartition, coût hors TVA, TVA, attendus, alertes de clôture, échéancier) | A72 |
+| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (marchandise, frais, répartition, coût hors TVA, TVA, attendus — dont `tva_ecart_tolere_mad` = \|TVA attendue\| × `toler_tva_import`, le même écart que C29 —, alertes de clôture, échéancier) | A72 |
 | 190 | POST | `/dossiers` | D, A | `DossierCreation` {facture_id \| null, numero (à la main seulement), libelle, date_arrivee, banque, local_confirme} | `DossierFiche` | A74 |
 | 191 | PUT | `/dossiers/{id}` | D, A | `DossierModification` {libelle, banque, commentaire, date_arrivee \| null, version} | `DossierFiche` | A75 |
 | 192 | POST | `/dossiers/{id}/rattacher` | D, A | `{version, facture_id, reception_ligne_ids}` | `DossierFiche` | A76 |
@@ -466,7 +483,7 @@ comprises) ; `GET /acces` et `GET /acces/qr` sont ouverts aussi à T ; `GET /ech
 reçoit `vue=consommation` ; `POST /commandes/{id}/approuver` reçoit `date` ; `PUT /dossiers/{id}/lignes/{lid}` accepte `cours: null` (« cours du jour ») ; `GET /dossiers/{id}` porte `a_rattacher` ; `GET /receptions/bobines` reçoit `matiere`. Le `PUT` d'une fiche reste un remplacement complet (l'écran envoie
 la fiche entière, y compris pour « désactiver ») : pas de corps partiel.
 
-**Total : 244 routes PRO** (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
+**Total : 245 routes PRO** (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
 service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/api/openapi.json`.
 
 ---
@@ -492,6 +509,7 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 | 117 | Plus de numéro de lot interne pris d'avance : case `lot_interne` | A.12-11, M65 |
 | 123 | Validation groupée : ce que le rôle ne peut pas valider est rendu dans `ignorés` avec la raison | A.12-4 |
 | 128–132 | Suspension limitée au périmètre ; abandon conservé ; champ absent = inchangé | N3 ; B.13-15 |
+| 245 | Un inventaire validé s'annule (contre-passation unique, motif obligatoire, numéro gardé, état `annule`) au lieu de rester définitif | Gestion MP corrigé, étape 17 (U19) |
 | 141 | Annuler un ordre supprime ses brouillons de retour et le dit | B.13-13 |
 | 154 | « Prix du catalogue à confirmer » rendu effectif (prix catalogue posés, non confirmés) ; sinon bon sans prix | ECRANS synthèse 7 |
 | 158 | Approbation datée du jour réel d'envoi | A.12-15 |
@@ -506,6 +524,7 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 | 204 | Annuler un dossier au lieu de le supprimer (numéro gardé, frais sortis du coût) | DONNEES 11 |
 | 205–208 | Statuts `ouvert`/`clos` en minuscules partout ; dates en vraies dates Excel ; titre corrigé | A.12-8/9/10 |
 | 212 | Écart (%) sur une seule échelle (pourcentage) ; synthèse = contrôles en anomalie **et** lignes | CONTROLES § 6 n° 1, 27 |
+| 212, 235 | C28 : délai lu dans `delai_frais_import_jours` (30 j), « …sans frais hors TVA » ; C29 : tolérance lue dans `toler_tva_import` (5 %), « TVA d'importation à plus de 5 % de la TVA attendue (20 % de la valeur en douane, droits et TPI compris) » | Gestion MP corrigé (DEFAUTS E-10) |
 | 216–220, 52, 106 | Exports homogènes : vraies dates, gravités traduites, mêmes filtres que l'écran, `date` acceptée partout | B.13-18 |
 | 229 | Un frais réglé ne redevient dû que par « annuler le règlement » explicite | I20 |
 | 233 | Bilan : mois invalide → 422 ; kilos et dirhams sur la même base (annulations sur leur ligne) ; stock sur les métiers compté | B.13-9, 11 |
@@ -734,18 +753,19 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 
 **Bilan** : 206 routes de Gestion MP → **202 reprises** (dont 8 éclatées en deux ou trois routes
 plus claires — A16, B11, B15, B19, B45, B83, B95, B97 — et 2 fondues dans une voisine — A19,
-A40), **4 mortes justifiées** (A67, B64, B77, B102). PRO compte 244 routes : 200 cibles directes
+A40), **4 mortes justifiées** (A67, B64, B77, B102). PRO compte 245 routes : 200 cibles directes
 des routes reprises, 8 nées d'un éclatement, **26 nouvelles** (contexte, données brutes,
 `PUT /moi`, appareils ×4, tâches, courriels, historique, notifications ×3, recherche, fiches à
 adresse stable ×7, versions du plan, montages, commentaire de lot, fiche stock d'une matière,
-bilan en JSON), et **8 ajoutées** par la conception des écrans (235–242 : détail d'un contrôle, sept exports) et **2 pour la coexistence** avec Gestion MP (243–244 : état et rafraîchissement du miroir).
+bilan en JSON), **8 ajoutées** par la conception des écrans (235–242 : détail d'un contrôle, sept exports), **2 pour la coexistence** avec Gestion MP (243–244 : état et rafraîchissement du miroir), et **1 reprise
+de Gestion MP corrigé** (245 : annulation d'un inventaire validé).
 
 ---
 
 ## 4. Matrice des droits
 
 Déclarée une fois (`securite/matrice.py`, générée depuis les dépendances des routes et exportée en
-`tests/matrice_droits.csv`) : 244 routes × {anonyme, D, A, L, T} → code attendu. L'essai
+`tests/matrice_droits.csv`) : 245 routes × {anonyme, D, A, L, T} → code attendu. L'essai
 `test_matrice_droits` la rejoue entièrement (paramètres remplis par les fabriques) ; une route
 nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 `test_toute_route_declare_ses_roles` échoue si une route (hors 1, 2, 8, 9, 10, 22) n'a pas de
@@ -754,7 +774,7 @@ nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 | Rôle | Routes permises | Interdites notables |
 |---|---|---|
 | Anonyme | 1, 2, 8, 9, 10, 22 | tout le reste (401) |
-| Direction | toutes les routes métier et techniques (238 hors routes publiques) | aucune |
+| Direction | toutes les routes métier et techniques (239 hors routes publiques) | aucune |
 | Achats | lectures et écritures achats, réceptions, importations, stock (sauf retour machine), inventaires, référentiels matières/fournisseurs/classification (valeurs), devises, pilotage, suivi | approbation (158, 159), plan et recettes (84–90, 146), rôles, postes, codes, magasins, métiers (écriture), montage, ordres (écriture), comptes, sauvegardes, journal, période close |
 | Alimentation | lectures « C » (prix filtrés), ordres, retours machine, transferts, mise en quarantaine, montage, signalements, notifications, recherche | tout ce qui est D/A : commandes, réceptions, importations, plan d'achat, pilotage, réglages, devises, exports chiffrés |
 | Administrateur | 3, 4, 11–25 (techniques), 43–55 | toute route métier (403) : il ne lit ni stock, ni prix, ni documents |

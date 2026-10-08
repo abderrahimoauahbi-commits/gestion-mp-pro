@@ -202,7 +202,7 @@ a tranché seul, la décision ci-dessous l'emporte.
 | E8 | Libellé de C29 | corrigé (partie 8) | retenu (texte seulement) |
 | E9 | Poids nuls d'une qualité | ne s'enregistrent plus (partie 8) | retenu (renommer un rôle n'est plus bloqué par un poids à 0) |
 | E10 | Création + validation en une transaction (`valider: true`) | parties 2, 3, 6 | retenu (API-PRO § 1.24) |
-| E11 | Abandon d'inventaire, annulation de dossier : motif | exigé (parties 5, 6) | retenu |
+| E11 | Abandon d'inventaire, annulation de dossier : motif | exigé (parties 5, 6) | retenu ; de même pour l'annulation d'un inventaire validé (Gestion MP corrigé, étape 17 ; API-PRO 245) |
 | E12 | « Théorique » gardé dans l'inventaire | partie 6 | retenu (mot du comptage, exception documentée au vocabulaire) |
 | E13 | Achats et postes de frais / codes douaniers | lecture pour A (partie 5) | retenu (API 34, 38) |
 | E14 | Pièces jointes d'un dossier clos | on joint, on ne retire plus (partie 5) | retenu |
@@ -3188,7 +3188,7 @@ Gestion MP : § 0 « Notions transversales » (`importations.py`, `moteur.py:352
 | Numéro dès l'ouverture, série `DOS` « NN/AA » (année de la date d'arrivée) ; numéro saisi ≤ 16 car., unique ; suivant si pris | identique ; un dossier annulé **garde** son numéro (série sans trou) | annulation |
 | Statuts `ouvert` / `clos` (« Ouvert » / « Clos le jj/mm/aaaa hh:mm ») | `ouvert` / `clos` / `annule` (`Badge` « Annulé le … ») | point tranché |
 | Entrée = pesée × prix (pas le montant facture) ; `poids_kg` figé ; lignes prises : réception validée, non refusée, pesée > 0, hors dossier | identique (I18) | — |
-| Cours : cours figé du bon si même devise, sinon **0 = cours du jour** ; cours payé à la banque le remplace ; MAD sans cours ; clôture écrit le cours du jour + commentaire « cours du jour X figé à la clôture du jj/mm/aaaa » | sans cours = **NULL** (« cours du jour ») ; le reste identique | point tranché |
+| Cours : cours figé du bon si même devise, sinon **0 = cours du jour** ; cours payé à la banque le remplace ; MAD sans cours ; clôture écrit le cours du jour + commentaire « cours du jour X figé à la clôture du jj/mm/aaaa » | sans cours = **NULL** (« cours du jour ») ; à la clôture, le cours du jour écrit porte `cours_origine = clos_au_jour` (pas de note en commentaire), remis à NULL à la réouverture ; le reste identique | point tranché |
 | Achat MAD = valeur devise × (cours ou taux du jour) | identique | — |
 | Postes de frais d'origine DD, TPI, TVA (récupérable), PORT, FRET, ASSUR, TRANSIT, TIMBRE, INT_OC, TMSA, AUTRE ; récupérable ou coût ; clé `valeur` / `poids` ; postes système DD, TPI, TVA, FRET, ASSUR | identique | — |
 | Répartition : part valeur / part poids ; frais visé sur une ligne = entier ; répartition figée (`parts`) ; sans arrondi | identique | — |
@@ -3197,7 +3197,7 @@ Gestion MP : § 0 « Notions transversales » (`importations.py`, `moteur.py:352
 | Valeur en douane (CAF) = achat + FRET + ASSUR | identique ; **tous les textes disent « achat + fret + assurance »** | anom. 5.3 |
 | Droits attendus = valeur en douane × taux du code actif ; seulement si toutes les matières ont un code actif (sinon `matieres_sans_code`) ; droits saisis = Σ DD | identique | — |
 | Écart des droits (écran seul) : `|saisis − attendus| > max(50 MAD, 2 %)` | calculé **au serveur** (`ecart_droits`), seuils lus dans `parametres` | anom. 5.4 |
-| TVA attendue = taux TVA × (CAF + DD + TPI) ; TPI = frais TPI sinon CAF × taux TPI ; TVA saisie = poste TVA seul ; écart toléré 5 % (`TOLERANCE_TVA_IMPORT`) | identique ; **une seule définition** de « TVA saisie » (poste TVA) ; textes lisent les taux réglés | anom. 5.2, 5.4 |
+| TVA attendue = taux TVA × (CAF + DD + TPI) ; TPI = frais TPI sinon CAF × taux TPI ; TVA saisie = poste TVA seul ; écart toléré 5 % (`TOLERANCE_TVA_IMPORT`) | identique ; **une seule définition** de « TVA saisie » (poste TVA) ; textes lisent les taux réglés ; écart toléré lu dans le réglage **`toler_tva_import`** (5 %, Réglages › Prix ; semé par la révision 0003), le même pour C29 et pour la fiche (`tva_ecart_tolere_mad`, API-PRO 189) | anom. 5.2, 5.4 ; Gestion MP corrigé (E-10) |
 | Frais hors norme (C35) dossier / ligne, seuil « Frais d'un dossier d'importation à vérifier au-delà de » (100 %, 5-10 000 %) | identique | — |
 | Marchandise négative (avoir trop gros) refusée | identique | — |
 | Écart facture ↔ reçu (C36), tolérance 2 % ; coût reste pesée × prix | identique | — |
@@ -3350,9 +3350,9 @@ Gestion MP : fenêtre « Dossier {NN/AA} » (`DetailDossier.tsx`, très large, `
 | « Modifier l'en-tête » (infobulle « Libellé, date d'arrivée, banque, commentaire — et supprimer le dossier ») | D, A | — | `blocages` si clos/annulé | infobulle « … — et annuler le dossier » |
 | Champ d'en-tête quitté (changé) | D, A | `PUT dossiers/{id}` `{libelle, date_arrivee, banque, observations}` (schéma strict : `numero`, `facture_id` refusés) | refus clos ; 422 « date d'arrivée hors période » | « Enregistré à … » ; anom. 5.13 |
 | « Terminé » | D, A | — | — | — |
-| « Supprimer le dossier » (danger ; infobulle « Supprimer le dossier : sa facture attend de nouveau son dossier[, ses N frais sont perdus] » ; « Supprimer le dossier {n°} ? La facture {F} attendra de nouveau son dossier. » + « N frais saisi(s), {montant}, seront perdus — pour les garder, détacher plutôt la réception (onglet Marchandises). » / « Aucun frais n'est saisi. » · « Non » · « Oui, supprimer ») | D, A | `POST dossiers/{id}/annuler` `{motif}` | **« Annuler le dossier »** ; `Confirmer` motif exigé : « Annuler le dossier {n°} ? Il garde son numéro. La facture {F} (ou : ses marchandises) attendra de nouveau son dossier. N frais saisi(s), {montant}, sortiront du coût — pour les garder, détacher plutôt la réception (onglet Marchandises). Motif : [ ] » · « Non » · « Oui, annuler le dossier » ; `Bouton({blocages})` : « Ce dossier est clos : le rouvrir d'abord. », période close « (annulation refusé) » | point tranché ; frais gardés en lecture, hors coût ; frais dus hors échéancier, frais réglés gardés comme réglés ; toast « Dossier {n°} annulé : sa facture attend de nouveau son dossier ; N frais ({montant}) sortis du coût. » (anom. 5.12) |
-| « Clôturer le dossier » (principal ; infobulle « Figer le coût hors TVA : un dossier clos ne se modifie plus (il se rouvre si une facture de frais arrive en retard, c'est tracé) ») | D, A | `POST dossiers/{id}/cloturer` | `Bouton({blocages})` : « Un dossier sans marchandise n'a rien à clore. », « Des frais ne trouvent pas de marchandise où se répartir : les affecter à tout le dossier, ou les retirer, avant de clore. » ; `FenetreConfirmation` (A3) : « Clore ? » + avertissements serveur dans l'ordre (1 cours vides → cours du jour écrit ; 2 N ligne(s) au cours du bon ; 3 cours multiples par devise ; 4 frais > {seuil %} de l'achat ; 5 frais hors norme sur {réf.} ; 6 facture ≠ reçu {x,x %} ; 7 cours > 5 % du jour ; 8 N fournisseurs ; 9 aucun droit saisi ; 10 droits ≠ attendus ; 11 aucune TVA / TVA ≠ attendue), sinon « Le coût hors TVA devient celui des lots en stock. » · « Non » · « Oui, clôturer » | grisé avec raison, y compris frais non répartis (anom. 5.7) ; effets serveur gardés (`poids_kg`, cours NULL ← taux du jour + note, `clos_le`, journal) ; toast « Dossier clôturé : son coût est figé. » |
-| « Rouvrir pour corriger » (infobulle « Rouvrir le dossier pour y ajouter un frais arrivé en retard, ou corriger ») | D, A | `POST dossiers/{id}/rouvrir` | `Confirmer` « Rouvrir pour corriger ? La réouverture est tracée. » (motif facultatif) · « Non » · « Oui, rouvrir » ; refus « Ce dossier est déjà ouvert. », période close « (réouverture refusé) » | motif au journal ; toast « Dossier rouvert : il se modifie de nouveau. » |
+| « Supprimer le dossier » (danger ; infobulle « Supprimer le dossier : sa facture attend de nouveau son dossier[, ses N frais sont perdus] » ; « Supprimer le dossier {n°} ? La facture {F} attendra de nouveau son dossier. » + « N frais saisi(s), {montant}, seront perdus — pour les garder, détacher plutôt la réception (onglet Marchandises). » / « Aucun frais n'est saisi. » · « Non » · « Oui, supprimer ») | D, A | `POST dossiers/{id}/annuler` `{motif}` | **« Annuler le dossier »** ; `Confirmer` motif exigé : « Annuler le dossier {n°} ? Il garde son numéro. La facture {F} (ou : ses marchandises) attendra de nouveau son dossier. N frais saisi(s), {montant}, sortiront du coût — pour les garder, détacher plutôt la réception (onglet Marchandises). Motif : [ ] » · « Non » · « Oui, annuler le dossier » ; `Bouton({blocages})` : « Ce dossier est clos : le rouvrir d'abord. », période close « (annulation refusé) » | point tranché ; marchandises détachées de leurs lignes reçues (`reception_ligne_id` vidé, D7) pour qu'un nouveau dossier les reprenne ; frais gardés en lecture, hors coût ; frais dus hors échéancier, frais réglés gardés comme réglés ; toast « Dossier {n°} annulé : sa facture attend de nouveau son dossier ; N frais ({montant}) sortis du coût. » (anom. 5.12) |
+| « Clôturer le dossier » (principal ; infobulle « Figer le coût hors TVA : un dossier clos ne se modifie plus (il se rouvre si une facture de frais arrive en retard, c'est tracé) ») | D, A | `POST dossiers/{id}/cloturer` | `Bouton({blocages})` : « Un dossier sans marchandise n'a rien à clore. », « Des frais ne trouvent pas de marchandise où se répartir : les affecter à tout le dossier, ou les retirer, avant de clore. » ; `FenetreConfirmation` (A3) : « Clore ? » + avertissements serveur dans l'ordre (1 cours vides → cours du jour écrit ; 2 N ligne(s) au cours du bon ; 3 cours multiples par devise ; 4 frais > {seuil %} de l'achat ; 5 frais hors norme sur {réf.} ; 6 facture ≠ reçu {x,x %} ; 7 cours > 5 % du jour ; 8 N fournisseurs ; 9 aucun droit saisi ; 10 droits ≠ attendus ; 11 aucune TVA / TVA ≠ attendue), sinon « Le coût hors TVA devient celui des lots en stock. » · « Non » · « Oui, clôturer » | grisé avec raison, y compris frais non répartis (anom. 5.7) ; effets serveur gardés (`poids_kg`, cours NULL ← taux du jour avec `cours_origine = clos_au_jour`, `clos_le`, journal) ; toast « Dossier clôturé : son coût est figé. » |
+| « Rouvrir pour corriger » (infobulle « Rouvrir le dossier pour y ajouter un frais arrivé en retard, ou corriger ») | D, A | `POST dossiers/{id}/rouvrir` | `Confirmer` « Rouvrir pour corriger ? La réouverture est tracée. » (motif facultatif) · « Non » · « Oui, rouvrir » ; refus « Ce dossier est déjà ouvert. », période close « (réouverture refusé) » | motif au journal ; les cours écrits à la clôture (`clos_au_jour`) redeviennent « cours du jour » (NULL) ; toast « Dossier rouvert : il se modifie de nouveau. » |
 | Liens « voir les frais », « les vérifier sur leurs pièces », « le vérifier » | D, A | — | — | → `?onglet=frais` |
 | « Fermer » | D, A | — | garde `sale` (brouillon de frais ou de saisie à la main) | retour à l'écran d'origine (filtres gardés) |
 
@@ -3713,8 +3713,9 @@ Source : `docs/heritage/ECRANS.md` Partie 6 (inventaire, opérations, anomalies 
 Points tranchés appliqués :
 - **(b) Inventaire.** La suspension ne porte que sur **son périmètre** : les matières comptées, dans son magasin (dans tous les
   magasins s'il est global) ; les autres matières du même magasin continuent de bouger. Abandonner **garde** l'inventaire au statut
-  « abandonné » (son numéro INV reste, aucun trou). Un second comptage fait par la même personne que le premier (ou que l'ouvreur)
-  est **signalé** (pas refusé).
+  « abandonné » (son numéro INV reste, aucun trou). Un inventaire **validé** s'**annule** (Gestion MP corrigé, étape 17 : D, A,
+  motif obligatoire) : ses ajustements sont contre-passés une fois, il garde son numéro au statut « Annulé ». Un second comptage
+  fait par la même personne que le premier (ou que l'ouvreur) est **signalé** (pas refusé).
 - **(c) Lot interne.** Plus de bouton qui prend un numéro d'avance (`POST /lots/numero-interne` supprimée) : une case « Lot interne »
   sur la ligne ; numéro `LOT-AAAA-NNNN` donné à la validation.
 - **(d)** Transferts ouverts à L (`/operations?onglet=transfert`) ; libération de quarantaine D, A ; L peut mettre en quarantaine
@@ -3755,7 +3756,7 @@ Gestion MP : `pages/Inventaire.tsx` (`InventairePage`), `/inventaire` (`?onglet=
 | `?onglet=passes` (absent = cours) ; `?inventaire=ID` ouvre la fenêtre sur tout onglet ; après création : `inventaire=ID` | `?onglet=cours|passes` ; `/inventaires/:id` (fenêtre sur la liste, onglet gardé) ; après création → `/inventaires/:id` | A5 |
 | Titre « Inventaire » ; sous-titre « On fige le stock théorique, on compte lot par lot, on valide : chaque écart devient un ajustement de stock tracé. Au-delà de la tolérance, un écart se justifie. » | idem | — |
 | Pas d'indicateurs | pas d'indicateurs | — |
-| Onglets « En cours de comptage » (compteur ouverts) · « Inventaires validés » (total − en cours) | « En cours de comptage » (ouverts) · « Inventaires clos » (infobulle « Validés et abandonnés » ; compteur validés + abandonnés) | (b) |
+| Onglets « En cours de comptage » (compteur ouverts) · « Inventaires validés » (total − en cours) | « En cours de comptage » (ouverts) · « Inventaires clos » (infobulle « Validés, abandonnés et annulés » ; compteur validés + abandonnés + annulés) | (b), étape 17 |
 | Erreur de lecture ; chargement « les inventaires » | `Erreur`, `Chargement` | — |
 
 **Onglet « En cours de comptage »**
@@ -3783,13 +3784,13 @@ Gestion MP : `pages/Inventaire.tsx` (`InventairePage`), `/inventaire` (`?onglet=
 |---|---|---|
 | Carte « Inventaires validés » | « Inventaires clos » | (b) |
 | `BarreRecherche` « Numéro, libellé, magasin, personne… » sur numéro, libellé, magasin, ouvert par, validé par, date ; pas dans l'adresse | `Recherche` (+ `?q=` dans l'adresse) | — |
-| — | (nouveau) `Filtres` « État » : Validé / Abandonné ; « Effacer les filtres » + « N critère(s) » dès 2 | (b), A1 |
+| — | (nouveau) `Filtres` « État » : Validé / Abandonné / Annulé ; « Effacer les filtres » + « N critère(s) » dès 2 | (b), A1, étape 17 |
 | « Inventaire », « Date », « Magasin », « Lots comptés » | idem + « Périmètre » | — |
 | « Hors tolérance » : `Etiquette` attention | `Badge` (règle unique, voir plus haut) | an. 23 |
 | « Écart total » kg signé, rouge < −0,001, vert > 0,001 | « Écart (kg) » idem | — |
-| « Valeur de l'écart » MAD (au coût de chaque ajustement écrit) + « sans signe » | idem ; abandonné : « — » | — |
-| « Ouvert par » ; « Validé par » + date-heure | « Par » : « {ouvreur} · validé (ou abandonné) par {nom} le {jj/mm/aaaa hh:mm} » | an. 11, (b) |
-| — | (nouveau) « État » : `Badge` « Validé » ok / « Abandonné » neutre | (b) |
+| « Valeur de l'écart » MAD (au coût de chaque ajustement écrit) + « sans signe » | idem ; abandonné : « — » ; annulé : celle de ses ajustements d'origine (contre-passés depuis), comme Gestion MP corrigé | — |
+| « Ouvert par » ; « Validé par » + date-heure | « Par » : « {ouvreur} · validé (ou abandonné) par {nom} le {jj/mm/aaaa hh:mm} »[ « · annulé par {nom} le … »] | an. 11, (b), étape 17 |
+| — | (nouveau) « État » : `Badge` « Validé » ok / « Abandonné » neutre / « Annulé » neutre (comme Gestion MP corrigé) | (b), étape 17 |
 | Ligne cliquable (« Voir les écarts ») → `?inventaire=ID` | → `/inventaires/{id}` | — |
 | Vides « Aucun inventaire validé. » / « Aucun inventaire validé ne correspond. » | « Aucun inventaire clos. » / « Aucun inventaire ne correspond. » | — |
 | Pas d'export | `ExportExcel` (route ajoutée, API-PRO § 1.24 : `GET /api/export/inventaires`) | an. 10 |
@@ -3845,11 +3846,11 @@ proposé `?onglet=lots|pieces`), `Filtres`, `Recherche`, `DataTable` de saisie d
 
 | Élément GMP | Élément PRO (composant) | Changement |
 |---|---|---|
-| Saisie si ouvert ET achats ; validé = lecture seule | saisie si **ouvert** et D, A ; validé **ou abandonné** = lecture seule | (b) |
+| Saisie si ouvert ET achats ; validé = lecture seule | saisie si **ouvert** et D, A ; validé, abandonné **ou annulé** = lecture seule | (b) |
 | Données `GET /inventaires/{id}` ; `GET /pieces/inventaire/{id}` | `GET inventaires/{id}` ; `GET pieces?objet=inventaire&id=` | — |
 | Avant réception : fenêtre « Inventaire » + chargement ou « Inventaire introuvable. » | `Chargement` / `Erreur` | — |
-| Titre « {n°} · {libellé} » + « Comptage en cours » (attention) / « Validé par {nom} » (ok) | + « Abandonné par {nom} » (neutre) | (b) |
-| Barre : « {magasin} · compté le {date} · tolérance {N %} · ouvert par {nom}[ · validé le {date heure}] » puis boutons à place fixe | « {magasin} · {périmètre} · compté le … · tolérance … · par {nom}[ · validé / abandonné le … par …][ · motif d'abandon] » ; boutons à place fixe | (b), an. 11 |
+| Titre « {n°} · {libellé} » + « Comptage en cours » (attention) / « Validé par {nom} » (ok) | + « Abandonné par {nom} » (neutre) ; « Annulé par {nom} » (neutre) | (b), étape 17 |
+| Barre : « {magasin} · compté le {date} · tolérance {N %} · ouvert par {nom}[ · validé le {date heure}] » puis boutons à place fixe | « {magasin} · {périmètre} · compté le … · tolérance … · par {nom}[ · validé / abandonné le … par …][ · annulé le … par … : {motif}][ · motif d'abandon] » ; boutons à place fixe | (b), an. 11 |
 | Indicateur « Lots figés » (lignes, lots trouvés compris) | `Kpi` idem | — |
 | « Comptés » « c / n », détail « {%} du comptage », ok si tout compté | `Kpi` idem, formule | — |
 | « Hors tolérance » (sur le retenu), détail « N sans justification » / « tous justifiés », ton rupture / attention / ok | `Kpi` idem | — |
@@ -3892,7 +3893,8 @@ Gestes de la fenêtre Comptage
 | « Lot trouvé… » | D, A (saisie) | — | infobulles « Un lot trouvé sur place, absent du théorique » / « Refermer la saisie du lot trouvé » | ouvre l'encart |
 | « Abandonner » (danger) | D, A (saisie) | `POST inventaires/{id}/abandonner` `{motif}` | `Confirmer` motif **exigé** : « Abandonner {INV-…} ? Rien n'est ajusté, les mouvements reprennent ; l'inventaire reste au statut « Abandonné » avec ses comptages. » · « Non » · « Oui, abandonner » | (b) : plus de suppression, numéro gardé ; succès « {n°} abandonné : les mouvements reprennent. » ; refus « Un inventaire validé reste : ses ajustements sont au journal. » (409), « Inventaire introuvable. », droits |
 | « Enregistrer le comptage » | D, A (saisie) | `PUT inventaires/{id}/comptages` `[{ligne_id, compte, palettes, bobines, second_compte, justification}]` (lignes modifiées) | grisé : « Rien à enregistrer » / sinon infobulle « {N} ligne(s) à enregistrer » | succès « {N} comptage(s) enregistré(s). » ; serveur note `premier_par` et `second_par` ; refus repris : « Cet inventaire est déjà validé. » (+ « … est abandonné. »), « Ligne étrangère à cet inventaire. », « « RÉF », lot X : un recomptage suit un premier comptage. », bornes |
-| « Valider l'inventaire » (principal) | D, A (saisie) | enregistre d'abord les modifications, puis `POST inventaires/{id}/valider` | grisé : « {N} écart(s) hors tolérance sans justification : écrire d'abord ce qui a été constaté (lignes en rouge) » / « Aucun lot compté » ; `Confirmer` « Valider ? {c} lot(s) comptés, {a} écart(s) ajusté(s) ({±x,x kg})[, {n} non comptés restent au théorique][, {r} recomptage(s) faits par la même personne]. Ne se défait pas. » · « Non » · « Oui, valider l'inventaire » | garde-fous écran inatteignables retirés (an. 15) ; succès « Inventaire validé : {a} ajustement(s) écrit(s) au stock. » + vue « Avec un écart » ; refus serveur repris (déjà validé, aucun lot compté, « Écart hors tolérance sans justification : RÉF1… » (8 au plus), dates, « … des lots qu'il fige ont bougé depuis … », moteur de stock) |
+| « Valider l'inventaire » (principal) | D, A (saisie) | enregistre d'abord les modifications, puis `POST inventaires/{id}/valider` | grisé : « {N} écart(s) hors tolérance sans justification : écrire d'abord ce qui a été constaté (lignes en rouge) » / « Aucun lot compté » ; `Confirmer` « Valider ? {c} lot(s) comptés, {a} écart(s) ajusté(s) ({±x,x kg})[, {n} non comptés restent au théorique][, {r} recomptage(s) faits par la même personne]. Seule une annulation (contre-passation, avec un motif) la défait. » · « Non » · « Oui, valider l'inventaire » | garde-fous écran inatteignables retirés (an. 15) ; succès « Inventaire validé : {a} ajustement(s) écrit(s) au stock. » + vue « Avec un écart » ; refus serveur repris (déjà validé, aucun lot compté, « Écart hors tolérance sans justification : RÉF1… » (8 au plus), dates, « … des lots qu'il fige ont bougé depuis … », moteur de stock) |
+| (Gestion MP corrigé) « Annuler l'inventaire » (danger ; inventaire **validé** seulement ; infobulle « Annuler (contre-passation) : chaque ajustement de cet inventaire est contre-passé, avec un motif ») | D, A | `POST inventaires/{id}/annuler` `{version, motif}` (API-PRO 245) | `Confirmer` motif **exigé** (≥ 3 caractères, sinon « Le motif de l'annulation fait au moins 3 caractères. ») : « Annuler l'inventaire {n°} ? Ses ajustements sont contre-passés à leur date (refusé en période close ou si la matière est déjà repartie). Motif : [ ] » · « Non » · « Oui, annuler l'inventaire » | étape 17 ; succès « Inventaire {n°} annulé : ses ajustements sont contre-passés. » ; statut `annule`, numéro gardé, une seule contre-passation ; refus repris (409) : « Seul un inventaire validé s'annule ; un inventaire en cours s'abandonne. », « L'inventaire {n°} est déjà annulé. », « L'inventaire {n°} est en cours : les mouvements sont suspendus jusqu'à sa validation. », période close, stock insuffisant ; 422 « Dire pourquoi l'inventaire est annulé. » |
 | Saisies de cellule (palettes, bobines, compté, recompté, justification) | D, A (saisie) | local jusqu'à « Enregistrer » | — | ligne « modifiée » |
 | Bascule « Lots à compter » / « Pièces jointes » | D, A | — | — | `Onglets` dans l'adresse |
 | (nouveau) Recherche / vue / « Effacer les filtres » | D, A | — | — | an. 9 |
@@ -3901,7 +3903,8 @@ Gestes de la fenêtre Comptage
 
 Serveur à la validation (inchangé) : un `AJUSTEMENT` par ligne comptée dont |retenu − théorique| ≥ 0,001, daté du jour de
 l'inventaire, document « inventaire » + n°, motif « Écart d'inventaire », commentaire « {justification} · recompté par {nom} » ;
-statut `valide`, validé par / le ; mouvements du périmètre repris ; pas d'annulation d'un inventaire validé ; non comptés restent au
+statut `valide`, validé par / le ; mouvements du périmètre repris ; un inventaire validé ne se défait que par son **annulation**
+(contre-passation de chaque ajustement, une fois, avec un motif ; statut `annule`) ; non comptés restent au
 théorique ; **lots trouvés créés à ce moment** (an. 19), numéros internes `LOT-AAAA-NNNN` donnés à ce moment (c).
 
 ### Encart « Lot trouvé » — dans `/inventaires/:id`
@@ -3933,7 +3936,7 @@ Gestion MP : `PiecesJointes objet="inventaire"` (`suivi.py:242-290`, achats) →
 
 | Élément GMP | Élément PRO (composant) | Changement |
 |---|---|---|
-| Lecture seule si pas achats (jamais ici) ; dépôt possible sur un validé | idem (aussi sur un abandonné) | — |
+| Lecture seule si pas achats (jamais ici) ; dépôt possible sur un validé | idem (aussi sur un abandonné ou un annulé) | — |
 | « Joindre un document… » (« Envoi… ») + note « ou le glisser ici · PDF, image, tableur, texte ou document · 20 Mo au plus. Ouvrir un document le télécharge. » ; zone de dépôt | idem | — |
 | Note « La feuille de comptage signée, scannée ; une photo d'un lot trouvé ou abîmé. » | idem | — |
 | Colonnes « Document » (lien, « Télécharger le document ») · « Genre » · « Taille » (o/Ko/Mo) · « Par » · « Joint le » · « Retirer » | idem | — |
@@ -3969,7 +3972,10 @@ paysage, papier à en-tête, nouvel onglet ; C.
 ### Notions métier — Inventaire (PRO)
 
 - Document numéroté **dès l'ouverture** (`INV-AAAA-NNNN`) ; statuts `ouvert` (« Comptage en cours ») → `valide` (« Validé ») ou
-  **`abandonne` (« Abandonné »)** : un abandon garde le document, ses comptages et son numéro (pas de trou), rien n'est ajusté.
+  **`abandonne` (« Abandonné »)** : un abandon garde le document, ses comptages et son numéro (pas de trou), rien n'est ajusté ;
+  un inventaire validé peut passer à **`annule` (« Annulé »)** (Gestion MP corrigé, étape 17) : chaque ajustement est contre-passé
+  une fois, à sa date, motif obligatoire ; `valide_le` reste, `annule_le`, `annule_par_id`, `annulation_motif` s'ajoutent ; refusé en
+  période close, si la matière ajustée est déjà repartie, ou si un inventaire ouvert couvre ses magasins.
 - Figer le théorique : chaque solde lot × magasin > 0 du périmètre devient une ligne.
 - **Suspension par périmètre** : tant qu'il est ouvert, aucun mouvement des **matières comptées** ne s'écrit dans son magasin (dans
   tous s'il est global) ; les autres matières bougent. Deux inventaires ouverts ne peuvent pas compter la même matière dans le même
@@ -3981,7 +3987,9 @@ paysage, papier à en-tête, nouvel onglet ; C.
 - **Recomptage** : pour un premier comptage hors tolérance ; retenu s'il existe ; premier et second compteurs enregistrés ; même
   personne (ou l'ouvreur) **signalée** partout (ligne, indicateur, confirmation de validation), jamais bloquée.
 - Retenu, écart, écart net (kg), valeur de l'écart (MAD : CMUP tant qu'ouvert, coût de l'ajustement une fois validé), « sans signe ».
-- Lot trouvé, non prévu (théorique 0), **créé à la validation** ; lot interne numéroté `LOT-AAAA-NNNN` à la validation.
+- Lot trouvé, non prévu (théorique 0), **créé à la validation** : jusque-là sa ligne porte sa matière, son numéro (ou la case
+  « Lot interne ») et pas de lot (MODELE-DONNEES § 3.7.3) ; lot interne numéroté `LOT-AAAA-NNNN` à la validation ; un même lot
+  trouvé (matière, numéro, magasin) ne se saisit qu'une fois.
 - Ajustement d'inventaire : `AJUSTEMENT` par écart non nul, motif « Écart d'inventaire », daté du jour de l'inventaire.
 - Contrôle d'antidate à l'ouverture (lots figés) et à la validation (lots ajustés).
 - Palettes / bobines au poids de bobine du lot (sinon catalogue) ; mètres indicatifs pour cuir, franges, ruban.
@@ -4196,7 +4204,8 @@ Gestion MP : `Operations.tsx:775-1121` (`FormeLigne`) → PRO : encart de `Fenet
   comptage / de recomptage » ; panneau « Pièces jointes ».
 - **Gestes** : 36 gestes GMP repris (inventaire 19, opérations 17) ; + 17 nouveaux (filtre État, Effacer ×3, Exporter ×3, Feuille
   avec le théorique, fermer l'encart lot trouvé confirmé, Nouveau retour des machines, Charger les 500 suivants, liens ordre /
-  fournisseur / lot, Annuler l'encart confirmé, fermer la fenêtre de comptage, recherche du comptage).
+  fournisseur / lot, Annuler l'encart confirmé, fermer la fenêtre de comptage, recherche du comptage) ; + 1 repris de Gestion MP
+  corrigé (« Annuler l'inventaire », étape 17).
 - **Anomalies** : 25 / 25 traitées.
 
 ### Routes demandées par la partie 6 (reportées dans API-PRO § 1.24)
@@ -4209,7 +4218,8 @@ Paramètres d'écran à ajouter au registre (pas des routes d'API) : `/inventair
 `/inventaire?onglet=passes&q=&etat=` ; `/operations?onglet=…&q=&etat=`. Corps d'API étendus (pas de nouvelle route) :
 `POST operations` accepte `valider: true` (création et validation en une transaction, retour et déplacement du téléphone) et
 `lot_interne` par ligne ; `PUT metiers/{id}` accepte `fils` (D, transaction unique) ; `POST inventaires/{id}/abandonner` prend
-`{motif}` ; `POST inventaires/{id}/lots-trouves` prend `lot_interne`.
+`{motif}` ; `POST inventaires/{id}/lots-trouves` prend `lot_interne`. Route reprise de Gestion MP corrigé (étape 17, ajoutée
+à API-PRO § 1.14 sous le n° 245) : `POST /api/inventaires/{id}/annuler` `{version, motif}` (D, A).
 
 ---
 
@@ -5150,8 +5160,8 @@ seuls les noms d'écran suivent les titres PRO et « la personne qui entretient 
 | C25 | Fil monté sans sortie de magasin enregistrée (le magasin le compte encore) | avertissement | — | Métier, Étage, Référence, Poids (kg) | `/sorties` | texte à aligner sur le modèle « sur les métiers » tranché (synthèse 1) |
 | C26 | Sortie de stock sans numéro de lot | avertissement | — | Date, Référence, Quantité, Ordre (n° OF), Par | `/stock?onglet=mouvements` | — |
 | C27 | Lot dont il est sorti plus qu'il n'est entré | bloquant | — | Référence, Lot, Stock, Entré, Sorti | `/stock?onglet=lots` | « Suivre » → `/tracabilite?lot=` |
-| C28 | Dossier d'importation arrivé depuis plus de 30 jours et sans frais | avertissement | — | Dossier, Arrivée, Marchandises, Jours | `/importations` | — |
-| C29 | TVA d'importation éloignée de 20 % de la valeur en douane | avertissement | — | Dossier, TVA saisie (MAD), TVA attendue (MAD), Écart (MAD) | `/importations` | libellé corrigé « TVA d'importation éloignée de la TVA attendue (20 % de la valeur en douane) » (P8-15) |
+| C28 | Dossier d'importation arrivé depuis plus de {delai_frais_import_jours} jours et sans frais hors TVA | avertissement | — | Dossier, Arrivée, Marchandises, Jours | `/importations` | délai lu dans le réglage `delai_frais_import_jours` (30 j, 1–365) ; « sans frais hors TVA » (Gestion MP corrigé, E-10) |
+| C29 | TVA d'importation éloignée de 20 % de la valeur en douane | avertissement | — | Dossier, TVA saisie (MAD), TVA attendue (MAD), Écart (MAD) | `/importations` | libellé corrigé « TVA d'importation à plus de {toler_tva_import} de la TVA attendue (20 % de la valeur en douane, droits et TPI compris) » (P8-15, Gestion MP corrigé E-10) ; tolérance lue dans le réglage `toler_tva_import` (5 %), la même que la fiche du dossier |
 | C30 | Poids de bobine reçu éloigné du catalogue de plus de 5 % | information | — | Référence, Fournisseur, Catalogue (kg / bobine), Constaté (kg / bobine), Écart (%), Réception | `/receptions?onglet=bobines` | « 5 % » (P8-14) |
 | C31 | Ordre de fabrication servi à plusieurs dates | avertissement | — | Ordre (n° OF), Dates, Jours | `/sorties` | — |
 | C32 | Ordre de fabrication daté avant un ordre de numéro inférieur | information | — | Ordre (n° OF), Date, Après, Date de l'ordre suivant | `/sorties` | — |
@@ -5254,9 +5264,12 @@ D écrit, A lit ; L refusé (`GET parametres` 403) ; T ne voit que la famille te
 | « Annuler » (≥ 1 modification) | D | — | `Confirmer` « Abandonner {n} modification(s) ? · Non · Oui, abandonner » | P8-8 |
 | « Enregistrer {n} modification(s) » / « Aucune modification » / « Enregistrement… » | D | `PUT parametres` (clé → valeur) | `Bouton({manque, blocages})` : raisons en infobulle (bornes, ordres, « Aucune modification ») | « {n} paramètre(s) enregistré(s) : tout le pilotage est recalculé. » ; invalidation globale ; la clôture n'y passe plus (P8-9) |
 
-**Les 55 réglages** — libellé, famille, unité, défaut, bornes gardés ; aide = déclaration serveur
-(« srv ») ou texte d'écran versé dans la déclaration (« écran → srv ») ; textes exacts dans
-ECRANS.md P8 § 2.1 et REGLAGES.md § 3. Écriture D sauf mention ; A lit ; L jamais.
+**Les 57 réglages** — les 56 clés semées par la révision 0002 (`modeles.CLES_REGLAGES`) et
+`toler_tva_import`, à semer par la révision 0003 (MODELE-DONNEES § 3.1.6) ; libellé, famille, unité,
+défaut, bornes gardés ; aide = déclaration serveur (« srv ») ou texte d'écran versé dans la
+déclaration (« écran → srv ») ; textes exacts dans ECRANS.md P8 § 2.1 et REGLAGES.md § 3, et pour
+les deux réglages ajoutés par Gestion MP corrigé (E-10), `gestion_mp/parametres.py`. Écriture D sauf
+mention ; A lit ; L jamais.
 
 | Clé | Libellé | Onglet PRO / famille | Unité | Défaut | Bornes | Aide | Changement |
 |---|---|---|---|---|---|---|---|
@@ -5299,6 +5312,8 @@ ECRANS.md P8 § 2.1 et REGLAGES.md § 3. Écriture D sauf mention ; A lit ; L ja
 | taux_tpi_import | Taxe parafiscale à l'importation (TPI) | parametres / Prix | % | 0,25 % | 0-10 % | srv + écran (fusion) | — |
 | seuil_surcout_import | Frais d'un dossier d'importation à vérifier au-delà de | parametres / Prix | % | 100 % | 5 %-10 000 % | srv + écran (C35) | — |
 | toler_facture_import | Facture d'un dossier à rapprocher au-delà de | parametres / Prix | % | 2 % | 0-100 % | srv + écran (C36) | — |
+| toler_tva_import | TVA d'importation à vérifier au-delà de | parametres / Prix | % | 5 % | 0-100 % | srv (C29 et fiche du dossier) | ajouté par Gestion MP corrigé (E-10) ; **absent des semences 0002** : révision 0003 |
+| delai_frais_import_jours | Dossier sans frais à signaler après | parametres / Prix | jours | 30 | 1-365 | srv (C28) | ajouté par Gestion MP corrigé (E-10) ; semé par 0002 |
 | dso | Délai client moyen (DSO) | parametres / Trésorerie | jours | 60 | 0-3650 | à écrire (« cycle de trésorerie du Cockpit ») | — |
 | nom_entreprise | Raison sociale | parametres / Société | texte | (vide) | ≤ 500 | srv | — |
 | forme_juridique | Forme juridique et capital | parametres / Société | texte | — | ≤ 500 | srv | exemple de l'aide « … 20 000 000 MAD » (P8-23) |
@@ -5674,7 +5689,7 @@ Anomalies : P8-16, P8-23, P8-24.
 12. Historique des cours faussé (cours réécrit à chaque enregistrement) → cours écrit seulement si le taux change.
 13. « 10.85 » dans l'historique → valeurs localisées (« 10,85 »).
 14. « 1,234 kg » et « 2% » → format français partout (« 1 234 kg », « 2 % »), libellés C08 et C30 compris.
-15. Libellé C29 trompeur → « TVA d'importation éloignée de la TVA attendue (20 % de la valeur en douane) ».
+15. Libellé C29 trompeur → « TVA d'importation à plus de 5 % de la TVA attendue (20 % de la valeur en douane, droits et TPI compris) », la tolérance tirée du réglage `toler_tva_import` (Gestion MP corrigé, E-10).
 16. Erreurs 500 brutes (sauvegarde, mois 13) → messages serveur lisibles (503 / 422).
 17. Réglage et code morts (`seuil_bc_urgent`, branches classeur, message inatteignable, `HAUT_DIALOGUE`) → `seuil_bc_urgent` affiché en lecture « sans effet, gardé pour mémoire » ; branches classeur non reprises ; `EcranReserve` ; `Cadre` mesure la hauteur.
 18. Famille « Stock et inventaire » sans aide → phrase ajoutée.
@@ -5708,7 +5723,7 @@ Anomalies : P8-16, P8-23, P8-24.
 - Écrans PRO : 3 pages (`/analyse`, `/reglages`, `/administration`) + 1 document (Bilan du mois) — GMP : 2 pages + 1 document.
 - Onglets : Analyse 9 ; Réglages 6 (dont `periode`, nouveau) ; Administration 8 (dont `appareils` et `technique`, nouveaux) = 23 (GMP : 20). Sous-vues : Bascule Évolution 2, Coût de revient 3, Échéancier 4, familles de Paramètres 9 (Méthode de calcul devenue aide) = 18 (GMP : 19).
 - Fenêtres : 11 GMP repris (Évolution des prix, réceptions d'un fournisseur, détail d'un contrôle, ordre de fabrication, historique des paramètres, cours d'une devise, magasin, poste de frais, code douanier, compte, restauration en `FenetreConfirmation`) + 2 `FenetreConfirmation` de période (clore, rouvrir) = 13 ; 3 à adresse stable (`&fournisseur=`, `&controle=`, `&ordre=`).
-- Contrôles décrits : 38 ; réglages décrits : 55 (52 dans `/reglages`, dont 1 dans `periode` ; 2 dans `/administration`).
+- Contrôles décrits : 38 ; réglages décrits : 57 (55 dans `/reglages` : 54 dans `parametres`, dont `seuil_bc_urgent` en lecture, et 1 dans `periode` ; 2 dans `/administration`) — 56 semés par 0002, `toler_tva_import` par 0003.
 - Gestes : 82 GMP, tous repris ; 98 lignes PRO (nouveaux : « Bilan du mois » d'Analyse, « Effacer les filtres » des Opportunités, « Charger les 500 suivants », « Chercher dans les lignes » serveur, appareils 2, période 2).
 - Anomalies : 28 traitées (P8-1 à P8-28) + 11 incohérences transverses de la synthèse.
 
