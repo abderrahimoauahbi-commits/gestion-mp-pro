@@ -1,0 +1,86 @@
+[project]
+name = "gestion-mp-pro"
+version = "0.1.0"
+description = "Gestion MP PRO : matières premières d'une usine de tapis — achats, réceptions, importations, stock, alimentation des machines, pilotage"
+readme = "../README.md"
+requires-python = ">=3.12"
+license = { text = "Propriétaire" }
+dependencies = [
+  "fastapi>=0.121",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+  "sqlalchemy>=2.0.32",
+  "psycopg[binary]>=3.2",
+  "alembic>=1.13",
+  "jinja2>=3.1",
+  "segno>=1.6",
+  "openpyxl>=3.1",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "httpx2>=2.10",
+  "hypothesis>=6.100",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "pre-commit>=3.7",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["gestion_mp_pro*"]
+
+[tool.setuptools.package-data]
+gestion_mp_pro = ["documents/gabarits/*", "migrations/*.mako", "py.typed"]
+
+# --- ruff : ARCHITECTURE § 9.1 (E, F, W, I, UP, B, S, PL, C90, DTZ ; longueur 100) ---------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "S", "PL", "C90", "DTZ", "T20", "D1"]
+ignore = [
+  "D105",    # méthodes magiques : leur sens est connu
+  "D107",    # __init__ : documenté par la classe
+  "PLR0913", # services et routes reçoivent session, acteur et paramètres de requête
+  "PLC0415", # imports différés voulus (crochets entre lots, cycles évités)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "D1", "S105", "S106", "S311"]
+"essais/**" = ["S101", "PLR2004", "S311"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gestion_mp_pro"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.pylint]
+max-statements = 50
+max-branches = 14
+
+[tool.ruff.format]
+quote-style = "double"
+
+# --- mypy : strict sur services/ et calcul/ (LOTS § 0 n° 3) ----------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["gestion_mp_pro/services", "gestion_mp_pro/calcul"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+  "complet: essai qui demande un vrai serveur ou les outils PostgreSQL (sauté sauf GESTIONMPPRO_ESSAIS_COMPLETS=1)",
+]

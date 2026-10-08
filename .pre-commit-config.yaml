@@ -1,0 +1,36 @@
+# Crochet pre-commit : la partie rapide de `make verifier` bloque le commit (ARCHITECTURE § 15).
+# Installé par `make installer` (backend/.venv/bin/pre-commit install).
+default_install_hook_types: [pre-commit]
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff (serveur)
+        entry: backend/.venv/bin/ruff check --config backend/pyproject.toml
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff format (serveur)
+        entry: backend/.venv/bin/ruff format --check --config backend/pyproject.toml
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: mypy
+        name: mypy strict (services, calcul)
+        entry: bash -c 'cd backend && .venv/bin/mypy'
+        language: system
+        pass_filenames: false
+        files: ^backend/gestion_mp_pro/
+      - id: prettier
+        name: prettier (écran)
+        entry: bash -c 'cd frontend && npx --no-install prettier --check .'
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+      - id: eslint
+        name: eslint (écran)
+        entry: bash -c 'cd frontend && npx --no-install eslint .'
+        language: system
+        pass_filenames: false
+        files: ^frontend/(src/|eslint)
