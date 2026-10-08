@@ -1,0 +1,13 @@
+.bandeau {
+  display: flex;
+  gap: var(--espace-2);
+  padding: var(--espace-3) 14px;
+  background: var(--ton-critique);
+  color: var(--sur-ton);
+  font-size: var(--taille-note-atelier);
+}
+
+.liste {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

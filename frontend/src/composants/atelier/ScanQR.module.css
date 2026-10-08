@@ -1,0 +1,19 @@
+.scan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}
+
+.video {
+  width: 100%;
+  max-height: 50vh;
+  border-radius: var(--rayon);
+  background: var(--marine);
+  object-fit: cover;
+}
+
+.note {
+  margin: 0;
+  color: var(--texte-2);
+  font-size: var(--taille-note-atelier);
+}
