@@ -1,0 +1,42 @@
+.recherche {
+  position: relative;
+  display: inline-flex;
+  flex: 0 1 320px;
+  min-width: 180px;
+}
+
+.icone {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  color: var(--texte-3);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.champ {
+  width: 100%;
+  height: var(--hauteur-champ);
+  padding: 0 10px 0 30px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.champ:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--anneau);
+}
+
+@media (width <= 700px) {
+  .recherche {
+    flex-basis: 100%;
+  }
+
+  .champ {
+    height: var(--champ-atelier);
+    font-size: var(--texte-atelier);
+  }
+}

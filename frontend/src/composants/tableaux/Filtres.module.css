@@ -1,0 +1,28 @@
+.filtre {
+  max-width: 200px;
+  height: var(--hauteur-champ);
+  padding: 0 8px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.pose {
+  border-color: var(--accent);
+  background: var(--accent-clair);
+}
+
+.criteres {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+@media (width <= 700px) {
+  .filtre {
+    flex: 1 1 140px;
+    max-width: none;
+    height: var(--cible-tactile);
+  }
+}
