@@ -7,11 +7,15 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Mapping
+from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
 
 from gestion_mp_pro.db import DISPONIBILITE
+from gestion_mp_pro.services import horloge
+
+HEURE = datetime(2026, 10, 8, 10, 0, tzinfo=horloge.FUSEAU).isoformat(timespec="seconds")
 
 SECURITE = {
     "X-Content-Type-Options": "nosniff",
@@ -40,7 +44,7 @@ def test_ecriture_sans_entete_refusee(client_brut: TestClient, methode: str, che
     _securite(r.headers)
     assert r.headers["Cache-Control"] == "no-store"
     assert re.fullmatch(r"[0-9a-f]{16}", r.headers["X-Requete"])
-    assert r.headers["X-Heure-Serveur"] == "2026-10-08T10:00:00"
+    assert r.headers["X-Heure-Serveur"] == HEURE
 
 
 def test_entete_de_gestion_mp_ou_valeur_fausse_refusee(client_brut: TestClient) -> None:
@@ -73,8 +77,11 @@ def test_en_tetes_de_l_api(client: TestClient) -> None:
     r = client.get("/api/openapi.json")
     assert r.status_code == 200
     assert r.headers["Cache-Control"] == "no-store"
-    assert r.headers["X-Heure-Serveur"] == "2026-10-08T10:00:00"
+    assert r.headers["X-Heure-Serveur"] == HEURE
     _securite(r.headers)
+    assert re.fullmatch(
+        r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d", r.headers["X-Heure-Serveur"]
+    )
     a, b = client.get("/api/openapi.json"), client.get("/api/openapi.json")
     assert a.headers["X-Requete"] != b.headers["X-Requete"]
 
@@ -101,7 +108,7 @@ def test_503_si_schema_en_retard(client: TestClient) -> None:
         assert r.json()["code"] == "schema_en_retard"
         _securite(r.headers)
         assert client.get("/api/openapi.json").status_code == 200
-        assert client.get("/api/sante").json()["code"] != "schema_en_retard"
+        assert client.get("/api/sante").status_code == 200
     finally:
         DISPONIBILITE.schema_en_retard = False
 
@@ -128,3 +135,20 @@ def test_une_ligne_de_journal_par_requete(
         rf"POST /api/commandes/12/envoyer {r.status_code} \d+ ms"
     )
     assert re.fullmatch(attendu, lignes[0])
+
+
+def test_sante_publique_avec_version(client_brut: TestClient) -> None:
+    r = client_brut.get("/api/sante")
+    assert r.status_code == 200
+    corps = r.json()
+    assert corps["etat"] == "ok"
+    assert corps["version"].startswith("0.1.0")
+    assert corps["base_ms"] is not None
+    assert "schema" in corps and "schema_" not in corps
+    DISPONIBILITE.schema_en_retard = True
+    try:
+        r = client_brut.get("/api/sante")
+        assert r.status_code == 200
+        assert r.json()["etat"] == "degrade"
+    finally:
+        DISPONIBILITE.schema_en_retard = False

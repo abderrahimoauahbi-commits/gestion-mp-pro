@@ -107,8 +107,9 @@ def poser_entetes(requete: Request, reponse: Response, identifiant: str) -> None
     reponse.headers["X-Requete"] = identifiant
     if chemin == "/api" or chemin.startswith("/api/"):
         reponse.headers.setdefault("Cache-Control", "no-store")
-        # L'heure de l'usine, au format de Gestion MP : l'écran l'affiche plutôt que celle du poste.
-        reponse.headers["X-Heure-Serveur"] = f"{horloge.maintenant():%Y-%m-%dT%H:%M:%S}"
+        # L'heure de l'usine avec son décalage (2026-10-08T13:20:46+01:00) : l'écran l'affiche
+        # plutôt que celle du poste, et en tire « aujourd'hui » (lot E0).
+        reponse.headers["X-Heure-Serveur"] = horloge.maintenant().isoformat(timespec="seconds")
 
 
 async def trace(requete: Request, suite: Suite) -> Response:
