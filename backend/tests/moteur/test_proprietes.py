@@ -4,7 +4,8 @@ annulations), le moteur tient ses invariants :
 
 - les soldes par lot et par magasin retombent sur le stock de chaque matière (journal) ;
 - aucun lot n'est jamais sous zéro, à aucune date (C27, C37 conformes) ;
-- la valeur est conservée : Σ des flux valorisés = valeur du stock au CMUP ;
+- la valeur est conservée : Σ des flux valorisés = valeur du stock au CMUP (hors matières
+  rendues au fournisseur : un retour au coût du lot qui vide la matière efface le reste) ;
 - une annulation coûte ce que coûtait l'écriture qu'elle défait ;
 - une sortie puis son annulation remettent le stock et le CMUP à l'état d'avant ;
 - l'état à une date passée ne dépend pas des écritures postérieures.
@@ -214,14 +215,21 @@ def test_la_valeur_est_conservee_et_une_annulation_coute_l_original(journal: _Jo
     donnees = _donnees(journal.mouvements)
     couts = couts_du_journal(donnees)
     flux: dict[str, float] = defaultdict(float)
+    # Un retour au fournisseur sort au coût d'entrée de son lot, pas au coût moyen : s'il vide
+    # la matière, le reste de valeur est effacé (« rien ne vaut rien », règle de Gestion MP).
+    # La conservation exacte se juge donc sur les matières sans retour au fournisseur.
+    avec_retour = {m.reference for m in donnees.mouvements if m.type == "RETOUR_FOURNISSEUR"}
     for m in donnees.mouvements:
         flux[m.reference] += m.quantite_signee * couts.unitaire[m.id or 0]
         if m.contrepasse_id is not None:
             assert couts.unitaire[m.id or 0] == couts.unitaire[m.contrepasse_id]
     for reference, (quantite, valeur) in couts.stock.items():
-        echelle = max(1.0, abs(valeur), abs(flux[reference]))
-        assert abs(flux[reference] - valeur) <= 1e-6 * echelle
         assert quantite >= 0 and valeur >= 0
+        if quantite <= 1e-9:
+            assert valeur == 0
+        if reference not in avec_retour:
+            echelle = max(1.0, abs(valeur), abs(flux[reference]))
+            assert abs(flux[reference] - valeur) <= 1e-6 * echelle
 
 
 @REGLAGE
