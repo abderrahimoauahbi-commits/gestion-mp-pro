@@ -265,7 +265,7 @@ Le journal **n'est plus relu comme donnée** (§ 4).
 
 | Colonne | Type | N | Défaut | Contraintes | Sens | ← GMP |
 |---|---|---|---|---|---|---|
-| cle | VARCHAR(60) | | | PK ; CK `ck_parametre_cle_connue` : `cle IN (…)` (liste fermée `modeles.CLES_REGLAGES`, 56 clés, techniques comprises) | | cle |
+| cle | VARCHAR(60) | | | PK ; CK `ck_parametre_cle_connue` : `cle IN (…)` (liste fermée `modeles.CLES_REGLAGES`, 57 clés, techniques comprises) | | cle |
 | valeur | VARCHAR(500) | | `''` | | texte normalisé (nombre `repr`, date ISO) | valeur |
 | modifie_le | TIMESTAMPTZ | | now() | | entre dans la signature du cache | modifie_le |
 | modifie_par_id | INTEGER | O | | FK utilisateur | NULL = installation/système | modifie_par |
@@ -277,14 +277,13 @@ bornes, unité, échelle, aide (une seule source, enrichie des textes d'écran d
 l'administrateur), `monetaire` (vrai pour les seuils en MAD : jamais servis à l'alimentation).
 La clé cachée `courriel_dernier_envoi` disparaît (remplacée par la table `courriel`).
 
-**56 clés** (`CLES_REGLAGES`, semées par 0002, § 9) : les réglages de Gestion MP corrigé, dont
+**57 clés** (`CLES_REGLAGES`) : les 56 réglages de Gestion MP corrigé, dont
 `delai_frais_import_jours` (C28 « dossier sans frais à signaler après », défaut 30, bornes 1–365,
-jours), plus `seuil_bc_urgent` (300 000 MAD), sans effet mais gardé pour mémoire (ECRANS-PRO E6).
-Valeurs semées en texte normalisé (entier sans « .0 » : `croissance_annuelle` = `0`,
-`seuil_surcout_import` = `1`), `modifie_par_id` NULL (= installation). **Manque** : `toler_tva_import`
-(« TVA d'importation à vérifier au-delà de », défaut 0,05 = 5 %, bornes 0–1, lu par C29 et par la
-fiche du dossier), ajouté à Gestion MP corrigé après le lot S1 : il entre par la révision **0003**
-(clé ajoutée à `CLES_REGLAGES`, CHECK `ck_parametre_cle_connue` refait, semence) — 57 clés ensuite.
+jours) et `toler_tva_import` (« TVA d'importation à vérifier au-delà de », défaut 0,05 = 5 %,
+bornes 0–1, lu par C29 et par la fiche du dossier), plus `seuil_bc_urgent` (300 000 MAD), sans
+effet mais gardé pour mémoire (ECRANS-PRO E6). 56 sont semées par 0002, `toler_tva_import` par
+0003. Valeurs semées en texte normalisé (entier sans « .0 » : `croissance_annuelle` = `0`,
+`seuil_surcout_import` = `1`), `modifie_par_id` NULL (= installation).
 Le registre (D1) déclare exactement les clés de `CLES_REGLAGES`.
 
 #### 3.1.7 `parametre_historique` ← `parametre_historique` (lignes `cle` de réglage)
@@ -1191,9 +1190,9 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
   leur défaut (§ 3.1.6 : les réglages de Gestion MP corrigé dont `delai_frais_import_jours` = 30, et
   `seuil_bc_urgent` = 300 000 gardé pour mémoire ; `modifie_par_id` NULL) ; `INSERT … ON CONFLICT DO NOTHING`
   (rejouable, n'écrase rien). Données écrites **en dur dans la révision** (pas d'import du paquet).
-- `0003` (à écrire) : le réglage `toler_tva_import` (défaut 0,05, bornes 0–1 ; C29 et fiche du dossier),
+- `0003_tolerance_tva_import` : le réglage `toler_tva_import` (défaut 0,05, bornes 0–1 ; C29 et fiche du dossier),
   ajouté à Gestion MP corrigé après S1 — clé dans `CLES_REGLAGES`, CHECK `ck_parametre_cle_connue`
-  remplacé (`DROP`/`ADD`), semence `ON CONFLICT DO NOTHING` ; 57 réglages ensuite.
+  remplacé (`DROP`/`ADD`), semence `ON CONFLICT DO NOTHING` ; 57 réglages ensuite. Le retour arrière efface la clé et son historique.
 - Les révisions suivantes : une par changement, avec `upgrade()` et `downgrade()`, numérotées à la suite
   (numéro réservé auprès du coordinateur), relues après autogénération : autogenerate ne voit ni les
   CHECK modifiés ni les déclencheurs (à écrire à la main) ; pas de `%` dans le texte d'un CHECK (utiliser `~`).
@@ -1295,7 +1294,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture` ; `uq_inventaire_ligne_lot_a_creer`) |
 | Index | — | **194** (hors `alembic_version`) : 70 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, le reste simple |
 | Déclencheurs | — | **3** : `tr_mouvement_immuable`, `tr_operation_type_fige`, `tr_matiere_lineaire_densite` |
-| Réglages semés | 56 (Gestion MP corrigé) | **56** (sans `toler_tva_import`, avec `seuil_bc_urgent`) ; 57 après la révision 0003 |
+| Réglages semés | 56 (Gestion MP corrigé) | **57** (0002 : 56, avec `seuil_bc_urgent` ; 0003 : `toler_tva_import`) |
 | Données métier rangées dans du texte ou du JSON | 17 (§ 4) | 0 |
 
 Ces chiffres sont ceux de la base migrée (`0001` + `0002`) ; `outils/schema_contre_modele.py`

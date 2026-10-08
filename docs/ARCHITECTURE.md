@@ -98,7 +98,7 @@ gestion-mp-pro/
 │   │   │   ├── enums.py            les 36 énumérations (MODELE-DONNEES § 2)
 │   │   │   ├── longueurs.py        longueurs partagées modèle ↔ schémas
 │   │   │   ├── socle.py            utilisateur, session (modèle SessionOuverte), tentative, appareil, journal,
-│   │   │   │                       parametre(_historique) et CLES_REGLAGES (56 clés), compteur
+│   │   │   │                       parametre(_historique) et CLES_REGLAGES (57 clés), compteur
 │   │   │   ├── communication.py    notification(_lecture), courriel, tache_execution, sauvegarde
 │   │   │   ├── referentiels.py     devise(_cours), composition, type_fil, titrage, couleur, role_nomenclature,
 │   │   │   │                       code_douanier, magasin, poste_frais, motif
