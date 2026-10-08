@@ -1,0 +1,135 @@
+"""Ordres de fabrication et dossiers d'importation, pour le moteur (CALCULS A § 4.6).
+
+Un ordre compte une fois validé (son prévu figé à la validation, s'il l'a été) ; un dossier
+annulé n'existe plus pour les calculs (K3 : gardé en base pour ne pas trouer la série).
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from gestion_mp_pro.calcul import modele as c
+from gestion_mp_pro.modeles import (
+    Dossier,
+    DossierFrais,
+    DossierFraisPart,
+    DossierLigne,
+    Facture,
+    Ordre,
+    OrdrePrevu,
+    OrdreQualite,
+    PosteFrais,
+    Qualite,
+)
+from gestion_mp_pro.modeles.enums import StatutDossier, StatutOrdre
+from gestion_mp_pro.services.chargeur.contexte import Noms, a_l_usine, nombre
+
+
+def ordres(s: Session, noms: Noms) -> list[c.OrdreFabrication]:
+    """Les ordres validés : (qualité, m²) et, s'il a été figé, le prévu hors perte."""
+    codes = dict(s.execute(select(Qualite.id, Qualite.code)).all())
+    fabrications: dict[int, list[tuple[str, float]]] = defaultdict(list)
+    for o, q, m2 in s.execute(
+        select(OrdreQualite.ordre_id, OrdreQualite.qualite_id, OrdreQualite.m2).order_by(
+            OrdreQualite.id
+        )
+    ):
+        fabrications[o].append((codes[q], float(m2)))
+    prevus: dict[int, dict[str, float]] = defaultdict(dict)
+    for o, m, kg in s.execute(
+        select(OrdrePrevu.ordre_id, OrdrePrevu.matiere_id, OrdrePrevu.kg_hors_perte).order_by(
+            OrdrePrevu.ordre_id, OrdrePrevu.matiere_id
+        )
+    ):
+        prevus[o][noms.references[m]] = float(kg)
+    requete = select(Ordre).where(Ordre.statut == StatutOrdre.valide).order_by(Ordre.id)
+    return [
+        c.OrdreFabrication(
+            numero=b.numero or "",
+            date=b.date,
+            fabrications=fabrications.get(b.id, []),
+            commentaire=b.commentaire,
+            theorique=dict(prevus.get(b.id, {})) if b.prevu_fige else None,
+            perte=float(b.taux_perte_fige) if b.taux_perte_fige is not None else None,
+            valide_le=a_l_usine(b.valide_le),
+        )
+        for b in s.scalars(requete)
+    ]
+
+
+def _lignes(s: Session, noms: Noms) -> dict[int, list[c.LigneImport]]:
+    """Les marchandises de chaque dossier, dans l'ordre de leurs numéros."""
+    resultat: dict[int, list[c.LigneImport]] = defaultdict(list)
+    for x in s.scalars(select(DossierLigne).order_by(DossierLigne.dossier_id, DossierLigne.id)):
+        resultat[x.dossier_id].append(
+            c.LigneImport(
+                id=x.id,
+                reference=noms.references[x.matiere_id],
+                quantite=nombre(x.quantite_kg),
+                valeur_devise=nombre(x.valeur_devise),
+                devise=x.devise,
+                cours=nombre(x.cours),
+                lot_fournisseur=noms.lots.get(x.lot_id, "") if x.lot_id else "",
+                fournisseur=noms.fournisseur(x.fournisseur_id),
+                ligne_reception_id=x.reception_ligne_id,
+            )
+        )
+    return resultat
+
+
+def _frais(s: Session) -> dict[int, list[c.ChargeImport]]:
+    """Les frais de chaque dossier : poste, clé de répartition, parts figées."""
+    postes = {p.id: p for p in s.scalars(select(PosteFrais))}
+    parts: dict[int, dict[int, float]] = defaultdict(dict)
+    for f, ligne, montant in s.execute(
+        select(
+            DossierFraisPart.frais_id, DossierFraisPart.ligne_id, DossierFraisPart.montant
+        ).order_by(DossierFraisPart.frais_id, DossierFraisPart.ligne_id)
+    ):
+        parts[f][ligne] = float(montant)
+    resultat: dict[int, list[c.ChargeImport]] = defaultdict(list)
+    for x in s.scalars(select(DossierFrais).order_by(DossierFrais.dossier_id, DossierFrais.id)):
+        poste = postes[x.poste_id]
+        resultat[x.dossier_id].append(
+            c.ChargeImport(
+                poste=poste.code,
+                montant=nombre(x.montant),
+                ligne=x.ligne_id,
+                piece=x.piece,
+                commentaire=x.commentaire,
+                recuperable_poste=poste.recuperable,
+                cle=str(poste.cle),
+                parts=dict(parts.get(x.id, {})),
+            )
+        )
+    return resultat
+
+
+def dossiers(s: Session, noms: Noms) -> list[c.DossierImport]:
+    """Les dossiers non annulés, dans l'ordre de leurs identifiants."""
+    factures = {f.id: f for f in s.scalars(select(Facture).where(Facture.id.in_(
+        select(Dossier.facture_id).where(Dossier.facture_id.is_not(None)))))}  # fmt: skip
+    lignes, frais = _lignes(s, noms), _frais(s)
+    resultat = []
+    requete = select(Dossier).where(Dossier.statut != StatutDossier.annule).order_by(Dossier.id)
+    for d in s.scalars(requete):
+        facture = factures.get(d.facture_id) if d.facture_id else None
+        resultat.append(
+            c.DossierImport(
+                numero=d.numero,
+                libelle=d.libelle,
+                date_arrivee=d.date_arrivee,
+                banque=d.banque,
+                statut="Clos" if d.statut == StatutDossier.clos else "Ouvert",
+                commentaire=d.commentaire,
+                lignes=lignes.get(d.id, []),
+                charges=frais.get(d.id, []),
+                facture=facture.numero if facture else "",
+                facture_montant=nombre(facture.montant) if facture else 0.0,
+                facture_devise=facture.devise if facture else "",
+            )
+        )
+    return resultat
