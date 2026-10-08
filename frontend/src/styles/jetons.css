@@ -1,0 +1,64 @@
+/*
+ * Gestion MP PRO — jetons de l'écran : les SEULES couleurs du projet (stylelint l'impose).
+ *
+ * Amorce posée par le lot E0 pour que l'écran se construise ; le lot E1 en est le propriétaire
+ * (LOTS-DE-TRAVAIL § 0.3) et la complète. Fond, surfaces et texte : système de GMAO PRO (sobre,
+ * dense, lisible huit heures par jour) ; tons des statuts : ceux de Gestion MP, à l'identique
+ * (ECRANS-PRO, briques lib/ : « jetons CSS identiques »).
+ */
+:root {
+  /* Surfaces et texte */
+  --fond: #f4f6f8;
+  --surface: #fff;
+  --surface-2: #f8fafc;
+  --bord: #e2e8f0;
+  --bord-fort: #cbd5e1;
+  --texte: #0f172a;
+  --texte-2: #475569;
+  --texte-3: #64748b;
+  --marine: #0f1f35;
+  --marine-2: #1b2f4b;
+  --marque: #17497f;
+  --accent: #1f5fa8;
+  --accent-fonce: #164a85;
+  --accent-clair: #e8f0fd;
+  --focus: #2f6fe4;
+
+  /* Tons des statuts (Badge, Kpi, Pastille) : couleur forte et fond pâle */
+  --ton-ok: #146c44;
+  --ton-ok-clair: #e7f6ec;
+  --ton-attention: #8d5c07;
+  --ton-attention-clair: #fdf3e2;
+  --ton-urgent: #a1560b;
+  --ton-urgent-clair: #fdebdc;
+  --ton-critique: #a92c2c;
+  --ton-critique-clair: #fdecec;
+  --ton-rupture: #2d3440;
+  --ton-rupture-clair: #e5e7eb;
+  --ton-neutre: #5b6675;
+  --ton-neutre-clair: #eef2f6;
+  --ton-accent: #1f5fa8;
+  --ton-accent-clair: #e8f0fd;
+
+  /* Formes */
+  --rayon: 8px;
+  --rayon-petit: 6px;
+  --filet-ton: 3px;
+  --ombre: 0 1px 2px rgb(15 23 42 / 6%), 0 1px 3px rgb(15 23 42 / 4%);
+  --ombre-haute: 0 10px 30px rgb(15 23 42 / 18%);
+  --voile: rgb(15 23 42 / 45%);
+
+  /* Typographie */
+  --police:
+    'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', menlo, consolas, monospace;
+  --taille: 14px;
+  --taille-petite: 12px;
+
+  /* Mesures de la coque (1366 × 768) et de l'atelier */
+  --barre: 248px;
+  --entete: 56px;
+  --cible-tactile: 44px;
+  --champ-atelier: 46px;
+  --texte-atelier: 16px;
+}

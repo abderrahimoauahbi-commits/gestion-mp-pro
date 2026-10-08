@@ -1,0 +1,152 @@
+/*
+ * Gestion MP PRO — base de l'écran : remise à zéro, typographie, aides communes.
+ * Aucune couleur ici : uniquement des jetons (`jetons.css`).
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police);
+  font-size: var(--taille);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
+}
+
+#racine {
+  min-height: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+h3 {
+  font-size: 13px;
+}
+
+/* Chiffres : alignés à droite dans les colonnes, de même largeur (REGLES-ECRAN § 2) */
+.nombre,
+.droite {
+  font-variant-numeric: tabular-nums;
+}
+
+.droite {
+  text-align: right;
+}
+
+.centre {
+  text-align: center;
+}
+
+.discret {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+/* Lu par les lecteurs d'écran, invisible à l'œil */
+.masque-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Écran d'attente du socle (remplacé par la coque, lot E2) */
+.socle {
+  max-width: 560px;
+  margin: 12vh auto 0;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+}
+
+.socle h1 {
+  color: var(--marque);
+}
+
+/* Téléphone : pas de zoom automatique d'iOS sur un champ (police ≥ 16 px) */
+@media (width <= 700px) {
+  input,
+  select,
+  textarea {
+    font-size: var(--texte-atelier);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .ecran-seulement {
+    display: none !important;
+  }
+}
