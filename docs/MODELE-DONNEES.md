@@ -271,7 +271,7 @@ Le journal **n'est plus relu comme donnée** (§ 4).
 | modifie_par_id | INTEGER | O | | FK utilisateur | NULL = installation/système | modifie_par |
 | version | INTEGER | | 1 | | | nouveau |
 
-Le registre (`services/reglages/registre.py`) déclare pour chaque clé : libellé, famille, défaut,
+Le registre (`services/registre_reglages.py`) déclare pour chaque clé : libellé, famille, défaut,
 bornes, unité, échelle, aide (une seule source, enrichie des textes d'écran de Gestion MP),
 `technique` (vrai pour `adresse_publique`, `courriel_destinataires` : modifiables par
 l'administrateur), `monetaire` (vrai pour les seuils en MAD : jamais servis à l'alimentation).
