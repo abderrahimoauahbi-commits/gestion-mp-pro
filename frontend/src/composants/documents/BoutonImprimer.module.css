@@ -1,0 +1,20 @@
+.imprimer {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--hauteur-bouton);
+  padding: 0 12px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.imprimer:hover {
+  border-color: var(--texte-3);
+  background: var(--surface-2);
+  text-decoration: none;
+}
