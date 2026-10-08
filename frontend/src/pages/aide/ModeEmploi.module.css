@@ -1,0 +1,74 @@
+.texte {
+  padding-right: var(--espace-2);
+  line-height: 1.55;
+}
+
+.liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  margin: 0;
+  padding-left: var(--espace-5);
+}
+
+.cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--espace-3);
+}
+
+.cartes h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2);
+  margin-bottom: var(--espace-2);
+  font-size: 14px;
+}
+
+.carte {
+  padding: var(--espace-3) var(--espace-4);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.carteMoi {
+  border-color: var(--accent);
+}
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableau th,
+.tableau td {
+  padding: var(--espace-2) var(--espace-3);
+  border-bottom: 1px solid var(--bord);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tableau th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.nom {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.note {
+  margin: var(--espace-3) 0 0;
+  color: var(--texte-2);
+}
+
+.discret {
+  color: var(--texte-2);
+}

@@ -1,0 +1,23 @@
+.garde {
+  position: fixed;
+  top: var(--espace-3);
+  left: 50%;
+  z-index: var(--plan-messages);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  max-width: calc(100vw - 2 * var(--espace-4));
+  padding: var(--espace-2) var(--espace-3);
+  transform: translateX(-50%);
+  border: 1px solid var(--ton-attention);
+  border-left-width: var(--filet-ton);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre-haute);
+}
+
+.question {
+  flex: 1 1 260px;
+  font-weight: 600;
+}
