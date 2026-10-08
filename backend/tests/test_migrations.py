@@ -8,6 +8,7 @@ Ces essais vident la base d'essai ; chacun la rend migrée à la tête, semences
 from __future__ import annotations
 
 import ast
+import importlib.util
 import json
 import os
 import subprocess
@@ -192,3 +193,17 @@ def test_declencheurs_poses_par_la_migration() -> None:
         ("tr_operation_type_fige", "operation"),
         ("tr_matiere_lineaire_densite", "matiere"),
     }
+
+
+def test_schema_conforme_au_document_modele_donnees(capsys: pytest.CaptureFixture[str]) -> None:
+    outil = Path(__file__).resolve().parents[2] / "outils" / "schema_contre_modele.py"
+    spec = importlib.util.spec_from_file_location("schema_contre_modele", outil)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    code = module.main(["--base", str(moteur().url.render_as_string(hide_password=False))])
+    sortie = capsys.readouterr().out
+    assert code == 0, sortie
+    assert "71 tables en base, 71 au document" in sortie
+    assert sortie.count("Écart déclaré") == len(module.ECARTS_DECLARES)
