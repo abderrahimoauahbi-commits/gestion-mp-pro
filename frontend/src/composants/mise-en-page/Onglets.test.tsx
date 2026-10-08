@@ -1,0 +1,61 @@
+/** Essais des onglets : sélection, libellé court + infobulle, compteur, saisie non enregistrée, clavier. */
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
+import { describe, expect, it, vi } from 'vitest'
+
+import { Onglets, type Onglet } from './Onglets'
+
+type Cle = 'valorisation' | 'opportunites' | 'controles'
+const ONGLETS: Onglet<Cle>[] = [
+  { cle: 'valorisation', libelle: 'Valorisation', compte: 1234 },
+  { cle: 'opportunites', libelle: 'Opportunités d’économies', court: 'Opportunités' },
+  { cle: 'controles', libelle: 'Contrôles', sale: true },
+]
+
+function Essai({ surChange = () => {} }: { surChange?: (c: Cle) => void }) {
+  const [actif, setActif] = useState<Cle>('valorisation')
+  return (
+    <Onglets
+      onglets={ONGLETS}
+      actif={actif}
+      onChange={(c) => {
+        setActif(c)
+        surChange(c)
+      }}
+    />
+  )
+}
+
+describe('Onglets', () => {
+  it('marque l’onglet actif, et le clic en choisit un autre', async () => {
+    const vu = vi.fn()
+    render(<Essai surChange={vu} />)
+    expect(screen.getByRole('tab', { name: /Valorisation/ })).toHaveAttribute('aria-selected', 'true')
+    await userEvent.click(screen.getByRole('tab', { name: 'Opportunités d’économies' }))
+    expect(vu).toHaveBeenCalledWith('opportunites')
+    expect(screen.getByRole('tab', { name: 'Opportunités d’économies' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+  })
+
+  it('libellé court affiché, nom complet en infobulle ; compteur à la française ; « • » si non enregistré', () => {
+    render(<Essai />)
+    const court = screen.getByRole('tab', { name: 'Opportunités d’économies' })
+    expect(court).toHaveTextContent('Opportunités')
+    expect(court).toHaveAttribute('title', 'Opportunités d’économies')
+    expect(screen.getByRole('tab', { name: /Valorisation/ })).toHaveTextContent('Valorisation1 234')
+    expect(screen.getByRole('tab', { name: /Contrôles/ })).toHaveTextContent('saisie non enregistrée')
+  })
+
+  it('les flèches passent d’un onglet à l’autre et bouclent', async () => {
+    render(<Essai />)
+    screen.getByRole('tab', { name: /Valorisation/ }).focus()
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(screen.getByRole('tab', { name: /Contrôles/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: /Contrôles/ })).toHaveFocus()
+    await userEvent.keyboard('{Home}')
+    expect(screen.getByRole('tab', { name: /Valorisation/ })).toHaveAttribute('aria-selected', 'true')
+  })
+})

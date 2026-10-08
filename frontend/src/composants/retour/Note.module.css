@@ -1,0 +1,42 @@
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espace-2);
+  padding: var(--espace-2) var(--espace-3);
+  border-radius: var(--rayon-petit);
+  font-size: 13px;
+}
+
+.note > svg {
+  margin-top: 2px;
+}
+
+.texte {
+  min-width: 0;
+}
+
+.info {
+  background: var(--ton-accent-clair);
+  color: var(--ton-accent);
+}
+
+.attention {
+  background: var(--ton-attention-clair);
+  color: var(--ton-attention);
+}
+
+.critique {
+  background: var(--ton-critique-clair);
+  color: var(--ton-critique);
+}
+
+.ok {
+  background: var(--ton-ok-clair);
+  color: var(--ton-ok);
+}
+
+.uneLigne .texte {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

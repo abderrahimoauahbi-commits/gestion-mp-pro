@@ -1,0 +1,61 @@
+.compteur {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rangee {
+  display: grid;
+  grid-template-columns: var(--cible-tactile) minmax(0, 1fr) var(--cible-tactile) auto;
+  gap: var(--espace-2);
+  align-items: center;
+}
+
+.pas {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--cible-tactile);
+  min-height: var(--cible-tactile);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.pas:disabled {
+  opacity: 0.45;
+}
+
+.champ {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--champ-atelier);
+  padding: 0 10px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  font-size: var(--texte-atelier);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.champ:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--anneau);
+}
+
+.champ[aria-invalid='true'] {
+  border-color: var(--ton-critique);
+}
+
+.unite {
+  min-width: 34px;
+  color: var(--texte-2);
+  font-size: var(--taille-note-atelier);
+}
+
+.message {
+  color: var(--ton-critique);
+  font-size: var(--taille-note-atelier);
+}

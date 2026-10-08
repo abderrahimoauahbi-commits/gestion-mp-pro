@@ -1,0 +1,52 @@
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.controle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pied {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pied:empty {
+  display: none;
+}
+
+.large {
+  grid-column: 1 / -1;
+}
+
+.libelle {
+  color: var(--texte-2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.obligatoire {
+  color: var(--ton-critique);
+}
+
+.aide {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.erreur {
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+  font-weight: 500;
+}
+
+.enErreur :where(input, textarea, select) {
+  border-color: var(--ton-critique);
+}

@@ -1,0 +1,137 @@
+.voile {
+  position: fixed;
+  inset: 0;
+  z-index: var(--plan-fenetre);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 5vh var(--espace-4) var(--espace-4);
+  background: var(--voile);
+}
+
+.voileTiroir {
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.fenetre {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90vh;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre-haute);
+  outline: none;
+}
+
+.normale {
+  max-width: var(--fenetre-normale);
+}
+
+.large {
+  max-width: var(--fenetre-large);
+}
+
+.tresLarge {
+  max-width: var(--fenetre-tres-large);
+}
+
+.tiroir {
+  max-width: var(--tiroir);
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+
+.entete {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espace-3);
+  padding: var(--espace-3) var(--espace-4);
+  border-bottom: 1px solid var(--bord);
+}
+
+.titres {
+  flex: 1;
+  min-width: 0;
+}
+
+.titres h2 {
+  font-size: 16px;
+}
+
+.sous {
+  margin: 2px 0 0;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.fermer {
+  display: inline-grid;
+  place-items: center;
+  width: var(--hauteur-bouton);
+  height: var(--hauteur-bouton);
+  border: 0;
+  border-radius: var(--rayon-petit);
+  background: none;
+  color: var(--texte-2);
+}
+
+.fermer:hover {
+  background: var(--surface-3);
+}
+
+.question {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  padding: var(--espace-2) var(--espace-4);
+  background: var(--ton-attention-clair);
+  color: var(--ton-attention);
+  font-weight: 600;
+}
+
+.question > span {
+  flex: 1 1 260px;
+}
+
+.corps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-height: 0;
+  padding: var(--espace-4);
+  overflow: auto;
+}
+
+.pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espace-2);
+  padding: var(--espace-3) var(--espace-4);
+  border-top: 1px solid var(--bord);
+}
+
+@media (width <= 700px) {
+  .voile {
+    padding: 0;
+  }
+
+  .fenetre {
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+}
+
+/* Un bouton posé seul dans le corps garde sa largeur (la colonne étire ses enfants). */
+.corps > button {
+  align-self: flex-start;
+}

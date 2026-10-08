@@ -1,0 +1,45 @@
+.puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.puce {
+  min-height: 28px;
+  padding: 2px 12px;
+  border: 1px solid var(--bord-fort);
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: 13px;
+}
+
+.puce:hover {
+  border-color: var(--accent);
+}
+
+.actif {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--sur-accent);
+}
+
+.plus {
+  border-style: dashed;
+  color: var(--texte-3);
+}
+
+.nouvelle {
+  width: 200px;
+  min-height: 28px;
+  padding: 2px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+@media (width <= 700px) {
+  .puce,
+  .nouvelle {
+    min-height: var(--cible-tactile);
+  }
+}

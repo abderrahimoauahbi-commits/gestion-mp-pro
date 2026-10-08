@@ -1,0 +1,24 @@
+.bascule {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--rayon-petit);
+  background: var(--surface-3);
+}
+
+.vue {
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--texte-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.actif {
+  background: var(--surface);
+  box-shadow: var(--ombre);
+  color: var(--texte);
+}

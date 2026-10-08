@@ -1,0 +1,15 @@
+.erreur {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+  padding: var(--espace-3);
+  border: 1px solid var(--ton-critique);
+  border-radius: var(--rayon-petit);
+  background: var(--ton-critique-clair);
+  color: var(--ton-critique);
+}
+
+.titre {
+  flex-basis: 100%;
+}

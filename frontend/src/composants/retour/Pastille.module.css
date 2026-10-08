@@ -1,0 +1,42 @@
+.pastille {
+  display: inline-block;
+  flex: none;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--sur-ton);
+}
+
+.ok {
+  background: var(--ton-ok);
+}
+
+.attention {
+  background: var(--ton-attention);
+}
+
+.urgent {
+  background: var(--ton-urgent);
+}
+
+.critique {
+  background: var(--ton-critique);
+}
+
+.rupture {
+  background: var(--ton-rupture);
+}
+
+.neutre {
+  background: var(--ton-neutre);
+}
+
+.accent {
+  background: var(--ton-accent);
+}

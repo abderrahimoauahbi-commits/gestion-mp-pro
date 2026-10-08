@@ -1,0 +1,89 @@
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: var(--hauteur-bouton);
+  padding: 0 14px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+
+.bouton:disabled {
+  opacity: 0.55;
+}
+
+.bouton:hover:not(:disabled) {
+  border-color: var(--texte-3);
+  background: var(--surface-2);
+}
+
+.bouton[aria-busy='true'] {
+  cursor: progress;
+}
+
+.principal {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--sur-accent);
+}
+
+.principal:hover:not(:disabled) {
+  border-color: var(--accent-fonce);
+  background: var(--accent-fonce);
+}
+
+.danger {
+  border-color: var(--ton-critique);
+  color: var(--ton-critique);
+}
+
+.danger:hover:not(:disabled) {
+  border-color: var(--ton-critique);
+  background: var(--ton-critique-clair);
+}
+
+.fantome {
+  border-color: transparent;
+  background: none;
+}
+
+.fantome:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--surface-3);
+}
+
+.petit {
+  height: var(--hauteur-bouton-petit);
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+
+.atelier {
+  min-width: var(--cible-tactile);
+  height: auto;
+  min-height: var(--champ-atelier);
+  padding: 0 18px;
+  font-size: 15px;
+  white-space: normal;
+}
+
+.bloc {
+  width: 100%;
+}
+
+.raison {
+  display: block;
+  margin-top: 4px;
+  color: var(--ton-critique);
+  font-size: var(--taille-note-atelier);
+  line-height: 1.35;
+}

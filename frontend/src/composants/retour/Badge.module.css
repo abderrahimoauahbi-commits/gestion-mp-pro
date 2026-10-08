@@ -1,0 +1,54 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.badge::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.ok {
+  background: var(--ton-ok-clair);
+  color: var(--ton-ok);
+}
+
+.attention {
+  background: var(--ton-attention-clair);
+  color: var(--ton-attention);
+}
+
+.urgent {
+  background: var(--ton-urgent-clair);
+  color: var(--ton-urgent);
+}
+
+.critique {
+  background: var(--ton-critique-clair);
+  color: var(--ton-critique);
+}
+
+.rupture {
+  background: var(--ton-rupture-clair);
+  color: var(--ton-rupture);
+}
+
+.neutre {
+  background: var(--ton-neutre-clair);
+  color: var(--ton-neutre);
+}
+
+.accent {
+  background: var(--ton-accent-clair);
+  color: var(--ton-accent);
+}

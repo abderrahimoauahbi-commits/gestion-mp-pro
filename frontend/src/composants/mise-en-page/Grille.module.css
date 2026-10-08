@@ -1,0 +1,41 @@
+.grille {
+  display: grid;
+  gap: var(--espace-3) var(--espace-4);
+  align-items: start;
+}
+
+/* Chaque champ occupe trois rangées de la grille (libellé, contrôle, aide) : les contrôles d'une
+   même rangée s'alignent même si un libellé passe sur deux lignes ou qu'une aide s'ajoute dessous. */
+@supports (grid-template-rows: subgrid) {
+  .grille.grille > * {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    row-gap: 5px;
+    align-content: start;
+  }
+}
+
+.c1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.c2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.c3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.c4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (width <= 700px) {
+  .c2,
+  .c3,
+  .c4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
