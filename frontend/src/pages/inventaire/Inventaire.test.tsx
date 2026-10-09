@@ -195,6 +195,23 @@ describe('Inventaire : le comptage', () => {
   })
 })
 
+describe('Inventaire : le motif d’un abandon', () => {
+  it('se lit dans sa propre colonne (abandon_motif), pas dans celle de l’annulation', async () => {
+    serveur(
+      'achats',
+      ficheEssai({
+        statut: 'abandonne',
+        abandonne_le: '2026-10-08T12:00:00+01:00',
+        abandonne_par: 'MAZARI',
+        abandon_motif: 'Comptage reporté',
+        annulation_motif: '',
+      }),
+    )
+    monterApp('/inventaires/7')
+    expect(await screen.findByText(/abandonné le .* par MAZARI : Comptage reporté/)).toBeInTheDocument()
+  })
+})
+
 describe('Inventaire : les volets de la fiche', () => {
   it('pièces jointes et historique dans l’adresse de la fiche', async () => {
     const appels = serveur('achats', ficheEssai(), {
