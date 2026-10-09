@@ -1,0 +1,64 @@
+RECETTE NAVIGATEUR — Gestion MP PRO (critère A8)
+Serveur : http://127.0.0.1:8137   début 2026-10-09T20:09:46.831Z   fin 2026-10-09T20:23:53.457Z
+Méthode : Chrome sans tête, profil et port CDP propres (jamais le panneau partagé) ;
+          vraies navigations par rôle et par écran, dans plusieurs tailles et les deux thèmes.
+
+PASSES (rôle × taille × thème × zone)
+--------------------------------------------------------------------------------------------
+rôle           taille    thème zone    conx   écrans  défil.H  montant  anomalies    interdits
+direction      1366×768  light bureau  200       121        0        0          0       0/1 KO
+direction      1366×768  dark  bureau  200        32        0        0          0       0/1 KO
+achats         1366×768  light bureau  200       107        0        0          0       0/2 KO
+achats         1366×768  dark  bureau  200        31        0        0          0       0/2 KO
+alimentation   1366×768  light bureau  200        42        0        0          0      0/15 KO
+alimentation   1366×768  dark  bureau  200        18        0        0          0      0/15 KO
+administrateur 1366×768  light bureau  200        17        0        0          0      0/30 KO
+administrateur 1366×768  dark  bureau  200         3        0        0          0      0/30 KO
+direction      1920×1080 light bureau  200       121        0        0          0       0/1 KO
+alimentation   360×640   light atelier 200        10        0        0          0       0/8 KO
+alimentation   375×812   light atelier 200        10        0        0          0       0/8 KO
+alimentation   375×812   dark  atelier 200        10        0        0          0       0/8 KO
+direction      360×640   light atelier 200        10        0        0          0       0/0 KO
+direction      375×812   light atelier 200        10        0        0          0       0/0 KO
+direction      375×812   dark  atelier 200        10        0        0          0       0/0 KO
+--------------------------------------------------------------------------------------------
+TOTAL : 552 écrans visités, 0 anomalie(s) d'écran, 121 essais d'écran interdit (0 en échec).
+
+ANOMALIES D'ÉCRAN : AUCUNE.
+  - aucune réponse 4xx/5xx inattendue, aucune erreur JavaScript, aucun écran d'erreur ;
+  - aucune page vide ni chargement bloqué ;
+  - aucune page ne défile horizontalement en 1366×768 ni 1920×1080 (bureau) ;
+  - l'atelier tient en 360×640 et 375×812 ;
+  - aucun montant, prix, cours ni conseil d'achat chez l'alimentation ni l'administrateur ;
+  - chaque écran interdit renvoie à l'accueil du rôle avec le bandeau « réservé à un autre rôle ».
+
+INTERACTIONS DE LA COQUE
+--------------------------------------------------------------------------------------------
+  direction      recherche=ouverte, 9 résultats         cloche=panneau ouvert     aide de l'écran=ouverte
+  achats         recherche=ouverte, 9 résultats         cloche=panneau ouvert     aide de l'écran=ouverte
+  alimentation   recherche=ouverte, 9 résultats         cloche=panneau ouvert     aide de l'écran=ouverte
+
+PARCOURS PAR DE VRAIS CLICS (défauts de Gestion MP observables au navigateur, § 9.2)
+--------------------------------------------------------------------------------------------
+  [OK ] H-08 QR achats bureau → /lots/:id                       /lots/21
+  [OK ] H-08 QR direction bureau → /lots/:id                    /lots/21
+  [OK ] H-08 QR alimentation téléphone → /atelier/lots/:id      /atelier/lots/21
+  [OK ] H-06 fil monté sans « hors stock »/« pour information » ok
+  [OK ] H-10 saisie jamais perdue (réglages)                    question posée
+  [OK ] Atelier Envoyer : page pleine, sans montant             ok
+
+
+CONTEXTE
+--------------------------------------------------------------------------------------------
+- Base : gestion_mp_pro_v3_essai, reprise (R1) d'une copie lue seule de gestion_mp_comparaison
+  (année d'essai : 124 matières, 1 684 lots, 10 438 mouvements, 330 commandes, 320 ordres,
+  dossiers d'importation), plus quelques gestes semés par l'API (besoin signalé urgent, inventaire
+  ouvert ; brouillons de réception/ordre/transfert venant de la reprise).
+- Écran construit (frontend/dist) servi par le serveur PRO réel au même origine (port 8137).
+- Chrome sans tête, profil (--user-data-dir) et port CDP (9377) propres, JAMAIS le panneau partagé.
+- Comptes d'essai (essai-direction 12 chiffres, essai-achats 10, essai-alimentation 4,
+  essai-administrateur 12) : dans la base d'essai, supprimés avec elle à la fin.
+- Captures témoins : cockpit-direction, stock-alimentation (aucun prix), atelier-envoyer (téléphone),
+  commandes-achats.
+
+VERDICT A8 : 0 ANOMALIE. Tous les critères du plan de recette § 9 sont tenus.
