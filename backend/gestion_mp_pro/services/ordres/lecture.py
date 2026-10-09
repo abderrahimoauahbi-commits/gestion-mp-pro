@@ -144,6 +144,14 @@ def _ligne(x: OrdreLigne, ctx: Contexte) -> LigneOrdre:
     )  # fmt: skip
 
 
+def nom_du_metier(m: Metier | None) -> str:
+    """« CODE · Nom » (ECRANS-PRO, champ serveur unique ; RESTES3, F3) ; le code seul sans nom
+    distinct."""
+    if m is None:
+        return ""
+    return f"{m.code} · {m.nom}" if m.nom and m.nom != m.code else m.code
+
+
 def lire_un(s: Session, o: Ordre, ctx: Contexte, *, avec_blocages: bool = True) -> OrdreLu:
     """Un ordre lu avec son contexte."""
     lignes = [_ligne(x, ctx) for x in sorted(o.lignes, key=lambda y: y.id)]
@@ -160,7 +168,7 @@ def lire_un(s: Session, o: Ordre, ctx: Contexte, *, avec_blocages: bool = True) 
     return OrdreLu(
         id=o.id, version=o.version, numero=o.numero, statut=StatutOrdre(o.statut), date=o.date,
         magasin_id=o.magasin_id, magasin=ctx.magasins[o.magasin_id].code,
-        metier_id=o.metier_id, metier=(metier.nom or metier.code) if metier else "",
+        metier_id=o.metier_id, metier=nom_du_metier(metier),
         commentaire=o.commentaire, cree_par=ctx.noms.get(o.cree_par_id or 0, ""),
         cree_le=o.cree_le, valide_par=ctx.noms.get(o.valide_par_id or 0, ""),
         valide_le=o.valide_le, annule_par=ctx.noms.get(o.annule_par_id or 0, ""),

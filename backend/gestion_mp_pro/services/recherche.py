@@ -14,6 +14,7 @@ pour les rôles qui ont le droit d'ouvrir sa fiche ; aucun prix n'y figure.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
@@ -50,6 +51,29 @@ Colonne = ColumnElement[str] | QueryableAttribute[str]
 
 C = frozenset({Role.direction, Role.achats, Role.alimentation})
 DA = frozenset({Role.direction, Role.achats})
+
+
+_PONCTUATION = re.compile(r"[^0-9a-z]+")
+
+
+def compacter(texte: str) -> str:
+    """« FA-2026/117 » → « fa2026117 » : normalisé, sans blancs ni ponctuation."""
+    return _PONCTUATION.sub("", normaliser(texte))
+
+
+def trouve(q: str, *champs: str | None) -> bool:
+    """Chaque mot de `q` est dans les champs (sans accents), ou y est à la ponctuation près :
+    « FA-2026/117 » trouve « FA-2026-117 » (un numéro de pièce s'écrit de plusieurs façons ;
+    RESTES3, F5)."""
+    texte = normaliser(" ".join(c for c in champs if c))
+    compact = compacter(texte)
+    for mot in normaliser(q).split():
+        if mot in texte:
+            continue
+        serre = compacter(mot)
+        if not serre or serre not in compact:
+            return False
+    return True
 
 
 def mots(q: str) -> list[str]:

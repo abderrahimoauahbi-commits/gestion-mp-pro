@@ -139,6 +139,7 @@ class InventaireResume(Sortie):
     valide_le: datetime | None
     abandonne_par: str
     abandonne_le: datetime | None
+    abandon_motif: str
     annule_par: str
     annule_le: datetime | None
     annulation_motif: str

@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import Query, Response
+from fastapi import Depends, Query, Response
 
 from gestion_mp_pro.api.communs import nouveau_routeur
 from gestion_mp_pro.api.dependances import DateReferenceDep, SessionDep
@@ -62,6 +62,25 @@ def exporter_pilotage(s: SessionDep, jour: DateReferenceDep) -> Response:
     return reponse(pilotage_achats.pilotage(plan_achat.pilotage(s, jour)), "pilotage-mp", jour)
 
 
+Filtre = Annotated[str, Query(max_length=120, description="valeur affichée du filtre de l'écran")]
+
+
+def _choix(
+    *,
+    statut: Filtre = "",
+    priorite: Filtre = "",
+    abc: Filtre = "",
+    fournisseur: Filtre = "",
+    urgence: Filtre = "",
+    devise: Filtre = "",
+    pays: Filtre = "",
+) -> dict[str, str]:
+    """Les filtres liés de l'écran (références : statut, priorité, classe, fournisseur ;
+    fournisseurs : urgence, devise, pays), tels qu'affichés."""
+    return {"statut": statut, "priorite": priorite, "abc": abc, "fournisseur": fournisseur,
+            "urgence": urgence, "devise": devise, "pays": pays}  # fmt: skip
+
+
 @routeur.get(
     "/export/plan-achat",
     response_class=Response,
@@ -72,10 +91,11 @@ def exporter_pilotage(s: SessionDep, jour: DateReferenceDep) -> Response:
 def exporter_plan(
     s: SessionDep,
     jour: DateReferenceDep,
+    choix: Annotated[dict[str, str], Depends(_choix)],
     onglet: Annotated[str, Query(max_length=20)] = "fournisseurs",
     q: Annotated[str, Query(max_length=200, description="mots, sans accents")] = "",
 ) -> Response:
-    """Route 242."""
+    """Route 242 : les filtres liés de l'écran (libellés affichés) s'appliquent aussi."""
     p = plan_achat.plan(s, jour)
-    lignes = plan_achat.filtrer(p, onglet, q)
+    lignes = plan_achat.filtrer(p, onglet, q, choix)
     return reponse(classeurs.plan_affiche(p, onglet, q, lignes), "plan-achat", jour)

@@ -23,15 +23,13 @@ from fabriques.importations import (
     ouvrir,
     poste,
 )
-from fabriques.receptions import JOUR, menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import JOUR, ok
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import DossierFrais, DossierLigne, Journal
 from gestion_mp_pro.services import devises, horloge
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 def _regler(frais_id: int, le: object) -> None:
@@ -59,14 +57,14 @@ def test_frais_regle_ne_se_modifie_ni_ne_se_retire(achats: TestClient) -> None:
     d = frais(achats, ouvrir(achats, imp.f("DB-REG")), "TRANSIT", 1500, piece="T-9")
     cid = d["frais"][0]["id"]
     _regler(cid, JOUR)
-    assert fiche(achats, d["id"])["frais"][0]["blocage"].startswith("Frais réglé le 31/12/2025")
+    assert fiche(achats, d["id"])["frais"][0]["blocage"].startswith("Frais réglé le 03/08/2026")
     for corps in (
         {"montant": 1200},
         {"poste_id": poste("PORT")},
         {"ligne_id": d["lignes"][0]["id"]},
     ):
         refus = _modifier_frais(achats, d, cid, 409, **corps)
-        assert refus["detail"].startswith("Ce frais est réglé (le 31/12/2025, 1 500,00 MAD)")
+        assert refus["detail"].startswith("Ce frais est réglé (le 03/08/2026, 1 500,00 MAD)")
     d = _modifier_frais(achats, d, cid, 200, piece="T-9", commentaire="facture du transitaire")
     assert d["frais"][0]["payee_le"] == JOUR.isoformat()
     refus = _modifier_frais(achats, d, cid, 422, date_piece=(JOUR + timedelta(days=1)).isoformat())

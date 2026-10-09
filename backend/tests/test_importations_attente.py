@@ -18,7 +18,6 @@ from fabriques.receptions import (
     camion,
     j,
     ligne_du_bon,
-    menage,  # noqa: F401 — fixture du module
     ok,
     parti,
 )
@@ -31,8 +30,6 @@ from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Dossier, DossierLigne, Reception, ReceptionLigne
 from gestion_mp_pro.modeles.enums import OrigineCours
 from gestion_mp_pro.services import donnees_moteur
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 def _attente(client: TestClient, **params: Any) -> dict[str, Any]:

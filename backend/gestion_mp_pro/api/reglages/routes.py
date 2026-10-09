@@ -6,6 +6,7 @@ s'inscrit sur le même routeur. Routes minces : droits, schémas, un appel de se
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Annotated
 
 from fastapi import Query
@@ -14,11 +15,13 @@ from gestion_mp_pro.api.communs import encoder_curseur, nouveau_routeur
 from gestion_mp_pro.api.dependances import PaginationDep, SessionDep
 from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.api.reglages.schemas import (
+    BrouillonsPeriode,
     ClotureEntree,
     CoursHistorique,
     DeviseCreation,
     DeviseFiche,
     DeviseModification,
+    GenreEnAttente,
     PageCoursHistorique,
     PageReglageHistorique,
     Periode,
@@ -122,6 +125,27 @@ def _periode(s: SessionDep, p: periode.Periode) -> Periode:
     """La période close et la version de sa clôture."""
     return Periode(
         date_cloture=p.date_cloture, par=p.par, quand=p.quand, version=reglages.version_cloture(s)
+    )
+
+
+@routeur.get(
+    "/periode-close/brouillons",
+    response_model=BrouillonsPeriode,
+    dependencies=[droit(D)],
+    summary="Les brouillons datés de la période à clore, annoncés avant la clôture.",
+    responses=reponses(401, 403, 422),
+)
+def brouillons_periode(
+    s: SessionDep, jour: Annotated[date, Query(alias="date", description="clore jusqu'au")]
+) -> BrouillonsPeriode:
+    """Brouillons et inventaires ouverts datés jusqu'au jour : ce que la route 26 refuserait."""
+    restes = periode.compter_brouillons(s, jour)
+    textes = [f"{r.nombre} {r.libelle}(s)" for r in restes if r.nombre]
+    return BrouillonsPeriode(
+        jusqu_au=jour,
+        total=sum(r.nombre for r in restes),
+        genres=[GenreEnAttente(genre=r.genre, libelle=r.libelle, nombre=r.nombre) for r in restes],
+        message=periode.message_brouillons(textes),
     )
 
 

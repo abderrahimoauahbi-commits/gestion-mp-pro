@@ -17,7 +17,8 @@ define exige
 endef
 
 .PHONY: aide installer verifier verifier-rapide verifier-serveur verifier-ecran verifier-outils \
-	essais matrice types notice parite comparer miroir construire docker demarrer verrouiller
+	essais matrice types notice parite comparer miroir construire docker demarrer verrouiller \
+	poste-installer coexistence verifier-chiffres
 
 aide: ## Liste des cibles
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/:.*## /\t/' | expand -t 20
@@ -70,6 +71,18 @@ comparer: ## Comparaison chiffre par chiffre Gestion MP (8030) / PRO (8050)
 	$(call exige,outils/comparer_avec_gestion_mp.py,C1)
 	$(BIN)/python outils/comparer_avec_gestion_mp.py --gestion-mp http://localhost:8030 \
 		--pro http://localhost:$(PORT)
+
+verifier-chiffres: ## Vérifie les chiffres de PRO par un autre chemin (SQL et API) sur GESTIONMPPRO_BASE
+	$(call exige,$(BACK)/essais/verification_chiffres.py,V1)
+	cd $(BACK) && .venv/bin/python essais/verification_chiffres.py $(ARGS)
+
+poste-installer: ## Installe ou met à jour le poste Mac (base, copie figée, raccourci ; idempotent)
+	$(call exige,deploiement/mac/installer.sh,X2)
+	deploiement/mac/installer.sh $(ARGS)
+
+coexistence: ## Vérifie que PRO (8050) et Gestion MP (8030) cohabitent sur ce Mac
+	$(call exige,essais/coexistence.sh,X2)
+	essais/coexistence.sh
 
 miroir: ## Rafraîchit la base PRO, miroir de Gestion MP (lecture seule de la source)
 	$(call exige,$(BACK)/gestion_mp_pro/reprise/__main__.py,R1)

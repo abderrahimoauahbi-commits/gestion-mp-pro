@@ -50,7 +50,7 @@ le montre) ; l'administrateur n'est dans aucune route métier.
 Corps unique `{"detail": "<phrase française>", "code": "<code>"}` (+ `"champs": {chemin: message}`
 pour 422 de saisie). Codes HTTP : **422** saisie (types, bornes, valeurs inconnues, règle de
 saisie) · **409** conflit ou état (statut qui interdit, version périmée, stock insuffisant,
-période close, inventaire en cours, doublon) · **404** introuvable · **403** droit (ou en-tête
+période close, inventaire en cours, doublon) · **404** introuvable · **410** fichier d'une pièce jointe disparu du disque (`fichier_disparu`) · **403** droit (ou en-tête
 anti-falsification absent) · **401** non connecté · **429** trop d'essais de connexion · **503**
 base en retard de migration ou restauration en cours. **Jamais de 500 pour une saisie** : toute
 exception non prévue est journalisée avec l'identifiant de requête et rendue 500
@@ -96,7 +96,7 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 | 4 | GET | `/serveur` | D, T | — | `EtatServeur` (versions, base, réseau, tâches, sauvegardes, sessions par compte) | B22 |
 | 5 | GET | `/acces` | C | — | `Acces` {adresses, adresse_publique, adresse_qr, alerte_localhost} (schéma et port **de la requête**, port implicite omis : derrière HTTPS, `https://nom` sans « :8050 », G-13) | B28 |
 | 6 | GET | `/acces/qr` | C | `?adresse=` | SVG | B29 |
-| 7 | GET | `/donnees/{table}` | D | `?date=` | JSON brut d'une table métier (liste fermée) pour la vérification indépendante | nouveau |
+| 7 | GET | `/donnees/{table}` | D | `?date=` (facultatif : borne les tables datées au soir de ce jour) | `DonneesBrutes` {table, date_reference, colonnes, lignes} : JSON brut d'une table métier (liste fermée, `services/donnees_brutes.py`) pour la vérification indépendante ; table hors liste → 404. Servie par le routeur `pilotage` (étiquette « Pilotage et analyse ») | nouveau |
 
 ### 1.2 Comptes et appareils (`api/comptes`)
 
@@ -126,6 +126,7 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 | 24 | PUT | `/parametres` | D (métier) ; D, T (techniques) | `{valeurs: {clé: valeur}, version_globale}` (Σ des `version` des 57 lignes ; périmée → 409 ; tout ou rien) | `[Reglage]` | B15 |
 | 25 | GET | `/parametres/historique` | D, T | `?cle=` | `Page[ReglageHistorique]` {cle, libelle, avant, apres, quand, par, motif} | B16 |
 | 26 | PUT | `/periode-close` | D | `ClotureEntree` {date_cloture \| null, motif ≥ 3, version} (celle de la ligne `date_cloture`) | `Periode` {date_cloture, par, quand, version} | B15 (clé `date_cloture`) |
+| 246 | GET | `/periode-close/brouillons` | D | `?date=AAAA-MM-JJ` | `BrouillonsPeriode` {jusqu_au, total, genres [{genre, libelle, nombre}], message} : les brouillons datés jusqu'à cette date, qui empêcheraient de clore la période jusque-là | nouveau (lot RESTES3) |
 | 27 | GET | `/devises` | D, A | — | `[DeviseFiche]` {code, nom, cours, cours_le, cours_repris, actif, version} | B17 |
 | 28 | GET | `/devises/{code}/cours` | D, A | — | `Page[CoursHistorique]` {id, cours, saisi_le, par, variation} | B18 |
 | 29 | POST | `/devises` | D, A | `DeviseCreation` {code, nom, cours} | `DeviseFiche` | B19 (création) |
@@ -225,17 +226,17 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 82 | GET | `/qualites` | C (coûts filtrés) | — | `[QualiteResume]` (poids, plan, recette calculée, contrôle 100 %, coût m², facteurs de coût pour D/A) | A18 + A19 |
-| 83 | GET | `/qualites/{id}` | C | — | `QualiteFiche` | nouveau |
-| 84 | POST | `/qualites` | D | `QualiteCreation` | `QualiteFiche` | A20 |
-| 85 | PUT | `/qualites/{id}` | D | `QualiteModification` {code, nom, actif, poids, version} | `QualiteFiche` (+ avertissement) | A21 |
-| 86 | DELETE | `/qualites/{id}` | D | — | 204 | A22 |
+| 82 | GET | `/qualites` | C (coûts filtrés) | — | `[QualiteResume]` (poids `[{role_id, role, lineaire, poids}]`, plan : `base_mensuelle` et `saisonnalite` (12), recette calculée, contrôle 100 %, `fabrications`, `facteurs_cout` {perte, cours} — A19 fondue ; cours filtrés hors D/A) | A18 + A19 |
+| 83 | GET | `/qualites/{id}` | C | — | `QualiteFiche` (= `QualiteResume` + `avertissement`) | nouveau |
+| 84 | POST | `/qualites` | D | `QualiteCreation` {code, nom, actif, poids `[{role_id, poids}]`} (liste par id de rôle, plus de dictionnaire par code) | `QualiteFiche` (201) | A20 |
+| 85 | PUT | `/qualites/{id}` | D | `QualiteModification` {code, nom, actif, poids `[{role_id, poids}]`, recette (facultative : `[{matiere_id, pourcentage}]`), motif, version} | `QualiteFiche` (+ avertissement) | A21 |
+| 86 | DELETE | `/qualites/{id}` | D | `?version=` (obligatoire) | 204 | A22 |
 | 87 | PUT | `/qualites/{id}/recette` | D | `RecetteEntree` {lignes [{matiere_id, pourcentage}], motif, version} | `QualiteFiche` | A23 |
 | 88 | GET | `/qualites/{id}/versions` | C | — | `[RecetteVersionFiche]` {numero, valide_depuis, par, origine, motif, lignes, poids} | B93 |
-| 89 | POST | `/qualites/{id}/versions/{vid}/restaurer` | D | `{motif, version}` | `QualiteFiche` | A24 |
-| 90 | PUT | `/qualites/{id}/plan` | D | `PlanQualiteEntree` {base_mensuelle, coefficients[12], motif, version} | `QualiteFiche` | A25 |
+| 89 | POST | `/qualites/{id}/versions/{vid}/restaurer` | D | `{motif, version}` | `QualiteFiche` ; vers la recette déjà en vigueur → 409 « La recette en vigueur est déjà celle de cette version : rien à restaurer. » | A24 |
+| 90 | PUT | `/qualites/{id}/plan` | D | `PlanQualiteEntree` {base_mensuelle, coefficients[12], motif, version} | `QualiteFiche` (les coefficients reviennent en `saisonnalite`) | A25 |
 | 91 | GET | `/qualites/{id}/plan/versions` | C | — | `[PlanVersionFiche]` | nouveau |
-| 92 | GET | `/nomenclature` | C (prix filtrés) | `?date=` | `Nomenclature` {lignes, controle} | B65 |
+| 92 | GET | `/nomenclature` | C (prix filtrés) | `?date=` (accepté et borné, **sans effet** : la nomenclature est celle en vigueur ; les recettes passées sont dans les versions, 88) | `Nomenclature` {lignes, controle [{qualite_id, qualite, actif, roles_utilises, roles_conformes, ecarts, conforme}]} | B65 |
 | 93 | GET | `/export/qualites` | D, A | — | xlsx | A39 |
 
 ### 1.11 Métiers et montage (`api/metiers`)
@@ -245,18 +246,18 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 | 94 | GET | `/metiers` | C (valeurs filtrées) | — | `[MetierFiche]` (étages, fils montés, bobines, kg, valeur, version par étage) | A29 |
 | 95 | GET | `/metiers/{id}` | C | — | `MetierFiche` | nouveau |
 | 96 | POST | `/metiers` | D | `MetierCreation` | `MetierFiche` | A31 |
-| 97 | PUT | `/metiers/{id}` | D | `MetierModification` (+version) | `MetierFiche` | A32 |
-| 98 | DELETE | `/metiers/{id}` | D | — | 204 | A33 |
-| 99 | PUT | `/metiers/{id}/montage` | D, L | `MontageEntree` {etages: [{etage, version, fils}], confirme_effet_kg} | `ResultatMontage` {metier, effet_kg, alertes} | A34 |
-| 100 | PUT | `/metiers/{id}/etages/{etage}` | D, L | `EtageEntree` {version, fils [{matiere_id, metres, pourcentage, commentaire}], confirme_effet_kg} | `ResultatMontage` | A35 |
-| 101 | GET | `/metiers/{id}/montages` | C | — | `[MontageEvenementFiche]` | nouveau |
+| 97 | PUT | `/metiers/{id}` | D | `MetierModification` {code, nom, laize, bobines_par_metre (la « densité » de Gestion MP), etages, actif, commentaire, version, montage (facultatif, `MontageEntree`)} ; des fils au-delà du nouveau nombre d'étages → 422 (X-REF-62) | `MetierModifie` (= `MetierFiche` + `montage` : `ResultatMontage` ou null) | A32 |
+| 98 | DELETE | `/metiers/{id}` | D | `?version=` (obligatoire) | 204 | A33 |
+| 99 | PUT | `/metiers/{id}/montage` | D, L | `MontageEntree` {etages: [{etage, version, fils}], confirme_effet_kg} : seuls les étages envoyés sont remplacés, les autres ne bougent pas (Gestion MP remplaçait tout le montage) ; étage hors du métier → **404** « Étage N : ce métier n'en a que M. » | `ResultatMontage` {metier, effet_kg, avant_kg, apres_kg, alertes, message} | A34 |
+| 100 | PUT | `/metiers/{id}/etages/{etage}` | D, L | `EtageEntree` {version, fils [{matiere_id, metres, pourcentage, commentaire}], confirme_effet_kg} ; étage hors du métier → 404 (comme 99) | `ResultatMontage` | A35 |
+| 101 | GET | `/metiers/{id}/montages` | C | — | `[MontageEvenementFiche]` {id, quand, par, etage, origine, avant, apres, avant_kg, apres_kg, effet_kg, alerte} ; `origine` déduite de `etage` (MODELE-DONNEES `montage_evenement`) | nouveau |
 | 102 | GET | `/montage/matieres` | C | — | `[MatiereMontage]` {matiere, poids_bobine_compte, origine_poids, sorti_30_j, deja_monte} | A30 |
 
 ### 1.12 Stock et lots (`api/stock`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 103 | GET | `/stock` | C (L : `LigneStockAtelier`, sans montants ni conseil d'achat) | `?date=&q=` | `[LigneStock]` (tous les champs de `LigneStock`, CALCULS § 3.9) | B63 |
+| 103 | GET | `/stock` | C (L : `LigneStockAtelier`, sans montants ni conseil d'achat) | `?date=&q=` | `[LigneStock]` (tous les champs de `LigneStock`, CALCULS § 3.9 ; `statut`, `statut_couverture` en codes `RUPTURE` \| `CRITIQUE` \| `URGENT` \| `ATTENTION` \| `OK` \| `NON_CONSOMMEE`, `action` en `CREER_BC` \| `AUCUNE` — l'écran les traduit, § 2) | B63 |
 | 104 | GET | `/stock/{matiere_id}` | C | `?date=` | `FicheStockMatiere` (ligne + d'où vient le besoin + lots + sur les métiers) | nouveau (agrège ce que la fenêtre « Fiche matière » lisait) |
 | 105 | GET | `/mouvements` | C (prix filtrés) | `?q=&matiere=&lot=&magasin=&type=&document=&du=&au=&avec_valeur=&apres=&limite=` | `Page[MouvementLigne]` | B24 |
 | 106 | GET | `/export/mouvements` | C (colonnes de prix absentes pour L) | mêmes filtres | xlsx | B101 |
@@ -277,29 +278,29 @@ quarantaine » → D, A ; motif « Mise en quarantaine » → D, A, L (commentai
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 115 | GET | `/operations` | C (prix filtrés) | `?type=&statut=&q=&apres=` | `Page[OperationResume]` | B33 |
-| 116 | GET | `/operations/{id}` | C | — | `OperationFiche` (+ `blocages`) | B34 |
-| 117 | POST | `/operations` | C selon le type | `OperationCreation` {type, date, ordre_id, fournisseur_id, motif_id, commentaire, lignes [{matiere_id, lot_id, lot_numero, lot_interne, magasin_id, magasin_destination_id, quantite, unite (kg\|bobine\|palette), prix, devise}]} | `OperationFiche` | B35 |
+| 115 | GET | `/operations` | C (prix filtrés) | `?type=&statut=&q=&apres=&limite=` | `PageOperations` = `Page[OperationFiche]` | B33 |
+| 116 | GET | `/operations/{id}` | C | — | `OperationFiche` (+ `blocages`, `peut_agir`, `raison`, `liberation`, `mise_en_quarantaine`, `valeurs [{devise, montant}]`, `annulee_par`, `annulee_le`, `annulation_motif`, `version`) | B34 |
+| 117 | POST | `/operations` | C selon le type | `OperationCreation` {type, date, ordre_id, fournisseur_id (ignoré : le fournisseur est celui des lots, S101), motif_id, commentaire, valider, lignes [{matiere_id, lot_id, lot_numero, lot_interne, magasin_id, magasin_destination_id, quantite, unite (kg\|bobine\|palette), prix, devise}]} | `OperationFiche` | B35 |
 | 118 | PUT | `/operations/{id}` | idem | `OperationModification` (+version) | `OperationFiche` | B36 |
 | 119 | DELETE | `/operations/{id}` | idem | `?version=` | 204 | B37 |
 | 120 | POST | `/operations/{id}/valider` | idem | `{version}` | `OperationFiche` | B38 |
-| 121 | POST | `/operations/{id}/annuler` | idem | `{version, motif}` | `OperationFiche` | B39 |
-| 122 | GET | `/brouillons` | C | — | `Brouillons` {ordres, operations, receptions (D, A), chacun avec blocages et `peut_valider`} | A69 |
-| 123 | POST | `/brouillons/valider` | C | `{documents: [{genre, id, version}]}` ou `{tous: true}` | `ResultatValidationGroupee` {validés, refusés [{document, raison}], ignorés [{document, raison: droit}]} | A70 |
+| 121 | POST | `/operations/{id}/annuler` | idem | `{version, motif}` (motif facultatif) | `OperationFiche` | B39 |
+| 122 | GET | `/brouillons` | C | — | `Brouillons` {lignes (tous, dans l'ordre de validation), ordres, operations, receptions (D, A), nombre, bloques, validables} ; chaque élément avec `version`, `blocages`, `peut_valider`, `raison`, `valide_par` | A69 |
+| 123 | POST | `/brouillons/valider` | C | `{documents: [{genre, id, version}]}` ou `{tous: true}` (corps vide → 422 « Choisir les documents à valider, ou demander de tout valider. ») | `ResultatValidationGroupee` {valides, refuses, ignores} (clés sans accents ; `ignores` = le `non_permis` de Gestion MP corrigé, C-17), chaque élément {genre, type, id, date, libelle, resume, lien, numero, raison} | A70 |
 
 ### 1.14 Inventaires (`api/inventaires`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 124 | GET | `/inventaires` | C (montants filtrés) | `?statut=` | `[InventaireResume]` | B40 |
-| 125 | GET | `/inventaires/defauts` | D, A | — | `DefautsInventaire` | B41 |
+| 124 | GET | `/inventaires` | C (montants filtrés) | `?statut=` | `[InventaireResume]` (+ `perimetre`, `criteres`, `nb_matieres_suspendues`, `abandonne_par/le`, `abandon_motif`, `annule_par/le`, `annulation_motif`, `sans_justification`, `recomptes_meme_personne`, `version`) | B40 |
+| 125 | GET | `/inventaires/defauts` | D, A | — | `DefautsInventaire` {tolerance, roles `[{id, code}]`, compositions `[{id, code}]` (Gestion MP : des codes), cadence_jours} | B41 |
 | 126 | GET | `/inventaires/a-compter` | D, A | `?magasin=` | `[MatiereACompter]` | B42 |
-| 127 | GET | `/inventaires/{id}` | C | — | `InventaireFiche` (+ périmètre, matières suspendues, lignes, blocages) | B43 |
+| 127 | GET | `/inventaires/{id}` | C | — | `InventaireFiche` = `InventaireResume` + blocages, lignes (+ `lot_trouve`, `lot_interne`, `compte_par`, `second_par`, `quatre_yeux`, `ecart_pourcent`) | B43 |
 | 128 | POST | `/inventaires` | D, A | `InventaireOuverture` {date, magasin_id, libelle, tolerance, criteres: {matieres, roles, compositions, classes_abc}} | `InventaireFiche` | B44 |
 | 129 | PUT | `/inventaires/{id}/comptages` | D, A | `{version, lignes: [{ligne_id, compte, palettes, bobines, justification, second_compte?}]}` (un champ absent = inchangé ; `null` explicite = vidé) | `InventaireFiche` | B45 (lignes existantes) |
 | 130 | POST | `/inventaires/{id}/lots-trouves` | D, A | `{version, matiere_id, lot_numero, lot_interne, magasin_id, compte, palettes, bobines, justification}` | `InventaireFiche` | B45 (lot trouvé) |
 | 131 | POST | `/inventaires/{id}/valider` | D, A | `{version}` | `InventaireFiche` | B46 |
-| 132 | POST | `/inventaires/{id}/abandonner` | D, A | `{version, motif}` | `InventaireFiche` | B47 |
+| 132 | POST | `/inventaires/{id}/abandonner` | D, A | `{version, motif}` (motif exigé, ≥ 3 : « Dire pourquoi l'inventaire est abandonné. ») | `InventaireFiche` (statut `abandonne` ; numéro, comptages et lignes gardés ; motif dans `abandon_motif`) | B47 |
 | 245 | POST | `/inventaires/{id}/annuler` | D, A | `{version, motif}` (motif ≥ 3 caractères, obligatoire) | `InventaireFiche` (statut `annule`, numéro gardé, ajustements contre-passés) | nouveau : Gestion MP corrigé, étape 17 (`POST /inventaires/{iid}/annuler`, U19) |
 | 133 | GET | `/documents/inventaires/{id}/feuille` | C | `?recomptage=&theorique=` | HTML A4 paysage | B48 |
 
@@ -308,32 +309,37 @@ inventaire **en cours** s'abandonne (132 : rien n'est ajusté) ; un inventaire *
 chacun de ses ajustements est contre-passé **une fois** (UQ `mouvement.contrepasse_id`), daté comme lui ;
 refus 409 si l'inventaire n'est pas validé (« Seul un inventaire validé s'annule ; un inventaire en cours
 s'abandonne. »), s'il est déjà annulé, si la période est close, si la matière ajustée est déjà repartie
-(stock insuffisant), ou si un inventaire ouvert couvre ses magasins ; 422 sans motif (« Dire pourquoi
+(stock insuffisant), ou si un inventaire ouvert suspend une matière ajustée dans son magasin ; 422 sans motif (« Dire pourquoi
 l'inventaire est annulé. »). `valide_le` reste posé ; `annule_le`, `annule_par_id`, `annulation_motif`
 s'y ajoutent ; journal « annulation inventaire » « {n°} · {motif} ».
+
+Un seul inventaire **ouvert par magasin**, et un inventaire de tous les magasins exclut tout autre
+(index unique `uq_inventaire_ouvert_magasin`, vérifié sous le verrou `INVENTAIRE_GLOBAL`) : 128 refuse
+(409) « … déjà ouvert sur « CODE ». » / « … sur tous les magasins. ». L'abandon (132) range son motif
+dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif`.
 
 ### 1.15 Ordres de fabrication (`api/ordres`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 134 | POST | `/ordres/proposition` | C (lecture en POST : corps structuré) | `DemandeProposition` {date, magasin_id, metier_id, qualites [{qualite_id, m2}]} | `Proposition` {prevu (perte comprise), lignes FIFO, manques, recette_incomplete, blocages} | B49 |
-| 135 | GET | `/ordres` | C | `?statut=&q=&du=&au=` | `[OrdreResume]` (net, écart, lots) | B50 |
-| 136 | GET | `/ordres/{id}` | C | — | `OrdreFiche` (qualités, lignes, prévu figé, sorti net, retours, blocages) | B56 |
-| 137 | POST | `/ordres` | D, L | `OrdreCreation` {date, magasin_id, metier_id, commentaire, qualites, lignes [{lot_id, quantite, unite}]} | `OrdreFiche` | B51 |
+| 134 | POST | `/ordres/proposition` | C (lecture en POST : corps structuré) | `DemandeProposition` {date (facultative : aujourd'hui), magasin_id, metier_id, qualites [{qualite_id, m2}]} ; magasin inconnu → 404 | `Proposition` {date, magasin_id, taux_perte, prevu (perte comprise), manque, lignes FIFO [{matiere_id, reference, designation, role, prevu, par_qualite [{qualite_id, qualite, kg}], kg_par_ml, poids_bobine, bobines_palette, lots, disponibles, manque}], manques, recettes_incompletes, blocages} | B49 |
+| 135 | GET | `/ordres` | C | `?statut=&q=&du=&au=&metier=&magasin=&qualite=` (ids) ; `du > au` → 422 | `[OrdreResume]` (net, écart, lots) — liste complète, non paginée | B50 |
+| 136 | GET | `/ordres/{id}` | C | — | `OrdreFiche` = `OrdreResume` + `lignes`, `par_matiere`, `message` ; vocabulaire PRO : `prevu` (Gestion MP : `theorique`), `par_matiere` (`par_fil`), `retours [{id, numero, date, quantite}]` (`retours_detail`), `revenu`, `fabrication`, `m2`, `lots`, `matieres`, `taux_perte`, `prevu_fige`, `annule_par/le`, `annulation_motif`, `version`, `blocages` ; un brouillon : `prevu` 0 et `par_matiere` vide | B56 |
+| 137 | POST | `/ordres` | D, L | `OrdreCreation` {date, magasin_id, metier_id, commentaire, qualites, lignes [{lot_id, quantite, unite, matiere_id?}]} (la matière se lit sur le lot ; `matiere_id` ne sert qu'au contrôle) | `OrdreFiche` | B51 |
 | 138 | PUT | `/ordres/{id}` | D, L | `OrdreModification` (+version) | `OrdreFiche` | B52 |
 | 139 | DELETE | `/ordres/{id}` | D, L | `?version=` | 204 | B53 |
 | 140 | POST | `/ordres/{id}/valider` | D, L | `{version}` | `OrdreFiche` | B54 |
-| 141 | POST | `/ordres/{id}/annuler` | D, L | `{version, motif}` | `OrdreFiche` (annule aussi ses retours, brouillons de retour supprimés avec le dire) | B55 |
-| 142 | GET | `/ordres/{id}/lots-sortis` | C | — | `[LotSorti]` (net des retours) | B57 |
-| 143 | GET | `/ordres/consommation` | C | `?du=&au=&qualite=` | `[ConsommationOrdre]` | B80 |
-| 144 | GET | `/export/ordres` | C | mêmes filtres | xlsx | B58 |
+| 141 | POST | `/ordres/{id}/annuler` | D, L | `{version, motif}` (motif facultatif) | `OrdreFiche` (annule aussi ses retours, brouillons de retour supprimés avec le dire) | B55 |
+| 142 | GET | `/ordres/{id}/lots-sortis` | C | — | `[LotSorti]` (net des retours ; + `designation`, `blocage` : l'inventaire qui suspend la matière) | B57 |
+| 143 | GET | `/ordres/consommation` | C | `?du=&au=&qualite=` | `[ConsommationOrdre]` (+ `ordre_id` ; les totaux se font à l'écran) | B80 |
+| 144 | GET | `/export/ordres` | C | `?statut=&q=&du=&au=&metier=&magasin=&qualite=&vue=ordres\|consommation` | xlsx `ordres-AAAA-MM-JJ.xlsx` ou `consommation-ordres-AAAA-MM-JJ.xlsx` (colonne « Statut » en plus : les statuts peuvent être mêlés) | B58 |
 
 ### 1.16 Production et besoins (`api/production`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
 | 145 | GET | `/production/plan` | C | `?date=` | `PlanProduction` | B59 |
-| 146 | PUT | `/production/plan` | D | `PlanGlobalEntree` {qualites [{qualite_id, base_mensuelle, coefficients, version}], motif} | `PlanProduction` | B60 |
+| 146 | PUT | `/production/plan` | D | `PlanGlobalEntree` {qualites [{qualite_id, base_mensuelle, coefficients (12), version}], motif} ; une qualité deux fois → 422 ; qualité inconnue → 404 « Qualité introuvable : le plan n'a pas été enregistré. » ; version périmée → 409 nommant la qualité | `PlanProduction` (coefficients rendus en `saisonnalite`) + `modifiees` (nombre de qualités changées) | B60 |
 | 147 | GET | `/production/realise` | C | `?date=` | `PlanEtRealise` | B61 |
 | 148 | GET | `/production/besoins` | C | `?date=&matiere=` | `BesoinsDetailles` | B62 |
 
@@ -341,29 +347,29 @@ s'y ajoutent ; journal « annulation inventaire » « {n°} · {motif} ».
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 149 | GET | `/plan-achat` | D, A | `?date=` | `PlanAchat` {lignes, fournisseurs, budget} | B66 |
-| 150 | GET | `/plan-achat/fournisseurs/{id}` | D, A | `?date=` | `PreparationCommande` | B67 (par id, plus par nom) |
+| 149 | GET | `/plan-achat` | D, A | `?date=` | `PlanAchat` {date_reference, indicateurs (à commander, en alerte, budget MAD, quantité, classe A, ruptures… par statut, tiers), fournisseurs (montants par devise), lignes} (`api/plan_achat/schemas.py`) | B66 |
+| 150 | GET | `/plan-achat/fournisseurs/{id}` | D, A | `?date=` | `PreparationCommande` {fournisseur_id, fournisseur, pays, contact, email, delai_jours, devise_par_defaut, date_reference, lignes (+ `depart` {unite, contenance, quantite, unites} : l'unité de commande proposée)} | B67 (par id, plus par nom) |
 | 151 | GET | `/export/pilotage` | D, A | `?date=` | xlsx (stock, plan d'achat, fournisseurs, besoins, contrôles) | B100 |
 
 ### 1.18 Commandes (`api/commandes`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 152 | GET | `/commandes` | D, A | `?statut=&filtre=retard&fournisseur=&q=` | `[CommandeResume]` (état de livraison, montants estimés, reçu, reste) | A48 |
-| 153 | GET | `/commandes/{id}` | D, A | — | `CommandeFiche` (lignes, reçu net, version partie, décisions, jalons, blocages, actions permises) | nouveau |
+| 152 | GET | `/commandes` | D, A | `?statut=&filtre=retard&fournisseur=&q=` (`statut` : un statut, ou `clos` = soldés et annulés, onglet « Soldées / annulées ») | `[CommandeResume]` (état de livraison, montants estimés, reçu, reste, jalons, renvoi… : détail dans `api/commandes/schemas.py` ; `en_retard` (bool, la règle de `?filtre=retard`), `arrivee_attendue` (ETA sinon livraison prévue, pour un bon parti ni soldé ni annulé ; sinon null)) | A48 |
+| 153 | GET | `/commandes/{id}` | D, A | — | `CommandeFiche` = `CommandeResume` + lignes (reçu net, `kg_en_quarantaine` : reçu sous réserve encore en quarantaine, attendu jusqu'à sa libération ; reste), `promesse_figee` (la phrase qui dit pourquoi la date promise ne se change plus, ou null), `actions` (geste → null ou phrase du refus), `fin_possible`, `modifiable`, `raison_sociale_reglee`, `decisions`, `version_partie`, `renvoi`, `receptions` [{id, numero, date, statut, pese}], contact du fournisseur, `seuil_approbation` | nouveau |
 | 154 | POST | `/commandes` | D, A | `CommandeCreation` {fournisseur_id, date_livraison_prevue, prix_catalogue_a_confirmer: bool, observations, lignes [{matiere_id, quantite, unite_achat, contenance, prix}]} | `[CommandeFiche]` (un bon par devise) | A49 |
 | 155 | PUT | `/commandes/{id}` | D, A | `CommandeModification` (+version) | `CommandeFiche` | A50 |
 | 156 | DELETE | `/commandes/{id}` | D, A | `?version=` | 204 | A58 |
 | 157 | POST | `/commandes/{id}/envoyer` | D, A | `{version, date}` | `CommandeFiche` | A51 |
 | 158 | POST | `/commandes/{id}/approuver` | D | `{version, date}` (date réelle d'envoi) | `CommandeFiche` | A52 |
 | 159 | POST | `/commandes/{id}/renvoyer` | D | `{version, motif 3–500}` | `CommandeFiche` | A53 |
-| 160 | POST | `/commandes/{id}/prix` | D, A | `{version, lignes [{ligne_id, prix, unite: kg\|ml}], mettre_a_jour_catalogue}` | `CommandeFiche` | A54 |
+| 160 | POST | `/commandes/{id}/prix` | D, A | `{version, lignes [{ligne_id, prix, unite: kg\|ml}], mettre_a_jour_catalogue, date_livraison_prevue}` (champ `lignes`, et non `prix` ; un prix au mètre se ramène au kilo par la densité) | `CommandeFiche` | A54 |
 | 161 | PUT | `/commandes/{id}/expedition` | D, A | `{version, jalons…}` (champ absent = inchangé, `null` = vidé) | `CommandeFiche` | A55 |
-| 162 | POST | `/commandes/{id}/solder` | D, A | `{version, motif}` | `CommandeFiche` | A56 |
+| 162 | POST | `/commandes/{id}/solder` | D, A | `{version, motif}` (motif facultatif, au journal) | `CommandeFiche` | A56 |
 | 163 | POST | `/commandes/{id}/rouvrir` | D, A | `{version}` | `CommandeFiche` | A57 |
-| 164 | GET | `/documents/commandes/{id}/bon` | D, A | — | HTML A4 anglais sans prix | A59 |
-| 165 | GET | `/export/commandes/{id}/bon` | D, A | — | xlsx anglais sans prix (même contenu que 164) | A97 |
-| 166 | GET | `/export/commandes` | D, A | `?statut=&q=` | xlsx | A93 |
+| 164 | GET | `/documents/commandes/{id}/bon` | D, A | — | HTML A4 anglais sans prix (route déclarée dans `api/commandes/routes_documents.py`, étiquette « Commandes ») | A59 |
+| 165 | GET | `/export/commandes/{id}/bon` | D, A | — | xlsx anglais sans prix (même contenu que 164) ; raison sociale de l'usine non réglée → 409 | A97 |
+| 166 | GET | `/export/commandes` | D, A | mêmes filtres que 152 | xlsx | A93 |
 
 ### 1.19 Réceptions, factures (`api/receptions`)
 
@@ -371,68 +377,68 @@ s'y ajoutent ; journal « annulation inventaire » « {n°} · {motif} ».
 |---|---|---|---|---|---|---|
 | 167 | GET | `/receptions` | D, A | `?statut=&q=&du=&au=&fournisseur=` | `[ReceptionResume]` (brouillons recalés **sans écrire**) | A60 |
 | 168 | GET | `/receptions/{id}` | D, A | — | `ReceptionFiche` (+ blocages, avertissements, reste après) | nouveau |
-| 169 | POST | `/receptions` | D, A | `ReceptionCreation` {date, fournisseur_id, numero_bl, controle_par, observations, factures: {devise: FactureEntree}, lignes [{commande_ligne_id, matiere_id, lot_numero, lot_interne, quantite_bl, quantite_pesee, nb_palettes, bobines_en_plus, magasin_id, qualite, observations, prix}]} | `[ReceptionFiche]` (une par devise, **une transaction**) | A61 |
-| 170 | PUT | `/receptions/{id}` | D, A | `ReceptionModification` (+version) | `ReceptionFiche` | A62 |
+| 169 | POST | `/receptions` | D, A | `ReceptionCreation` {date, fournisseur_id, numero_bl, controle_par, observations, factures: {devise: FactureEntree {numero, date, montant, echeance}} (**dictionnaire par devise** ; une facture pour une devise sans ligne → 422), lignes [{commande_ligne_id, matiere_id, lot_numero, lot_interne, quantite_bl, quantite_pesee, nb_palettes, bobines_en_plus, magasin_id, qualite, observations, prix, devise (hors commande)}]} ; bon pas parti → 409 dès la saisie | `[ReceptionFiche]` (une par devise, **une transaction** : aucune laissée en brouillon si une autre est refusée) | A61 |
+| 170 | PUT | `/receptions/{id}` | D, A | `ReceptionModification` = la saisie de 169 + `version`, **une seule devise** (422 « Une réception ne mêle pas deux devises… ») | `ReceptionFiche` (la fiche, pas une liste) | A62 |
 | 171 | DELETE | `/receptions/{id}` | D, A | `?version=` | 204 | A63 |
-| 172 | POST | `/receptions/{id}/valider` | D, A | `{version}` | `ReceptionFiche` | A64 |
-| 173 | POST | `/receptions/{id}/annuler` | D, A | `{version, motif}` | `ReceptionFiche` (une réception toute refusée s'annule) | A65 |
-| 174 | PUT | `/receptions/{id}/facture` | D, A | `FactureEntree` {numero, date, montant, echeance, version} (champ absent = inchangé ; `numero: ""` détache) — validée seulement | `ReceptionFiche` | A66 |
-| 175 | GET | `/factures` | D, A | `?fournisseur=&q=&sans_dossier=` | `[FactureResume]` | A68 |
-| 176 | GET | `/receptions/pesees` | D, A | `?q=&ecarts=&apres=` | `Page[Pesee]` | B73 |
-| 177 | GET | `/receptions/bobines` | D, A | `?q=&ecarts=` | `EvolutionBobines` | B74 |
-| 178 | GET | `/export/receptions` | D, A | `?statut=&q=` | xlsx | A94 |
-| 179 | GET | `/export/receptions/pesees` | D, A | `?q=&ecarts=` | xlsx | A95 |
-| 180 | GET | `/export/receptions/bobines` | D, A | `?q=&ecarts=` | xlsx | A96 |
+| 172 | POST | `/receptions/{id}/valider` | D, A | `{version}` | `ReceptionFiche` ; un blocage garde son code : `excedent`, `bon_clos`, `etat_incompatible`, `inventaire_en_cours`, `periode_close` → **409** ; `date_invalide`, `quantite_invalide`, `saisie_invalide` → 422 (Gestion MP : 422 pour tout) | A64 |
+| 173 | POST | `/receptions/{id}/annuler` | D, A | `{version, motif}` (motif **exigé**, 3–300) | `ReceptionFiche` (une réception toute refusée s'annule) | A65 |
+| 174 | PUT | `/receptions/{id}/facture` | D, A | `FactureCorrection` {version (**de la réception**), numero?, date?, montant?, echeance?} — pas de `devise` (celle de la réception) ; champ absent = inchangé ; `numero: ""` détache ; `montant: null` vide le montant — validée seulement (brouillon → 409) | `ReceptionFiche` | A66 |
+| 175 | GET | `/factures` | D, A | `?fournisseur=&q=&sans_dossier=` | `[FactureResume]` (+ `payee_par`, `montant_estime` = Σ pesée × prix des réceptions validées, `poids`, `recue_le`, `receptions`, `dossier`, `version`) | A68 |
+| 176 | GET | `/receptions/pesees` | D, A | `?q=&ecarts=&fournisseur=&qualite=&magasin=&apres=&limite=` | `PagePesees` = `Page[Pesee]` + {tolerance, tolerance_bobine, kg_pesees, hors_tolerance, non_conformes, bobines_hors_tolerance} | B73 |
+| 177 | GET | `/receptions/bobines` | D, A | `?q=&ecarts=&matiere=&fournisseur=` (ids) | `EvolutionBobines` {tolerance, lignes, hors_tolerance, alourdies, allegees} | B74 |
+| 178 | GET | `/export/receptions` | D, A | mêmes filtres que 167 | xlsx | A94 |
+| 179 | GET | `/export/receptions/pesees` | D, A | mêmes filtres que 176 | xlsx | A95 |
+| 180 | GET | `/export/receptions/bobines` | D, A | mêmes filtres que 177 | xlsx | A96 |
 
 ### 1.20 Réclamations (`api/reclamations`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 181 | GET | `/reclamations` | D, A | `?statut=&fournisseur=` | `[ReclamationResume]` | B81 |
+| 181 | GET | `/reclamations` | D, A | `?statut=ouverte\|close&fournisseur=&reception=&q=` | `[ReclamationResume]` | B81 |
 | 182 | GET | `/reclamations/{id}` | D, A | — | `ReclamationFiche` | nouveau |
-| 183 | POST | `/reclamations` | D, A | `ReclamationCreation` {fournisseur_id, reception_id, lot_id, motif, description, quantite, montant_demande, devise, ouverte_le} | `ReclamationFiche` | B82 |
-| 184 | PUT | `/reclamations/{id}` | D, A | `ReclamationModification` {reponse, description, montant_obtenu, version} (ouverte seulement) | `ReclamationFiche` | B83 (répondre) |
-| 185 | POST | `/reclamations/{id}/clore` | D, A | `{version, issue, montant_obtenu, close_le}` | `ReclamationFiche` | B83 (clore) |
+| 183 | POST | `/reclamations` | D, A | `ReclamationCreation` {fournisseur_id, reception_id, reception_ligne_id, lot_id, motif (code ou libellé), description, quantite, montant_demande, devise, ouverte_le} | `ReclamationFiche` | B82 |
+| 184 | PUT | `/reclamations/{id}` | D, A | `ReclamationModification` {reponse, description, montant_obtenu, version} (champ absent = inchangé) — permis aussi sur une **close** (l'avoir arrive après la clôture), sans changer son issue ni la rouvrir | `ReclamationFiche` | B83 (répondre) |
+| 185 | POST | `/reclamations/{id}/clore` | D, A | `{version, issue, montant_obtenu, close_le, reponse (facultative)}` ; une close → 409 | `ReclamationFiche` | B83 (clore) |
 | 186 | POST | `/reclamations/{id}/rouvrir` | D, A | `{version, motif}` | `ReclamationFiche` | B83 (rouvrir) |
 
 ### 1.21 Importations et coût de revient (`api/importations`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 187 | GET | `/dossiers` | D, A | `?statut=ouvert\|clos\|annule&q=` | `[DossierResume]` | A71 |
-| 188 | GET | `/dossiers/a-rattacher` | D, A | `?locaux=` | `[FactureARattacher]` | A73 |
-| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (marchandise, frais, répartition, coût hors TVA, TVA, attendus — dont `tva_ecart_tolere_mad` = \|TVA attendue\| × `toler_tva_import`, le même écart que C29 —, alertes de clôture, échéancier) | A72 |
-| 190 | POST | `/dossiers` | D, A | `DossierCreation` {facture_id \| null, numero (à la main seulement), libelle, date_arrivee, banque, local_confirme} | `DossierFiche` | A74 |
-| 191 | PUT | `/dossiers/{id}` | D, A | `DossierModification` {libelle, banque, commentaire, date_arrivee \| null, version} | `DossierFiche` | A75 |
-| 192 | POST | `/dossiers/{id}/rattacher` | D, A | `{version, facture_id, reception_ligne_ids}` | `DossierFiche` | A76 |
-| 193 | POST | `/dossiers/{id}/lignes` | D, A | `LigneManuelle` {matiere_id, lot_numero, fournisseur_id, quantite_kg, valeur_devise, devise, cours, version} | `DossierFiche` | A77 |
+| 187 | GET | `/dossiers` | D, A | `?statut=ouvert\|clos\|annule&q=&fournisseur=` (sans statut : ouverts et clos ; `q` : mots sans accents sur numéro, libellé, banque, commentaire, factures, réceptions, familles, fournisseurs) | `[DossierResume]` | A71 |
+| 188 | GET | `/dossiers/a-rattacher` | D, A | `?locaux=` | `EnAttente` {factures: `[FactureARattacher]`, sans_facture: `[ReceptionSansFacture]`, locaux: {factures, lignes}} ; valeurs par devise en liste `[{devise, valeur}]` | A73 |
+| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (marchandise, frais, répartition, coût hors TVA, TVA, attendus — dont `tva_ecart_tolere_mad` = \|TVA attendue\| × `toler_tva_import`, le même écart que C29 —, `tva_ecart_mad`, `toler_tva_import`, `cours_eloignes`, `alertes` de clôture, `a_verifier`, `echeancier`, `actions` (geste → null ou phrase du refus), `a_rattacher`, `nb_pieces`, `version` ; détail dans `api/importations/schemas_fiche.py`) | A72 |
+| 190 | POST | `/dossiers` | D, A | `DossierCreation` {facture_id \| null, numero (à la main seulement, format `NN/AA`), libelle, date_arrivee (exigée à la main), banque, commentaire, local_confirme} | `DossierFiche` | A74 |
+| 191 | PUT | `/dossiers/{id}` | D, A | `DossierModification` {libelle, banque, commentaire, date_arrivee \| null, version} (fiche entière ; `commentaire` = colonne du modèle, « Observations » à l'écran) | `DossierFiche` | A75 |
+| 192 | POST | `/dossiers/{id}/rattacher` | D, A | `{version, facture_id}` — par facture seulement (pas de `reception_ligne_ids` : un rattachement par lignes pouvait couper une réception, contraire à « un dossier = une facture = une livraison ») | `DossierFiche` | A76 |
+| 193 | POST | `/dossiers/{id}/lignes` | D, A | `LigneManuelle` {matiere_id, lot_numero, fournisseur_id, quantite_kg, valeur_devise, devise, cours (nul = cours du jour), commentaire, version} | `DossierFiche` | A77 |
 | 194 | PUT | `/dossiers/{id}/lignes/{lid}` | D, A | `{cours, commentaire, version}` | `DossierFiche` | A78 |
 | 195 | DELETE | `/dossiers/{id}/lignes/{lid}` | D, A | `?version=` | `DossierFiche` | A81 |
 | 196 | PUT | `/dossiers/{id}/cours` | D, A | `{devise, cours, version}` | `DossierFiche` | A79 |
 | 197 | POST | `/dossiers/{id}/cours-des-bons` | D, A | `{version}` | `DossierFiche` | A80 |
 | 198 | POST | `/dossiers/{id}/detacher` | D, A | `{reception_id, version}` | `DossierFiche` | A82 |
 | 199 | POST | `/dossiers/{id}/frais` | D, A | `FraisEntree` {poste_id, montant, ligne_id, piece, prestataire, date_piece, echeance, commentaire, version} | `DossierFiche` | A83 |
-| 200 | PUT | `/dossiers/{id}/frais/{fid}` | D, A | `FraisEntree` (+version du frais) | `DossierFiche` | A84 |
-| 201 | DELETE | `/dossiers/{id}/frais/{fid}` | D, A | `?version=` | `DossierFiche` | A85 |
-| 202 | POST | `/dossiers/{id}/cloturer` | D, A | `{version, alertes_lues: true}` | `DossierFiche` | A86 |
-| 203 | POST | `/dossiers/{id}/rouvrir` | D, A | `{version, motif}` | `DossierFiche` | A87 |
-| 204 | POST | `/dossiers/{id}/annuler` | D, A | `{version, motif}` | `DossierFiche` (statut `annule`, numéro gardé, marchandise libérée) | A88 |
-| 205 | GET | `/export/dossiers` | D, A | `?statut=` | xlsx (4 feuilles) | A89 |
-| 206 | GET | `/analyse/revient` | D, A | `?axe=&statut=ouvert\|clos&du=&au=&matieres=&compositions=…` | `AnalyseRevient` | A90 |
-| 207 | GET | `/analyse/revient/qualites/{id}` | D, A | — | `CoutQualite` | A91 (par id) |
+| 200 | PUT | `/dossiers/{id}/frais/{fid}` | D, A | `FraisEntree` (`version` = celle **du frais**) | `DossierFiche` | A84 |
+| 201 | DELETE | `/dossiers/{id}/frais/{fid}` | D, A | `?version=` (celle du frais) | `DossierFiche` | A85 |
+| 202 | POST | `/dossiers/{id}/cloturer` | D, A | `{version, alertes_lues}` (`alertes_lues` vaut confirmation : s'il y a des alertes et qu'il est faux → 422 `confirmation_requise`) | `DossierFiche` | A86 |
+| 203 | POST | `/dossiers/{id}/rouvrir` | D, A | `{version, motif}` (motif facultatif, au journal ; refusé en période close) | `DossierFiche` | A87 |
+| 204 | POST | `/dossiers/{id}/annuler` | D, A | `{version, motif}` (motif **exigé**, 3–300 ; refusé sur un clos et en période close) | `DossierFiche` (statut `annule`, numéro, lignes détachées et frais gardés, marchandise libérée ; un annulé ne se rouvre pas ; un dossier n'est **jamais supprimé**) | A88 |
+| 205 | GET | `/export/dossiers` | D, A | mêmes filtres que 187 | xlsx (4 feuilles) | A89 |
+| 206 | GET | `/analyse/revient` | D, A | `?axe=&q=&statut=ouvert\|clos&du=&au=&qualite=` (id) `&matieres=` (ids répétés) `&selection=` (JSON) `&composition=&type_fil=&titrage=&couleur=&fournisseur=` (nom) `&detail=` ; axe, sélection, statut inconnus → 422 | `AnalyseRevient` | A90 |
+| 207 | GET | `/analyse/revient/qualites/{id}` | D, A | `?du=&au=` | `CoutQualite` | A91 (par id) |
 | 208 | GET | `/export/revient` | D, A | mêmes filtres | xlsx | A92 |
 
 ### 1.22 Pilotage et analyse (`api/pilotage`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 209 | GET | `/cockpit` | D, A | `?date=` | `Cockpit` (six KPI avec formule, à faire, alertes, ensemble, évolution, économies) | B68 |
+| 209 | GET | `/cockpit` | D, A | `?date=` | `Cockpit` {date_reference, kpi [{cle, libelle, valeur, unite, detail, formule, lien, ton}], stock (+ `valeur_magasins_mad`, `kg_machine`), achats (+ `en_retard`), finance, abc, dormant, sourcing, economies (`top[]` avec ids), nb_alertes, alerte_rouge, alertes (avec ids), devises, controles (synthèse)} ; « À faire » et « Évolution » de l'écran viennent d'autres routes (commandes, réceptions…, 231) | B68 |
 | 210 | GET | `/valorisation` | D, A | `?date=` | `Valorisation` | B69 |
 | 211 | GET | `/opportunites` | D, A | `?date=&meme_couleur=&fenetre_jours=` | `Opportunites` | B70 |
-| 212 | GET | `/controles` | D, A | `?date=` | `Controles` {synthese, controles [{code, libelle, gravite, garanti, anomalies, quoi_faire, lien, colonnes, lignes}]} | B71 |
-| 213 | GET | `/prix/historique` | D, A | `?q=&du=&au=` | `[PrixPaye]` | B72 |
+| 212 | GET | `/controles` | D, A | `?date=` | `Controles` {date_reference, synthese, controles [{code, libelle, gravite, garanti, anomalies, conforme, quoi_faire, lien, colonnes [{cle, libelle, unite}], lignes (200 au plus), lignes_total, tronque}]} | B71 |
+| 213 | GET | `/prix/historique` | D, A | `?q=&du=&au=` | `HistoriquePrix` {lignes `[PrixPaye]`, total_achats_mad, hausses, fortes_hausses, baisses, seuils} (les indicateurs de l'écran ne se recalculent pas à l'écran) | B72 |
 | 214 | GET | `/prix/matrice` | D, A | `?q=` | `MatricePrix` | B75 |
-| 215 | GET | `/fournisseurs/performance` | D, A | `?du=&au=` | `PerformanceFournisseurs` | B76 |
+| 215 | GET | `/fournisseurs/performance` | D, A | `?du=&au=` | `PerformanceFournisseurs` {du, au, cible_otif, seuils, lignes, receptions} (les chemins `/fournisseurs/{ident:int}` de 1.8 ne la masquent pas) | B76 |
 | 216 | GET | `/export/controles` | D, A | `?date=` | xlsx | B103 |
 | 217 | GET | `/export/valorisation` | D, A | `?date=` | xlsx | B104 |
 | 218 | GET | `/export/prix` | D, A | `?q=` | xlsx | B105 |
@@ -443,33 +449,33 @@ s'y ajoutent ; journal « annulation inventaire » « {n°} · {motif} ».
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 221 | GET | `/signalements` | C | `?a_traiter=&apres=` | `Page[SignalementFiche]` | B84 |
-| 222 | POST | `/signalements` | C | `{matiere_id, texte, urgence}` | `SignalementFiche` | B85 |
-| 223 | POST | `/signalements/{id}/traiter` | D, A | `{reponse}` | `SignalementFiche` | B86 |
-| 224 | GET | `/pieces` | D, A | `?objet=&id=` | `[PieceFiche]` | B87 |
+| 221 | GET | `/signalements` | C | `?a_traiter=` (vrai : en attente ; faux : traités ; absent : tous) `&mes=true` (les miens) `&apres=&limite=` | `Page[SignalementFiche]` (le plus récent d'abord) | B84 |
+| 222 | POST | `/signalements` | C | `{matiere_id, texte, urgence}` | `SignalementFiche` (201 ; la direction et les achats sont prévenus) | B85 |
+| 223 | POST | `/signalements/{id}/traiter` | D, A | `{reponse}` | `SignalementFiche` (l'auteur est prévenu ; déjà traité → 409) | B86 |
+| 224 | GET | `/pieces` | D, A | `?objet=&id=` | `[PieceFiche]` {id, objet, objet_id, nom, type, taille, empreinte, par, par_id, quand} | B87 |
 | 225 | POST | `/pieces` | D, A | multipart {objet, id, fichier} | `PieceFiche` | B88 |
-| 226 | GET | `/pieces/{id}/fichier` | D, A | — | fichier (`attachment`) | B89 |
-| 227 | DELETE | `/pieces/{id}` | D, A | — | 204 (retrait logique) | B90 |
-| 228 | GET | `/echeancier` | D, A | `?du=&au=&etat=` | `Echeancier` | B91 |
-| 229 | PUT | `/echeancier/paiement` | D, A | `{genre: facture\|frais, id, payee_le \| null, version}` | `EcheanceLigne` | B92 |
-| 230 | GET | `/export/echeancier` | D, A | mêmes filtres | xlsx | B109 |
+| 226 | GET | `/pieces/{id}/fichier` | D, A | — | fichier (`attachment`) ; fichier disparu du disque → **410** `fichier_disparu` | B89 |
+| 227 | DELETE | `/pieces/{id}` | D, A | — (pas de `version` : la table n'en a pas) | 204 (retrait logique) ; déjà retirée → 409 | B90 |
+| 228 | GET | `/echeancier` | D, A | `?q=&nature=facture\|frais&du=&au=` (le futur est permis) | `Echeancier` {aujourdhui, lignes, par_mois, total_mad, echu_mad, echues, dans_30_jours_mad, a_dater, a_dater_mad, reglees, ecartees} (l'échu se compte quelle que soit la période) | B91 |
+| 229 | PUT | `/echeancier/paiement` | D, A | `{genre: facture\|frais, id, payee_le \| null, version, motif}` ; facture par `services.factures.regler` (D4), frais aux mêmes règles ; annuler un règlement (`payee_le: null`) : direction seule (403), `motif` exigé (≥ 3, 422 `motif_requis`) ; date dans le futur, en période close ou avant la pièce → refus | `EcheanceLigne` (+ `etat`) | B92 |
+| 230 | GET | `/export/echeancier` | D, A | mêmes filtres | xlsx (feuilles Échéances, À dater, Par mois, Réglées, Écartées) | B109 |
 | 231 | GET | `/indicateurs/historique` | D, A | `?du=&au=` | `[IndicateurJour]` | B94 |
 | 232 | POST | `/indicateurs/photographier` | D | — | `IndicateurJour` (journalisé) | B99 |
-| 233 | GET | `/bilan` | D, A | `?mois=AAAA-MM` (mois valide, passé ou en cours) | `BilanMois` (JSON) | nouveau |
+| 233 | GET | `/bilan` | D, A | `?mois=AAAA-MM` (mois valide, passé ou en cours) | `BilanMois` (JSON) : celui du moteur + magasins et métiers (`stock_debut_magasins_kg`, `metiers_debut_kg`, `variation_metiers_kg`, `…_mad`), `du`, `au`, `mois_iso`, `sorties_nettes_kg`, `alerte_rouge` ; les sorties comptent la sortie annulée, l'annulation a sa ligne à part ; l'écart est une fraction | nouveau |
 | 234 | GET | `/documents/bilan` | D, A | `?mois=` | HTML A4 (papier à en-tête) | B95 |
 
 ### 1.24 Routes ajoutées par la conception des écrans (`ECRANS-PRO.md`) et pour la coexistence
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 235 | GET | `/controles/{code}` | D, A | `?date=&q=&apres=` | `Page[LigneControle]` (détail complet, cherchable ; la liste 212 n'en rend que les 200 premières en le disant) | B71 (détail) |
+| 235 | GET | `/controles/{code}` | D, A | `?date=&q=&apres=&limite=` | `PageControle` = `Page` (lignes avec les ids des fiches qu'elles nomment) + {code, libelle, gravite, quoi_faire, lien, colonnes} (détail complet, cherchable ; la liste 212 n'en rend que les 200 premières en le disant) | B71 (détail) |
 | 236 | GET | `/export/lots` | C (sans valeur pour L) | mêmes filtres que 107 | xlsx | nouveau |
 | 237 | GET | `/export/production` | C | `?onglet=glissant\|realise\|besoins&date=` | xlsx | nouveau |
 | 238 | GET | `/export/metiers` | C (valeur masquée pour L) | — | xlsx | nouveau |
 | 239 | GET | `/export/inventaires` | D, A | `?statut=` | xlsx | nouveau |
 | 240 | GET | `/export/inventaires/{id}` | D, A | — | xlsx (lignes, écarts en kg et en MAD) | nouveau |
 | 241 | GET | `/export/operations` | C (sans prix pour L ; types permis au rôle) | `?type=&statut=&q=` | xlsx | nouveau |
-| 242 | GET | `/export/plan-achat` | D, A | `?onglet=fournisseurs\|references&q=&date=` | xlsx (la liste affichée ; 151 reste le classeur complet) | nouveau |
+| 242 | GET | `/export/plan-achat` | D, A | `?onglet=fournisseurs\|references&q=&date=` + les filtres liés de l'écran : `statut, priorite, abc, fournisseur` (onglet références), `urgence, devise, pays` (onglet fournisseurs) | xlsx (la liste affichée, filtres compris ; 151 reste le classeur complet) | nouveau |
 | 243 | GET | `/reprise` | D, T | — | `EtatMiroir` {dernières exécutions, signature de la source, à jour: bool, rapport} | nouveau (coexistence) |
 | 244 | POST | `/reprise` | D | `{mode: tout, remplacer_activite: true, confirmation: "REMPLACER"}` | 202 `ExecutionReprise` (tâche ; sauvegarde « avant reprise » d'abord) | nouveau (coexistence) |
 
@@ -483,7 +489,7 @@ comprises) ; `GET /acces` et `GET /acces/qr` sont ouverts aussi à T ; `GET /ech
 reçoit `vue=consommation` ; `POST /commandes/{id}/approuver` reçoit `date` ; `PUT /dossiers/{id}/lignes/{lid}` accepte `cours: null` (« cours du jour ») ; `GET /dossiers/{id}` porte `a_rattacher` ; `GET /receptions/bobines` reçoit `matiere`. Le `PUT` d'une fiche reste un remplacement complet (l'écran envoie
 la fiche entière, y compris pour « désactiver ») : pas de corps partiel.
 
-**Total : 245 routes PRO** (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
+**Total : 246 routes PRO** (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
 service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/api/openapi.json`.
 
 ---
@@ -505,28 +511,43 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 | 75 | `POST /articles/composer` devient `GET /matieres/reference` | lecture (A.12-1) |
 | 79–80 | Import tableur : mêmes contrôles que la fiche, doublons, bornes, longueurs, `version` par ligne, empreinte d'aperçu ; colonne « Vider » explicite | B.13-14 |
 | 82 | Facteurs de coût inclus pour D, A (plus de 403 sur un second appel) | A.12-3 |
-| 99–100 | Montage : `version` d'étage, effet confirmé (`confirme_effet_kg` = effet calculé, sinon 409 « l'effet a changé »), trace en table | F19, empreinte |
+| 99–100 | Montage : `version` d'étage, effet confirmé (`confirme_effet_kg` = effet calculé, sinon 409 « l'effet a changé »), trace en table ; 99 ne remplace que les étages envoyés ; étage hors du métier → 404 | F19, empreinte |
+| 103, 104, 145, 149, 150, 209 | `statut` et `statut_couverture` rendus en **codes** (`RUPTURE`, `CRITIQUE`, `URGENT`, `ATTENTION`, `OK`, `NON_CONSOMMEE`) et `action` d'une ligne de stock en `CREER_BC` \| `AUCUNE` (`null` pour l'alimentation) au lieu des libellés à émoji de Gestion MP (« 🔴 CRITIQUE », « 📝 Créer BC - … ») : l'écran les traduit (`lib/statuts.ts`), les classeurs les écrivent en clair ; `relance` du plan d'achat sans émoji | vocabulaire de la base (lot RESTES3) |
+| 103, 104 | `/stock?date=` passé : le fil monté **de ce soir-là** (historique des montages) est compté, comme la Valorisation (210) ; chaque ligne porte `role_id`, `fournisseur_id` ; `EtatStock.magasin_ids` {code → id} (`par_magasin` reste par code) | deux pages, un chiffre (E-06, U8) ; liens de l'écran (lot RESTES3) |
+| 105, 108 | `MouvementLigne.devise` à `null` hors direction et achats | an. 27 : aucune devise lue par l'alimentation (lot RESTES3) |
+| 112 | `Tracabilite` + `matiere_id`, `ordre_id` ; chaque `EtapeTracee` + `matiere_id`, `ordre_id`, `document_type`, `document_id` | liens de l'écran (lot RESTES3) |
+| 101 | Origine « bureau » pour tout montage des routes 97 et 99, même d'un seul étage (`etage` nul) ; « téléphone » pour la route 100 | origine réelle (lot RESTES3) |
+| 135 | `OrdreResume.metier` = « CODE · Nom » (le code seul sans nom distinct) | champ serveur unique (ECRANS-PRO ; lot RESTES3) |
+| 152, 153 | `en_retard`, `arrivee_attendue`, `arrivee_sous_7_jours`, `kg_en_quarantaine` comptés au serveur ; la fiche dit `promesse_figee` ; chaque ligne garde `en_quarantaine` (reçu sous réserve, attendu jusqu'à sa libération) | P1-11, D-02 (lots RESTES3, V1) |
+| 176 | `Pesee.numero` d'un brouillon = « Brouillon » | vocabulaire « brouillon n° 6 » retiré (lot RESTES3) |
+| 175, 187, 228 | La recherche trouve un numéro à la ponctuation près (« FA-2026/117 » = « FA-2026-117 ») | lot RESTES3 (F5) |
+| 222, 223 | Lien de la notification d'un besoin : `/cockpit?signalement=` pour la direction, `/accueil?signalement=` pour les achats, `/atelier` pour l'alimentation | la direction n'a pas « Ma journée » (lot RESTES3) |
+| 6, 20 | QR en SVG **avec** l'espace de noms (`xmlns`) : il s'affiche dans une `<img>` | lot RESTES3 (F8) |
+| 242 | Filtres liés de l'écran appliqués au classeur : `statut`, `priorite`, `abc`, `fournisseur` (références), `urgence`, `devise`, `pays` (fournisseurs), valeurs affichées | ECRANS-PRO 4.28 (lot RESTES3) |
 | 117 | Plus de numéro de lot interne pris d'avance : case `lot_interne` | A.12-11, M65 |
-| 123 | Validation groupée : ce que le rôle ne peut pas valider est rendu dans `ignorés` avec la raison | A.12-4 |
+| 123 | Validation groupée : ce que le rôle ne peut pas valider est rendu dans `ignores` avec la raison | A.12-4 |
 | 128–132 | Suspension limitée au périmètre ; abandon conservé ; champ absent = inchangé | N3 ; B.13-15 |
 | 245 | Un inventaire validé s'annule (contre-passation unique, motif obligatoire, numéro gardé, état `annule`) au lieu de rester définitif | Gestion MP corrigé, étape 17 (U19) |
 | 141 | Annuler un ordre supprime ses brouillons de retour et le dit | B.13-13 |
 | 154 | « Prix du catalogue à confirmer » rendu effectif (prix catalogue posés, non confirmés) ; sinon bon sans prix | ECRANS synthèse 7 |
 | 158 | Approbation datée du jour réel d'envoi | A.12-15 |
-| 160 | Confirmation des prix refusée sur un brouillon non parti et sur un bon soldé ou annulé ; un `a_approuver` sans numéro repasse en brouillon comme pour un `PUT` | A.12-14 |
+| 160 | Confirmation des prix refusée sur un brouillon non parti, sur un `a_approuver` sans numéro (il n'est pas parti : le retour en brouillon ne s'applique donc jamais) et sur un bon soldé ou annulé | A.12-14 |
 | 161 | Jalons : champ absent = inchangé ; refusé sur un bon soldé ou annulé | A.12-16 |
 | 162 | Solder : motif facultatif gardé (`solde_origine = manuel`) | colonne réelle |
 | 167 | La lecture ne recale plus des objets en mémoire : le recalage est calculé (`services/receptions.recalage`) et rendu, il s'écrit à la modification et à la validation | A.12-27 |
 | 169 | Un camion en deux devises = une requête, une transaction | ECRANS synthèse 9 |
-| 173 | Une réception toute refusée s'annule (statut `annulee`, aucun mouvement) | A.12-12 |
+| 172 | Un blocage garde son code à la validation : 409 pour un état (excédent, bon clos ou pas parti, inventaire en cours, période close), 422 pour une saisie (deux postes qui valident la même réception : [200, 409], Gestion MP [200, 422]) | convention PRO |
+| 173 | Une réception toute refusée s'annule (statut `annulee`, aucun mouvement) ; annuler une validée exige un motif (3–300) | A.12-12 ; ECRANS-PRO 4.17 |
 | 174 | Facture : sémantique unique (absent = inchangé), réservée à une réception validée (le brouillon porte sa facture dans son corps) | A.12-17 |
+| 184 | Une réclamation close se complète encore (réponse, montant obtenu : l'avoir arrive après la clôture) sans changer son issue | R20r |
 | 190–191 | `PUT` n'accepte que ce qu'il modifie ; `date_arrivee` peut se vider | A.12-19 |
-| 204 | Annuler un dossier au lieu de le supprimer (numéro gardé, frais sortis du coût) | DONNEES 11 |
+| 192 | Rattacher par facture seulement (plus de `reception_ligne_ids`) | un dossier = une facture = une livraison (I3) |
+| 204 | Annuler un dossier au lieu de le supprimer, pour **tout** dossier, même saisi à la main (numéro gardé, frais sortis du coût, motif exigé) : plus aucune suppression | DONNEES 11, B-02 |
 | 205–208 | Statuts `ouvert`/`clos` en minuscules partout ; dates en vraies dates Excel ; titre corrigé | A.12-8/9/10 |
 | 212 | Écart (%) sur une seule échelle (pourcentage) ; synthèse = contrôles en anomalie **et** lignes | CONTROLES § 6 n° 1, 27 |
 | 212, 235 | C28 : délai lu dans `delai_frais_import_jours` (30 j), « …sans frais hors TVA » ; C29 : tolérance lue dans `toler_tva_import` (5 %), « TVA d'importation à plus de 5 % de la TVA attendue (20 % de la valeur en douane, droits et TPI compris) » | Gestion MP corrigé (DEFAUTS E-10) |
 | 216–220, 52, 106 | Exports homogènes : vraies dates, gravités traduites, mêmes filtres que l'écran, `date` acceptée partout | B.13-18 |
-| 229 | Un frais réglé ne redevient dû que par « annuler le règlement » explicite | I20 |
+| 229 | Un frais réglé ne redevient dû que par « annuler le règlement » explicite ; annuler un règlement (facture ou frais) : direction seule, motif exigé | I20 ; D4 |
 | 233 | Bilan : mois invalide → 422 ; kilos et dirhams sur la même base (annulations sur leur ligne) ; stock sur les métiers compté | B.13-9, 11 |
 | 234, 164, 114, 133 | Gabarits Jinja2 sur le papier à en-tête | PLAN |
 
@@ -753,19 +774,19 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 
 **Bilan** : 206 routes de Gestion MP → **202 reprises** (dont 8 éclatées en deux ou trois routes
 plus claires — A16, B11, B15, B19, B45, B83, B95, B97 — et 2 fondues dans une voisine — A19,
-A40), **4 mortes justifiées** (A67, B64, B77, B102). PRO compte 245 routes : 200 cibles directes
+A40), **4 mortes justifiées** (A67, B64, B77, B102). PRO compte 246 routes : 200 cibles directes
 des routes reprises, 8 nées d'un éclatement, **26 nouvelles** (contexte, données brutes,
 `PUT /moi`, appareils ×4, tâches, courriels, historique, notifications ×3, recherche, fiches à
 adresse stable ×7, versions du plan, montages, commentaire de lot, fiche stock d'une matière,
 bilan en JSON), **8 ajoutées** par la conception des écrans (235–242 : détail d'un contrôle, sept exports), **2 pour la coexistence** avec Gestion MP (243–244 : état et rafraîchissement du miroir), et **1 reprise
-de Gestion MP corrigé** (245 : annulation d'un inventaire validé).
+de Gestion MP corrigé** (245 : annulation d'un inventaire validé), et **1 ajoutée par le lot RESTES3** (246 : brouillons qui empêcheraient de clore une période).
 
 ---
 
 ## 4. Matrice des droits
 
 Déclarée une fois (`securite/matrice.py`, générée depuis les dépendances des routes et exportée en
-`tests/matrice_droits.csv`) : 245 routes × {anonyme, D, A, L, T} → code attendu. L'essai
+`tests/matrice_droits.csv`) : 246 routes × {anonyme, D, A, L, T} → code attendu. L'essai
 `test_matrice_droits` la rejoue entièrement (paramètres remplis par les fabriques) ; une route
 nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 `test_toute_route_declare_ses_roles` échoue si une route (hors 1, 2, 8, 9, 10, 22) n'a pas de

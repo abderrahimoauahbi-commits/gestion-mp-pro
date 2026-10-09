@@ -524,10 +524,15 @@ FK composite `(metier_id, etage)` → `metier_etage` ON DELETE CASCADE (**l'éta
 garanti par la base ; retirer un étage retire ses montages) · `matiere_id` FK · `metres NUMERIC(8,3)` CK `>= 0` · `pourcentage NUMERIC(9,6)`
 CK `BETWEEN 0 AND 100` · `commentaire VARCHAR(300)` · UQ `(metier_id, etage, matiere_id)`.
 
-`montage_evenement` (nouveau ; ← journal `action = 'montage'`) : `id` · `metier_id` · `etage` O (NULL = tout
-le métier ; CK `BETWEEN 1 AND 40`) · `quand` · `par_id` · `avant JSONB` / `apres JSONB` (lignes de l'étage) · `effet_kg NUMERIC(14,3)`
+`montage_evenement` (nouveau ; ← journal `action = 'montage'`) : `id` · `metier_id` · `etage` O (NULL = plusieurs
+étages touchés par le geste ; CK `BETWEEN 1 AND 40`) · `quand` · `par_id` · `avant JSONB` / `apres JSONB` (lignes des étages
+touchés, chacune `{etage, matiere_id, reference, metres, pourcentage, commentaire, kg}`) · `effet_kg NUMERIC(14,3)`
 (variation du stock sur les métiers annoncée et confirmée) · `alerte VARCHAR(300)` (« plus que ce
 qui est parti en 30 jours ») · IX `(metier_id, quand)`.
+
+Pas de colonne d'origine : l'origine rendue par la route 101 est **déduite** de `etage` — renseigné (route 100, un
+étage au téléphone) = « téléphone » ; NULL (routes 97 et 99 au bureau, **même d'un seul étage** — RESTES3) = « bureau ». Les kilos avant/après d'un événement sont la somme des `kg` de ses lignes `avant`/`apres`. Le rejeu de
+cette table donne le fil monté à toute date (valorisation, cockpit, contrôles, bilan).
 
 #### 3.2.11 `poste_frais` ← `poste_frais`
 
@@ -813,6 +818,7 @@ CK `prix = 0 OR devise IS NOT NULL`.
 | valide_par_id, valide_le | | O | | CK `ck_inventaire_validation_date` : `(statut IN ('valide', 'annule')) = (valide_le IS NOT NULL)` (un inventaire annulé garde sa validation) | | valide_par, valide_le |
 | abandonne_par_id, abandonne_le | | O | | CK `ck_inventaire_abandon_date` : `(statut = 'abandonne') = (abandonne_le IS NOT NULL)` | ouvert puis laissé : rien n'est ajusté | nouveau |
 | annule_par_id, annule_le | | O | | CK `ck_inventaire_annulation_date` : `(statut = 'annule') = (annule_le IS NOT NULL)` | validé puis défait : ses ajustements sont contre-passés (une fois : UQ `mouvement.contrepasse_id`), datés comme eux | GMP corrigé, étape 17 |
+| abandon_motif | VARCHAR(300) | | `''` | | motif de l'abandon (exigé par le service, ≥ 3 caractères) ; révision 0005 (avant : rangé dans `annulation_motif`) | nouveau (RESTES3) |
 | annulation_motif | VARCHAR(300) | | `''` | | motif de l'annulation (exigé par le service, ≥ 3 caractères) | GMP corrigé, étape 17 |
 | version | | | | | | nouveau |
 
@@ -1300,7 +1306,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | | Gestion MP | PRO |
 |---|---|---|
 | Tables | 49 | **71** (70 tables métier et techniques + `alembic_version`) |
-| Colonnes | 405 | **685** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004) |
+| Colonnes | 405 | **686** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
 | Clés étrangères | 73 | **171**, dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
 | CHECK | 39 | **291** : 176 nommés à la main, 41 `…_enum`, 74 `…_nombre` (refus de NaN) |

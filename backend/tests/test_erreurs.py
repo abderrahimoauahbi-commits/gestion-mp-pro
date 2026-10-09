@@ -318,13 +318,13 @@ def test_refus_mal_forme_est_une_faute_de_programmation() -> None:
 def devises_essai() -> Iterator[None]:
     yield
     with moteur().begin() as c:
-        c.execute(text("DELETE FROM devise_cours WHERE devise LIKE 'Q%'"))
-        c.execute(text("DELETE FROM devise WHERE code LIKE 'Q%'"))
+        c.execute(text("DELETE FROM devise_cours WHERE devise LIKE 'QQ%'"))
+        c.execute(text("DELETE FROM devise WHERE code LIKE 'QQ%'"))
 
 
 def _codes() -> list[str]:
     with moteur().connect() as c:
-        return list(c.execute(text("SELECT code FROM devise WHERE code LIKE 'Q%'")).scalars())
+        return list(c.execute(text("SELECT code FROM devise WHERE code LIKE 'QQ%'")).scalars())
 
 
 def _refus(r: Response, code: str, debut: str) -> None:

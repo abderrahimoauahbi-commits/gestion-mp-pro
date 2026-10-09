@@ -27,7 +27,12 @@ def _ligne_de_stock() -> type[Sortie]:
     champs: dict[str, Any] = {
         f.name: (indices[f.name] | None, None) for f in dataclasses.fields(_LigneDuMoteur)
     }
-    champs |= {"matiere_id": (int | None, None), "valeur_machine_mad": (float | None, None)}
+    champs |= {
+        "matiere_id": (int | None, None),
+        "role_id": (int | None, None),
+        "fournisseur_id": (int | None, None),
+        "valeur_machine_mad": (float | None, None),
+    }
     return create_model("LigneStock", __base__=Sortie, __doc__="Une matière à la date.", **champs)
 
 
@@ -39,6 +44,9 @@ class EtatStock(Sortie):
 
     date_reference: date
     magasins: list[str]
+    magasin_ids: dict[str, int] = Field(
+        description="code du magasin → id (`par_magasin` est par code)"
+    )
     lignes: list[LigneStock]  # type: ignore[valid-type]
 
 
@@ -140,7 +148,7 @@ class MouvementLigne(Sortie):
     magasin: str
     quantite: Nombre
     prix: Nombre | None
-    devise: str
+    devise: str | None = Field(description="null hors direction et achats (an. 27)")
     cours: Nombre | None
     document: str
     document_id: int | None
@@ -224,11 +232,17 @@ class EtapeTracee(Sortie):
     quantite: float
     lot: str
     lot_id: int | None
+    matiere_id: int | None
     ordre: str
+    ordre_id: int | None
     magasin_source: str
     magasin_destination: str
     utilisateur: str
     document: str
+    document_type: str | None = Field(
+        description="reception, ordre, operation, inventaire, reprise"
+    )
+    document_id: int | None = Field(description="la fiche du document (lien), null pour la reprise")
     annulation: bool
     annule: bool
 
@@ -238,7 +252,9 @@ class Tracabilite(Sortie):
 
     lot_id: int | None
     lot: str
+    ordre_id: int | None
     ordre: str
+    matiere_id: int | None
     matiere: str
     references: list[str]
     lots: list[str]

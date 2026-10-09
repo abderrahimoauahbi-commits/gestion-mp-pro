@@ -140,7 +140,8 @@ def test_relations_chargees_explicitement(s: Session) -> None:
     assert [x.quantite for x in chargee.lignes] == [Decimal("10.000")]
     s.delete(chargee)
     s.flush()
-    assert s.scalar(text("SELECT count(*) FROM commande_ligne")) == 0
+    restantes = text("SELECT count(*) FROM commande_ligne WHERE commande_id = :c")
+    assert s.scalar(restantes, {"c": c.id}) == 0
 
 
 def test_tables_d_activite() -> None:

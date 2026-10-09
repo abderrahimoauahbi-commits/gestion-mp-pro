@@ -1,7 +1,7 @@
 """Les réclamations aux fournisseurs (lot D4) : ce que le fournisseur a livré, bornées par le
 reçu, la date et la validation, sur la ligne en cause (A-10), suivies jusqu'à leur issue qui ne
 change plus sans réouverture (A-22). Preuves héritées de `test_suivi`, `test_audit2_achats`,
-`test_commandes_receptions` (domaine 5). Les réclamations sont datées en 2025 (`JOUR`).
+`test_commandes_receptions` (domaine 5). Les réclamations sont datées du 3 août 2026 (`JOUR`).
 """
 
 from __future__ import annotations
@@ -13,13 +13,10 @@ from fabriques.receptions import (
     Quai,
     camion,
     j,
-    menage,  # noqa: F401 — fixture du module
     ok,
     recevoir,
 )
 from fastapi.testclient import TestClient
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture
@@ -65,13 +62,13 @@ def test_une_reclamation_se_suit_jusqu_a_sa_cloture(
     constat = "Bobines à 2,9 kg au lieu de 3,15"
     x = ouvrir(achats, fournisseur_id=mad.fournisseur_id, motif="Poids des bobines", quantite=120,
                montant_demande=300, devise="USD", description=constat)  # fmt: skip
-    assert x["numero"].startswith("RCL-2025-") and x["statut"] == "ouverte"
+    assert x["numero"].startswith("RCL-2026-") and x["statut"] == "ouverte"
     assert x["motif"] == "poids_bobines" and x["motif_libelle"] == "Poids des bobines"
     refus = action(achats, x, "clore", 422, reponse="ok")
     assert refus["detail"].startswith("Pour clore, dire comment elle s'est terminée")
     x = action(achats, x, "clore", reponse="Avoir accordé", issue="Avoir", montant_obtenu=250)
     assert x["statut"] == "close" and x["montant_obtenu"] == 250 and x["issue"] == "avoir"
-    assert x["close_le"] == "2026-10-08" and x["jours"] == 281
+    assert x["close_le"] == "2026-10-08" and x["jours"] == 66  # du 03/08 au 08/10/2026
     assert alimentation.get("/api/reclamations").status_code == 403
 
 
@@ -97,7 +94,7 @@ def test_une_reclamation_reste_dans_le_reel(achats: TestClient, mad: Achat, quai
     assert refus["detail"] == "Une réclamation ne s'ouvre pas dans le futur."
     refus = ouvrir(achats, 422, **base, reception_id=r["id"], ouverte_le=j(-1))
     assert (
-        refus["detail"] == "Une réclamation ne précède pas la réception qu'elle vise (31/12/2025)."
+        refus["detail"] == "Une réclamation ne précède pas la réception qu'elle vise (03/08/2026)."
     )
     b = camion(achats, mad.fournisseur_id, [ligne | {"lot_numero": "RCL-2", "quantite_pesee": 10}])
     refus = ouvrir(achats, 409, **base, reception_id=b["id"])

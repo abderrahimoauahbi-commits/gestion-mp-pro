@@ -35,7 +35,7 @@ def test_le_moteur_pro_rend_les_sorties_de_gestion_mp(nom: str) -> None:
     assert attendu["commit_gestion_mp"] == entete["commit_gestion_mp"] == COMMIT_GESTION_MP
     jour = date.fromisoformat(entete["jour"])
     aujourdhui = date.fromisoformat(entete["aujourdhui"])
-    obtenu = jeux.propre(sorties_du_moteur(complet, jour, aujourdhui))
+    obtenu = jeux.comme_gestion_mp(jeux.propre(sorties_du_moteur(complet, jour, aujourdhui)))
     gestion_mp = attendu["sorties"]
     assert set(obtenu) == set(gestion_mp)
     gestion_mp["controles"] = _par_code(gestion_mp["controles"])

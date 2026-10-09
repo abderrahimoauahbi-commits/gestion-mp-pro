@@ -68,11 +68,13 @@ def _decision_des_achats(s: Session, qui: Acteur, o: Operation, geste: str) -> N
         return
     libere, met = lecture.passages(o, b.contexte(s, [o]))
     if libere:
-        raise Refus.droit(f"{geste} une libération de quarantaine est une décision des achats.")
+        raise Refus.droit(
+            f"{geste} une libération de quarantaine est une décision de la direction ou des achats."
+        )
     if met and geste == "Annuler":
         raise Refus.droit(
             "Annuler une mise en quarantaine en ferait sortir la matière : c'est une décision "
-            "des achats, après contrôle."
+            "de la direction ou des achats, après contrôle."
         )
 
 

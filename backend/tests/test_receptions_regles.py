@@ -21,7 +21,6 @@ from fabriques.receptions import (
     geste,
     j,
     ligne_du_bon,
-    menage,  # noqa: F401 — fixture du module
     ok,
     parti,
     performance,
@@ -34,8 +33,6 @@ from sqlalchemy import select, update
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Matiere, ReceptionLigne
 from gestion_mp_pro.services import horloge
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture
@@ -353,12 +350,12 @@ def test_lot_fournisseur_forme_lot_ne_decale_pas_la_serie(
     }
     premier = geste(achats, camion(achats, mad.fournisseur_id, [interne]), "valider")
     n = int(premier["lignes"][0]["lot_numero"].rsplit("-", 1)[1])
-    fournisseur = {**interne, "lot_interne": False, "lot_numero": "LOT-2025-9999"}
+    fournisseur = {**interne, "lot_interne": False, "lot_numero": "LOT-2026-9999"}
     geste(achats, camion(achats, mad.fournisseur_id, [fournisseur]), "valider")
-    suivant = f"LOT-2025-{n + 1:04d}"
+    suivant = f"LOT-2026-{n + 1:04d}"
     pris = {**interne, "lot_interne": False, "lot_numero": suivant}
     geste(achats, camion(achats, mad.fournisseur_id, [pris]), "valider")
     r = geste(achats, camion(achats, mad.fournisseur_id, [interne]), "valider")
-    assert r["lignes"][0]["lot_numero"] == f"LOT-2025-{n + 2:04d}"
+    assert r["lignes"][0]["lot_numero"] == f"LOT-2026-{n + 2:04d}"
     with sessions()() as s:
         assert s.scalar(select(Matiere.reference).where(Matiere.id == m))

@@ -23,8 +23,8 @@ from gestion_mp_pro.modeles import (
     Utilisateur,
 )
 from gestion_mp_pro.modeles.enums import QualiteReception, StatutDocument, StatutDossier
-from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import numerotation
+from gestion_mp_pro.services.recherche import trouve
 
 
 @dataclass(frozen=True)
@@ -161,8 +161,4 @@ def _passe(x: FactureResume, f: FiltresFactures) -> bool:
     """Recherche multi-mots (n°, fournisseur, réceptions) et « sans dossier »."""
     if f.sans_dossier and x.dossier is not None:
         return False
-    mots = normaliser(f.q).split()
-    if not mots:
-        return True
-    texte = normaliser(" ".join([x.numero, x.fournisseur, *(r.numero for r in x.receptions)]))
-    return all(m in texte for m in mots)
+    return trouve(f.q, x.numero, x.fournisseur, *(r.numero for r in x.receptions))

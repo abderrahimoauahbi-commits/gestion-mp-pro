@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from gestion_mp_pro.calcul.constantes import LIBELLES_STATUT
 from gestion_mp_pro.calcul.controles.base import Controle
 from gestion_mp_pro.calcul.plan_achat import GroupeFournisseur, LignePlanAchat
 from gestion_mp_pro.calcul.stock import LigneStock
@@ -17,6 +18,11 @@ from gestion_mp_pro.services.plan_achat import Pilotage
 def _a(nom: str, format_: str = "", *, monetaire: bool = False, titre_: str = "") -> Colonne:
     """Une colonne qui lit un attribut."""
     return Colonne(titre_ or nom, lambda x: getattr(x, nom), format_, monetaire=monetaire)
+
+
+def _statut() -> Colonne:
+    """Le statut d'une matière en clair (le moteur rend un code, RESTES3)."""
+    return Colonne("Statut", lambda x: LIBELLES_STATUT.get(x.statut, x.statut))
 
 
 def _stock(p: Pilotage) -> Feuille:
@@ -30,7 +36,7 @@ def _stock(p: Pilotage) -> Feuille:
     colonnes = [
         _a("reference", titre_="Référence"), _a("designation", titre_="Désignation"),
         Colonne("Rôle", role), _a("fournisseur", titre_="Fournisseur"),
-        _a("statut", titre_="Statut"), _a("stock_net", "kg", titre_="Stock net"),
+        _statut(), _a("stock_net", "kg", titre_="Stock net"),
         _a("stock_machine", "kg", titre_="Sur les métiers"),
         _a("stock_quarantaine", "kg", titre_="Quarantaine"),
         _a("stock_disponible", "kg", titre_="Disponible"),
@@ -64,7 +70,7 @@ def _plan(p: Pilotage) -> Feuille:
 
     colonnes = [
         _a("reference", titre_="Référence"), _a("fournisseur", titre_="Fournisseur"),
-        _a("classe_abc", titre_="Classe"), _a("statut", titre_="Statut"),
+        _a("classe_abc", titre_="Classe"), _statut(),
         _a("quantite", "kg", titre_="Quantité (kg)"),
         Colonne("Soit (ml, indicatif)", metres, "entier"),
         Colonne("Unité de commande", lambda x: x.unite_commande or "kg"),

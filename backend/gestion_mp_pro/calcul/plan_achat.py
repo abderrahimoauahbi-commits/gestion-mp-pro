@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 
 from gestion_mp_pro.calcul.constantes import (
     ACTIONS_TIER,
+    LIBELLES_STATUT,
     POIDS_CLASSE,
     STATUTS,
     STATUTS_EN_ALERTE,
@@ -133,7 +134,8 @@ def _ligne(ligne: LigneStock, niveau: str) -> LignePlanAchat:
         risque=ligne.sourcing,
         action=ACTIONS_TIER[niveau],
         relance=(
-            f"{ligne.statut} — {ligne.reference} ({ligne.fournisseur}) — "
+            f"{LIBELLES_STATUT.get(ligne.statut, ligne.statut)} — {ligne.reference} "
+            f"({ligne.fournisseur}) — "
             f"Qté: {arrondi(ligne.quantite_a_commander):.0f} kg — "
             f"{arrondi(ligne.montant_a_commander):.0f} {ligne.devise} — "
             f"Délai: {arrondi(ligne.delai_jours):.0f}j"

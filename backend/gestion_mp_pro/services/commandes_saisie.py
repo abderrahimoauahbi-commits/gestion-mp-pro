@@ -160,23 +160,33 @@ def changer_promesse(
     c.date_livraison_prevue = nouvelle
 
 
+def promesse_figee(c: Commande, fige: bool) -> str | None:
+    """Pourquoi la date promise d'un bon parti ne se change plus (X-CMD-12, X-CMD-13), ou
+    `None` : la fiche le dit avant la saisie (RESTES3, F4)."""
+    ancienne = c.date_livraison_prevue
+    if not c.numero:
+        return None
+    if fige:
+        if ancienne is None:
+            return f"La date promise est figée depuis la confirmation des prix. {ETA}"
+        return (
+            f"La livraison promise ({ancienne:%d/%m/%Y}) est figée depuis la confirmation des "
+            f"prix : elle mesure la ponctualité. {ETA}"
+        )
+    if ancienne and ancienne < horloge.aujourd_hui():
+        return (
+            f"La livraison était promise pour le {ancienne:%d/%m/%Y}, date passée : elle ne "
+            f"se repousse plus. {ETA}"
+        )
+    return None
+
+
 def _verifier_promesse_partie(c: Commande, nouvelle: date, fige: bool) -> None:
     """Les refus X-CMD-12 à X-CMD-14 (bon parti)."""
     ancienne = c.date_livraison_prevue
-    if fige:
-        raise Refus.saisie(
-            f"La livraison promise ({ancienne:%d/%m/%Y}) est figée depuis la confirmation des "
-            f"prix : elle mesure la ponctualité. {ETA}"
-            if ancienne
-            else f"La date promise est figée depuis la confirmation des prix. {ETA}",
-            code="date_figee",
-        )
-    if ancienne and ancienne < horloge.aujourd_hui() and nouvelle > ancienne:
-        raise Refus.saisie(
-            f"La livraison était promise pour le {ancienne:%d/%m/%Y}, date passée : elle ne "
-            f"se repousse plus. {ETA}",
-            code="date_figee",
-        )
+    raison = promesse_figee(c, fige)
+    if raison is not None and (fige or (ancienne is not None and nouvelle > ancienne)):
+        raise Refus.saisie(raison, code="date_figee")
     if nouvelle < c.date_commande:
         raise Refus.saisie(
             f"La livraison prévue ({nouvelle:%d/%m/%Y}) précède la date du bon "

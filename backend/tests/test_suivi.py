@@ -50,6 +50,11 @@ def test_l_atelier_signale_un_besoin_que_les_achats_traitent(
         avis = s.query(Notification).filter_by(objet="signalement", objet_id=x["id"]).all()
         assert {n.role for n in avis if n.role} == {"direction", "achats"}
         assert any(n.lien == "/atelier" for n in avis if n.utilisateur_id)
+        liens = {n.role: n.lien for n in avis if n.role}  # RESTES3 (F1) : pas d'accueil pour D
+        assert liens == {
+            "direction": f"/cockpit?signalement={x['id']}",
+            "achats": f"/accueil?signalement={x['id']}",
+        }
     assert administrateur.get("/api/signalements").status_code == 403
 
 
