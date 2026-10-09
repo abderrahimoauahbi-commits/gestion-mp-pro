@@ -2,7 +2,6 @@
 
 /* Trois cartes côte à côte qui prennent la hauteur restante ; chacune fait défiler sa liste. */
 .grille {
-  position: relative; /* le texte masqué d'un bouton reste dans la page qui défile (téléphone) */
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--espace-3);
