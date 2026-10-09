@@ -14,13 +14,14 @@ from decimal import Decimal
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.documents import SOCIETE, lire_qr, reglages, svgs, textes
-from fabriques.stock import entree, lot, magasin, matiere, unique
+from fabriques.stock import entree, lot, matiere, unique
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.db import fabrique
 from gestion_mp_pro.documents import format as fmt
 from gestion_mp_pro.documents import rendu
+from gestion_mp_pro.modeles import Magasin
 from gestion_mp_pro.modeles.enums import TypeMagasin
 from gestion_mp_pro.services import horloge
 
@@ -235,7 +236,11 @@ def test_un_lot_en_quarantaine_ne_sort_pas(base: Session, achats: TestClient) ->
     """« QUARANTAINE — NE PAS SORTIR » encadré ; en partie seulement : « dont … en quarantaine »."""
     m = matiere(base, unique("Fil bloqué"))
     tout, part = lot(base, m, numero=unique("QT")), lot(base, m, numero=unique("QP"))
-    quarantaine = magasin(base, TypeMagasin.quarantaine)
+    quarantaine = Magasin(
+        code=unique("QUAR"), nom="Quarantaine d'essai", type=TypeMagasin.quarantaine
+    )
+    base.add(quarantaine)  # à soi : le magasin semé reste vide (essais des référentiels)
+    base.flush()
     entree(base, tout, 50, g=quarantaine)
     entree(base, part, 70)
     entree(base, part, 30, g=quarantaine)

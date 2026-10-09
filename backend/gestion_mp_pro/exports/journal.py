@@ -50,6 +50,7 @@ def colonnes(voit_prix: bool) -> tuple[Colonne, ...]:
     """Les colonnes du journal ; avant/après sans prix pour qui ne les voit pas."""
 
     def lisible(champs: dict[str, Any] | None) -> str:
+        """Les champs changés, sans prix pour qui ne les voit pas."""
         if champs is None:
             return ""
         return _changements(champs if voit_prix else sans_prix(champs))  # type: ignore[arg-type]

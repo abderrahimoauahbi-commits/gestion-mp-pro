@@ -145,6 +145,7 @@ def _filtre(fonction: Callable[..., str]) -> Callable[..., str]:
 
     @pass_context
     def filtre(contexte: Context, valeur: Any, *args: Any) -> str:
+        """La fonction de `format`, dans la langue du document."""
         return fonction(valeur, *args, langue=contexte.get("langue", "fr"))
 
     return filtre
