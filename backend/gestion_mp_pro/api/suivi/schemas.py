@@ -14,6 +14,7 @@ from pydantic import Field
 
 from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.api.pilotage.schemas import du_moteur
+from gestion_mp_pro.calcul.production import ConsommationOrdre as _ConsommationOrdre
 from gestion_mp_pro.calcul.suivi import Echeance
 from gestion_mp_pro.calcul.suivi_bilan import BilanMois as _BilanMois
 from gestion_mp_pro.modeles import longueurs as L
@@ -136,10 +137,17 @@ class IndicateurJour(Sortie):
 
 # ── Bilan du mois (233) ───────────────────────────────────────────────────────────────
 
+# Nom propre au bilan : la dataclass du moteur porterait sinon le nom `ConsommationOrdre`, déjà
+# pris par le schéma de la route 143, et la génération des types de l'écran renommerait l'un.
+EcartOrdreBilan = du_moteur(
+    _ConsommationOrdre, "EcartOrdreBilan", "Un ordre du mois et son écart au prévu (bilan)."
+)
+
 BilanMois = du_moteur(
     _BilanMois,
     "BilanMois",
     "Le bilan matières d'un mois : magasins et métiers, en kilos et en dirhams.",
+    ecarts_ordres=(list[EcartOrdreBilan], ...),  # type: ignore[valid-type]
     mois_iso=(str, ...),
     du=(date, ...),
     au=(date, ...),
