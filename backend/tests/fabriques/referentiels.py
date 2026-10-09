@@ -24,6 +24,7 @@ import itertools
 import random
 import string
 from collections.abc import Callable
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -61,6 +62,7 @@ __all__ = [
     "poste_seme",
     "qualite",
     "role_id",
+    "stock_initial",
     "unique",
     "valeur_classification",
 ]
@@ -313,5 +315,39 @@ def qualite(
         for mid, part in (recette or {}).items():
             x.add(Recette(qualite_id=q.id, matiere_id=mid, pourcentage=Decimal(str(part))))
         return q.id
+
+    return _ecrire(s, faire)
+
+
+def stock_initial(
+    matiere_id: int,
+    kg: float | str,
+    *,
+    magasin_id: int | None = None,
+    prix: str = "0",
+    devise: str = "MAD",
+    le: date | None = None,
+    s: Session | None = None,
+) -> int:
+    """Du stock d'ouverture sur une matière (par le seul chemin, `services/stock`) ; rend le lot."""
+    from gestion_mp_pro.modeles.enums import DocumentMouvement, TypeMouvement
+    from gestion_mp_pro.services import horloge, lots, stock
+
+    def faire(x: Session) -> int:
+        jour = le or horloge.aujourd_hui()
+        nouveau = lots.lot_ou_creer(x, matiere_id, unique("L"), jour)
+        stock.ecrire(
+            x,
+            type=TypeMouvement.OUVERTURE,
+            lot=nouveau,
+            magasin_id=magasin_id or magasin_seme(s=x),
+            quantite=Decimal(str(kg)),
+            jour=jour,
+            piece=stock.Piece(DocumentMouvement.reprise, None, ""),
+            auteur_id=None,
+            prix=Decimal(prix),
+            devise=devise,
+        )
+        return nouveau.id
 
     return _ecrire(s, faire)
