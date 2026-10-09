@@ -21,3 +21,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | R1 | Mohamed (à la livraison) | 4 réceptions de Gestion MP payées en deux devises (LOMAT, USD et EUR) : reprises en une réception (devise de la facture en en-tête, prix des lignes intacts), signalé. À proposer : garder ou scinder. |
 | R1 | docs | MODELE-DONNEES § 10 : `--date-limite` non fait ; options `--cible`, `--pieces-source`, `--rapport`, `--genre` ; correspondances des tables enfants par parent ; le vidage garde les fichiers des pièces jointes. |
 | R1 | D10 | `reprise/sauvegarde.py` est un `pg_dump` minimal : le remplacer par le service de sauvegarde de D10. |
+| D9 | docs | API-PRO 114 « HTML A4 » : fait en étiquettes 100 × 70 mm, une par page (comme Gestion MP et ECRANS-PRO). ECRANS-PRO 4.29 : le bon fournisseur est en anglais jusque dans l'en-tête (« HEAD OFFICE », « BANKS », décision du 8 octobre) — corriger le document. |
+| D9 | X1 | Caddy ne doit pas remplacer la CSP posée par l'application (le bouton « Imprimer » est autorisé par son empreinte sha256). |
+| D9 | S4 | Étiquettes (`lots_lecture.etiquettes`) : kilos selon la règle § 9.3 (espace insécable, décimales) ; champ « ≈ N bobines » manquant. |
