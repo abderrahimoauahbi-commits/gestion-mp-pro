@@ -75,7 +75,7 @@ quote-style = "double"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["gestion_mp_pro/services", "gestion_mp_pro/calcul"]
+files = ["gestion_mp_pro/services", "gestion_mp_pro/calcul", "gestion_mp_pro/reprise"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -18,3 +18,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D1 | D9 | Les classeurs des référentiels passent par `exports/referentiels.classeur` en attendant `exports/classeur.py`. |
 | D1 | docs | Schémas enrichis (routes 24, 26, 27, 28, 34, 38, 42, 57, 62, 64, 70–71, 77, 79–80 : voir docs/lots/D1.md § 4) ; ECRANS-PRO P7 « Désactiver » à corps partiel contre API-PRO § 1.24 (fiche entière, suivi) ; `?version=` facultatif sur les suppressions 41, 63, 68, 74. |
 | D1 | tous | `test_catalogue_api.py` (OpenAPI = API-PRO) n'existe pas encore : à écrire avant la recette (V5). |
+| R1 | Mohamed (à la livraison) | 4 réceptions de Gestion MP payées en deux devises (LOMAT, USD et EUR) : reprises en une réception (devise de la facture en en-tête, prix des lignes intacts), signalé. À proposer : garder ou scinder. |
+| R1 | docs | MODELE-DONNEES § 10 : `--date-limite` non fait ; options `--cible`, `--pieces-source`, `--rapport`, `--genre` ; correspondances des tables enfants par parent ; le vidage garde les fichiers des pièces jointes. |
+| R1 | D10 | `reprise/sauvegarde.py` est un `pg_dump` minimal : le remplacer par le service de sauvegarde de D10. |
