@@ -95,6 +95,15 @@ describe('Fiche dossier › clôture', () => {
   })
 })
 
+describe('Fiche dossier › pièces jointes', () => {
+  it('ouvert : joindre et retirer ; clos : joindre seulement ; annulé : lecture', async () => {
+    const { modePieces } = await import('./FicheDossier')
+    expect(modePieces('ouvert')).toBe('complet')
+    expect(modePieces('clos')).toBe('joindre')
+    expect(modePieces('annule')).toBe('lecture')
+  })
+})
+
 describe('Fiche dossier › frais', () => {
   it('un frais réglé garde poste, montant, marchandise et ne se retire pas (raison dite)', async () => {
     const d = donnees()

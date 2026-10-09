@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { Historique } from '../../composants/documents/Historique'
-import { PiecesJointes } from '../../composants/documents/PiecesJointes'
+import { PiecesJointes, type ModePieces } from '../../composants/documents/PiecesJointes'
 import { Fenetre } from '../../composants/mise-en-page/Fenetre'
 import { Onglets } from '../../composants/mise-en-page/Onglets'
 import { Badge } from '../../composants/retour/Badge'
@@ -62,6 +62,12 @@ function Badges({ d }: { d: DossierFiche }) {
   if (d.statut === 'clos') return <Badge ton="ok">Clos le {horodatage(d.clos_le)}</Badge>
   if (d.statut === 'annule') return <Badge ton="neutre">Annulé le {horodatage(d.annule_le)}</Badge>
   return <Badge ton="attention">Ouvert</Badge>
+}
+
+/** Ouvert : joindre et retirer ; clos : joindre seulement (le serveur refuse le retrait) ; annulé : lecture. */
+export function modePieces(statut: string): ModePieces {
+  if (statut === 'ouvert') return 'complet'
+  return statut === 'clos' ? 'joindre' : 'lecture'
 }
 
 const LIBELLES: Record<Volet, { libelle: string; court?: string }> = {
@@ -132,7 +138,7 @@ function Contenu({
             d’origine, les factures de frais et les quittances : tout ce qui justifie le coût du dossier, même
             clos.
           </Note>
-          <PiecesJointes objet="dossier" id={d.id} lectureSeule={d.statut === 'annule'} />
+          <PiecesJointes objet="dossier" id={d.id} mode={modePieces(d.statut)} />
         </div>
       )
     case 'facture':

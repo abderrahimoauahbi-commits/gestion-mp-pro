@@ -3,15 +3,11 @@
  * identifiant lu dans `ids_dossiers`) en emportant l'adresse de l'analyse (`state.retour`) : la
  * fiche, fermée, ramène à l'analyse telle qu'on l'avait filtrée (ECRANS-PRO 5.16, 5.17). Une
  * référence mène à sa fiche matière quand le rôle peut l'ouvrir.
- *
- * `LienDocument` ne porte pas d'état de navigation : le lien du dossier reprend son adresse
- * (`adresseDocument`) et son texte (`numeroOuEtat`) avec un `Link` qui le porte.
  */
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 
-import { adresseDocument, LienDocument } from '../../../composants/documents/LienDocument'
+import { LienDocument } from '../../../composants/documents/LienDocument'
 import { nombre } from '../../../lib/format'
-import { numeroOuEtat } from '../../../lib/statuts'
 import styles from './revient.module.css'
 
 /** Ce que les colonnes savent pour faire leurs liens. */
@@ -32,18 +28,14 @@ export function useRetour(): string {
 
 /** Le n° d'un dossier, lien vers sa fiche (l'adresse de l'analyse en retour). */
 export function LienDossier({ numero, liens }: { numero: string; liens: Liens }) {
-  const id = liens.ids[numero]
-  const texte = numeroOuEtat(numero)
-  if (id == null) return <span>{texte}</span>
   return (
-    <Link
-      to={adresseDocument('dossier', id)}
+    <LienDocument
+      genre="dossier"
+      id={liens.ids[numero]}
+      numero={numero}
+      titre="Ouvrir le dossier"
       state={{ retour: liens.retour }}
-      title="Ouvrir le dossier"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {texte}
-    </Link>
+    />
   )
 }
 
