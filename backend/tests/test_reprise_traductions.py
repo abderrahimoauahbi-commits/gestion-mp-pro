@@ -50,6 +50,19 @@ def reprise(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Resultat
     supprimer_base(CIBLE)
 
 
+@pytest.fixture
+def puis_reprendre(reprise: tuple[Resultat, Path]) -> Iterator[tuple[Resultat, Path]]:
+    """Un essai qui vide la cible : la reprise est refaite après lui, pour que les autres essais
+    du module la lisent entière quel que soit l'ordre (RESTES3 : ordre aléatoire)."""
+    yield reprise
+    racine = reprise[1].parent
+    supprimer_base(CIBLE)
+    cible_migree(CIBLE)
+    shutil.rmtree(racine / "cible", ignore_errors=True)
+    r = reprendre((racine / "source", racine / "cible"))
+    assert r.reussie, r.rapport
+
+
 def valeurs(sql: str) -> dict[Any, Any]:
     """Les deux premières colonnes d'une requête en dictionnaire."""
     return {a: b for a, b in lire(sql)}
@@ -262,7 +275,7 @@ def _outil() -> Any:
     return module
 
 
-def test_vider_l_activite_garde_les_referentiels(reprise: tuple[Resultat, Path]) -> None:
+def test_vider_l_activite_garde_les_referentiels(puis_reprendre: tuple[Resultat, Path]) -> None:
     outil = _outil()
     assert outil.main(["--base", CIBLE]) == 2  # sans confirmation, rien
     assert un("SELECT count(*) FROM mouvement") == 11
@@ -280,7 +293,7 @@ def test_vider_l_activite_garde_les_referentiels(reprise: tuple[Resultat, Path])
 
 
 def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(
-    reprise: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch
+    puis_reprendre: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Révision 0004 : la sauvegarde d'avant le vidage a son genre (« avant vidage », jamais
     purgée), celle d'après est la base vide de référence ; les deux vont au registre."""
@@ -301,7 +314,11 @@ def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(
 
 
 @pytest.mark.skipif(shutil.which("pg_dump") is None, reason="outils PostgreSQL absents")
-def test_sauvegarde_avant_reprise(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_sauvegarde_avant_reprise(
+    puis_reprendre: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """La sauvegarde « avant reprise » d'une cible neuve (recréée : la reprise du module est
+    refaite après, `puis_reprendre`)."""
     from gestion_mp_pro.config import reglages
     from gestion_mp_pro.modeles.enums import GenreSauvegarde
     from gestion_mp_pro.reprise import sauvegarde

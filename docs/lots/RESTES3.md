@@ -71,9 +71,14 @@ défaut ''), le motif des inventaires abandonnés y est déplacé ; retour arri�
 - Contournements retirés : réceptions des essais datées du 3 août 2026 (`fabriques.receptions.JOUR`,
   avant 31/12/2025), inventaires validés du 30/09/2026 (`JOUR_DES_INVENTAIRES`), fixture
   `menage` (écrivait sans journal) supprimée de 17 modules.
+- Essais enchaînés rendus indépendants (le mélange les a trouvés) : `test_importations` (chaque
+  essai ses arrivées et son dossier : `_premier`, `_cours_et_fret`), `test_reprise_traductions`
+  (`puis_reprendre` : la reprise est refaite après un essai qui vide ou recrée la cible),
+  `test_magasins_postes::test_toujours_une_quarantaine_en_service` (`base_neuve`).
 - Ordre aléatoire : `pytest --melanger=GRAINE` (ou `GESTIONMPPRO_MELANGE=GRAINE`) mélange les
   modules puis les essais de chaque module (crochet de `conftest.py` ; ni `pytest-randomly` ni
-  `pytest-random-order` ne sont dans les dépendances).
+  `pytest-random-order` ne sont dans les dépendances). Vert dans l'ordre normal, en ordre inversé
+  des modules et avec les graines 7 et 31 (2 623 essais).
 
 ## 3. Outils et Makefile (S0)
 

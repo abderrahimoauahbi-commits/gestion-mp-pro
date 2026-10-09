@@ -93,8 +93,9 @@ def test_un_magasin_qui_detient_de_la_matiere(direction: TestClient) -> None:
     assert perime.status_code == 409
 
 
-def test_toujours_une_quarantaine_en_service(direction: TestClient) -> None:
-    """R-REF-04 : il reste toujours un magasin en service de chaque type."""
+def test_toujours_une_quarantaine_en_service(base_neuve: None, direction: TestClient) -> None:
+    """R-REF-04 : il reste toujours un magasin en service de chaque type (base neuve : la
+    quarantaine semée ne détient rien de ce que les autres essais y ont mis)."""
     with sessions()() as s:
         quarantaines = s.scalars(
             select(Magasin).where(Magasin.type == "quarantaine", Magasin.actif)
