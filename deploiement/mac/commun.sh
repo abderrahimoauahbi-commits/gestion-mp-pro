@@ -27,6 +27,12 @@ OUTILS="$APPLI/outils"
 JOURNAUX="$HOME/Library/Logs/Gestion MP PRO"
 RACCOURCI="$HOME/Desktop/Gestion MP PRO.app"
 
+# Les variables données par le premier appelant (ni défauts, ni fichier « environnement ») :
+# installer_demarrage_automatique.sh n'écrit que celles-là dans l'agent launchd.
+if [ -z "${_GMPPRO_DONNEES+x}" ]; then
+  _GMPPRO_DONNEES=" $(env | sed -n 's/^\(GESTIONMPPRO_[A-Z_]*\)=.*/\1/p' | tr '\n' ' ')"
+  export _GMPPRO_DONNEES
+fi
 # Réglages permanents du poste (SMTP, copie externe…) : « environnement » à côté des outils,
 # lignes GESTIONMPPRO_NOM=valeur (valeur prise telle quelle) ; une variable déjà donnée par
 # l'appelant (launchd, essai) l'emporte. Fichier 0600 : il peut porter le mot de passe SMTP.

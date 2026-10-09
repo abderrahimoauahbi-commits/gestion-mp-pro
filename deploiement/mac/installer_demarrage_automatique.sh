@@ -52,11 +52,12 @@ fi
 xml() { printf '%s' "$1" | sed -e 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'; }
 valeur() { xml "$1" | sed -e 's/[|&\\]/\\&/g'; }
 mkdir -p "$HOME/Library/LaunchAgents" "$JOURNAUX"
-# Les réglages de cette installation (base, port, dossiers…) passent à l'agent ; jamais de
+# L'agent porte la base et le port de cette instance, et les réglages donnés à l'appel ; jamais de
 # secret ici (le mot de passe SMTP va dans le fichier « environnement » du poste, 0600).
 VARIABLES="$(mktemp)"
 trap 'rm -f "$VARIABLES" "$PLIST.nouveau"' EXIT
 for nom in BASE PORT ECOUTE JOURNAL_FICHIER SAUVEGARDES SAUVEGARDES_COPIE PIECES PG_BIN HTTPS ADRESSE; do
+  case "$nom:$_GMPPRO_DONNEES" in BASE:* | PORT:* | *" GESTIONMPPRO_$nom "*) ;; *) continue ;; esac
   v="$(eval "printf '%s' \"\${GESTIONMPPRO_$nom:-}\"")"
   [ -z "$v" ] || printf '    <key>GESTIONMPPRO_%s</key><string>%s</string>\n' "$nom" "$(xml "$v")" >>"$VARIABLES"
 done

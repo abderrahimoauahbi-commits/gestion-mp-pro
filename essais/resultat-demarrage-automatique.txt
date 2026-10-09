@@ -3,10 +3,10 @@ Démarrage automatique : étiquette fr.usine.gestion-mp-pro.essai, base gestion_
   ok  aucun agent d'essai ni serveur sur 8150 avant
 Démarrage automatique installé (/Users/mohamed/Library/LaunchAgents/fr.usine.gestion-mp-pro.essai.plist) : Gestion MP PRO répond sur le port 8150.
   ok  l'agent a démarré le serveur (RunAtLoad), /api/sante 200
-  ok  le serveur qui répond est celui de l'agent (processus 65201)
+  ok  le serveur qui répond est celui de l'agent (processus 70762)
   ok  l'agent porte KeepAlive et RunAtLoad
-  ok  relancé après kill -TERM (65201 → 65522)
-  ok  relancé après kill -KILL (65522 → 65805)
+  ok  relancé après kill -TERM (70762 → 71111)
+  ok  relancé après kill -KILL (71111 → 71485)
   ok  Gestion MP a répondu pendant les relances, même processus
 Démarrage automatique suspendu jusqu'à la prochaine ouverture de session (fr.usine.gestion-mp-pro.essai).
 Gestion MP PRO arrêté (port 8150).
