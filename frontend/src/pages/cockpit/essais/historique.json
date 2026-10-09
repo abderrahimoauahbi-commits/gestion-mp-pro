@@ -1,0 +1,93 @@
+[
+  {
+    "jour": "2026-10-03",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 59770.43,
+    "couverture_jours": 49.22,
+    "ruptures": 2,
+    "critiques": 1,
+    "urgents": 0,
+    "a_commander_mad": 39164.54,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.86
+  },
+  {
+    "jour": "2026-10-04",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 60386.62,
+    "couverture_jours": 49.73,
+    "ruptures": 1,
+    "critiques": 1,
+    "urgents": 2,
+    "a_commander_mad": 38764.9,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.85
+  },
+  {
+    "jour": "2026-10-05",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 61619.0,
+    "couverture_jours": 50.74,
+    "ruptures": 2,
+    "critiques": 1,
+    "urgents": 1,
+    "a_commander_mad": 37989.6,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.84
+  },
+  {
+    "jour": "2026-10-06",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 62235.19,
+    "couverture_jours": 51.25,
+    "ruptures": 1,
+    "critiques": 1,
+    "urgents": 0,
+    "a_commander_mad": 37613.47,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.83
+  },
+  {
+    "jour": "2026-10-07",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 61619.0,
+    "couverture_jours": 50.74,
+    "ruptures": 2,
+    "critiques": 1,
+    "urgents": 2,
+    "a_commander_mad": 37989.6,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.82
+  },
+  {
+    "jour": "2026-10-08",
+    "pris_le": "2026-10-09T11:08:21.999238Z",
+    "pris_par_id": null,
+    "valeur_stock_mad": 62851.38,
+    "couverture_jours": 51.75,
+    "ruptures": 1,
+    "critiques": 1,
+    "urgents": 1,
+    "a_commander_mad": 37244.71,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": 0.81
+  },
+  {
+    "jour": "2026-10-09",
+    "pris_le": "2026-10-09T11:08:21.996243Z",
+    "pris_par_id": 1,
+    "valeur_stock_mad": 61619.0,
+    "couverture_jours": 50.74,
+    "ruptures": 2,
+    "critiques": 1,
+    "urgents": 0,
+    "a_commander_mad": 37989.6,
+    "commandes_en_cours_mad": 43200.0,
+    "otif_moyen": null
+  }
+]
