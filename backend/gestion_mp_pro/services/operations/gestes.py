@@ -26,6 +26,7 @@ from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import Lot, Operation, OperationLigne, Ordre
 from gestion_mp_pro.modeles.enums import DocumentMouvement, StatutDocument, TypeOperation
 from gestion_mp_pro.services import audit, horloge, lots, numerotation, periode, stock
+from gestion_mp_pro.services.commandes_socle import commandes_des_lots, recaler_soldes
 from gestion_mp_pro.services.comptes import Acteur
 from gestion_mp_pro.services.operations import blocages as b
 from gestion_mp_pro.services.operations import droits, lecture
@@ -33,10 +34,10 @@ from gestion_mp_pro.services.operations.saisie import SaisieOperation, remplir, 
 
 Recalage = Callable[[Session, Acteur, set[int], str], None]
 RECALAGES: list[Recalage] = []
-"""Crochet des commandes (lots D3, D4) : appelé après un retour au fournisseur et tout
-transfert, validés ou annulés, avec les lots touchés et la raison (« retour au fournisseur »,
-« sortie de quarantaine », « TRF-… annulé ») — un retour rouvre le bon qu'il dégarnit, une
-libération solde le bon qui n'attendait plus qu'elle (S118)."""
+"""Crochets en plus du recalage des bons (fait ici par `commandes_socle.recaler_soldes`, lot
+D3) : appelés après un retour au fournisseur et tout transfert, validés ou annulés, avec les
+lots touchés et la raison (« retour au fournisseur », « sortie de quarantaine », « TRF-…
+annulé »)."""
 
 ANNULATION = "annulation opération"
 
@@ -228,9 +229,12 @@ def annuler(s: Session, qui: Acteur, ident: int, version: int, motif: str = "") 
 
 
 def _recaler(s: Session, qui: Acteur, o: Operation, raison: str) -> None:
-    """Les commandes des lots d'un retour au fournisseur ou d'un transfert (crochet D3/D4)."""
+    """Les bons des lots d'un retour au fournisseur ou d'un transfert (S118) : un retour rouvre
+    le bon qu'il dégarnit, une libération solde le bon qui n'attendait plus qu'elle (et leurs
+    annulations, l'inverse) — `commandes_socle.recaler_soldes` (lot D3) ; puis les crochets."""
     if o.type not in (TypeOperation.retour_fournisseur, TypeOperation.transfert):
         return
     lots_touches = {x.lot_id for x in o.lignes if x.lot_id is not None}
+    recaler_soldes(s, qui, commandes_des_lots(s, lots_touches), raison)
     for recaler in RECALAGES:
         recaler(s, qui, lots_touches, raison)

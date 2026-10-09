@@ -5,6 +5,7 @@ validées en base, à des noms uniques (les routes ont leurs propres sessions).
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import date
 from io import BytesIO
 from typing import Any
 
@@ -14,10 +15,12 @@ from fabriques.operations import JOUR_DES_INVENTAIRES, Monde, monde, motif, ordr
 from fabriques.stock import JOUR, jour
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from test_prix_masques import fuites
 
 from gestion_mp_pro.db import fabrique
+from gestion_mp_pro.modeles import Solde
 
 
 @pytest.fixture
@@ -51,9 +54,20 @@ def test_ouverture_valider_d_un_coup_et_prix_masques(
 ) -> None:
     """`valider: true` (une transaction) ; l'alimentation lit l'opération sans prix ni valeur
     (balayage des clés monétaires) ; 404 « Opération introuvable. »."""
-    corps = {"type": "ouverture", "date": JOUR.isoformat(), "valider": True, "lignes": [
-        {"matiere_id": m.a2.id, "lot_numero": "OUV-API-1", "magasin_id": m.courant.id,
-         "quantite": 12.5, "prix": 8}]}  # fmt: skip
+    corps = {
+        "type": "ouverture",
+        "date": JOUR.isoformat(),
+        "valider": True,
+        "lignes": [
+            {
+                "matiere_id": m.a2.id,
+                "lot_numero": "OUV-API-1",
+                "magasin_id": m.courant.id,
+                "quantite": 12.5,
+                "prix": 8,
+            }
+        ],
+    }
     o = _ok(achats.post("/api/operations", json=corps), 201)
     assert o["numero"].startswith("OUV-") and o["statut"] == "validee"
     assert o["valeurs"] == [{"devise": "MAD", "montant": 100.0}] and o["lignes"][0]["prix"] == 8
@@ -63,8 +77,9 @@ def test_ouverture_valider_d_un_coup_et_prix_masques(
     assert page["total"] == 1 and fuites(page) == []
     r = achats.get("/api/operations/999999")
     assert r.status_code == 404 and r.json()["detail"] == "Opération introuvable."
-    refus = achats.post("/api/operations", json={**corps, "lignes": [
-        {**corps["lignes"][0], "devise": "XXX"}]})  # fmt: skip
+    refus = achats.post(
+        "/api/operations", json={**corps, "lignes": [{**corps["lignes"][0], "devise": "XXX"}]}
+    )
     assert refus.status_code == 422
 
 
@@ -96,9 +111,13 @@ def test_liste_paginee_cherchee_sans_accents(m: Monde, base: Session, achats: Te
 def test_version_perimee_sur_chaque_ecriture(m: Monde, base: Session, achats: TestClient) -> None:
     """API-PRO § 0.1 : une version périmée → 409 `conflit_version` (PUT, DELETE, valider,
     annuler) ; rien n'a bougé."""
-    corps = {"type": "ajustement", "date": JOUR.isoformat(), "commentaire": "palette retrouvée",
-             "motif_id": motif(base, "ajustement", "Matière retrouvée"),
-             "lignes": [_ligne(m, "E-T1", 5)]}  # fmt: skip
+    corps = {
+        "type": "ajustement",
+        "date": JOUR.isoformat(),
+        "commentaire": "palette retrouvée",
+        "motif_id": motif(base, "ajustement", "Matière retrouvée"),
+        "lignes": [_ligne(m, "E-T1", 5)],
+    }
     o = _ok(achats.post("/api/operations", json=corps), 201)
     _ok(achats.put(f"/api/operations/{o['id']}", json={**corps, "version": 1}))
     for r in (
@@ -114,6 +133,13 @@ def test_version_perimee_sur_chaque_ecriture(m: Monde, base: Session, achats: Te
     assert a["statut"] == "annulee" and a["annulee_par"] == "Achats"
 
 
+def _creer(client: TestClient, type_: str, le: date, **corps: Any) -> Any:
+    """Un brouillon d'opération créé par l'API."""
+    return _ok(
+        client.post("/api/operations", json={"type": type_, "date": le.isoformat(), **corps}), 201
+    )
+
+
 def test_brouillons_a_valider_et_tout_valider(
     m: Monde, base: Session, achats: TestClient, alimentation: TestClient, direction: TestClient
 ) -> None:
@@ -124,17 +150,29 @@ def test_brouillons_a_valider_et_tout_valider(
     o = ordre_valide(base, [(m.lots["E-L2"], 40)])
     base.commit()
     reliquat = motif(base, "retour_machine", "Reliquat de fin d'ordre")
-    retour = _ok(alimentation.post("/api/operations", json={
-        "type": "retour_machine", "date": JOUR.isoformat(), "ordre_id": o.id,
-        "motif_id": reliquat, "lignes": [_ligne(m, "E-L2", 3)]}), 201)  # fmt: skip
-    ajustement = _ok(achats.post("/api/operations", json={
-        "type": "ajustement", "date": jour(-1).isoformat(), "commentaire": "palette derrière",
-        "motif_id": motif(base, "ajustement", "Matière retrouvée"),
-        "lignes": [_ligne(m, "E-T1", 5)]}), 201)  # fmt: skip
-    trop = _ok(achats.post("/api/operations", json={
-        "type": "retour_fournisseur", "date": JOUR.isoformat(),
-        "motif_id": motif(base, "retour_fournisseur", "Bobines endommagées"),
-        "lignes": [_ligne(m, "E-T1", 100000)]}), 201)  # fmt: skip
+    retour = _creer(
+        alimentation,
+        "retour_machine",
+        JOUR,
+        ordre_id=o.id,
+        motif_id=reliquat,
+        lignes=[_ligne(m, "E-L2", 3)],
+    )
+    ajustement = _creer(
+        achats,
+        "ajustement",
+        jour(-1),
+        commentaire="palette derrière",
+        motif_id=motif(base, "ajustement", "Matière retrouvée"),
+        lignes=[_ligne(m, "E-T1", 5)],
+    )
+    trop = _creer(
+        achats,
+        "retour_fournisseur",
+        JOUR,
+        motif_id=motif(base, "retour_fournisseur", "Bobines endommagées"),
+        lignes=[_ligne(m, "E-T1", 100000)],
+    )
     assert any("demandés" in x for x in trop["blocages"])
     liste = _ok(achats.get("/api/brouillons"))
     cles = [(x["date"], x["id"]) for x in liste["lignes"]]
@@ -160,9 +198,20 @@ def test_brouillons_a_valider_et_tout_valider(
 def test_classeur_des_operations(m: Monde, achats: TestClient, alimentation: TestClient) -> None:
     """Route 241 : une ligne par ligne d'opération ; pour l'alimentation, ni prix ni devise, et
     ses deux types seulement (transferts, retours des machines)."""
-    corps = {"type": "ouverture", "date": JOUR.isoformat(), "valider": True, "lignes": [
-        {"matiere_id": m.a2.id, "lot_numero": "XLS-1", "magasin_id": m.courant.id, "quantite": 2,
-         "prix": 8}]}  # fmt: skip
+    corps = {
+        "type": "ouverture",
+        "date": JOUR.isoformat(),
+        "valider": True,
+        "lignes": [
+            {
+                "matiere_id": m.a2.id,
+                "lot_numero": "XLS-1",
+                "magasin_id": m.courant.id,
+                "quantite": 2,
+                "prix": 8,
+            }
+        ],
+    }
     _ok(achats.post("/api/operations", json=corps), 201)
 
     def feuille(client: TestClient) -> list[tuple[Any, ...]]:
@@ -231,3 +280,51 @@ def test_aucun_prix_chez_l_alimentation_ni_recherche_joker(
                 json={"version": i["version"], "motif": "fin de l'essai"},
             )
         )
+
+
+def test_la_quarantaine_se_libere_et_solde_le_bon(achats: TestClient) -> None:
+    """Hérité : test_parcours::test_la_quarantaine_se_libere_par_un_transfert — reçu sous
+    réserve (en quarantaine), le bon attend encore ; libéré (transfert, motif dédié) : disponible,
+    quarantaine vide, et le bon, entièrement reçu, se solde de lui-même ; annuler la libération
+    le rouvre (S118, recalage du lot D3)."""
+    from fabriques.achats import Achat, bon, fiche, geste, lot_de_reception, recevoir
+    from fabriques.referentiels import magasin
+
+    a = Achat.nouveau()
+    m = a.matiere("POIL NOIR")
+    jour = JOUR_DES_INVENTAIRES  # une autre année : les compteurs du monde de S1 restent libres
+    b = geste(achats, bon(achats, a, {m: 600}), "envoyer", date=jour.isoformat())
+    lot = lot_de_reception(recevoir(b["lignes"][0]["id"], 600, qualite="reserve", le=jour))
+    assert fiche(achats, b["id"])["statut"] == "envoyee"
+    with fabrique()() as s:
+        liberation, ou = motif(s, "transfert", "Libération de quarantaine"), magasin()
+        quarantaine = s.scalar(
+            select(Solde.magasin_id).where(Solde.lot_id == lot, Solde.quantite > 0)
+        )
+    o = _ok(
+        achats.post(
+            "/api/operations",
+            json={
+                "type": "transfert",
+                "date": jour.isoformat(),
+                "motif_id": liberation,
+                "valider": True,
+                "commentaire": "contrôle conforme",
+                "lignes": [
+                    {
+                        "matiere_id": m,
+                        "lot_id": lot,
+                        "magasin_id": quarantaine,
+                        "magasin_destination_id": ou,
+                        "quantite": 600,
+                    }
+                ],
+            },
+        ),
+        201,
+    )
+    vu = _ok(achats.get(f"/api/lots/{lot}"))
+    assert vu["disponible"] == 600 and vu["quarantaine"] == 0
+    assert fiche(achats, b["id"])["statut"] == "soldee"
+    _ok(achats.post(f"/api/operations/{o['id']}/annuler", json={"version": o["version"]}))
+    assert fiche(achats, b["id"])["statut"] == "envoyee"
