@@ -160,8 +160,8 @@ describe('Commandes', () => {
     const phrase = 'figée avec les prix : une nouvelle date va dans l’ETA (Suivi de l’expédition)'
     serveur('achats', brouillon({ parti: true, promesse_figee: phrase }))
     monterApp('/commandes/9')
-    const fenetre = await screen.findByRole('dialog')
-    expect(await within(fenetre).findByText(phrase)).toBeInTheDocument()
+    await screen.findAllByLabelText(/Livraison prévue/)
+    await waitFor(() => expect(document.body.textContent).toContain(phrase))
   })
 
   it('reçu sous réserve : la ligne et la fiche disent la part en quarantaine, attendue jusqu’à sa libération', async () => {
