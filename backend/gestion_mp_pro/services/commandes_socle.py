@@ -24,8 +24,8 @@ from gestion_mp_pro.modeles import (
     CommandeLigne,
     Devise,
     Fournisseur,
+    Journal,
     Matiere,
-    Parametre,
     Reception,
     ReceptionLigne,
 )
@@ -36,7 +36,7 @@ from gestion_mp_pro.modeles.enums import (
     StatutDocument,
     UnitePrix,
 )
-from gestion_mp_pro.services import audit, horloge, numerotation, periode
+from gestion_mp_pro.services import audit, horloge, numerotation, periode, reglages
 from gestion_mp_pro.services.chargeur.achats import en_quarantaine_par_ligne, recu_par_ligne
 
 PARTIS = frozenset({StatutCommande.envoyee, StatutCommande.confirmee})
@@ -62,18 +62,9 @@ class Bon:
 # ── Réglages, cours, prix ────────────────────────────────────────────────────
 
 
-def reglage(s: Session, cle: str) -> str:
-    """La valeur brute d'un réglage (texte vide s'il n'existe pas)."""
-    p = s.get(Parametre, cle)
-    return p.valeur if p is not None and p.valeur is not None else ""
-
-
 def reglage_nombre(s: Session, cle: str) -> float:
-    """Un réglage numérique (0 s'il est vide ou illisible)."""
-    try:
-        return float(reglage(s, cle) or 0)
-    except ValueError:
-        return 0.0
+    """Un réglage numérique (`services.reglages.nombre`, lot D1 : défaut si vide)."""
+    return reglages.nombre(s, cle)
 
 
 def taux_des_devises(s: Session) -> dict[str, float]:
@@ -209,6 +200,18 @@ def journaliser(
         avant=a,
         apres=b,
     )
+
+
+def prix_deja_confirmes(s: Session, c: Commande) -> bool:
+    """Les prix ont-ils déjà été confirmés une fois ? Le cours s'est alors figé — sauf pour un
+    bon en dirhams, qui n'a pas de cours (contrainte `ck_commande_cours_mad`) : le journal le
+    dit. La date promise se fige au même moment (R-CMD-29)."""
+    if c.cours is not None:
+        return True
+    requete = select(Journal.id).where(
+        Journal.objet == "commande", Journal.objet_id == c.id, Journal.action == "prix confirmés"
+    )
+    return s.scalar(requete.limit(1)) is not None
 
 
 # ── Réceptions d'un bon ──────────────────────────────────────────────────────

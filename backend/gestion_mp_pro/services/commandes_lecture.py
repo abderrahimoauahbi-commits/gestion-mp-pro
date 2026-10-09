@@ -118,6 +118,7 @@ class Lecture:
     receptions: dict[int, list[ReceptionDuBon]] = field(default_factory=dict)
     decisions: dict[int, list[CommandeDecision]] = field(default_factory=dict)
     envois: dict[int, list[datetime]] = field(default_factory=dict)
+    avec_version: set[int] = field(default_factory=set)
 
     def nom(self, ident: int | None) -> str | None:
         """Le nom d'un compte (ou `None`)."""
@@ -160,13 +161,12 @@ def lecture(s: Session, commandes: list[Commande]) -> Lecture:
     ):
         decisions[d.commande_id].append(d)
     envois: dict[int, list[datetime]] = defaultdict(list)
-    for cid, quand in s.execute(
-        select(CommandeVersion.commande_id, CommandeVersion.figee_le).where(
-            CommandeVersion.commande_id.in_(ids),
-            CommandeVersion.motif == MotifVersionCommande.envoi,
-        )
-    ):
-        envois[cid].append(quand)
+    avec_version: set[int] = set()
+    versions = select(CommandeVersion.commande_id, CommandeVersion.figee_le, CommandeVersion.motif)
+    for cid, quand, motif in s.execute(versions.where(CommandeVersion.commande_id.in_(ids))):
+        avec_version.add(cid)
+        if motif == MotifVersionCommande.envoi:
+            envois[cid].append(quand)
     return Lecture(
         recu=recu_par_ligne(s),
         bloque=en_quarantaine_par_ligne(s),
@@ -179,10 +179,11 @@ def lecture(s: Session, commandes: list[Commande]) -> Lecture:
         fournisseurs={
             f.id: f for f in s.scalars(select(Fournisseur).where(Fournisseur.id.in_(fids)))
         },
-        noms=dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).tuples().all()),
+        noms=dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).all()),
         receptions=_receptions(s, ids),
         decisions=dict(decisions),
         envois=dict(envois),
+        avec_version=avec_version,
     )
 
 

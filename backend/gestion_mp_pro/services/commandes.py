@@ -56,6 +56,7 @@ from gestion_mp_pro.services.commandes_socle import (
     numeroter,
     photo,
     prix_catalogue_kg,
+    prix_deja_confirmes,
     recaler_soldes,
     reglage_nombre,
     statut_parti,
@@ -201,7 +202,8 @@ def modifier(s: Session, qui: audit.Qui, cid: int, e: Modification) -> Bon:
     avant_photo = photo(bon)
     if not c.numero:
         _promesse_d_un_brouillon(e.date_livraison_prevue, c.date_commande)
-    changer_promesse(c, e.date_livraison_prevue, vider=e.promesse_envoyee)
+    fige = prix_deja_confirmes(s, c)
+    changer_promesse(c, e.date_livraison_prevue, vider=e.promesse_envoyee, fige=fige)
     taux = taux_des_devises(s)
     avant = montant_estime(bon, taux)
     fiches = verifier_lignes(s, c.fournisseur_id, e.lignes, {x.matiere_id: x for x in c.lignes})
@@ -324,7 +326,7 @@ def confirmer_prix(s: Session, qui: audit.Qui, cid: int, e: Confirmation) -> Bon
     verifier(s, c, e.version)
     gestes.exiger("prix", gestes.etat(s, bon))
     avant_photo = photo(bon)
-    changer_promesse(c, e.date_livraison_prevue)
+    changer_promesse(c, e.date_livraison_prevue, fige=prix_deja_confirmes(s, c))
     taux = taux_des_devises(s)
     avant = montant_estime(bon, taux)
     avant_mad = avant * cours_du_bon(c, taux)

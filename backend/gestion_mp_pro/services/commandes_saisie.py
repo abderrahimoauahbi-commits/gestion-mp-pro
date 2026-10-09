@@ -1,5 +1,6 @@
-"""Ce qu'une saisie de bon doit respecter : matières du fournisseur, en service, une fois
-chacune ; unités de commande de la fiche ; date promise (REGLES § 2.5, 2.6 ;
+"""Ce qu'une saisie de bon doit respecter : matières du fournisseur, commandables
+(`matieres.commandable`, lot D1), une fois chacune ; unités de commande de la fiche ;
+date promise (REGLES § 2.5, 2.6 ;
 `gestion_mp/api/achats.py` : `unites_permises`, `_verifier_unite`, `_verifier_lignes`,
 `_changer_promesse` ; défauts A-08 et A-11 corrigés).
 """
@@ -15,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import Commande, CommandeLigne, Fournisseur, Matiere
-from gestion_mp_pro.services import horloge
+from gestion_mp_pro.services import horloge, matieres
 
 ETA = (
     "Noter la nouvelle date annoncée par le fournisseur dans l'arrivée prévue (ETA) du "
@@ -98,9 +99,9 @@ def fournisseur_commandable(s: Session, fournisseur_id: int) -> Fournisseur:
     if f is None:
         raise Refus.saisie("Fournisseur inconnu.", code="valeur_inconnue")
     if not f.actif:
-        raise Refus.saisie(
-            f"Le fournisseur « {f.nom} » est désactivé : on ne lui commande plus. Le "
-            "réactiver d'abord (Catalogue › Fournisseurs), ou commander à un autre."
+        raise Refus.etat(
+            f"« {f.nom} » est désactivé : le réactiver avant de lui commander.",
+            code="fiche_inactive",
         )
     return f
 
@@ -128,20 +129,19 @@ def verifier_lignes(
                 f"« {m.reference} » figure deux fois : regrouper les quantités.",
                 code="ligne_en_double",
             )
-        if not m.actif and m.id not in anciennes:
-            raise Refus.saisie(
-                f"« {m.reference} » est désactivée : elle ne se commande plus. La réactiver "
-                "d'abord (Catalogue › Matières), ou commander une autre matière."
-            )
+        if m.id not in anciennes:
+            matieres.commandable(s, m.id)
         verifier_unite(m, ligne, anciennes.get(m.id))
         vues.add(m.id)
     return fiches
 
 
-def changer_promesse(c: Commande, nouvelle: date | None, *, vider: bool = False) -> None:
+def changer_promesse(
+    c: Commande, nouvelle: date | None, *, vider: bool = False, fige: bool = False
+) -> None:
     """La date promise : libre sur un brouillon (vidée : elle se comptera à l'envoi, A-08) ;
-    sur un bon parti, figée avec les prix, jamais repoussée une fois passée, jamais avant la
-    date du bon, jamais vidée — une nouvelle annonce va dans l'ETA (R-CMD-29)."""
+    sur un bon parti, figée avec les prix (`fige`), jamais repoussée une fois passée, jamais avant
+    la date du bon, jamais vidée — une nouvelle annonce va dans l'ETA (R-CMD-29)."""
     if nouvelle is None:
         if not vider or c.date_livraison_prevue is None:
             return
@@ -156,14 +156,14 @@ def changer_promesse(c: Commande, nouvelle: date | None, *, vider: bool = False)
     if nouvelle == c.date_livraison_prevue:
         return
     if c.numero:
-        _verifier_promesse_partie(c, nouvelle)
+        _verifier_promesse_partie(c, nouvelle, fige)
     c.date_livraison_prevue = nouvelle
 
 
-def _verifier_promesse_partie(c: Commande, nouvelle: date) -> None:
+def _verifier_promesse_partie(c: Commande, nouvelle: date, fige: bool) -> None:
     """Les refus X-CMD-12 à X-CMD-14 (bon parti)."""
     ancienne = c.date_livraison_prevue
-    if c.cours:
+    if fige:
         raise Refus.saisie(
             f"La livraison promise ({ancienne:%d/%m/%Y}) est figée depuis la confirmation des "
             f"prix : elle mesure la ponctualité. {ETA}"
