@@ -1,0 +1,39 @@
+# Contexte de construction minimal (l'image est construite depuis la racine du dépôt :
+# docker-compose.yml « context: .. »). Le Dockerfile ne copie que backend/pyproject.toml,
+# backend/requirements.lock, backend/gestion_mp_pro/ et frontend/ ; on exclut le reste.
+.git
+.gitignore
+.dockerignore
+.pre-commit-config.yaml
+.editorconfig
+.claude/
+
+# Python : environnement et caches de développement.
+**/__pycache__/
+**/*.pyc
+backend/.venv/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.hypothesis/
+backend/.coverage
+backend/htmlcov/
+**/*.egg-info/
+backend/tests/
+backend/essais/
+
+# Écran : dépendances installées par « npm ci », build refait dans l'image.
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/tsconfig.tsbuildinfo
+
+# Sans objet dans l'image (poste Mac, docs, outils, scripts, essais, sauvegardes, journaux).
+deploiement/mac/
+docs/
+essais/
+scripts/
+outils/
+**/*.log
+**/*.dump
+.DS_Store

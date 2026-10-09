@@ -1,0 +1,34 @@
+# HTTPS devant Gestion MP PRO, sous le nom GESTIONMPPRO_NOM du fichier .env.
+# - Nom interne (gestion-mp-pro.usine.lan) : « tls internal » ci-dessous ; Caddy crée sa propre
+#   autorité, à installer une fois sur chaque appareil (docs/EXPLOITATION.md — lot X3).
+# - Nom public joignable d'Internet : retirer « tls internal » ; Caddy obtient alors seul un
+#   certificat reconnu (Let's Encrypt).
+# Utilisé aussi par le déploiement systemd (sans Docker) : y remplacer « application:8050 » par
+# « 127.0.0.1:8050 » et le nom en dur à la place de {$GESTIONMPPRO_NOM}.
+{$GESTIONMPPRO_NOM} {
+	tls internal
+	encode zstd gzip
+
+	# Pièces jointes : 10 Mo au plus ; un envoi plus gros est refusé avant d'être reçu.
+	request_body {
+		max_size 10MB
+	}
+
+	# L'application écoute sur le 8050 (non publié) ; uvicorn --proxy-headers lit l'adresse
+	# réelle du poste à partir des en-têtes posés ici par Caddy.
+	reverse_proxy application:8050
+
+	# Durcissement au bord : HSTS (que l'application ne pose pas) et Permissions-Policy.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+	}
+
+	# IMPORTANT (lots S0 n° 8, D9 décision 4, RESTES) : NE PAS poser ici de Content-Security-Policy.
+	# L'application pose SA PROPRE CSP (gestion_mp_pro/journalisation.py), et une CSP PROPRE à
+	# chaque document imprimable qui autorise le bouton « Imprimer » par l'empreinte sha256 de son
+	# script (documents/rendu.py). Une CSP posée par Caddy écraserait celle du document et casserait
+	# le bouton « Imprimer / enregistrer en PDF ». L'application pose aussi X-Content-Type-Options,
+	# X-Frame-Options et Referrer-Policy : on ne les redouble pas ici (Caddy laisse passer les
+	# en-têtes de l'application tels quels).
+}

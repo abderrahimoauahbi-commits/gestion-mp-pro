@@ -1,0 +1,97 @@
+# Gestion MP PRO — mise en service : base PostgreSQL 16, application, HTTPS (Caddy).
+#   cp deploiement/exemple.env .env        # puis remplir
+#   docker compose -f deploiement/docker-compose.yml --env-file .env up -d --build
+# Coexistence : Gestion MP garde 8030 ; ici 80/443 (Caddy) et le 8050 de l'application N'EST PAS
+# publié (seul Caddy le joint sur le réseau interne de Compose).
+name: gestion-mp-pro
+
+# Journaux bornés : sans limite, le journal remplirait le disque en quelques mois.
+x-journaux: &journaux
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "5" }
+
+services:
+  base:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gestion_mp_pro
+      POSTGRES_USER: gestion_mp_pro
+      POSTGRES_PASSWORD: ${GESTIONMPPRO_MOT_DE_PASSE_BASE:?à définir dans .env}
+    # Fuseau de PostgreSQL, reposé à chaque démarrage : il ne sert qu'aux dates que PostgreSQL
+    # écrit lui-même (étapes de schéma, journaux de la base). Toutes les dates métier sont
+    # écrites par l'application, à son propre fuseau (GESTIONMPPRO_FUSEAU).
+    command: ["postgres", "-c", "timezone=${GESTIONMPPRO_FUSEAU:-Africa/Casablanca}",
+              "-c", "log_timezone=${GESTIONMPPRO_FUSEAU:-Africa/Casablanca}"]
+    <<: *journaux
+    volumes:
+      - donnees:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gestion_mp_pro -d gestion_mp_pro"]
+      interval: 5s
+      retries: 10
+
+  application:
+    build:
+      context: ..
+      dockerfile: deploiement/Dockerfile
+      args:
+        VERSION: ${GESTIONMPPRO_VERSION:-}
+    restart: unless-stopped
+    depends_on:
+      base:
+        condition: service_healthy
+    environment:
+      # psycopg (psycopg3). Mot de passe sans @ : / # % (il entre dans l'URL de connexion).
+      GESTIONMPPRO_BASE: postgresql+psycopg://gestion_mp_pro:${GESTIONMPPRO_MOT_DE_PASSE_BASE}@base/gestion_mp_pro
+      # Derrière Caddy HTTPS : cookies « Secure », liens et QR en https://<nom>.
+      GESTIONMPPRO_HTTPS: "1"
+      GESTIONMPPRO_ADRESSE: https://${GESTIONMPPRO_NOM:?à définir dans .env}
+      GESTIONMPPRO_FUSEAU: ${GESTIONMPPRO_FUSEAU:-Africa/Casablanca}
+      GESTIONMPPRO_PROCESSUS: ${GESTIONMPPRO_PROCESSUS:-2}
+      # Ce processus tente de porter les tâches de fond (sauvegarde du jour, courriels, alertes).
+      GESTIONMPPRO_TACHES: "1"
+      # Racines : le dossier réel est <racine>/<nom de la base> (S0 n° 10).
+      GESTIONMPPRO_SAUVEGARDES: /sauvegardes
+      GESTIONMPPRO_SAUVEGARDES_COPIE: ${GESTIONMPPRO_SAUVEGARDES_COPIE:-}
+      GESTIONMPPRO_PIECES: /pieces
+      GESTIONMPPRO_SMTP_HOTE: ${GESTIONMPPRO_SMTP_HOTE:-}
+      GESTIONMPPRO_SMTP_PORT: ${GESTIONMPPRO_SMTP_PORT:-587}
+      GESTIONMPPRO_SMTP_UTILISATEUR: ${GESTIONMPPRO_SMTP_UTILISATEUR:-}
+      GESTIONMPPRO_SMTP_MOT_DE_PASSE: ${GESTIONMPPRO_SMTP_MOT_DE_PASSE:-}
+      GESTIONMPPRO_SMTP_EXPEDITEUR: ${GESTIONMPPRO_SMTP_EXPEDITEUR:-}
+      GESTIONMPPRO_JOURNAL_NIVEAU: ${GESTIONMPPRO_JOURNAL_NIVEAU:-INFO}
+    <<: *journaux
+    volumes:
+      - sauvegardes:/sauvegardes
+      - pieces:/pieces
+      # Copie des sauvegardes HORS du serveur (vivement conseillée) : montez ici un disque
+      # externe ou un partage réseau, donnez-le au compte de l'image
+      # (sudo chown 10001:10001 /mnt/disque-externe/gestion-mp-pro) et mettez
+      # GESTIONMPPRO_SAUVEGARDES_COPIE=/copie dans .env.
+      # - /mnt/disque-externe/gestion-mp-pro:/copie
+
+  https:
+    image: caddy:2
+    restart: unless-stopped
+    <<: *journaux
+    depends_on:
+      application:
+        condition: service_healthy
+    ports: ["80:80", "443:443"]
+    environment:
+      GESTIONMPPRO_NOM: ${GESTIONMPPRO_NOM}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificats et autorité interne (/data), configuration en cours (/config) : gardés d'un
+      # redémarrage à l'autre (sinon « tls internal » referait une autorité à chaque démarrage).
+      - caddy:/data
+      - caddy-config:/config
+
+volumes:
+  donnees:
+  sauvegardes:
+  pieces:
+  caddy:
+  caddy-config:
