@@ -25,10 +25,9 @@ describe('Cibles tactiles des écrans de l’atelier', () => {
     expect(d).toMatch(/min-width:\s*var\(--cible-tactile\)/)
   })
 
-  it('les champs font 46 px en 16 px ; l’étiquette à imprimer aussi', () => {
+  it('les champs font 46 px en 16 px (l’étiquette à imprimer : `BoutonImprimer taille="atelier"`)', () => {
     expect(declarations('.pile :is(input, select, textarea)')).toMatch(
       /min-height:\s*var\(--champ-atelier\);\s*font-size:\s*var\(--texte-atelier\)/,
     )
-    expect(declarations('.imprimer a')).toMatch(/min-height:\s*var\(--champ-atelier\)/)
   })
 })

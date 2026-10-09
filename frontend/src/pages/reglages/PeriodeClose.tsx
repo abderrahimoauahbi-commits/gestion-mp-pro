@@ -18,9 +18,9 @@ import { useListePaginee } from '../../composants/tableaux/ChargerPlus'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import { api } from '../../lib/api'
-import { date, horodatage } from '../../lib/format'
+import { date, horodatage, nombre } from '../../lib/format'
 import { jourDansN } from '../../lib/heure'
-import { useEcriture } from '../../lib/requetes'
+import { useEcriture, useLecture } from '../../lib/requetes'
 import type { Schema } from '../../lib/types'
 import type { Reglage } from './parametres/logique'
 import styles from './reglages.module.css'
@@ -86,10 +86,37 @@ interface GestesProps {
   onGeste: (g: Geste) => void
 }
 
+type BrouillonsPeriode = Schema<'BrouillonsPeriode'>
+
+/**
+ * Les brouillons datés jusqu'à la date choisie, annoncés avant la fenêtre (route 246) : « Clore la
+ * période… » est grisé avec le refus que dirait le serveur, et la liste dit lesquels valider ou
+ * supprimer (ou redater) d'abord.
+ */
+function useBrouillonsPeriode(jour: string) {
+  const lu = useLecture<BrouillonsPeriode>(jour ? '/periode-close/brouillons' : null, { date: jour })
+  return jour ? lu.data : undefined
+}
+
+function NoteBrouillons({ b }: { b: BrouillonsPeriode | undefined }) {
+  if (!b?.total) return null
+  return (
+    <Note ton="attention">
+      {`${nombre(b.total)} brouillon(s) datés jusqu’au ${date(b.jusqu_au)} : `}
+      {b.genres
+        .filter((g) => g.nombre > 0)
+        .map((g) => `${nombre(g.nombre)} ${g.libelle}(s)`)
+        .join(', ')}
+      . Les valider, les supprimer ou les redater d’abord.
+    </Note>
+  )
+}
+
 /** La date à poser (au plus hier, à l'heure de l'usine), « Clore la période… », « Rouvrir… ». */
 function GestesPeriode({ actuelle, onGeste }: GestesProps) {
   const hier = jourDansN(-1)
   const [jour, setJour] = useState('')
+  const brouillons = useBrouillonsPeriode(jour && jour <= hier ? jour : '')
   const grise =
     jour && jour > hier
       ? `On ne clôt qu’une période passée : au plus tard hier (${date(hier)}).`
@@ -97,25 +124,29 @@ function GestesPeriode({ actuelle, onGeste }: GestesProps) {
         ? 'C’est déjà la date de clôture.'
         : undefined
   return (
-    <div className={styles.rangee}>
-      <span className={styles.champDate}>
-        <DateChamp libelle="Clore jusqu’au" valeur={jour} max={hier} onChange={setJour} />
-      </span>
-      <Bouton
-        variante="principal"
-        manque={jour ? [] : ['la date de clôture']}
-        grise={grise}
-        onClick={() => onGeste({ genre: 'clore', jour })}
-      >
-        Clore la période…
-      </Bouton>
-      <Bouton
-        grise={actuelle ? undefined : 'Aucune période close à rouvrir.'}
-        onClick={() => onGeste({ genre: 'rouvrir' })}
-      >
-        Rouvrir la période…
-      </Bouton>
-    </div>
+    <>
+      <div className={styles.rangee}>
+        <span className={styles.champDate}>
+          <DateChamp libelle="Clore jusqu’au" valeur={jour} max={hier} onChange={setJour} />
+        </span>
+        <Bouton
+          variante="principal"
+          manque={jour ? [] : ['la date de clôture']}
+          blocages={brouillons?.message ? [brouillons.message] : undefined}
+          grise={grise}
+          onClick={() => onGeste({ genre: 'clore', jour })}
+        >
+          Clore la période…
+        </Bouton>
+        <Bouton
+          grise={actuelle ? undefined : 'Aucune période close à rouvrir.'}
+          onClick={() => onGeste({ genre: 'rouvrir' })}
+        >
+          Rouvrir la période…
+        </Bouton>
+      </div>
+      <NoteBrouillons b={brouillons} />
+    </>
   )
 }
 

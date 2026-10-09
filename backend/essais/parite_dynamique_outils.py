@@ -112,6 +112,19 @@ def _lignes(rep: Any, champ: str = "lignes") -> list[dict[str, Any]]:
     return rep if isinstance(rep, list) else rep.get(champ, rep.get("elements", []))
 
 
+STOCK_AJOUTES = ("matiere_id", "role_id", "fournisseur_id")
+"""Champs d'une ligne de stock que PRO ajoute (RESTES3 § 1.2) : hors de la comparaison."""
+
+
+def _ligne_stock(x: dict[str, Any], pro: bool) -> dict[str, Any]:
+    """Une ligne de stock sans les champs ajoutés par PRO ; côté PRO, codes du statut et de
+    l'action ramenés aux libellés de Gestion MP (RESTES3 § 1.1, forme déclarée)."""
+    from parite_api_formes import codes_du_stock
+
+    ligne = {k: v for k, v in x.items() if k not in STOCK_AJOUTES}
+    return codes_du_stock(ligne)[0] if pro else ligne
+
+
 def photo(c: Client, pro: bool, refs: set[str], lots: set[int]) -> dict[str, Any]:
     """Stock et valorisation des matières, soldes des lots, totaux de la valorisation."""
     stock = {x["reference"]: x for x in _lignes(c.get("/api/stock")) if x["reference"] in refs}
@@ -124,7 +137,7 @@ def photo(c: Client, pro: bool, refs: set[str], lots: set[int]) -> dict[str, Any
     }
     garder = ("quantite", "disponible", "quarantaine")
     return {
-        "stock": {r: {k: v for k, v in x.items() if k != "matiere_id"} for r, x in stock.items()},
+        "stock": {r: _ligne_stock(x, pro) for r, x in stock.items()},
         "valorisation": {r: {k: v for k, v in x.items() if k not in ("matiere_id", "designation")}
                          for r, x in lignes_valo.items()},
         "lots": {str(i): {k: x[k] for k in garder} for i, x in par_lot.items()},

@@ -22,7 +22,7 @@ describe('Table des statuts', () => {
       document: ['brouillon', 'validee', 'annulee'],
       ordre: ['brouillon', 'valide', 'annule'],
       qualite_reception: ['conforme', 'reserve', 'refuse'],
-      inventaire: ['ouvert', 'valide', 'abandonne'],
+      inventaire: ['ouvert', 'valide', 'abandonne', 'annule'],
       dossier: ['ouvert', 'clos', 'annule'],
       reclamation: ['ouverte', 'close'],
       issue_reclamation: ['avoir', 'remplacement', 'remise', 'refusee', 'abandonnee'],
@@ -49,6 +49,8 @@ describe('Table des statuts', () => {
     expect(statut('document', 'annulee')).toEqual({ libelle: 'Annulée', ton: 'rupture' })
     expect(statut('ordre', 'valide').libelle).toBe('Validé')
     expect(statut('lot', 'partiel').libelle).toBe('En partie en quarantaine')
+    expect(statut('inventaire', 'ouvert')).toEqual({ libelle: 'Comptage en cours', ton: 'attention' })
+    expect(statut('inventaire', 'annule')).toEqual({ libelle: 'Annulé', ton: 'neutre' })
   })
 
   it('une valeur inconnue se montre telle quelle, en neutre ; un vide « — »', () => {
@@ -58,13 +60,17 @@ describe('Table des statuts', () => {
 })
 
 describe('Statuts de stock', () => {
-  it('lit les libellés du moteur, même avec émoticône', () => {
-    expect(cleStock('⚫ RUPTURE')).toBe('RUPTURE')
-    expect(cleStock('🔴 CRITIQUE')).toBe('CRITIQUE')
-    expect(cleStock('🟠 URGENT')).toBe('URGENT')
-    expect(cleStock('🟡 ATTENTION')).toBe('ATTENTION')
-    expect(cleStock('🟢 OK')).toBe('OK')
-    expect(cleStock('⚪ NON CONSOMMÉE')).toBe('NON_CONSOMMEE')
+  it('lit les codes du moteur (RESTES3), et rien d’autre', () => {
+    expect(['RUPTURE', 'CRITIQUE', 'URGENT', 'ATTENTION', 'OK', 'NON_CONSOMMEE'].map(cleStock)).toEqual([
+      'RUPTURE',
+      'CRITIQUE',
+      'URGENT',
+      'ATTENTION',
+      'OK',
+      'NON_CONSOMMEE',
+    ])
+    // Un ancien libellé à émoticône n'est plus servi : il n'est plus reconnu.
+    expect(cleStock('🔴 CRITIQUE')).toBeNull()
     expect(cleStock('BOOKING')).toBeNull()
     expect(cleStock(null)).toBeNull()
   })

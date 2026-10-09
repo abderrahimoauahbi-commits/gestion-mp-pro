@@ -203,7 +203,6 @@ function useSuivi(suivi: Suivi) {
       ),
     fermer: () => navigate(retour ?? '/stock?onglet=ordres'),
     idMatiere: new Map((matieres.data ?? []).map((m) => [m.reference, m.id])),
-    idOrdre: new Map((ordres.data ?? []).map((o) => [o.numero, o.ordre_id])),
   }
 }
 
@@ -236,7 +235,7 @@ export function Tracabilite({ suivi }: { suivi: Suivi }) {
           {ordre && x.vue === 'matieres' ? (
             <ParMatiere ordre={ordre} onSuivre={x.suivre} idMatiere={x.idMatiere} />
           ) : (
-            <PasDuSuivi t={t} suivi={suivi} onSuivre={x.suivre} idMatiere={x.idMatiere} idOrdre={x.idOrdre} />
+            <PasDuSuivi t={t} suivi={suivi} onSuivre={x.suivre} />
           )}
         </>
       ) : null}

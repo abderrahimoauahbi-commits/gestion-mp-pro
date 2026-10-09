@@ -8,7 +8,7 @@
  *
  * Le « Coût de revient » (`/analyse?onglet=revient`), les « Postes de frais » et les « Codes
  * douaniers » (`/reglages?onglet=postes|codes`) sont des onglets des pages du lot F8 : leurs
- * contenus sont ici (`revient/`, `reglages/`), montés par `PageAnalyse` et `PageReglages`.
+ * contenus sont ici (`revient/`, `reglages/`), montés par les pages `Analyse` et `Reglages` de F8.
  */
 import type { Ecran } from '../../routes'
 

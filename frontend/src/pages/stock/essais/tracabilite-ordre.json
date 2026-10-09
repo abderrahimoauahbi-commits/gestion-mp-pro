@@ -24,7 +24,11 @@
       "utilisateur": "Direction",
       "document": "OF-2026-0005",
       "annulation": false,
-      "annule": false
+      "annule": false,
+      "matiere_id": 4,
+      "ordre_id": 7,
+      "document_type": "ordre",
+      "document_id": 7
     },
     {
       "id": 27,
@@ -41,7 +45,11 @@
       "utilisateur": "Direction",
       "document": "OF-2026-0005",
       "annulation": false,
-      "annule": false
+      "annule": false,
+      "matiere_id": 6,
+      "ordre_id": 7,
+      "document_type": "ordre",
+      "document_id": 7
     },
     {
       "id": 28,
@@ -58,7 +66,11 @@
       "utilisateur": "Direction",
       "document": "OF-2026-0005",
       "annulation": false,
-      "annule": false
+      "annule": false,
+      "matiere_id": 1,
+      "ordre_id": 7,
+      "document_type": "ordre",
+      "document_id": 7
     },
     {
       "id": 29,
@@ -75,7 +87,11 @@
       "utilisateur": "Direction",
       "document": "OF-2026-0005",
       "annulation": false,
-      "annule": false
+      "annule": false,
+      "matiere_id": 3,
+      "ordre_id": 7,
+      "document_type": "ordre",
+      "document_id": 7
     },
     {
       "id": 30,
@@ -92,7 +108,13 @@
       "utilisateur": "Direction",
       "document": "RET-2026-0002",
       "annulation": false,
-      "annule": false
+      "annule": false,
+      "matiere_id": 1,
+      "ordre_id": 7,
+      "document_type": "operation",
+      "document_id": null
     }
-  ]
+  ],
+  "ordre_id": 7,
+  "matiere_id": null
 }

@@ -23,10 +23,11 @@ import { avecParametre } from '../../lib/adresse'
 import type { ErreurApi } from '../../lib/api'
 import { useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
+import { statut } from '../../lib/statuts'
 import { colonnesInventaires } from './colonnes'
 import { Comptage } from './Comptage'
 import { OuvrirInventaire } from './OuvrirInventaire'
-import { statutInventaire, type InventaireResume } from './types'
+import { type InventaireResume } from './types'
 
 type OngletListe = 'cours' | 'passes'
 
@@ -101,7 +102,7 @@ function Liste({
                     cle: 'etat',
                     libelle: 'État',
                     valeur: (i) => i.statut,
-                    libelleValeur: (v) => statutInventaire(v).libelle,
+                    libelleValeur: (v) => statut('inventaire', v).libelle,
                   },
                 ]
               : []

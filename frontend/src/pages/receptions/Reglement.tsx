@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 import { dire } from '../../composants/retour/Messages'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Confirmer } from '../../composants/saisie/Confirmer'
+import { Confirmer, MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { DateChamp } from '../../composants/saisie/DateChamp'
 import { api } from '../../lib/api'
 import { date } from '../../lib/format'
@@ -15,7 +15,6 @@ import { aujourdhui } from '../../lib/heure'
 import { useEcriture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
 import type { Schema } from '../../lib/types'
-import { ConfirmerMotif } from '../commandes/ConfirmerMotif'
 import styles from '../plan-achat/achats.module.css'
 import type { ReceptionFiche } from './types'
 
@@ -67,12 +66,14 @@ function AnnulerReglement({ f }: { f: Facture }) {
   const ecrire = useEcriture((c: Paiement) => api.put('/echeancier/paiement', c))
   if (role !== 'direction') return <Bouton grise={RESERVE_DIRECTION}>Annuler le règlement</Bouton>
   return (
-    <ConfirmerMotif
+    <Confirmer
+      motif="exige"
+      motifMin={MOTIF_MIN}
       variante="neutre"
       titre="La facture redevient due : elle revient dans l’échéancier"
       question={`Annuler le règlement du ${date(f.payee_le)} ?`}
       libelleMotif="Pourquoi annuler le règlement"
-      max={300}
+      motifMax={300}
       oui="Oui, annuler le règlement"
       onOui={async (motif) => {
         await ecrire.mutateAsync(corpsPaiement(f, null, motif))
@@ -80,7 +81,7 @@ function AnnulerReglement({ f }: { f: Facture }) {
       }}
     >
       Annuler le règlement
-    </ConfirmerMotif>
+    </Confirmer>
   )
 }
 

@@ -3,7 +3,7 @@
  * RUPTURE, CRITIQUE, URGENT, ATTENTION (GET /stock, P1-13 : plus de limite à 24), la plus pressée
  * d'abord (couverture croissante, comme le serveur), recherche et filtres liés sur tout le jeu.
  * Une ligne ouvre la fiche matière ; « Préparer la commande » ouvre la préparation chez son
- * fournisseur (identifiant lu dans le catalogue, jamais par le nom).
+ * fournisseur (`fournisseur_id` de la ligne de stock, jamais par le nom).
  */
 import { Link, useNavigate } from 'react-router'
 
@@ -27,21 +27,16 @@ import { rangStatut } from '../stock/colonnesMatieres'
 
 type LigneStock = Schema<'LigneStock'>
 type EtatStock = Schema<'EtatStock'>
-type MatiereResume = Schema<'MatiereResume'>
 
 export interface LigneAlerte extends LigneStock {
   fournisseur_id: number | null
 }
 
 /** Les matières en alerte (quatre statuts), la plus pressée d'abord (couverture croissante). */
-export function lignesEnAlerte(
-  stock: EtatStock | undefined,
-  matieres: readonly MatiereResume[] | undefined,
-): LigneAlerte[] {
-  const fournisseurs = new Map((matieres ?? []).map((m) => [m.id, m.fournisseur_id]))
+export function lignesEnAlerte(stock: EtatStock | undefined): LigneAlerte[] {
   return (stock?.lignes ?? [])
     .filter((l) => STOCK_EN_ALERTE.includes(cleStock(l.statut) ?? ''))
-    .map((l) => ({ ...l, fournisseur_id: (l.matiere_id != null && fournisseurs.get(l.matiere_id)) || null }))
+    .map((l) => ({ ...l, fournisseur_id: l.fournisseur_id ?? null }))
     .sort((a, b) => (a.couverture_jours ?? 0) - (b.couverture_jours ?? 0))
 }
 
@@ -156,9 +151,8 @@ export function OngletAlertes({ cockpit }: { cockpit: Cockpit }) {
   const { role } = useSession()
   const navigate = useNavigate()
   const stock = useLecture<EtatStock>('/stock')
-  const matieres = useLecture<MatiereResume[]>('/matieres')
   const etat = useEtatTableAdresse(['statut', 'fournisseur'])
-  const lignes = lignesEnAlerte(stock.data, matieres.data)
+  const lignes = lignesEnAlerte(stock.data)
   const preparer = (l: LigneAlerte) =>
     l.fournisseur_id && (l.quantite_a_commander ?? 0) > 0
       ? siPermis(role, `/plan-achat/preparer/${l.fournisseur_id}`)
@@ -178,8 +172,8 @@ export function OngletAlertes({ cockpit }: { cockpit: Cockpit }) {
       serre
       remplir
     >
-      {stock.isPending || matieres.isPending ? <Chargement quoi="les matières en alerte" /> : null}
-      <Erreur erreur={stock.error ?? matieres.error} onReessayer={() => void stock.refetch()} />
+      {stock.isPending ? <Chargement quoi="les matières en alerte" /> : null}
+      <Erreur erreur={stock.error} onReessayer={() => void stock.refetch()} />
       {stock.data ? (
         <DataTable
           lignes={lignes}

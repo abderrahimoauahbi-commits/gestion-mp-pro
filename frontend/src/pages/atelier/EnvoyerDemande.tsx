@@ -16,12 +16,12 @@ import { DateChamp } from '../../composants/saisie/DateChamp'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { nombre } from '../../lib/format'
+import { manqueProposer } from '../../lib/ordre'
 import { useLecture } from '../../lib/requetes'
 import { enHaut, Fiche, NoteAtelier } from './briques'
 import { magasinsCourants, nomMetier, useBornesDate, useMagasins, useMetiers } from './commun'
 import { useEmpechements } from './empechements'
 import styles from './atelier.module.css'
-import { manqueDemande } from './sortie'
 import type { QualiteResume } from './types'
 import type { SaisieSortie } from './useSaisieSortie'
 
@@ -77,7 +77,7 @@ function ChoixMagasin({ s }: { s: SaisieSortie }) {
 function Fabrications({ s }: { s: SaisieSortie }) {
   const qualites = useLecture<QualiteResume[]>('/qualites')
   const fabs = s.e.fabrications
-  const prises = new Set(fabs.map((f) => f.qualite))
+  const prises = new Set(fabs.map((f) => f.qualite_id))
   const changer = (i: number, m: Partial<(typeof fabs)[number]>) =>
     s.changerDemande({ fabrications: fabs.map((f, j) => (j === i ? { ...f, ...m } : f)) })
   return (
@@ -86,12 +86,12 @@ function Fabrications({ s }: { s: SaisieSortie }) {
         <Fiche key={i} libelle={fabs.length > 1 ? `Qualité n° ${i + 1}` : 'Qualité à fabriquer'}>
           <Champ libelle={fabs.length > 1 ? `Qualité n° ${i + 1}` : 'Qualité à fabriquer'}>
             <Selecteur
-              valeur={f.qualite}
+              valeur={f.qualite_id}
               placeholder="Taper le code ou le nom…"
               options={(qualites.data ?? [])
-                .filter((q) => q.actif && (q.id === f.qualite || !prises.has(q.id)))
+                .filter((q) => q.actif && (q.id === f.qualite_id || !prises.has(q.id)))
                 .map((q) => ({ id: q.id, titre: `${q.code} — ${q.nom}` }))}
-              onChange={(id) => changer(i, { qualite: id })}
+              onChange={(id) => changer(i, { qualite_id: id })}
             />
           </Champ>
           <Champ groupe libelle="Mètres carrés">
@@ -102,7 +102,7 @@ function Fabrications({ s }: { s: SaisieSortie }) {
               valeur={f.m2}
               pas={50}
               min={0}
-              onChange={(m2) => changer(i, { m2: m2 ?? 0 })}
+              onChange={(m2) => changer(i, { m2 })}
             />
           </Champ>
           {fabs.length > 1 ? (
@@ -119,7 +119,7 @@ function Fabrications({ s }: { s: SaisieSortie }) {
       <Bouton
         taille="atelier"
         icone="plus"
-        onClick={() => s.changerDemande({ fabrications: [...fabs, { qualite: null, m2: 0 }] })}
+        onClick={() => s.changerDemande({ fabrications: [...fabs, { qualite_id: null, m2: null }] })}
       >
         Une autre qualité sur le même ordre
       </Bouton>
@@ -180,7 +180,7 @@ function ChampsDemande({ s }: { s: SaisieSortie }) {
 export function EnvoyerDemande({ s }: { s: SaisieSortie }) {
   useEffect(enHaut, [])
   const empechements = useEmpechements(s)
-  const manque = manqueDemande({ ...s.e, magasin: s.magasin })
+  const manque = manqueProposer({ ...s.e, magasin: s.magasin })
   const revenir = s.e.prises.length > 0 && !s.e.demandeChangee
   return (
     <EcranAtelier
@@ -205,7 +205,7 @@ export function EnvoyerDemande({ s }: { s: SaisieSortie }) {
           taille="atelier"
           variante={revenir ? 'neutre' : 'principal'}
           bloc
-          grise={manque || undefined}
+          manque={manque}
           attente="Calcul…"
           onClick={s.proposer}
         >

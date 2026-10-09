@@ -7,6 +7,7 @@
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 
 import { EcranAtelier } from '../../composants/atelier/EcranAtelier'
+import { LienDocument } from '../../composants/documents/LienDocument'
 import { dire } from '../../composants/retour/Messages'
 import { Badge } from '../../composants/retour/Badge'
 import { Note } from '../../composants/retour/Note'
@@ -15,11 +16,28 @@ import { Blocages } from '../../composants/saisie/Blocages'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import { horodatage, kgEtMetres, m2 } from '../../lib/format'
 import { api } from '../../lib/api'
+import { permis } from '../../lib/droits'
 import { useEcriture, useLecture } from '../../lib/requetes'
+import { useSession } from '../../lib/session'
 import { attente, Fiche, LienBouton, Ligne, NoteAtelier } from './briques'
-import { dateLisible, estIntrouvable, qte, useNomMetier } from './commun'
+import { dateLisible, estIntrouvable, qte } from './commun'
 import styles from './atelier.module.css'
 import type { OrdreFiche } from './types'
+
+/** Les retours d'un ordre, chacun lien vers sa fiche d'opération quand le rôle peut l'ouvrir. */
+function Retours({ o }: { o: OrdreFiche }) {
+  const { role } = useSession()
+  return o.retours.map((r, i) => (
+    <span key={`${r.numero}${i}`}>
+      {i ? ', ' : ''}
+      {r.id != null && permis(role, `/operations/${r.id}`) ? (
+        <LienDocument genre="operation" id={r.id} numero={r.numero} />
+      ) : (
+        r.numero || `retour repris de l’ERP Fil du ${dateLisible(r.date)}`
+      )}
+    </span>
+  ))
+}
 
 /** « Annuler tout l'ordre et ses retours (RET-…) ? … » : la question dit ce qui revient. */
 export function questionAnnuler(o: OrdreFiche): string {
@@ -33,7 +51,6 @@ export function questionAnnuler(o: OrdreFiche): string {
 }
 
 function Identite({ o }: { o: OrdreFiche }) {
-  const nomMetier = useNomMetier()
   const par = [`créé par ${o.cree_par} le ${horodatage(o.cree_le)}`]
   if (o.valide_par) par.push(`validé par ${o.valide_par} le ${horodatage(o.valide_le)}`)
   if (o.annule_par) par.push(`annulé par ${o.annule_par} le ${horodatage(o.annule_le)}`)
@@ -44,7 +61,7 @@ function Identite({ o }: { o: OrdreFiche }) {
       </Ligne>
       <Ligne libelle="Date">{dateLisible(o.date)}</Ligne>
       <Ligne libelle="Magasin">{o.magasin}</Ligne>
-      {o.metier_id ? <Ligne libelle="Métier">{nomMetier(o.metier_id, o.metier)}</Ligne> : null}
+      {o.metier_id ? <Ligne libelle="Métier">{o.metier}</Ligne> : null}
       {o.qualites.length ? (
         o.qualites.map((q) => (
           <Ligne key={q.qualite_id} libelle={`${q.qualite} — ${q.nom}`}>
@@ -84,10 +101,7 @@ function Matiere({ o }: { o: OrdreFiche }) {
       {o.revenu ? <Ligne libelle="dont revenu des machines">− {qte(o.revenu)}</Ligne> : null}
       {o.retours.length ? (
         <NoteAtelier>
-          Retours faits sur cet ordre :{' '}
-          {o.retours
-            .map((r) => r.numero || `retour repris de l’ERP Fil du ${dateLisible(r.date)}`)
-            .join(', ')}
+          Retours faits sur cet ordre : <Retours o={o} />
         </NoteAtelier>
       ) : null}
     </Fiche>
@@ -132,11 +146,10 @@ function GestesBrouillon({ o, ou }: { o: OrdreFiche; ou: string }) {
 }
 
 function Gestes({ o }: { o: OrdreFiche }) {
-  const nomMetier = useNomMetier()
   const annuler = useEcriture((motif: string) =>
     api.post<OrdreFiche>(`/ordres/${o.id}/annuler`, { version: o.version, motif }),
   )
-  const ou = [dateLisible(o.date), o.magasin, nomMetier(o.metier_id, o.metier)].filter(Boolean).join(' · ')
+  const ou = [dateLisible(o.date), o.magasin, o.metier].filter(Boolean).join(' · ')
   if (o.statut === 'brouillon') return <GestesBrouillon o={o} ou={ou} />
   if (o.statut !== 'valide') return null
   return (

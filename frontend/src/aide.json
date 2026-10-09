@@ -400,6 +400,10 @@
       "grandeur": "Reçu",
       "texte": "Pesé aux réceptions validées pour ce bon (hors refus), moins ce qui est reparti chez le fournisseur ; « livré » rapporte le reçu au commandé."
     },
+    "commande_reserve": {
+      "grandeur": "Reçu sous réserve, en quarantaine",
+      "texte": "Une marchandise reçue sous réserve attend en quarantaine : le reste à livrer du bon la compte comme reçue (règle de Gestion MP), mais le Cockpit (« Commandé ») et le plan d’achat la comptent encore attendue jusqu’à sa libération. La fiche du bon le dit sur la ligne : « dont X kg reçus sous réserve, en quarantaine »."
+    },
     "commandes_en_retard": {
       "grandeur": "Commandes en retard",
       "texte": "Les commandes parties, ni soldées ni annulées, dont l’arrivée attendue (ETA, sinon livraison prévue, tolérance de retard comprise) est passée sans que tout soit reçu — la règle du serveur, la même que le filtre « En retard » des Commandes et le courriel du lundi."

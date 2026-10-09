@@ -17,12 +17,14 @@ import { Zone } from '../../composants/saisie/Zone'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import { arrondi, date, montant, nombre, part, prixUnite, VIDE } from '../../lib/format'
+import { formule } from '../../lib/aide'
 import { aujourdhui } from '../../lib/heure'
 import styles from '../plan-achat/achats.module.css'
 import { deux } from '../plan-achat/colonnesFournisseurs'
 import { libelleUnite } from '../plan-achat/libelles'
 import type { Matiere } from '../plan-achat/types'
 import { ligneAjoutee, unitesDeLigne, type FormeLignes, type LigneForme } from './formeLignes'
+import { texteReserve } from './messages'
 import type { CommandeFiche, LigneCommande } from './types'
 import type { FormeFiche } from './useFormeFiche'
 
@@ -145,14 +147,7 @@ function colonnes2(x: Contexte): Colonne<LigneForme>[] {
       rendu: (l) => {
         const r = lue(c, l.matiere_id)
         if (!r || !r.recu) return VIDE
-        return deux(
-          `${nombre(r.recu)} · ${part(r.quantite ? r.recu / r.quantite : 0, 0)}`,
-          r.en_quarantaine ? (
-            <span title="Reçu sous réserve : le bon ne se solde qu’à sa libération">
-              dont {nombre(r.en_quarantaine)} en quarantaine
-            </span>
-          ) : null,
-        )
+        return `${nombre(r.recu)} · ${part(r.quantite ? r.recu / r.quantite : 0, 0)}`
       },
     },
   ]
@@ -173,11 +168,10 @@ function colonnes3(x: Contexte): Colonne<LigneForme>[] {
       rendu: (l) => {
         if (c.statut === 'soldee' || c.statut === 'annulee') return VIDE
         const r = lue(c, l.matiere_id)
-        return r && r.recu > 0 && r.reste <= 0 ? (
-          <Badge ton="ok">complet</Badge>
-        ) : (
-          nombre(r?.reste ?? l.quantite)
-        )
+        const reste =
+          r && r.recu > 0 && r.reste <= 0 ? <Badge ton="ok">complet</Badge> : nombre(r?.reste ?? l.quantite)
+        if (!r?.en_quarantaine) return reste
+        return deux(reste, <span className={styles.attention}>{texteReserve(r.en_quarantaine)}</span>)
       },
     },
     { cle: 'prix', titre: 'Prix / kg', droite: true, rendu: (l) => <Prix c={c} l={lue(c, l.matiere_id)} /> },
@@ -227,13 +221,8 @@ function colonnes(x: Contexte): Colonne<LigneForme>[] {
   return [...colonnes1(x), ...colonnes2(x), ...colonnes3(x), ...colonnes4(x)]
 }
 
-/** Pourquoi la date promise ne se change plus, ou `''`. */
-export function dateFigee(c: CommandeFiche): string {
-  if (c.confirme_le) return 'figée avec les prix : une nouvelle date va dans l’ETA (Suivi de l’expédition)'
-  if (c.parti && c.date_livraison_prevue && c.date_livraison_prevue < aujourdhui())
-    return 'date promise passée : elle ne se repousse plus ; noter la nouvelle date dans l’ETA'
-  return ''
-}
+/** Pourquoi la date promise ne se change plus (la phrase du serveur, `promesse_figee`), ou `''`. */
+export const dateFigee = (c: CommandeFiche): string => c.promesse_figee ?? ''
 
 function EnTeteLignes({ x, ajoutables }: { x: Contexte; ajoutables: readonly Matiere[] }) {
   const { c, f } = x
@@ -303,6 +292,20 @@ function NoteFigee({ c }: { c: CommandeFiche }) {
   )
 }
 
+/** La part du bon reçue sous réserve, en quarantaine : comptée reçue ici, attendue ailleurs. */
+function NoteReserve({ c }: { c: CommandeFiche }) {
+  if (c.statut === 'soldee' || c.statut === 'annulee') return null
+  const kg = c.kg_en_quarantaine
+  if (kg <= 0) return null
+  const texte = texteReserve(kg)
+  return (
+    <Note ton="attention">
+      Reçu : {texte.charAt(0).toUpperCase()}
+      {texte.slice(1)}. {formule('commande_reserve')}
+    </Note>
+  )
+}
+
 export function VoletLignes(props: Contexte & { ajoutables: readonly Matiere[] }) {
   const { c, f } = props
   return (
@@ -321,6 +324,7 @@ export function VoletLignes(props: Contexte & { ajoutables: readonly Matiere[] }
       ) : (
         <NoteFigee c={c} />
       )}
+      <NoteReserve c={c} />
       <div className={styles.tableFenetre}>
         <DataTable<LigneForme>
           libelle="Lignes du bon"

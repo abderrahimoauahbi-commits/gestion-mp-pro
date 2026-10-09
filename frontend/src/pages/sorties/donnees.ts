@@ -32,15 +32,5 @@ export function nomMetier(m: Pick<Metier, 'code' | 'nom'>): string {
   return m.nom && m.nom !== m.code ? `${m.code} · ${m.nom}` : m.code
 }
 
-/** La date du dernier ordre validé ou annulé (les numéros suivent les dates), hors `sauf`. */
-export function dernierOrdre(
-  ordres: readonly OrdreResume[] | undefined,
-  sauf?: number | null,
-): string | null {
-  let dernier: string | null = null
-  for (const o of ordres ?? []) {
-    if (o.statut === 'brouillon' || o.id === sauf) continue
-    if (!dernier || o.date > dernier) dernier = o.date
-  }
-  return dernier
-}
+/** La date du dernier ordre validé ou annulé : la règle du moteur. */
+export { dernierOrdre } from '../../lib/ordre'

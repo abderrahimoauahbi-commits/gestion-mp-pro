@@ -69,6 +69,47 @@ describe('Production › Plan de production', () => {
   })
 })
 
+describe('Production › Plan glissant', () => {
+  it('le graphique empile les qualités : une barre par mois, chaque qualité posée sur la précédente', async () => {
+    servir('achats')
+    monterApp('/production?onglet=glissant&vue=graphique')
+    const panneau = await screen.findByRole('img', { name: 'Plan glissant (m²)' })
+    const morceaux = [...panneau.querySelectorAll('rect')]
+    const premierMois = morceaux.filter((r) => r.textContent?.startsWith('oct.'))
+    expect(premierMois.map((r) => r.textContent?.split(' (')[0])).toEqual([
+      'oct. 2026 · ATLAS : 132 m²',
+      'oct. 2026 · SAHARA : 60 m²',
+    ])
+    // Même colonne (empilées), pas côte à côte.
+    expect(new Set(premierMois.map((r) => r.getAttribute('x'))).size).toBe(1)
+    expect(screen.getByText('ATLAS (m²)')).toBeInTheDocument()
+  })
+
+  it('au-delà de sept qualités, les plus petites se regroupent en « Autres »', async () => {
+    const { seriesGlissant } = await import('./OngletGlissant')
+    const base = plan.qualites[0]!
+    const qualites = Array.from({ length: 9 }, (_, i) => ({
+      ...base,
+      code: `Q${i}`,
+      total_glissant: 100 - i,
+      glissant: base.glissant.map(() => 10 - i),
+    }))
+    const series = seriesGlissant(plan as never, qualites as never)
+    expect(series.map((s) => s.nom)).toEqual([
+      'Q0',
+      'Q1',
+      'Q2',
+      'Q3',
+      'Q4',
+      'Q5',
+      'Q6',
+      'Autres',
+      'Matière nécessaire',
+    ])
+    expect(series[7]?.valeurs[0]).toBe(3 + 2)
+  })
+})
+
 describe('Production › Besoins matière', () => {
   it('alimentation : les besoins, sans « À commander » (H-03)', async () => {
     servir('alimentation')

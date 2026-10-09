@@ -72,6 +72,21 @@
   font-size: 9px;
 }
 
+/* Une ligne de groupe (un mois de l'échéancier) : sur toute la largeur, ne colle pas en haut. */
+.table .groupe th {
+  position: static;
+  padding: 6px 12px;
+  border-top: 1px solid var(--bord);
+  background: var(--surface-3);
+  color: var(--texte);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+}
+
 .marquee td {
   background: var(--ligne-marquee);
 }

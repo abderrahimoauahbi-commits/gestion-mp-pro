@@ -8,10 +8,8 @@
 import { useSearchParams } from 'react-router'
 
 import { EnTete } from '../../composants/coque/EnTete'
-import { Carte } from '../../composants/mise-en-page/Carte'
 import { Onglets } from '../../composants/mise-en-page/Onglets'
 import { Page } from '../../composants/mise-en-page/Page'
-import { Vide } from '../../composants/retour/Vide'
 import { useOngletAdresse } from '../../lib/adresse'
 import { ongletsPermis } from '../../lib/droits'
 import { useSession } from '../../lib/session'
@@ -21,6 +19,7 @@ import { Comptes } from './Comptes'
 import { CourrielDuLundi } from './Courriel'
 import { DonneesBrutes } from './DonneesBrutes'
 import { Journal } from './Journal'
+import { Reprise } from './Reprise'
 import { Sauvegardes } from './Sauvegardes'
 import { Serveur } from './Serveur'
 import { Technique } from './Technique'
@@ -59,14 +58,7 @@ function Contenu({ onglet }: { onglet: string }) {
     case 'donnees':
       return <DonneesBrutes />
     case 'reprise':
-      return (
-        <Carte remplir>
-          <Vide>
-            L’état du miroir de Gestion MP arrive avec la route de la reprise (`GET /reprise`, API-PRO 243),
-            pas encore servie : en attendant, la reprise se lance sur le serveur (`make miroir`).
-          </Vide>
-        </Carte>
-      )
+      return <Reprise />
     default:
       return <Comptes />
   }

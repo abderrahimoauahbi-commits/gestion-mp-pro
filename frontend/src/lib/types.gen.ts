@@ -422,6 +422,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/periode-close/brouillons': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les brouillons datés de la période à clore, annoncés avant la clôture.
+     * @description Brouillons et inventaires ouverts datés jusqu'au jour : ce que la route 26 refuserait.
+     */
+    get: operations['brouillons_periode_api_periode_close_brouillons_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/periode-close': {
     parameters: {
       query?: never
@@ -2578,7 +2598,7 @@ export interface paths {
     }
     /**
      * L'onglet affiché du plan d'achat (fournisseurs ou références), cherché, en classeur.
-     * @description Route 242.
+     * @description Route 242 : les filtres liés de l'écran (libellés affichés) s'appliquent aussi.
      */
     get: operations['exporter_plan_api_export_plan_achat_get']
     put?: never
@@ -4065,6 +4085,30 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/reprise': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état du miroir de Gestion MP : dernières reprises, signature, à jour, activité.
+     * @description Route 243.
+     */
+    get: operations['lire_miroir_api_reprise_get']
+    put?: never
+    /**
+     * Rafraîchir le miroir : reprise de Gestion MP (sauvegarde « avant reprise » d'abord).
+     * @description Route 244 : 202, puis la reprise en tâche de fond (après le commit de la requête).
+     */
+    post: operations['rafraichir_miroir_api_reprise_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/documents/etiquettes': {
     parameters: {
       query?: never
@@ -4713,6 +4757,26 @@ export interface components {
       validables: number
     }
     /**
+     * BrouillonsPeriode
+     * @description Ce qui empêcherait de clore jusqu'au `jusqu_au` : annoncé avant la fenêtre de clôture.
+     */
+    BrouillonsPeriode: {
+      /**
+       * Jusqu Au
+       * Format: date
+       */
+      jusqu_au: string
+      /** Total */
+      total: number
+      /** Genres */
+      genres: components['schemas']['GenreEnAttente'][]
+      /**
+       * Message
+       * @description le refus que la clôture opposerait, ou null
+       */
+      message: string | null
+    }
+    /**
      * Changement
      * @description Un champ qui change, en clair.
      */
@@ -4960,7 +5024,7 @@ export interface components {
      * CommandeFiche
      * @description La fiche d'un bon (route 153) : `actions` dit, geste par geste, `null` s'il est permis,
      *     sinon la phrase du refus ; `fin_possible` : « solder » (un camion est venu), « annuler »
-     *     (rien reçu) ou `null`.
+     *     (rien reçu) ou `null` ; `promesse_figee` : pourquoi la date promise ne se change plus.
      */
     CommandeFiche: {
       /** Id */
@@ -5066,6 +5130,28 @@ export interface components {
       /** Solde Le */
       solde_le: string | null
       renvoi: components['schemas']['RenvoiLu'] | null
+      /**
+       * En Retard
+       * @description la règle de `?filtre=retard` (P1-11)
+       */
+      en_retard: boolean
+      /**
+       * Arrivee Attendue
+       * @description ETA, sinon livraison promise (bon parti)
+       */
+      arrivee_attendue: string | null
+      /**
+       * Arrivee Sous 7 Jours
+       * @description arrivée attendue d'hier à J+7
+       */
+      arrivee_sous_7_jours: boolean
+      /**
+       * Kg En Quarantaine
+       * @description reçu sous réserve encore en quarantaine : attendu jusqu'à sa libération
+       */
+      kg_en_quarantaine: number
+      /** Promesse Figee */
+      promesse_figee: string | null
       /** Seuil Approbation */
       seuil_approbation: number
       /** Contact */
@@ -5221,6 +5307,26 @@ export interface components {
       /** Solde Le */
       solde_le: string | null
       renvoi: components['schemas']['RenvoiLu'] | null
+      /**
+       * En Retard
+       * @description la règle de `?filtre=retard` (P1-11)
+       */
+      en_retard: boolean
+      /**
+       * Arrivee Attendue
+       * @description ETA, sinon livraison promise (bon parti)
+       */
+      arrivee_attendue: string | null
+      /**
+       * Arrivee Sous 7 Jours
+       * @description arrivée attendue d'hier à J+7
+       */
+      arrivee_sous_7_jours: boolean
+      /**
+       * Kg En Quarantaine
+       * @description reçu sous réserve encore en quarantaine : attendu jusqu'à sa libération
+       */
+      kg_en_quarantaine: number
     }
     /**
      * Comptages
@@ -6508,8 +6614,12 @@ export interface components {
       lot: string
       /** Lot Id */
       lot_id: number | null
+      /** Matiere Id */
+      matiere_id: number | null
       /** Ordre */
       ordre: string
+      /** Ordre Id */
+      ordre_id: number | null
       /** Magasin Source */
       magasin_source: string
       /** Magasin Destination */
@@ -6518,6 +6628,16 @@ export interface components {
       utilisateur: string
       /** Document */
       document: string
+      /**
+       * Document Type
+       * @description reception, ordre, operation, inventaire, reprise
+       */
+      document_type: string | null
+      /**
+       * Document Id
+       * @description la fiche du document (lien), null pour la reprise
+       */
+      document_id: number | null
       /** Annulation */
       annulation: boolean
       /** Annule */
@@ -6534,6 +6654,52 @@ export interface components {
       societe: string
       /** Version */
       version: string
+    }
+    /**
+     * EtatMiroir
+     * @description Route 243 : l'état du miroir de Gestion MP.
+     */
+    EtatMiroir: {
+      /**
+       * Base
+       * @description base de PRO (cible)
+       */
+      base: string
+      /**
+       * Base Source
+       * @description base de Gestion MP (lue seulement)
+       */
+      base_source: string
+      /**
+       * Signature Source
+       * @description signature actuelle de la source
+       */
+      signature_source: string | null
+      /** Source Lisible */
+      source_lisible: boolean
+      /**
+       * Message Source
+       * @description pourquoi la source ne se lit pas (sinon vide)
+       */
+      message_source: string
+      /**
+       * A Jour
+       * @description source inchangée depuis la dernière reprise réussie
+       */
+      a_jour: boolean
+      /**
+       * Activite Propre
+       * @description activité saisie dans PRO (pas écrite par la dernière reprise)
+       */
+      activite_propre: boolean
+      /** En Cours */
+      en_cours: boolean
+      derniere_reussie: components['schemas']['ExecutionMiroir'] | null
+      /**
+       * Executions
+       * @description les 10 dernières exécutions
+       */
+      executions: components['schemas']['ExecutionMiroir'][]
     }
     /**
      * EtatRestauration
@@ -6656,6 +6822,13 @@ export interface components {
       date_reference: string
       /** Magasins */
       magasins: string[]
+      /**
+       * Magasin Ids
+       * @description code du magasin → id (`par_magasin` est par code)
+       */
+      magasin_ids: {
+        [key: string]: number
+      }
       /** Lignes */
       lignes: components['schemas']['LigneStock'][]
     }
@@ -6713,6 +6886,82 @@ export interface components {
       alourdies: number
       /** Allegees */
       allegees: number
+    }
+    /**
+     * ExecutionMiroir
+     * @description Une exécution de la reprise (la plus récente d'abord).
+     */
+    ExecutionMiroir: {
+      /** Id */
+      id: number
+      /**
+       * Debut
+       * Format: date-time
+       */
+      debut: string
+      /** Fin */
+      fin: string | null
+      /**
+       * Statut
+       * @description en_cours, reussie, echouee
+       */
+      statut: string
+      /**
+       * Mode
+       * @description referentiels, activite, tout
+       */
+      mode: string
+      /** Base Source */
+      base_source: string
+      /**
+       * Empreinte Source
+       * @description signature de la source relevée
+       */
+      empreinte_source: string | null
+      /** Duree S */
+      duree_s: number | null
+      /**
+       * Creees
+       * @description lignes créées, toutes tables
+       */
+      creees: number
+      /**
+       * Tables
+       * @description par table : lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees
+       */
+      tables: {
+        [key: string]: {
+          [key: string]: number
+        }
+      }
+      /**
+       * Rapport
+       * @description rapport de contrôle (direction seulement)
+       */
+      rapport: string | null
+    }
+    /**
+     * ExecutionReprise
+     * @description Route 244 (202) : la reprise a commencé ; l'écran suit son issue par la route 243.
+     */
+    ExecutionReprise: {
+      /**
+       * Etat
+       * @default en_cours
+       * @constant
+       */
+      etat: 'en_cours'
+      /**
+       * Debut
+       * Format: date-time
+       */
+      debut: string
+      /** Mode */
+      mode: string
+      /** Remplacer Activite */
+      remplacer_activite: boolean
+      /** Message */
+      message: string
     }
     /**
      * ExpeditionEntree
@@ -7524,6 +7773,21 @@ export interface components {
       commentaire: string
     }
     /**
+     * GenreEnAttente
+     * @description Un genre de document daté de la période à clore (brouillons, inventaires ouverts).
+     */
+    GenreEnAttente: {
+      /**
+       * Genre
+       * @description reception, ordre, operation, inventaire
+       */
+      genre: string
+      /** Libelle */
+      libelle: string
+      /** Nombre */
+      nombre: number
+    }
+    /**
      * GesteMotive
      * @description Routes 132, 245 : la version lue et le motif (3 caractères au moins).
      */
@@ -7792,6 +8056,8 @@ export interface components {
       abandonne_par: string
       /** Abandonne Le */
       abandonne_le: string | null
+      /** Abandon Motif */
+      abandon_motif: string
       /** Annule Par */
       annule_par: string
       /** Annule Le */
@@ -7911,6 +8177,8 @@ export interface components {
       abandonne_par: string
       /** Abandonne Le */
       abandonne_le: string | null
+      /** Abandon Motif */
+      abandon_motif: string
       /** Annule Par */
       annule_par: string
       /** Annule Le */
@@ -8065,7 +8333,10 @@ export interface components {
       montant_estime: number
       /** Recu */
       recu: number
-      /** En Quarantaine */
+      /**
+       * En Quarantaine
+       * @description kg reçus sous réserve, en quarantaine : attendus jusqu'à leur libération
+       */
       en_quarantaine: number
       /** Reste */
       reste: number
@@ -9170,6 +9441,10 @@ export interface components {
       action?: string | null
       /** Matiere Id */
       matiere_id?: number | null
+      /** Role Id */
+      role_id?: number | null
+      /** Fournisseur Id */
+      fournisseur_id?: number | null
       /** Valeur Machine Mad */
       valeur_machine_mad?: number | null
     }
@@ -10270,6 +10545,12 @@ export interface components {
       montage?: components['schemas']['ResultatMontage'] | null
     }
     /**
+     * ModeReprise
+     * @description Ce qu'une exécution de la reprise a repris.
+     * @enum {string}
+     */
+    ModeReprise: 'referentiels' | 'activite' | 'tout'
+    /**
      * Moi
      * @description Route 12 : le compte connecté, ce qu'il voit et ses droits fins.
      */
@@ -10426,8 +10707,11 @@ export interface components {
       quantite: number
       /** Prix */
       prix: number | null
-      /** Devise */
-      devise: string
+      /**
+       * Devise
+       * @description null hors direction et achats (an. 27)
+       */
+      devise: string | null
       /** Cours */
       cours: number | null
       /** Document */
@@ -12862,6 +13146,22 @@ export interface components {
       motif: string
     }
     /**
+     * RepriseDemandee
+     * @description Route 244 : rafraîchir le miroir. `remplacer_activite` exige `confirmation` = REMPLACER
+     *     (casse indifférente) ; sans lui, une activité saisie dans PRO fait refuser (409).
+     */
+    RepriseDemandee: {
+      /** @default tout */
+      mode: components['schemas']['ModeReprise']
+      /**
+       * Remplacer Activite
+       * @default false
+       */
+      remplacer_activite: boolean
+      /** Confirmation */
+      confirmation?: string | null
+    }
+    /**
      * ReseauServeur
      * @description L'adresse du serveur pour un autre poste (schéma et port de la requête).
      */
@@ -13381,8 +13681,12 @@ export interface components {
       lot_id: number | null
       /** Lot */
       lot: string
+      /** Ordre Id */
+      ordre_id: number | null
       /** Ordre */
       ordre: string
+      /** Matiere Id */
+      matiere_id: number | null
       /** Matiere */
       matiere: string
       /** References */
@@ -14841,6 +15145,56 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['Page_ReglageHistorique_']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  brouillons_periode_api_periode_close_brouillons_get: {
+    parameters: {
+      query: {
+        /** @description clore jusqu'au */
+        date: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['BrouillonsPeriode']
         }
       }
       /** @description Non connecté */
@@ -22444,6 +22798,20 @@ export interface operations {
         q?: string
         /** @description AAAA-MM-JJ */
         date?: string | null
+        /** @description valeur affichée du filtre de l'écran */
+        statut?: string
+        /** @description valeur affichée du filtre de l'écran */
+        priorite?: string
+        /** @description valeur affichée du filtre de l'écran */
+        abc?: string
+        /** @description valeur affichée du filtre de l'écran */
+        fournisseur?: string
+        /** @description valeur affichée du filtre de l'écran */
+        urgence?: string
+        /** @description valeur affichée du filtre de l'écran */
+        devise?: string
+        /** @description valeur affichée du filtre de l'écran */
+        pays?: string
       }
       header?: never
       path?: never
@@ -27758,6 +28126,113 @@ export interface operations {
         }
         content: {
           'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_miroir_api_reprise_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatMiroir']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  rafraichir_miroir_api_reprise_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RepriseDemandee']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ExecutionReprise']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Service indisponible */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
         }
       }
     }

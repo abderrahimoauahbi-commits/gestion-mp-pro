@@ -42,6 +42,7 @@ import gestion_mp_calcul as calcul  # noqa: E402
 import parite_api_alimentation as alim  # noqa: E402
 import parite_api_passe as api  # noqa: E402
 import parite_bases as pb  # noqa: E402
+import parite_chaine_base as pcb  # noqa: E402
 import parite_donnees as pd  # noqa: E402
 import parite_dynamique as dyn  # noqa: E402
 import parite_k7 as k7  # noqa: E402
@@ -74,12 +75,25 @@ def entete(r: rp.Rapport, prep: pb.Preparation, bases: pb.Bases) -> None:
         r(f"  {ligne}")
 
 
+def donnees_scindees(bases: pb.Bases, dossier: Path) -> pd.Contexte:
+    """K8b : le dépôt de Gestion MP relu sur une copie où la scission est refaite."""
+    adresse = pb.url(f"{bases.prefixe}_scindee_essai")
+    try:
+        pb.copier(bases.copie.rsplit("/", 1)[-1], adresse)
+        comptes = pcb.traduire(adresse, "K8b")
+        (dossier / "scindee").mkdir(parents=True, exist_ok=True)
+        d0s = st.donnees_gestion_mp(adresse, dossier / "scindee")["donnees"]
+    finally:
+        pb.supprimer(adresse)
+    return pd.lire_contexte(d0s, comptes["reception.scindee"])
+
+
 def statique(r: rp.Rapport, bases: pb.Bases, dossier: Path) -> dict[str, Path]:
     """Données comparées, chaîne des traductions, moteurs aux 19 dates, K7 des services."""
     d0 = st.donnees_gestion_mp(bases.copie, dossier)["donnees"]
     complet = st.donnees_pro(bases.pro)
     dpro = pd.sans_index(json.loads(calcul.texte_json(complet)))
-    ecarts = pd.ecarts(d0, dpro, pd.lire_contexte(bases.copie))
+    ecarts = pd.ecarts(d0, dpro, donnees_scindees(bases, dossier))
     chaine = pd.chaine(d0, ecarts)
     jeux = st.ecrire_jeux(dossier, d0, chaine)
     r.titre("Données des deux moteurs (chargeur de PRO contre dépôt de Gestion MP)")
@@ -107,6 +121,8 @@ def _statique_rapport(r: rp.Rapport, jours: list[st.Jour]) -> None:
       f"{len(moteur)} écart(s)")  # fmt: skip
     r.a_corriger += len(moteur)
     rp.detail_a_corriger(r, moteur)
+    r(f"  codes du stock de PRO ramenés aux libellés de Gestion MP (forme RESTES3) : "
+      f"{sum(j.codes for j in jours)} valeurs")  # fmt: skip
     comparees: Counter[str] = Counter()
     for j in jours:
         comparees.update(j.comparees)
@@ -175,6 +191,7 @@ def passe_dynamique(r: rp.Rapport, bases: pb.Bases, dossier: Path) -> None:
     d = pb.Bases(prefixe=f"{bases.prefixe}dyn")
     try:
         pb.copier(bases.copie.rsplit("/", 1)[-1], d.copie)
+        pcb.traduire(d.copie, "K8b")  # mêmes réceptions (et identifiants) que la reprise
         pb.copier(bases.pro.rsplit("/", 1)[-1], d.pro)
         with srv.demarrer(d, dossier) as s:
             j = dyn.passe(s)

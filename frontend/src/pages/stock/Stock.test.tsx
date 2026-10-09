@@ -202,6 +202,10 @@ describe('Suivi de traçabilité', () => {
     await userEvent.click(within(table).getByRole('button', { name: 'PP FRZ-2900 Rouge' }))
     await waitFor(() => expect(adresse()).toMatch(/^\/tracabilite\?matiere=1&depuis=ordre%3A7/))
     const suite = await screen.findByRole('dialog', { name: /Parcours de la matière/ })
+    // Les ids des étapes (RESTES3) : le n° du document mène à sa fiche, l'ordre se suit par son id.
+    const documents = await within(suite).findAllByRole('link', { name: 'OF-2026-0005' })
+    expect(documents[0]).toHaveAttribute('href', '/ordres/7')
+    expect(within(suite).getAllByRole('button', { name: 'OF-2026-0005' }).length).toBeGreaterThan(0)
     expect(
       within(suite).getByRole('button', { name: '← Revenir à l’ordre OF-2026-0005' }),
     ).toBeInTheDocument()

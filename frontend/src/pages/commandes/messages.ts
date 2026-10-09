@@ -7,6 +7,15 @@ import type { CommandeFiche } from './types'
 
 type Etat = Pick<CommandeFiche, 'statut' | 'numero' | 'montant_estime_mad' | 'date_commande'>
 
+/**
+ * La part reçue sous réserve qui attend en quarantaine (D-02, décision V1) : le reste à livrer du
+ * bon la compte reçue (règle de Gestion MP, gardée pour la parité), le Cockpit et le plan d'achat
+ * l'attendent encore jusqu'à sa libération. Une seule phrase, sur la ligne et sur la fiche.
+ */
+export function texteReserve(kg: number): string {
+  return `dont ${nombre(kg)} kg reçus sous réserve, en quarantaine : attendus jusqu’à leur libération`
+}
+
 /** Après « Enregistrer » (lignes, date, remarques). */
 export function apresModification(avant: Etat, apres: Etat): string {
   if (avant.statut === 'a_approuver' && apres.statut === 'brouillon')

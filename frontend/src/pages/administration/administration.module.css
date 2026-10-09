@@ -52,12 +52,6 @@
   font: inherit;
 }
 
-.case {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espace-2);
-}
-
 .liste {
   margin: 0;
   padding-left: var(--espace-4);

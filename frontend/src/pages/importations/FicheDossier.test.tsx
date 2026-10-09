@@ -95,6 +95,35 @@ describe('Fiche dossier › clôture', () => {
   })
 })
 
+describe('Fiche dossier › échéancier', () => {
+  it('une ligne de groupe par mois, qui dit ce qui y reste à payer par devise', async () => {
+    const d = donnees()
+    const [a, b, c] = d.fiche.echeancier
+    Object.assign(a!, { echeance: '2026-10-15' })
+    Object.assign(b!, { echeance: '2026-10-30' })
+    Object.assign(c!, { echeance: null })
+    ouvrir(d, 'echeancier')
+    const table = await screen.findByRole('table', { name: /Échéancier du dossier/ })
+    const mois = within(table)
+      .getAllByRole('rowheader')
+      .map((x) => x.textContent)
+    expect(mois).toHaveLength(2)
+    expect(mois[0]).toMatch(
+      /^octobre 2026à payer .*5\u00a0964,00\u00a0MAD.*5\u00a0700,00\u00a0DJN|^octobre 2026à payer .*DJN.*MAD/,
+    )
+    expect(mois[1]).toMatch(/^Sans échéanceà payer 4\u00a0200,00\u00a0MADla saisir sur le frais$/)
+  })
+})
+
+describe('Fiche dossier › pièces jointes', () => {
+  it('ouvert : joindre et retirer ; clos : joindre seulement ; annulé : lecture', async () => {
+    const { modePieces } = await import('./FicheDossier')
+    expect(modePieces('ouvert')).toBe('complet')
+    expect(modePieces('clos')).toBe('joindre')
+    expect(modePieces('annule')).toBe('lecture')
+  })
+})
+
 describe('Fiche dossier › frais', () => {
   it('un frais réglé garde poste, montant, marchandise et ne se retire pas (raison dite)', async () => {
     const d = donnees()

@@ -187,6 +187,8 @@ def pesee_comme_gestion_mp(p: dict[str, Any]) -> dict[str, Any]:
     est ce à quoi la pesée est comparée — le BL (`compare_au = bl`), sinon le reste à livrer
     (`reste`), sinon rien (0) ; un écart sans comparaison (`null`) y valait 0."""
     vue = dict(p)
+    if p.get("numero") == "Brouillon" and p.get("statut_reception") == "brouillon":
+        vue["numero"] = f"brouillon n° {p.get('reception_id')}"  # RESTES3 : « Brouillon » à l'écran
     compare = p.get("compare_au")
     vue["quantite_attendue"] = (
         p.get("quantite_bl") if compare == "bl" else p.get("quantite_attendue") if compare else 0.0
@@ -211,3 +213,30 @@ def note_de_cloture(g: Any, p: Any) -> tuple[Any, Any]:
 def aujourdhui() -> date:
     """Le jour de l'usine (les deux serveurs tournent sur l'horloge réelle)."""
     return datetime.now(USINE).date()
+
+
+def codes_du_stock(p: Any) -> tuple[Any, int]:
+    """Les codes du stock de PRO (RESTES3 § 1.1 : `statut`, `statut_couverture` « CRITIQUE »,
+    `action` « CREER_BC »/« AUCUNE », `relance` sans émoji) ramenés aux libellés de Gestion MP
+    (`calcul.constantes.LIBELLES_GESTION_MP`, par `tests/moteur/jeux_outils.comme_gestion_mp`) :
+    même valeur logique, autre forme. Rend la réponse traduite et le nombre de valeurs
+    traduites ; une valeur inconnue reste telle quelle et l'écart se voit."""
+    import sys
+    from pathlib import Path
+
+    tests = str(Path(__file__).resolve().parents[1] / "tests")
+    if tests not in sys.path:
+        sys.path.insert(0, tests)
+    from moteur.jeux_outils import comme_gestion_mp
+
+    rendu = comme_gestion_mp(p)
+    return rendu, _differentes(p, rendu)
+
+
+def _differentes(a: Any, b: Any) -> int:
+    """Le nombre de feuilles qui diffèrent entre deux structures de même forme."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return sum(_differentes(a[k], b.get(k)) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return sum(_differentes(x, y) for x, y in zip(a, b, strict=False))
+    return int(a != b)

@@ -9,7 +9,6 @@ import { Kpi } from '../../composants/retour/Kpi'
 import { Cadre } from '../../composants/tableaux/Cadre'
 import { formule } from '../../lib/aide'
 import { nombre } from '../../lib/format'
-import { aujourdhui } from '../../lib/heure'
 import { useSession } from '../../lib/session'
 import styles from './accueil.module.css'
 import { CarteArrivees, CarteAValider, EtatLectures } from './CartesJournee'
@@ -21,10 +20,9 @@ import {
   useCommandesToutes,
   useInventairesOuverts,
   useReclamationsOuvertes,
-  useRetards,
 } from './donnees'
 import { ListeTaches } from './ListeTaches'
-import { arriveesSemaine, siPermis, tachesAchats } from './taches'
+import { arriveesSemaine, retardsDe, siPermis, tachesAchats } from './taches'
 import type { Cockpit } from './types'
 
 function IndicateursJournee({
@@ -81,7 +79,6 @@ export function JourneeAchats() {
   const { role } = useSession()
   const cockpit = useCockpit()
   const commandes = useCommandesToutes()
-  const retards = useRetards()
   const brouillons = useBrouillons()
   const attente = useAttente()
   const besoins = useBesoins()
@@ -91,17 +88,16 @@ export function JourneeAchats() {
     role,
     cockpit: cockpit.data,
     commandes: commandes.data ?? [],
-    retards: retards.data ?? [],
+    retards: retardsDe(commandes.data ?? []),
     attente: attente.data,
     besoins: besoins.data?.elements ?? [],
     reclamations: reclamations.data ?? [],
     inventaires: inventaires.data ?? [],
   })
-  const arrivees = arriveesSemaine(commandes.data ?? [], aujourdhui())
+  const arrivees = arriveesSemaine(commandes.data ?? [])
   const lectures = [
     [cockpit, 'le cockpit'],
     [commandes, 'les commandes'],
-    [retards, 'les commandes en retard'],
     [attente, 'les factures en attente de dossier'],
     [besoins, 'les besoins signalés'],
     [reclamations, 'les réclamations'],
@@ -110,7 +106,11 @@ export function JourneeAchats() {
   const pret = lectures.every(([l]) => !l.isPending)
   return (
     <>
-      <IndicateursJournee cockpit={cockpit.data} retards={retards.data?.length} arrivees={arrivees.length} />
+      <IndicateursJournee
+        cockpit={cockpit.data}
+        retards={commandes.data ? retardsDe(commandes.data).length : undefined}
+        arrivees={arrivees.length}
+      />
       <div className={styles.grille}>
         <Carte titre={`À faire (${nombre(taches.length)})`}>
           <EtatLectures lectures={lectures} />

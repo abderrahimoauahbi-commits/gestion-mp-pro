@@ -14,7 +14,6 @@ import { Bouton } from '../../composants/saisie/Bouton'
 import { date, kgTelephone, nombre } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
 import { attente } from './briques'
-import { useNomMetier } from './commun'
 import styles from './atelier.module.css'
 import type { OrdreResume } from './types'
 
@@ -37,7 +36,6 @@ export function quantiteCarte(o: OrdreResume): [string, string] {
 }
 
 export function CarteOrdre({ o, vers }: { o: OrdreResume; vers: string }) {
-  const nomMetier = useNomMetier()
   const [q, sens] = quantiteCarte(o)
   const brouillon = o.statut === 'brouillon'
   return (
@@ -48,7 +46,7 @@ export function CarteOrdre({ o, vers }: { o: OrdreResume; vers: string }) {
       </span>
       <span className={styles.ligne}>
         <span className={styles.note}>
-          {[date(o.date), fabrication(o), nomMetier(o.metier_id, o.metier)].filter(Boolean).join(' · ')}
+          {[date(o.date), fabrication(o), o.metier].filter(Boolean).join(' · ')}
         </span>
         <span className={styles.valeur}>
           {q}

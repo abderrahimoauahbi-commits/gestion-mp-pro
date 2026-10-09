@@ -4,8 +4,8 @@ réceptions et leurs lignes, réclamations. Identifiants et numéros gardés.
 Traductions (MODELE-DONNEES § 10.3) : cours, montant approuvé, montant de facture à 0 → NULL ;
 `version_approuvee` (JSON) → une `commande_version` (motif `reprise`) ; une réception porte
 **une** devise (celle de sa facture, sinon celle de la plupart de ses lignes : deux devises sur
-une réception sont signalées) ; `LOT INTERNE` → `lot_interne` ; prix confirmé sans date →
-date de création du bon (signalé).
+une réception : scindée ensuite par `scission`) ; `LOT INTERNE` → `lot_interne` ; prix
+confirmé sans date → date de création du bon (signalé).
 """
 
 from __future__ import annotations
@@ -196,13 +196,6 @@ def receptions(ctx: Contexte, j: jt.Journal, sortie: Lignes) -> None:
         v["numero"] = numero_de_document(ctx, "reception", r, r["statut"] == "brouillon")
         defaut = factures_.get(r["facture_id"]) or fournisseurs.get(r["fournisseur_id"]) or "MAD"
         v["devise"] = factures_.get(r["facture_id"]) or plus_frequent(devises[r["id"]], defaut)
-        if len(set(devises[r["id"]])) > 1:
-            ctx.signaler(
-                "reception",
-                r["id"],
-                f"lignes en {', '.join(sorted(set(devises[r['id']])))} : "
-                f"devise de l'en-tête {v['devise']}, prix des lignes gardés",
-            )
         v["cree_par_id"] = ctx.personne(r["cree_par"])
         v["validee_par_id"] = ctx.personne(r["validee_par"])
         if r["statut"] != "brouillon" and r["validee_le"] is None:
