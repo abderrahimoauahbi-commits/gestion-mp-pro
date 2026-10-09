@@ -9,7 +9,7 @@ import { Cadre } from '../../composants/tableaux/Cadre'
 import { kg, kgEtMetres, nombre, nombreSigne, VIDE } from '../../lib/format'
 import styles from '../stock/stock.module.css'
 import { EcartRecette, ecartRelatif } from './ecart'
-import type { Fil, Prise } from './ordre'
+import type { Fil, Prise } from '../../lib/ordre'
 import type { SaisieOrdre } from './useSaisieOrdre'
 
 function AutreLot({ f, s }: { f: Fil; s: SaisieOrdre }) {

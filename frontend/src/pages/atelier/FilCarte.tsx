@@ -1,28 +1,18 @@
 /**
  * La carte d'un fil à l'étape « Lots à prendre » : ce que les recettes en prévoient, ce qu'on en
- * prend lot par lot (kg, bobines, palettes — l'arrondi est dit), l'écart, le manque, les lots
- * qui débordent, un autre lot à prendre.
+ * prend lot par lot (kg, bobines, palettes : `Quantite` dit la conversion et l'arrondi), l'écart,
+ * le manque, les lots qui débordent, un autre lot à prendre.
  */
-import { Compteur } from '../../composants/atelier/Compteur'
-import { SegmentsTactiles } from '../../composants/atelier/SegmentsTactiles'
 import { Badge } from '../../composants/retour/Badge'
 import { Note } from '../../composants/retour/Note'
 import { Bouton } from '../../composants/saisie/Bouton'
+import { Quantite } from '../../composants/saisie/Quantite'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { kgEtMetres, metres, nombreSigne } from '../../lib/format'
-import { bobinesApprochees, contenance, direConversion, unitesPossibles } from '../../lib/unites'
+import { conditionnement, depasse, ecartLisible, kgDe, priseDe, type Fil, type Prise } from '../../lib/ordre'
+import { bobinesApprochees, contenance } from '../../lib/unites'
 import { Fiche, NoteAtelier } from './briques'
 import styles from './atelier.module.css'
-import {
-  changerUnite,
-  conditionnement,
-  depasse,
-  ecartLisible,
-  kgDe,
-  priseDe,
-  type Fil,
-  type Prise,
-} from './sortie'
 import type { SaisieSortie } from './useSaisieSortie'
 
 const q = (kg: number, kgParMl: number) => kgEtMetres(kg, kgParMl, true)
@@ -53,15 +43,11 @@ export function parQualite(f: Fil): string {
   return (f.besoin?.par_qualite ?? []).map((x) => `${x.qualite} : ${q(x.kg, f.kg_par_ml)}`).join(' · ')
 }
 
-const LIBELLES = { kg: 'kg', bobine: 'bobines', palette: 'palettes' } as const
-
 function LignePrise({ s, p }: { s: SaisieSortie; p: Prise }) {
   const c = conditionnement(p)
-  const unites = unitesPossibles(c)
   const dispo = s.dispo(p)
   const changer = (m: Partial<Prise>) =>
-    s.poser({ prises: s.e.prises.map((x) => (x.cle === p.cle ? { ...x, ...m, arrondi: undefined } : x)) })
-  const conversion = direConversion(p.quantite, p.unite, c)
+    s.poser({ prises: s.e.prises.map((x) => (x.cle === p.cle ? { ...x, ...m } : x)) })
   const indicatif = p.unite === 'kg' && p.kg_par_ml ? metres(kgDe(p), p.kg_par_ml) : ''
   return (
     <div className={styles.prise}>
@@ -71,25 +57,18 @@ function LignePrise({ s, p }: { s: SaisieSortie; p: Prise }) {
           {dispo >= 0 ? `dispo ${q(dispo, p.kg_par_ml)} ${bobinesApprochees(dispo, c)}` : ''}
         </span>
       </div>
-      {unites.length > 1 ? (
-        <SegmentsTactiles
-          libelle={`Unité du lot ${p.lot}`}
-          valeur={p.unite}
-          options={unites.map((u) => ({ valeur: u, libelle: LIBELLES[u] }))}
-          onChange={(u) =>
-            s.poser({ prises: s.e.prises.map((x) => (x.cle === p.cle ? changerUnite(x, u) : x)) })
-          }
-        />
-      ) : null}
-      <Compteur
+      <Quantite
+        tactile
         libelle={`Quantité du lot ${p.lot}`}
-        valeur={p.quantite}
+        kg={p.kg}
         unite={p.unite}
-        onChange={(v) => changer({ quantite: v ?? 0 })}
+        poidsBobine={p.poids_bobine}
+        bobinesPalette={p.bobines_palette}
+        kgParMl={p.kg_par_ml}
+        onChange={(kg) => changer({ kg })}
+        onUnite={(unite) => changer({ unite })}
       />
-      {conversion ? <span className={styles.note}>{conversion}</span> : null}
       {indicatif ? <span className={styles.note}>{indicatif}, à titre indicatif</span> : null}
-      {p.arrondi ? <span className={styles.note}>{p.arrondi}</span> : null}
       {depasse(p, dispo) ? <Note ton="critique">Plus que ce que porte le lot.</Note> : null}
       {contenance(c, p.unite) == null ? (
         <Note ton="critique">Le poids de bobine n’est pas connu : saisir en kg.</Note>
