@@ -1,4 +1,8 @@
-/** Essais de Bascule : vue choisie, vue dans l'adresse. */
+/// <reference types="node" />
+/** Essais de Bascule : vue choisie, vue dans l'adresse, jamais plus large que sa carte. */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
@@ -35,5 +39,15 @@ describe('Bascule', () => {
     expect(screen.getByRole('button', { name: 'Annulés' })).toHaveAttribute('aria-pressed', 'true')
     await userEvent.click(screen.getByRole('button', { name: 'Clos' }))
     expect(screen.getByRole('status')).toHaveTextContent('?onglet=clos')
+  })
+})
+
+describe('Bascule au téléphone', () => {
+  // jsdom ne calcule pas la mise en page : la règle se lit dans la feuille (la recette mesure).
+  it('ne dépasse pas la largeur de sa carte : ses vues passent à la ligne', () => {
+    const css = readFileSync(join(process.cwd(), 'src/composants/mise-en-page/Bascule.module.css'), 'utf8')
+    const regle = /\.bascule\s*\{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(regle).toMatch(/max-width:\s*100%/)
+    expect(regle).toMatch(/flex-wrap:\s*wrap/)
   })
 })

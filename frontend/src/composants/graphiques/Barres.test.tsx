@@ -61,3 +61,37 @@ describe('Barres', () => {
     expect(screen.getByText('Pas de données à montrer.')).toBeInTheDocument()
   })
 })
+
+describe('Barres empilées', () => {
+  it('une seule barre par étiquette : chaque série part du haut de la précédente, l’axe va au total', () => {
+    const { container } = render(
+      <Barres
+        libelle="Plan glissant"
+        empiler
+        etiquettes={['oct.', 'nov.']}
+        series={[
+          { nom: 'Q1', valeurs: [600, 300], unite: 'm²' },
+          { nom: 'Q2', valeurs: [400, 0], unite: 'm²' },
+          { nom: 'Autres', valeurs: [200, 100], unite: 'm²' },
+        ]}
+      />,
+    )
+    const barres = [...container.querySelectorAll('svg[role="img"] rect')].map((r) => ({
+      x: Number(r.getAttribute('x')),
+      haut: Number(r.getAttribute('y')),
+      bas: Number(r.getAttribute('y')) + Number(r.getAttribute('height')),
+      titre: r.textContent,
+    }))
+    // Le zéro n'est pas dessiné : 3 morceaux en octobre, 2 en novembre.
+    expect(barres).toHaveLength(5)
+    const [q1, q2, autres] = barres
+    // Même colonne, posées l'une sur l'autre (le haut d'une barre = le bas de la suivante).
+    expect(q1?.x).toBe(q2?.x)
+    expect(q2?.bas).toBeCloseTo(q1?.haut ?? 0)
+    expect(autres?.bas).toBeCloseTo(q2?.haut ?? 0)
+    expect(q2?.titre).toBe('oct. · Q2 : 400 m² (total 1 200 m²)')
+    // L'axe couvre le total (1 200), pas la plus grande série (600).
+    const graduations = [...container.querySelectorAll('text')].map((t) => t.textContent)
+    expect(graduations).toContain('1 500')
+  })
+})
