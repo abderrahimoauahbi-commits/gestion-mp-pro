@@ -1,0 +1,271 @@
+{
+  "ligne": {
+    "reference": "PP FRZ-2900 Rouge",
+    "nature": "",
+    "designation": "",
+    "fournisseur": "Filature Atlas",
+    "composition": "",
+    "type_fil": "",
+    "couleur": "",
+    "titrage": "",
+    "titrage_unite": "",
+    "unite_achat": "kg",
+    "quantite_a_commander_achat": 0.0,
+    "prix_unite": 2.8,
+    "kg_par_ml": 0.0,
+    "stock_initial": 2330.4,
+    "entrees": 22.5,
+    "stock_net": 1851.7,
+    "stock_machine": 15.0,
+    "stock_quarantaine": 0.0,
+    "stock_disponible": 1866.7,
+    "bc_en_cours": 0.0,
+    "bc_hors_horizon": 0.0,
+    "bc_dans_couverture": 0.0,
+    "bc_en_preparation": 0.0,
+    "bons_en_preparation": [],
+    "sorties_prevues": 169.89119999999997,
+    "demande_delai": 340.14301935483866,
+    "stock_projete": 1526.5569806451613,
+    "stock_min": 800.0,
+    "stock_min_recalcule": 584.4718451612902,
+    "stock_min_plafonne": 584.4718451612902,
+    "statut": "🟢 OK",
+    "statut_couverture": "🟢 OK",
+    "couverture_jours": 220.09183688655725,
+    "couverture_cible_jours": 84.26641366223906,
+    "conso_mensuelle": 208.08,
+    "besoin_annuel": 2496.96,
+    "conso_plan": 208.08,
+    "conso_reelle": null,
+    "coefficient_realisation": null,
+    "conso_horizon": 194.82394838709672,
+    "realisation_heritee": [],
+    "delai_jours": 45.0,
+    "sans_achat": "",
+    "quantite_a_commander": 0.0,
+    "quantite_theorique": 0.0,
+    "palettes_a_commander": 0.0,
+    "unite_commande": "Palette",
+    "contenance_commande": 100.0,
+    "unites_a_commander": 0.0,
+    "prix_kg": 2.8,
+    "devise": "MAD",
+    "montant_a_commander": 0.0,
+    "montant_a_commander_mad": 0.0,
+    "valeur_conso_annuelle": 6991.487999999999,
+    "valeur_conso_annuelle_mad": 6991.487999999999,
+    "classe_abc": "A",
+    "rang": 1,
+    "pourcentage_cumule": 0.544909219955583,
+    "cv_demande": 3.3166247903554003,
+    "classe_xyz": "Z",
+    "groupe_equiv": "",
+    "sourcing": "❓ Hors catalogue",
+    "nb_fournisseurs_groupe": 0,
+    "substituts": [],
+    "date_derniere_sortie": "2026-10-09",
+    "jours_sans_mouvement": 0.0,
+    "dormant": false,
+    "par_magasin": {
+      "Magasin principal": 1371.7,
+      "Quarantaine": 0.0,
+      "ATELIER": 480.0
+    },
+    "besoins": [
+      222.768, 237.456, 149.32799999999997, 178.70399999999998, 193.392, 208.08, 222.768, 237.456, 237.456,
+      208.08, 193.392, 208.08
+    ],
+    "action": "—",
+    "matiere_id": 1,
+    "valeur_machine_mad": 30.0
+  },
+  "besoins_par_qualite": [
+    {
+      "qualite": "ATLAS",
+      "pourcentage": 100.0,
+      "kg_par_m2": 1.2,
+      "m2": [132.0, 144.0, 72.0, 96.0, 108.0, 120.0, 132.0, 144.0, 144.0, 120.0, 108.0, 120.0],
+      "kg": [
+        161.568, 176.25599999999997, 88.12799999999999, 117.50399999999999, 132.192, 146.88, 161.568,
+        176.25599999999997, 176.25599999999997, 146.88, 132.192, 146.88
+      ]
+    },
+    {
+      "qualite": "SAHARA",
+      "pourcentage": 50.0,
+      "kg_par_m2": 1.0,
+      "m2": [60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0],
+      "kg": [61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2]
+    }
+  ],
+  "lots": [
+    {
+      "lot_id": 1,
+      "lot": "L-R-101",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature Atlas",
+      "entre_le": "2026-07-11",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 731.3,
+      "disponible": 731.3,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 731.3
+        }
+      ],
+      "bobines": 293,
+      "statut": "disponible",
+      "historique": {
+        "entre": 1200.0,
+        "sorti": 468.7,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": [
+          {
+            "id": 1,
+            "numero": "OF-2026-0001"
+          },
+          {
+            "id": 2,
+            "numero": "OF-2026-0002"
+          },
+          {
+            "id": 3,
+            "numero": "OF-2026-0003"
+          },
+          {
+            "id": 7,
+            "numero": "OF-2026-0005"
+          }
+        ]
+      }
+    },
+    {
+      "lot_id": 2,
+      "lot": "L-R-102",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature Atlas",
+      "entre_le": "2026-08-30",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 640.4,
+      "disponible": 640.4,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 640.4
+        }
+      ],
+      "bobines": 256,
+      "statut": "disponible",
+      "historique": {
+        "entre": 650.4,
+        "sorti": 10.0,
+        "dernier_mouvement": "2026-10-07",
+        "ordres": [
+          {
+            "id": 4,
+            "numero": "OF-2026-0004"
+          }
+        ]
+      }
+    },
+    {
+      "lot_id": 3,
+      "lot": "L-R-103",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature Atlas",
+      "entre_le": "2026-09-19",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 300.0,
+      "disponible": 300.0,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 3,
+          "magasin": "ATELIER",
+          "type": "stock_courant",
+          "quantite": 300.0
+        }
+      ],
+      "bobines": 120,
+      "statut": "disponible",
+      "historique": {
+        "entre": 300.0,
+        "sorti": 0.0,
+        "dernier_mouvement": "2026-09-19",
+        "ordres": []
+      }
+    },
+    {
+      "lot_id": 4,
+      "lot": "L-R-104",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature Atlas",
+      "entre_le": "2026-09-29",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 180.0,
+      "disponible": 180.0,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 3,
+          "magasin": "ATELIER",
+          "type": "stock_courant",
+          "quantite": 180.0
+        }
+      ],
+      "bobines": 72,
+      "statut": "disponible",
+      "historique": {
+        "entre": 180.0,
+        "sorti": 0.0,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": []
+      }
+    }
+  ],
+  "sur_les_metiers": [
+    {
+      "metier": "M1",
+      "etage": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "metres": 3.0,
+      "pourcentage": 100.0,
+      "densite": 2.0,
+      "bobines": 6.0,
+      "poids_bobine": 2.5,
+      "poids": 15.0
+    }
+  ]
+}

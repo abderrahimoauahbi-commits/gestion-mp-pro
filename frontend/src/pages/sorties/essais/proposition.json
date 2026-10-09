@@ -1,0 +1,180 @@
+{
+  "date": "2026-10-09",
+  "magasin_id": 1,
+  "taux_perte": 0.02,
+  "prevu": 107.1,
+  "manque": 0.0,
+  "lignes": [
+    {
+      "matiere_id": 4,
+      "reference": "COTON CHAINE 12/6",
+      "designation": "",
+      "role": "Chaîne",
+      "prevu": 15.3,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "par_qualite": [
+        {
+          "qualite_id": 1,
+          "qualite": "ATLAS",
+          "kg": 15.3
+        }
+      ],
+      "lots": [
+        {
+          "lot_id": 8,
+          "lot": "L-C-401",
+          "entre_le": "2026-07-16",
+          "disponible": 388.7,
+          "poids_bobine": 0.0,
+          "propose": 15.3
+        }
+      ],
+      "disponibles": [
+        {
+          "lot_id": 8,
+          "lot": "L-C-401",
+          "entre_le": "2026-07-16",
+          "disponible": 388.7,
+          "poids_bobine": 0.0,
+          "propose": 15.3
+        }
+      ],
+      "manque": 0.0
+    },
+    {
+      "matiere_id": 6,
+      "reference": "COLLE LATEX",
+      "designation": "",
+      "role": "Colle",
+      "prevu": 10.2,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "par_qualite": [
+        {
+          "qualite_id": 1,
+          "qualite": "ATLAS",
+          "kg": 10.2
+        }
+      ],
+      "lots": [
+        {
+          "lot_id": 10,
+          "lot": "L-G-601",
+          "entre_le": "2026-08-20",
+          "disponible": 195.8,
+          "poids_bobine": 0.0,
+          "propose": 10.2
+        }
+      ],
+      "disponibles": [
+        {
+          "lot_id": 10,
+          "lot": "L-G-601",
+          "entre_le": "2026-08-20",
+          "disponible": 195.8,
+          "poids_bobine": 0.0,
+          "propose": 10.2
+        }
+      ],
+      "manque": 0.0
+    },
+    {
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "role": "Poil",
+      "prevu": 61.2,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "par_qualite": [
+        {
+          "qualite_id": 1,
+          "qualite": "ATLAS",
+          "kg": 61.2
+        }
+      ],
+      "lots": [
+        {
+          "lot_id": 1,
+          "lot": "L-R-101",
+          "entre_le": "2026-07-11",
+          "disponible": 731.3,
+          "poids_bobine": 2.5,
+          "propose": 61.2
+        }
+      ],
+      "disponibles": [
+        {
+          "lot_id": 1,
+          "lot": "L-R-101",
+          "entre_le": "2026-07-11",
+          "disponible": 731.3,
+          "poids_bobine": 2.5,
+          "propose": 61.2
+        },
+        {
+          "lot_id": 2,
+          "lot": "L-R-102",
+          "entre_le": "2026-08-30",
+          "disponible": 640.4,
+          "poids_bobine": 2.5,
+          "propose": 0.0
+        }
+      ],
+      "manque": 0.0
+    },
+    {
+      "matiere_id": 3,
+      "reference": "JUTE TRAME 4 Ply",
+      "designation": "",
+      "role": "Trame",
+      "prevu": 20.4,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "par_qualite": [
+        {
+          "qualite_id": 1,
+          "qualite": "ATLAS",
+          "kg": 20.4
+        }
+      ],
+      "lots": [
+        {
+          "lot_id": 6,
+          "lot": "L-T-301",
+          "entre_le": "2026-07-21",
+          "disponible": 737.6,
+          "poids_bobine": 0.0,
+          "propose": 20.4
+        }
+      ],
+      "disponibles": [
+        {
+          "lot_id": 6,
+          "lot": "L-T-301",
+          "entre_le": "2026-07-21",
+          "disponible": 737.6,
+          "poids_bobine": 0.0,
+          "propose": 20.4
+        },
+        {
+          "lot_id": 7,
+          "lot": "L-T-302",
+          "entre_le": "2026-09-24",
+          "disponible": 333.3,
+          "poids_bobine": 0.0,
+          "propose": 0.0
+        }
+      ],
+      "manque": 0.0
+    }
+  ],
+  "manques": [],
+  "recettes_incompletes": [],
+  "blocages": []
+}

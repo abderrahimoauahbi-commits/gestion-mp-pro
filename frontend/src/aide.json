@@ -283,6 +283,22 @@
       "grandeur": "Bobines montées",
       "texte": "Σ mètres × bobines par mètre du métier × part du fil, sur les métiers en service."
     },
+    "brouillons": {
+      "grandeur": "Brouillons",
+      "texte": "Les documents saisis et pas encore validés (réceptions, ordres, opérations) : le stock n’a pas bougé pour eux."
+    },
+    "brouillons_bloques": {
+      "grandeur": "Brouillons qui seraient refusés",
+      "texte": "Les brouillons dont le serveur annonce un refus à la validation (lot épuisé ou entré après la date, stock insuffisant, inventaire en cours, date, qualité arrêtée…), quel que soit le rôle qui les valide."
+    },
+    "brouillons_validables": {
+      "grandeur": "Brouillons que vous pouvez valider",
+      "texte": "Les brouillons que votre rôle valide et que rien ne bloque : exactement ceux que « Tout valider » enverra. Les bloqués n’y sont pas comptés."
+    },
+    "budget_a_commander": {
+      "grandeur": "Budget à commander",
+      "texte": "Σ des montants à commander des matières affichées, en MAD au cours du jour : quantité à commander × prix au kilo × cours de la devise."
+    },
     "cout_hors_tva": {
       "grandeur": "Coût hors TVA d’une marchandise",
       "texte": "Valeur au cours de la banque + sa part des charges non récupérables (droits, fret, transit…), à la valeur ou au poids selon le poste. La TVA est à part (Coût TTC)."
@@ -299,13 +315,41 @@
       "grandeur": "Couverture",
       "texte": "Stock projeté ÷ consommation journalière. Couverture pondérée (Cockpit) : la même, pondérée par la valeur."
     },
+    "critiques": {
+      "grandeur": "Matières critiques",
+      "texte": "Les matières affichées au statut CRITIQUE : stock projeté au plus à 50 % du seuil d’alerte."
+    },
     "cycle_tresorerie": {
       "grandeur": "Cycle de trésorerie",
       "texte": "Jours de stock + délai client − délai de paiement fournisseur (pondéré par les montants)."
     },
+    "demande_delai": {
+      "grandeur": "Demande pendant le délai",
+      "texte": "Ce que le plan consommera (besoin retenu, mois par mois au prorata des jours) entre aujourd’hui et la livraison d’une commande passée aujourd’hui, soit le délai du fournisseur. Disponible + Commandé dans le délai − cette demande = Stock projeté."
+    },
+    "ecart_plan": {
+      "grandeur": "Écart au plan, mois clos",
+      "texte": "(m² tissés − m² prévus) ÷ m² prévus, sur les mois clos depuis la mise en service ; chaque mois est jugé sur le plan en vigueur pendant ce mois. À 10 % près c’est juste ; un retard est critique, une avance à surveiller."
+    },
+    "ecart_recette": {
+      "grandeur": "Écart à la recette",
+      "texte": "(sorti net − prévu par la recette) ÷ prévu, sur les ordres selon recette ; le prévu est figé à la validation (recette et perte du jour). À 5 % près c’est juste ; un excès est à surveiller, un manque est critique."
+    },
+    "entre_sorti_lot": {
+      "grandeur": "Entré et sorti d’un lot",
+      "texte": "Entré : les entrées du lot (réception, stock d’ouverture, matière retrouvée), hors transferts et annulations. Sorti : les sorties vers les machines et les retours au fournisseur, net des retours des machines."
+    },
+    "entree_lot": {
+      "grandeur": "Entrée d’un lot",
+      "texte": "Le jour où le lot est entré au stock, et son fournisseur."
+    },
     "etages_garnis": {
       "grandeur": "Étages garnis",
       "texte": "Les étages qui portent au moins un fil, sur les métiers en service, sur le total de leurs étages."
+    },
+    "fabrication_ordre": {
+      "grandeur": "Fabrication d’un ordre",
+      "texte": "Les m² de chaque qualité tissée sous l’ordre ; un ordre hors recette (échantillons, série spéciale) n’en a pas."
     },
     "fournisseur_delai": {
       "grandeur": "Délai d’un fournisseur",
@@ -343,21 +387,57 @@
       "grandeur": "Valeur de l’écart",
       "texte": "Σ écart × coût moyen (CMUP) tant que l’inventaire est ouvert ; le coût de chaque ajustement écrit une fois validé. « Sans signe » : Σ des valeurs absolues."
     },
+    "lots_affiches": {
+      "grandeur": "Lots affichés",
+      "texte": "Les lots qui passent la recherche et les filtres ; « en stock » : ceux qui portent encore de la matière."
+    },
+    "matieres_affichees": {
+      "grandeur": "Matières affichées",
+      "texte": "Les matières qui passent la recherche, les filtres et les cases, sur toutes celles du stock."
+    },
     "metiers_en_service": {
       "grandeur": "Métiers en service",
       "texte": "Le nombre de métiers en service ; un métier arrêté ne compte pas dans le stock (son fil monté n’y est pas compté)."
+    },
+    "mois_en_cours": {
+      "grandeur": "Mois en cours",
+      "texte": "m² tissés ce mois-ci (ordres de fabrication) face aux m² prévus par le plan du mois ; à signaler quand plus de 20 % du mois est écoulé et que l’avancement a plus de 15 points de retard sur le temps écoulé."
     },
     "opportunite": {
       "grandeur": "Opportunité d’économies",
       "texte": "(prix actuel − prix du comparable le moins cher) × consommation annuelle, entre fils de même composition, type et titrage, payés à la même époque, au coût rendu usine."
     },
+    "ordres_affiches": {
+      "grandeur": "Ordres affichés",
+      "texte": "Les ordres de l’onglet qui passent la recherche, la période et les filtres."
+    },
+    "ordres_servis": {
+      "grandeur": "Ordres servis",
+      "texte": "Les ordres de fabrication différents qui ont pris de la matière dans ces lots."
+    },
+    "ordres_valides": {
+      "grandeur": "Ordres de fabrication",
+      "texte": "Les ordres validés (les annulés sont exclus) qui chevauchent la période et passent la recherche."
+    },
     "otif": {
       "grandeur": "OTIF",
       "texte": "Une réception est parfaite si elle est à l’heure, complète (à la tolérance près) et conforme. À l’heure se juge sur la date promise du bon (l’ETA ne la repousse pas). Score fournisseur = OTIF × 60 + jusqu’à 20 points pour peu de retours (0 dès 5 % renvoyés) + jusqu’à 20 pour un délai court."
     },
+    "plan_glissant": {
+      "grandeur": "Plan des douze mois à venir",
+      "texte": "Σ des m² planifiés du mois en cours aux onze suivants : base mensuelle × coefficient du mois, croissance annuelle comprise, qualités en service."
+    },
     "plan_mensuel": {
       "grandeur": "Plan mensuel",
       "texte": "Σ des bases mensuelles des qualités en service : les m² d’un mois ordinaire, avant saisonnalité et croissance. Il se saisit dans la page Production."
+    },
+    "poids_bobine": {
+      "grandeur": "Poids d’une bobine",
+      "texte": "Le poids pesé sur le lot, sinon celui du catalogue ; une palette porte le nombre de bobines du catalogue."
+    },
+    "prevu_recette": {
+      "grandeur": "Prévu par la recette",
+      "texte": "Σ, matière par matière, kg/m² de la recette × m² tissés × (1 + taux de perte), figé à la validation de l’ordre."
     },
     "prix_kilo": {
       "grandeur": "Prix au kilo",
@@ -387,17 +467,33 @@
       "grandeur": "Quantité à commander",
       "texte": "Sorties prévues + le plus grand de (sécurité de la classe sur la période, seuil d’alerte) − stock projeté − commandé arrivant pendant la période couverte − déjà en préparation (bons en brouillon ou à approuver), portée au minimum de commande et arrondie au conditionnement. Sous le gramme : rien. Une matière désactivée, d’un fournisseur désactivé, ou non consommée ne se rachète pas."
     },
+    "quarantaine": {
+      "grandeur": "En quarantaine",
+      "texte": "Les lots dont une partie est dans un magasin de quarantaine : détenue, comptée dans le stock et sa valeur, mais pas dans le disponible ; elle se libère après contrôle, ou se rend au fournisseur."
+    },
     "recettes_incompletes": {
       "grandeur": "Recettes incomplètes",
       "texte": "Les qualités en service dont un rôle ne fait pas 100 % ou dont un rôle qui pèse n’a pas de matière — la même base que la nomenclature ; les arrêtées sont signalées à part."
+    },
+    "reste_lot": {
+      "grandeur": "Reste d’un lot",
+      "texte": "Ce que le lot porte dans tous les magasins, quarantaine comprise (le solde de son journal)."
     },
     "rotation": {
       "grandeur": "Rotation du stock",
       "texte": "Ce que l’atelier a consommé sur les douze derniers mois clos, au coût moyen (CMUP), ÷ valeur du stock au coût moyen, les deux sur la même base. Sans consommation encore : le plan au prix du catalogue, face au stock au catalogue. Le stock couvre 365 ÷ rotation jours de consommation."
     },
+    "ruptures": {
+      "grandeur": "Ruptures",
+      "texte": "Les matières affichées au statut RUPTURE : stock projeté à zéro ou moins."
+    },
     "seuil_alerte": {
       "grandeur": "Seuil d’alerte",
       "texte": "Le plus grand de : stock minimum de la fiche (plafonné à N mois de la consommation à venir ; aucun pour une matière non consommée), couverture minimum de la fiche × (1 + marge de sécurité), jours de sécurité de la classe ABC. Le délai du fournisseur n’y est plus : il est déjà retiré du stock projeté."
+    },
+    "sorti_net": {
+      "grandeur": "Sorti net",
+      "texte": "Σ des sorties vers les machines des ordres, moins ce qui en est revenu (retours des machines) ; un brouillon compte ce qu’il sortira (« À sortir »)."
     },
     "sorties_prevues": {
       "grandeur": "Sorties prévues",
@@ -438,6 +534,14 @@
     "tableur_modifiees": {
       "grandeur": "Matières modifiées par le tableur",
       "texte": "Les matières du catalogue dont au moins un champ change ; chaque champ qui change est montré avant → après."
+    },
+    "trace_entre_sorti": {
+      "grandeur": "Entré et sorti suivis",
+      "texte": "Entré : les entrées des lots suivis, hors transferts et annulations ; sorti : leurs sorties, net des retours des machines ; une écriture annulée et son annulation ne comptent pas."
+    },
+    "trace_lots": {
+      "grandeur": "Lots et matières suivis",
+      "texte": "Les lots (et les matières) que le chemin suivi a touchés."
     },
     "valeur_stock": {
       "grandeur": "Valeur du stock (CMUP)",

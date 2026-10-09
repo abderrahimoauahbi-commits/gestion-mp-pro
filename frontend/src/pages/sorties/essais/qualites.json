@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "code": "ATLAS",
+    "nom": "Atlas berbère",
+    "actif": true
+  },
+  {
+    "id": 3,
+    "code": "KILIM",
+    "nom": "Kilim (sans recette)",
+    "actif": true
+  },
+  {
+    "id": 2,
+    "code": "SAHARA",
+    "nom": "Sahara frangé",
+    "actif": true
+  }
+]

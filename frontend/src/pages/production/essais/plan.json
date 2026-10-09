@@ -1,0 +1,71 @@
+{
+  "date_reference": "2026-10-09",
+  "mois": [
+    "2026-10-31",
+    "2026-11-30",
+    "2026-12-31",
+    "2027-01-31",
+    "2027-02-28",
+    "2027-03-31",
+    "2027-04-30",
+    "2027-05-31",
+    "2027-06-30",
+    "2027-07-31",
+    "2027-08-31",
+    "2027-09-30"
+  ],
+  "croissance_annuelle": 0.0,
+  "taux_perte": 0.02,
+  "qualites": [
+    {
+      "id": 1,
+      "code": "ATLAS",
+      "nom": "Atlas berbère",
+      "actif": true,
+      "version": 4,
+      "base_mensuelle": 120.0,
+      "saisonnalite": [0.8, 0.9, 1.0, 1.1, 1.2, 1.2, 1.0, 0.9, 1.0, 1.1, 1.2, 0.6],
+      "total_annuel": 1440.0,
+      "glissant": [132.0, 144.0, 72.0, 96.0, 108.0, 120.0, 132.0, 144.0, 144.0, 120.0, 108.0, 120.0],
+      "total_glissant": 1440.0,
+      "kg_m2": 2.1420000000000003,
+      "lignes_recette": 4,
+      "recette_conforme": true,
+      "tisse_mois_en_cours": 150.0
+    },
+    {
+      "id": 3,
+      "code": "KILIM",
+      "nom": "Kilim (sans recette)",
+      "actif": true,
+      "version": 1,
+      "base_mensuelle": 0.0,
+      "saisonnalite": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "total_annuel": 0.0,
+      "glissant": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "total_glissant": 0.0,
+      "kg_m2": 0.0,
+      "lignes_recette": 0,
+      "recette_conforme": true,
+      "tisse_mois_en_cours": 0.0
+    },
+    {
+      "id": 2,
+      "code": "SAHARA",
+      "nom": "Sahara frangé",
+      "actif": true,
+      "version": 4,
+      "base_mensuelle": 60.0,
+      "saisonnalite": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "total_annuel": 720.0,
+      "glissant": [60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0],
+      "total_glissant": 720.0,
+      "kg_m2": 2.8662,
+      "lignes_recette": 5,
+      "recette_conforme": true,
+      "tisse_mois_en_cours": 0.0
+    }
+  ],
+  "tisse_hors_plan": [],
+  "modifiees": null
+}
