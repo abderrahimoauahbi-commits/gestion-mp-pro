@@ -29,7 +29,14 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, pass_context, select_autoescape
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    Template,
+    pass_context,
+    select_autoescape,
+)
 from jinja2.runtime import Context
 from markupsafe import Markup
 from sqlalchemy import select
@@ -130,7 +137,7 @@ def societe(s: Session) -> Societe:
     lignes = s.execute(
         select(Parametre.cle, Parametre.valeur).where(Parametre.cle.in_(CLES_SOCIETE))
     )
-    return societe_de(dict(lignes.tuples().all()))
+    return societe_de({cle: valeur for cle, valeur in lignes})
 
 
 def _filtre(fonction: Callable[..., str]) -> Callable[..., str]:
@@ -172,8 +179,13 @@ def environnement() -> Environment:
     return env
 
 
+def script_imprimer() -> Markup:
+    """Le script du bouton « Imprimer » (`<script>{{ script_imprimer }}</script>`)."""
+    return Markup(SCRIPT_IMPRIMER)  # noqa: S704 — constante du module, permise par son empreinte
+
+
 def rendre(
-    gabarit: str,
+    gabarit: str | Template,
     *,
     societe: Societe,
     titre: str,
@@ -181,7 +193,8 @@ def rendre(
     paysage: bool = False,
     **donnees: Any,
 ) -> str:
-    """Le document HTML complet : le gabarit sur le papier à en-tête, dans la langue voulue."""
+    """Le document HTML complet : le gabarit (nom dans `gabarits/`, ou modèle déjà compilé par
+    `environnement().from_string`) sur le papier à en-tête, dans la langue voulue."""
     return (
         environnement()
         .get_template(gabarit)
@@ -191,7 +204,7 @@ def rendre(
             langue=langue,
             mots=LIBELLES[langue],
             paysage=paysage,
-            script_imprimer=Markup(SCRIPT_IMPRIMER),  # noqa: S704 — constante du module
+            script_imprimer=script_imprimer(),
             **donnees,
         )
     )

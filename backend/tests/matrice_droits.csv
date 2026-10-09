@@ -9,6 +9,7 @@ POST;/api/connexion;ok;ok;ok;ok;ok
 GET;/api/contexte;401;ok;ok;ok;ok
 GET;/api/controles/soldes;401;ok;ok;403;403
 POST;/api/deconnexion;401;ok;ok;ok;ok
+GET;/api/documents/etiquettes;401;ok;ok;ok;403
 GET;/api/etat;ok;ok;ok;ok;ok
 GET;/api/export/lots;401;ok;ok;ok;403
 GET;/api/export/mouvements;401;ok;ok;ok;403
