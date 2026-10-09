@@ -11,6 +11,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 
 import {
   fauxServeur,
+  type Reponse,
   monterApp,
   prechargerPages,
   reponsesConnecte,
@@ -30,9 +31,10 @@ afterEach(() => vi.unstubAllGlobals())
 
 const date = parametres.find((p) => p.cle === 'date_cloture')
 
-function servir(role: Role) {
+function servir(role: Role, autres: Record<string, Reponse> = {}) {
   return fauxServeur(
     reponsesConnecte(role, {
+      ...autres,
       'GET /parametres': { corps: parametres },
       'PUT /parametres': { corps: parametres },
       'GET /devises': { corps: devises },
@@ -93,6 +95,35 @@ describe('Réglages', () => {
     const cours = within(tableau).getByRole('textbox', { name: 'Cours de EUR' })
     expect(cours).toBeEnabled()
     expect(within(tableau).getByRole('textbox', { name: 'Cours de MAD' })).toBeDisabled()
+  })
+
+  it('clore la période : les brouillons datés de la période sont annoncés avant la fenêtre (route 246)', async () => {
+    const message =
+      'La période jusqu’au 30/06/2026 garde 3 brouillon(s) : les valider ou les supprimer avant de la clore.'
+    const appels = servir('direction', {
+      'GET /periode-close/brouillons': {
+        corps: {
+          jusqu_au: '2026-06-30',
+          total: 3,
+          genres: [
+            { genre: 'reception', libelle: 'réception(s)', nombre: 2 },
+            { genre: 'ordre', libelle: 'ordre(s)', nombre: 1 },
+          ],
+          message,
+        },
+      },
+    })
+    monterApp('/reglages?onglet=periode')
+    await userEvent.type(await screen.findByLabelText('Clore jusqu’au'), '2026-06-30')
+    expect(
+      await screen.findByText(
+        /3 brouillon\(s\) datés jusqu’au 30\/06\/2026 : 2 réception\(s\), 1 ordre\(s\)/,
+      ),
+    ).toBeInTheDocument()
+    const clore = screen.getByRole('button', { name: 'Clore la période…' })
+    expect(clore).toBeDisabled()
+    expect(clore.dataset.raison).toContain(message)
+    expect(appels.some((a) => a.chemin === '/periode-close/brouillons?date=2026-06-30')).toBe(true)
   })
 
   it('clore la période : une fenêtre qui dit l’effet, motif obligatoire, version lue', async () => {
