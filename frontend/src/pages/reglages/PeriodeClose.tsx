@@ -103,8 +103,11 @@ function NoteBrouillons({ b }: { b: BrouillonsPeriode | undefined }) {
   return (
     <Note ton="attention">
       {`${nombre(b.total)} brouillon(s) datés jusqu’au ${date(b.jusqu_au)} : `}
-      {b.genres.map((g) => `${nombre(g.nombre)} ${g.libelle}`).join(', ')}. Les valider ou les supprimer
-      d’abord.
+      {b.genres
+        .filter((g) => g.nombre > 0)
+        .map((g) => `${nombre(g.nombre)} ${g.libelle}(s)`)
+        .join(', ')}
+      . Les valider ou les supprimer d’abord.
     </Note>
   )
 }

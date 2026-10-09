@@ -106,8 +106,9 @@ describe('Réglages', () => {
           jusqu_au: '2026-06-30',
           total: 3,
           genres: [
-            { genre: 'reception', libelle: 'réception(s)', nombre: 2 },
-            { genre: 'ordre', libelle: 'ordre(s)', nombre: 1 },
+            { genre: 'reception', libelle: 'réception', nombre: 2 },
+            { genre: 'ordre', libelle: 'ordre de fabrication', nombre: 1 },
+            { genre: 'inventaire', libelle: 'inventaire', nombre: 0 },
           ],
           message,
         },
@@ -117,7 +118,7 @@ describe('Réglages', () => {
     await userEvent.type(await screen.findByLabelText('Clore jusqu’au'), '2026-06-30')
     expect(
       await screen.findByText(
-        /3 brouillon\(s\) datés jusqu’au 30\/06\/2026 : 2 réception\(s\), 1 ordre\(s\)/,
+        /3 brouillon\(s\) datés jusqu’au 30\/06\/2026 : 2 réception\(s\), 1 ordre de fabrication\(s\)\. Les/,
       ),
     ).toBeInTheDocument()
     const clore = screen.getByRole('button', { name: 'Clore la période…' })
