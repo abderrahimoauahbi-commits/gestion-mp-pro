@@ -1,5 +1,8 @@
+/* Au téléphone, une bascule de trois vues ou plus passe à la ligne au lieu de sortir de sa carte. */
 .bascule {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   padding: 2px;
   border-radius: var(--rayon-petit);
   background: var(--surface-3);

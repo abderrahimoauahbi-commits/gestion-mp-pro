@@ -51,7 +51,11 @@
     "solde_origine": null,
     "solde_par": null,
     "solde_le": null,
-    "renvoi": null
+    "renvoi": null,
+    "en_retard": false,
+    "arrivee_attendue": "2026-10-12",
+    "arrivee_sous_7_jours": true,
+    "kg_en_quarantaine": 0.0
   },
   {
     "id": 3,
@@ -105,7 +109,11 @@
     "solde_origine": null,
     "solde_par": null,
     "solde_le": null,
-    "renvoi": null
+    "renvoi": null,
+    "en_retard": true,
+    "arrivee_attendue": "2026-09-19",
+    "arrivee_sous_7_jours": false,
+    "kg_en_quarantaine": 0.0
   },
   {
     "id": 2,
@@ -159,7 +167,11 @@
     "solde_origine": null,
     "solde_par": null,
     "solde_le": null,
-    "renvoi": null
+    "renvoi": null,
+    "en_retard": false,
+    "arrivee_attendue": null,
+    "arrivee_sous_7_jours": false,
+    "kg_en_quarantaine": 0.0
   },
   {
     "id": 1,
@@ -213,6 +225,10 @@
     "solde_origine": null,
     "solde_par": null,
     "solde_le": null,
-    "renvoi": null
+    "renvoi": null,
+    "en_retard": false,
+    "arrivee_attendue": null,
+    "arrivee_sous_7_jours": false,
+    "kg_en_quarantaine": 0.0
   }
 ]

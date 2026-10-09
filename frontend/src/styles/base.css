@@ -99,9 +99,13 @@ h3 {
   font-size: 12.5px;
 }
 
-/* Lu par les lecteurs d'écran, invisible à l'œil */
+/* Lu par les lecteurs d'écran, invisible à l'œil. Posé en haut à gauche de son bloc : sans ancêtre
+   positionné, laissé à sa place, il allongeait le document quand la page défile dans <main>
+   (téléphone, F1). */
 .masque-accessible {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   padding: 0;

@@ -1,17 +1,14 @@
 /**
- * Un QR du serveur (SVG de segno) en image : le SVG servi n'a pas l'espace de noms
- * `xmlns`, sans lequel un navigateur ne l'affiche pas dans une balise `<img>` ; on l'ajoute.
+ * Un QR du serveur (SVG de segno, avec son espace de noms `xmlns` depuis RESTES3) en image : une
+ * adresse `data:` que la balise `<img>` affiche telle quelle.
  */
 import { useQuery } from '@tanstack/react-query'
 
 import { adresseApi } from '../../lib/api'
 
-/** L'adresse `data:` d'un SVG, son espace de noms ajouté s'il manque. */
+/** L'adresse `data:` d'un SVG, tel que le serveur le rend. */
 export function svgEnImage(svg: string): string {
-  const complet = svg.includes('xmlns=')
-    ? svg
-    : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(complet)}`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
 /** Le QR d'accès (route 6), en image. */

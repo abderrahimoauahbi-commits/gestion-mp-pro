@@ -15,13 +15,13 @@ import { Champ } from '../../composants/saisie/Champ'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { kgEtMetres, nombre } from '../../lib/format'
+import { filConforme, priseDuSolde, type Fil } from '../../lib/ordre'
 import { useLecture } from '../../lib/requetes'
 import { enHaut, Fiche, NoteAtelier } from './briques'
 import { dateLisible, qte, useMagasins, useNomMetier } from './commun'
 import { useEmpechements } from './empechements'
 import styles from './atelier.module.css'
 import { EcartFil, FilCarte } from './FilCarte'
-import { filConforme, priseDuSolde, type Fil } from './sortie'
 import type { OrdreFiche, QualiteResume } from './types'
 import type { SaisieSortie } from './useSaisieSortie'
 
@@ -38,7 +38,7 @@ function Demande({ s, ou }: { s: SaisieSortie; ou: string }) {
   const code = (id: number | null) => qualites.data?.find((q) => q.id === id)?.code ?? ''
   const resume = s.e.horsRecette
     ? 'Ordre hors recette'
-    : s.e.fabrications.map((f) => `${code(f.qualite)} ${nombre(f.m2)} m²`).join(' · ')
+    : s.e.fabrications.map((f) => `${code(f.qualite_id)} ${nombre(f.m2 ?? 0)} m²`).join(' · ')
   return (
     <Fiche titre={resume}>
       <NoteAtelier>
@@ -109,8 +109,6 @@ function AjouterFil({ s }: { s: SaisieSortie }) {
 function raisonValider(s: SaisieSortie, empechements: readonly string[]): string {
   if (empechements.length) return 'Validation impossible pour l’instant (voir le bandeau en tête)'
   if (s.depassements.length) return `${nombre(s.depassements.length)} lot(s) : plus que ce qu’ils portent`
-  if (s.sansContenance.length) return 'Un poids de bobine manque : saisir ces lots en kg'
-  if (!s.aEnvoyer.length) return 'Aucune quantité à sortir'
   return ''
 }
 
@@ -123,6 +121,7 @@ function PiedLots({ s, ou, raison, fin }: { s: SaisieSortie; ou: string; raison:
       <Confirmer
         taille="atelier"
         variante="principal"
+        manque={s.manqueBrouillon}
         grise={raison || undefined}
         question={`Sortir ${qte(s.totalSorti)} le ${ou} ? Le stock est débité tout de suite.`}
         oui="Oui, valider la sortie"
@@ -139,17 +138,12 @@ type Fin = (o: OrdreFiche | undefined) => void
 
 function GestesBas({ s, fin }: { s: SaisieSortie; fin: Fin }) {
   const naviguer = useNavigate()
-  const raison = !s.aEnvoyer.length
-    ? 'Aucune quantité à sortir'
-    : s.sansContenance.length
-      ? 'Un poids de bobine manque : saisir ces lots en kg'
-      : ''
   return (
     <>
       <Bouton
         taille="atelier"
         bloc
-        grise={raison || undefined}
+        manque={s.manqueBrouillon}
         attente="Enregistrement…"
         onClick={async () => fin(await s.enregistrer(false))}
       >

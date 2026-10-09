@@ -2,8 +2,7 @@
  * Les champs d'un poste de frais (ECRANS-PRO 5.20), alignés deux par rangée : Code (contrôlé à la
  * frappe, figé après la création) et Libellé ; Répartition et Ordre ; puis la nature
  * (« récupérable ») et le message d'un changement de clé (dossiers ouverts recalculés, clos
- * gardés). Une nature figée se dit en clair avec sa raison
- * (l'`Interrupteur` d'E1 ne porte pas de raison : grisé, il serait un bouton muet). Les achats
+ * gardés). Une nature figée grise l'interrupteur avec sa raison, redite en note. Les achats
  * lisent le poste (`LecturePoste`) : pas de champs grisés.
  */
 import { Definitions } from '../../../composants/mise-en-page/Definitions'
@@ -117,20 +116,13 @@ export function ChampsPoste({
           <Nombre valeur={forme.ordre} onChange={(ordre) => maj({ ordre })} min={0} max={999} decimales={0} />
         </Champ>
       </Grille>
-      {figee ? (
-        <div className={styles.case}>
-          <span>
-            Nature : <strong>{nature(forme.recuperable)}</strong>
-          </span>
-          <Note>{figee}</Note>
-        </div>
-      ) : (
-        <Interrupteur
-          valeur={forme.recuperable}
-          onChange={(recuperable) => maj({ recuperable })}
-          libelle="récupérable : hors du coût (comme la TVA)"
-        />
-      )}
+      <Interrupteur
+        valeur={forme.recuperable}
+        onChange={(recuperable) => maj({ recuperable })}
+        libelle="récupérable : hors du coût (comme la TVA)"
+        grise={figee ?? undefined}
+      />
+      {figee ? <Note>{figee}</Note> : null}
       {cleChangee ? <Note ton="attention">{messageChangementCle(poste, forme.cle)}</Note> : null}
     </>
   )

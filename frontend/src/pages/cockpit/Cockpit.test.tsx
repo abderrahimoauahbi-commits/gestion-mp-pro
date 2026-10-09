@@ -4,7 +4,7 @@
  * « Ce qui attend une action » dans l'ordre de Gestion MP, son compte à l'onglet ; les matières en
  * alerte toutes listées ; le bilan du mois du mois précédent dans un nouvel onglet.
  */
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -12,9 +12,10 @@ import { monterApp, prechargerPages, stockageMemoire } from '../../essais/monter
 import { jours, montant, montantCourt, part } from '../../lib/format'
 import type { Cockpit, CommandeResume, EtatSauvegardes } from '../accueil/types'
 import { DONNEES, servirJournee } from '../accueil/essaisServeur'
+import { ficheEssai } from '../commandes/donneesEssai'
 import { actionsCockpit, tacheSauvegarde, totalAFaire } from './aFaire'
 import { moisProposes } from './BilanDuMois'
-import { valeurKpi } from './IndicateursCockpit'
+import { formuleKpi, valeurKpi } from './IndicateursCockpit'
 
 beforeAll(prechargerPages)
 beforeEach(() => {
@@ -160,5 +161,42 @@ describe('Cockpit — onglets', () => {
     expect(bilan).toHaveAttribute('href', '/api/documents/bilan?mois=2026-09')
     expect(bilan).toHaveAttribute('target', '_blank')
     expect(moisProposes('2026-01', 3)).toEqual(['2026-01', '2025-12', '2025-11'])
+  })
+})
+
+describe('Cockpit › Commandé', () => {
+  it('la formule du « Commandé » explique la marchandise reçue sous réserve, attendue jusqu’à sa libération', () => {
+    const k = {
+      cle: 'commande',
+      libelle: 'Commandé',
+      valeur: 1,
+      unite: 'MAD',
+      detail: '',
+      formule: 'Bons partis',
+      lien: null,
+      ton: 'neutre',
+    }
+    expect(formuleKpi(k as never)).toMatch(
+      /^Bons partis\. Une marchandise reçue sous réserve attend en quarantaine/,
+    )
+    expect(formuleKpi(k as never)).toMatch(/« dont X kg reçus sous réserve, en quarantaine »/)
+  })
+})
+
+describe('Cockpit › Examiner', () => {
+  it('la fiche du bon ouverte depuis le Cockpit y ramène en se fermant, même après un changement de volet', async () => {
+    servirJournee('direction', {
+      'GET /commandes/2': { corps: ficheEssai({ id: 2 }) },
+      'GET /historique/commande/2': { corps: [] },
+    })
+    const u = userEvent.setup()
+    const app = monterApp('/cockpit')
+    const table = await screen.findByRole('table', { name: 'Commandes à approuver' })
+    await u.click(within(table).getByRole('button', { name: 'Examiner' }))
+    await waitFor(() => expect(app.adresse()).toBe('/commandes/2'))
+    await u.click(await screen.findByRole('tab', { name: /Historique/ }))
+    await waitFor(() => expect(app.adresse()).toBe('/commandes/2?onglet=historique'))
+    await u.click(within(screen.getByRole('dialog')).getAllByRole('button', { name: 'Fermer' })[0]!)
+    await waitFor(() => expect(app.adresse()).toBe('/cockpit'))
   })
 })

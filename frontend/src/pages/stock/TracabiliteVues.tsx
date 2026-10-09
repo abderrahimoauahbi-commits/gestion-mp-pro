@@ -2,15 +2,19 @@
  * Les deux vues du suivi : le prévu par la recette et le sorti net d'un ordre, matière par matière ;
  * les mouvements (le plus récent en haut), où un lot, un ordre ou une matière se suit d'un clic.
  */
+import { Link } from 'react-router'
+
 import { Badge } from '../../composants/retour/Badge'
 import { Note } from '../../composants/retour/Note'
 import { Vide } from '../../composants/retour/Vide'
 import { Cadre } from '../../composants/tableaux/Cadre'
 import { date, nombre, VIDE } from '../../lib/format'
+import { useSession } from '../../lib/session'
 import type { Schema } from '../../lib/types'
 import { ecartRelatif } from '../sorties/ecart'
 import { TablePrevuSorti } from '../sorties/VuesOrdre'
 import { Signe } from './cellules'
+import { lienMouvement } from './MouvementsDuLot'
 import type { Suivi } from './donnees'
 import styles from './stock.module.css'
 import type { EtapeTracee, Tracabilite } from './types'
@@ -87,20 +91,30 @@ function Libelle({ m }: { m: EtapeTracee }) {
 interface Liens {
   suivi: Suivi
   onSuivre: (s: Suivi) => void
-  idMatiere: ReadonlyMap<string, number>
-  idOrdre: ReadonlyMap<string, number>
+}
+
+/** Le document d'une étape, lien vers sa fiche quand le rôle peut l'ouvrir (ids servis depuis RESTES3). */
+function DocumentEtape({ m }: { m: EtapeTracee }) {
+  const { role } = useSession()
+  const vers = lienMouvement(
+    { document: m.document_type ?? '', document_id: m.document_id, ordre_id: null },
+    role,
+  )
+  return vers ? <Link to={vers}>{m.document}</Link> : <>{m.document}</>
 }
 
 function Mouvement({ m, l }: { m: EtapeTracee; l: Liens }) {
-  const matiere = idMatiereDe(m, l)
-  const ordre = m.ordre ? l.idOrdre.get(m.ordre) : undefined
+  const matiere = m.matiere_id != null && l.suivi.matiere !== m.matiere_id ? m.matiere_id : undefined
+  const ordre = m.ordre_id ?? undefined
   return (
     <tr>
       <td className={styles.nowrap}>{date(m.date)}</td>
       <td>
         <Libelle m={m} />
       </td>
-      <td className={styles.mono}>{m.document}</td>
+      <td className={styles.mono}>
+        <DocumentEtape m={m} />
+      </td>
       <td>
         <Suivable
           texte={m.reference}
@@ -134,24 +148,14 @@ function Mouvement({ m, l }: { m: EtapeTracee; l: Liens }) {
   )
 }
 
-/** La matière d'un mouvement à suivre, sauf celle qu'on suit déjà. */
-function idMatiereDe(m: EtapeTracee, l: Liens): number | undefined {
-  const id = l.idMatiere.get(m.reference)
-  return id && l.suivi.matiere !== id ? id : undefined
-}
-
 export function PasDuSuivi({
   t,
   suivi,
   onSuivre,
-  idMatiere,
-  idOrdre,
 }: {
   t: Tracabilite
   suivi: Suivi
   onSuivre: (s: Suivi) => void
-  idMatiere: ReadonlyMap<string, number>
-  idOrdre: ReadonlyMap<string, number>
 }) {
   if (!t.mouvements.length) return <Vide>Aucun mouvement.</Vide>
   const lignes = [...t.mouvements].reverse()
@@ -177,7 +181,7 @@ export function PasDuSuivi({
           </thead>
           <tbody>
             {lignes.map((m, i) => (
-              <Mouvement key={m.id ?? `r${i}`} m={m} l={{ suivi, onSuivre, idMatiere, idOrdre }} />
+              <Mouvement key={m.id ?? `r${i}`} m={m} l={{ suivi, onSuivre }} />
             ))}
           </tbody>
         </table>

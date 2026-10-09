@@ -69,6 +69,7 @@ export function resumeEssai(autres: Partial<InventaireResume> = {}): InventaireR
     annule_par: '',
     annule_le: null,
     annulation_motif: '',
+    abandon_motif: '',
     nb_lignes: 2,
     nb_comptees: 0,
     hors_tolerance: 0,

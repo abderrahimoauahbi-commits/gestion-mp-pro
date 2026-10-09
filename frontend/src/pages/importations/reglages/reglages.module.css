@@ -44,9 +44,3 @@
   gap: var(--espace-3);
   min-width: 0;
 }
-
-.case {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espace-2);
-}

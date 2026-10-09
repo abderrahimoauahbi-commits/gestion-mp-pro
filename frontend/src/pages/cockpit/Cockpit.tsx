@@ -20,9 +20,9 @@ import {
   useCommandesToutes,
   useInventairesOuverts,
   useReclamationsOuvertes,
-  useRetards,
   useSauvegardes,
 } from '../accueil/donnees'
+import { retardsDe } from '../accueil/taches'
 import type { Cockpit as DonneesCockpit } from '../accueil/types'
 import { aApprouver, actionsCockpit, tacheSauvegarde, totalAFaire } from './aFaire'
 import { BilanDuMois } from './BilanDuMois'
@@ -40,19 +40,18 @@ const CLES: readonly Onglet[] = ['faire', 'alertes', 'ensemble', 'evolution', 'e
 function useAFaire(cockpit: DonneesCockpit | undefined) {
   const { role } = useSession()
   const commandes = useCommandesToutes()
-  const retards = useRetards()
   const brouillons = useBrouillons()
   const inventaires = useInventairesOuverts()
   const besoins = useBesoins()
   const reclamations = useReclamationsOuvertes()
   const sauvegardes = useSauvegardes()
-  const lectures = [commandes, retards, brouillons, inventaires, besoins, reclamations]
+  const lectures = [commandes, brouillons, inventaires, besoins, reclamations]
   const actions = cockpit
     ? actionsCockpit({
         role,
         cockpit,
         commandes: commandes.data ?? [],
-        retards: retards.data ?? [],
+        retards: retardsDe(commandes.data ?? []),
         brouillons: brouillons.data,
         inventaires: inventaires.data ?? [],
         besoins: besoins.data?.elements ?? [],

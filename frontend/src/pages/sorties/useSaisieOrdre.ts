@@ -1,47 +1,35 @@
 /**
  * L'état de la saisie d'un ordre (nouveau, ou brouillon rouvert) et ses gestes : proposer,
- * corriger une prise, ajouter un lot, garder en brouillon, valider. Les règles sont dans `ordre.ts`.
+ * corriger une prise, ajouter un lot, garder en brouillon, valider. Les règles sont dans le moteur
+ * unique `lib/ordre.ts` (le même que le téléphone).
  * Un brouillon rouvert relit le prévu de ses recettes à sa date sans toucher à ses prises ; une
  * prise reprend l'unité où elle a sans doute été saisie (bobines quand le compte tombe juste).
  */
 import { useEffect, useMemo, useState } from 'react'
 
-import { api, ErreurApi } from '../../lib/api'
 import { aujourdhui } from '../../lib/heure'
+import {
+  blocagesSaisie,
+  corpsOrdre,
+  demanderProposition,
+  dernierOrdre,
+  enregistrerOrdre,
+  filsDe,
+  manqueBrouillon,
+  manqueProposer,
+  nouvelleCle,
+  priseRouverte,
+  recalculer,
+  type CorpsOrdre,
+  type Fabrication,
+  type Prise,
+} from '../../lib/ordre'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
 import type { Unite } from '../../lib/unites'
 import type { LotSolde, Magasin } from '../stock/types'
 import { estQuarantaine } from '../stock/types'
-import { dernierOrdre, useOrdres, type LigneProposee, type OrdreFiche, type Proposition } from './donnees'
-import {
-  aEnvoyer,
-  blocagesSaisie,
-  filsDe,
-  manqueBrouillon,
-  manqueProposer,
-  nouvelleCle,
-  recalculer,
-  type Fabrication,
-  type Prise,
-} from './ordre'
-
-/** Une ligne d'un brouillon rouvert, en prise. */
-function priseRouverte(l: OrdreFiche['lignes'][number]): Prise {
-  return {
-    cle: nouvelleCle(),
-    matiere_id: l.matiere_id,
-    reference: l.reference,
-    designation: l.designation,
-    kg_par_ml: l.kg_par_ml,
-    poids_bobine: l.poids_bobine,
-    bobines_palette: l.bobines_palette,
-    lot_id: l.lot_id,
-    lot: l.lot,
-    kg: l.quantite,
-    unite: l.bobines != null ? 'bobine' : 'kg',
-  }
-}
+import { useOrdres, type LigneProposee, type OrdreFiche } from './donnees'
 
 /** Le magasin proposé d'abord : le plus garni des magasins courants actifs. */
 function magasinParDefaut(magasins: readonly Magasin[] | undefined): number | null {
@@ -78,31 +66,7 @@ function useDemande(fiche: OrdreFiche | null) {
 
 type Demande = ReturnType<typeof useDemande>
 
-/** Ce qui part au serveur : la demande, et les prises d'au moins un gramme, en kilos. */
-export interface CorpsOrdre {
-  date: string
-  magasin_id: number | null
-  metier_id: number | null
-  commentaire: string
-  qualites: Fabrication[]
-  lignes: { lot_id: number; matiere_id: number; quantite: number | null; unite: Unite }[]
-}
-
-export function corpsOrdre(d: Demande, magasin: number | null, prises: readonly Prise[]): CorpsOrdre {
-  return {
-    date: d.jour,
-    magasin_id: magasin,
-    metier_id: d.metier,
-    commentaire: d.commentaire.trim(),
-    qualites: d.horsRecette ? [] : d.fabrications.filter((f) => f.qualite_id && f.m2),
-    lignes: aEnvoyer(prises).map((x) => ({
-      lot_id: x.lot_id,
-      matiere_id: x.matiere_id,
-      quantite: x.kg,
-      unite: 'kg',
-    })),
-  }
-}
+export { corpsOrdre, type CorpsOrdre }
 
 /** Le magasin choisi (le plus garni d'abord) et le disponible de ses lots **à la date de l'ordre**. */
 function useMagasin(d: Demande) {
@@ -123,6 +87,7 @@ function useMagasin(d: Demande) {
     magasinChoisi,
     magasins: (magasins.data ?? []).filter((g) => g.actif && !estQuarantaine(g.type)),
     magasinCode: magasins.data?.find((g) => g.id === magasinChoisi)?.code ?? '',
+    magasinNom: magasins.data?.find((g) => g.id === magasinChoisi)?.nom ?? '',
     lotsDuMagasin: lots.data ?? [],
     dispo,
   }
@@ -132,16 +97,24 @@ function useMagasin(d: Demande) {
 function useProposition(fiche: OrdreFiche | null, magasin: number | null, jour: string) {
   const [besoins, setBesoins] = useState<LigneProposee[]>([])
   const [incompletes, setIncompletes] = useState<string[]>([])
-  const proposition = useEcriture((corps: unknown) => api.post<Proposition>('/ordres/proposition', corps), {
-    invalider: false,
-  })
+  const proposition = useEcriture(
+    ({
+      demande,
+      magasin: m,
+    }: {
+      demande: Parameters<typeof demanderProposition>[0]
+      magasin: number | null
+    }) => demanderProposition(demande, m),
+    { invalider: false },
+  )
   const [relu, setRelu] = useState(!fiche?.qualites.length)
   useEffect(() => {
     if (relu || !fiche || !magasin) return
     setRelu(true)
-    const qualites = fiche.qualites.map((q) => ({ qualite_id: q.qualite_id, m2: q.m2 }))
+    const fabrications = fiche.qualites.map((q) => ({ qualite_id: q.qualite_id, m2: q.m2 }))
+    const demande = { jour, metier: null, commentaire: '', horsRecette: false, fabrications }
     proposition
-      .mutateAsync({ magasin_id: magasin, date: jour, qualites })
+      .mutateAsync({ demande, magasin })
       .then((r) => {
         setBesoins(r.lignes)
         setIncompletes(r.recettes_incompletes)
@@ -154,24 +127,12 @@ function useProposition(fiche: OrdreFiche | null, magasin: number | null, jour: 
 /** Garder en brouillon (créé ou modifié), puis valider si demandé ; un refus le laisse en brouillon. */
 function useEnregistrer(fiche: OrdreFiche | null, corps: () => CorpsOrdre, setSale: (v: boolean) => void) {
   const [cible, setCible] = useState(fiche ? { id: fiche.id, version: fiche.version } : null)
-  const ecrire = useEcriture(async ({ valider }: { valider: boolean }) => {
-    const b = cible
-      ? await api.put<OrdreFiche>(`/ordres/${cible.id}`, { ...corps(), version: cible.version })
-      : await api.post<OrdreFiche>('/ordres', corps())
-    setCible({ id: b.id, version: b.version })
-    setSale(false)
-    if (!valider) return b
-    try {
-      return await api.post<OrdreFiche>(`/ordres/${b.id}/valider`, { version: b.version })
-    } catch (e) {
-      const texte = `${e instanceof Error ? e.message : String(e)} — l'ordre est gardé en brouillon, modifiable.`
-      throw new ErreurApi(
-        texte,
-        e instanceof ErreurApi ? e.statut : 0,
-        e instanceof ErreurApi ? e.code : null,
-      )
-    }
-  })
+  const ecrire = useEcriture(({ valider }: { valider: boolean }) =>
+    enregistrerOrdre(cible, corps(), valider, (b) => {
+      setCible({ id: b.id, version: b.version })
+      setSale(false)
+    }),
+  )
   return { cible, enregistrer: (valider: boolean) => ecrire.mutateAsync({ valider }) }
 }
 
@@ -240,12 +201,7 @@ export function useSaisieOrdre(fiche: OrdreFiche | null) {
     toucher()
   }
   const proposer = async () => {
-    const r = await pr.proposition.mutateAsync({
-      magasin_id: m.magasinChoisi,
-      date: d.jour,
-      metier_id: d.metier,
-      qualites: d.fabrications,
-    })
+    const r = await pr.proposition.mutateAsync({ demande: d, magasin: m.magasinChoisi })
     p.setPrises((avant) => recalculer(avant, pr.besoins, r.lignes))
     pr.setBesoins(r.lignes)
     pr.setIncompletes(r.recettes_incompletes)
@@ -257,7 +213,7 @@ export function useSaisieOrdre(fiche: OrdreFiche | null) {
     aujourdhui: aujourdhui(),
     cloture: contexte.date_cloture,
     dernier: dernierOrdre(ordres.data, e.cible?.id ?? fiche?.id),
-    magasin: m.magasinCode,
+    magasin: { code: m.magasinCode, nom: m.magasinNom },
     inventaires: contexte.inventaires_ouverts,
     dispo: m.dispo,
   })
@@ -275,7 +231,12 @@ export function useSaisieOrdre(fiche: OrdreFiche | null) {
     demandeChangee,
     sale,
     blocages,
-    manqueProposer: manqueProposer({ jour: d.jour, magasin: m.magasinChoisi, fabrications: d.fabrications }),
+    manqueProposer: manqueProposer({
+      jour: d.jour,
+      magasin: m.magasinChoisi,
+      horsRecette: d.horsRecette,
+      fabrications: d.fabrications,
+    }),
     manqueBrouillon: manqueBrouillon(p.prises),
     proposer,
     proposeEnCours: pr.proposition.isPending,

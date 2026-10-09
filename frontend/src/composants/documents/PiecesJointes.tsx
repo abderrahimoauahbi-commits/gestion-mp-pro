@@ -3,7 +3,9 @@
  * fournisseur, matière) : joindre (bouton ou glisser-déposer), télécharger, retirer (confirmé sur
  * place, retrait tracé). Types et taille annoncés et vérifiés **avant** l'envoi (20 Mo, pas de
  * SVG) ; un fichier après l'autre, liste relue après chacun, bilan « n joints, m refusés : … ».
- * L'alimentation ne voit jamais de pièce ; `lectureSeule` cache les gestes.
+ * L'alimentation ne voit jamais de pièce. `mode` : `complet` (joindre et retirer), `joindre`
+ * (joindre seulement : un dossier clos s'enrichit, rien ne s'en retire), `lecture` (aucun geste) ;
+ * `lectureSeule` vaut `mode="lecture"`.
  */
 import { useQueryClient } from '@tanstack/react-query'
 import { useId, useRef, useState, type DragEvent } from 'react'
@@ -110,10 +112,7 @@ function useJoindre(objet: ObjetPiece, id: number) {
   return { joindre, envoi }
 }
 
-function colonnes(
-  lectureSeule: boolean,
-  retirer: (p: PieceFiche) => Promise<unknown>,
-): Colonne<PieceFiche>[] {
+function colonnes(sansRetrait: boolean, retirer: (p: PieceFiche) => Promise<unknown>): Colonne<PieceFiche>[] {
   const liste: Colonne<PieceFiche>[] = [
     {
       cle: 'nom',
@@ -130,7 +129,7 @@ function colonnes(
     { cle: 'par', titre: 'Par', triable: false },
     { cle: 'joint_le', titre: 'Joint le', triable: false, rendu: (p) => horodatage(p.joint_le) },
   ]
-  if (lectureSeule) return liste
+  if (sansRetrait) return liste
   return [
     ...liste,
     {
@@ -185,15 +184,20 @@ function Joindre({ joindre, envoi }: { joindre: (f: readonly File[]) => Promise<
   )
 }
 
+export type ModePieces = 'complet' | 'joindre' | 'lecture'
+
 export function PiecesJointes({
   objet,
   id,
   lectureSeule = false,
+  mode = lectureSeule ? 'lecture' : 'complet',
 }: {
   objet: ObjetPiece
   id: number
   lectureSeule?: boolean
+  mode?: ModePieces
 }) {
+  const joindreCache = mode === 'lecture'
   const pieces = useLecture<PieceFiche[]>('/pieces', { objet, id })
   const { joindre, envoi } = useJoindre(objet, id)
   const [survol, setSurvol] = useState(false)
@@ -205,25 +209,25 @@ export function PiecesJointes({
   const deposer = (e: DragEvent) => {
     e.preventDefault()
     setSurvol(false)
-    if (!lectureSeule) void joindre([...e.dataTransfer.files])
+    if (!joindreCache) void joindre([...e.dataTransfer.files])
   }
   return (
     <div
-      className={classes(styles.pieces, survol && !lectureSeule && styles.survol)}
+      className={classes(styles.pieces, survol && !joindreCache && styles.survol)}
       onDragOver={(e) => {
         e.preventDefault()
-        if (!lectureSeule) setSurvol(true)
+        if (!joindreCache) setSurvol(true)
       }}
       onDragLeave={() => setSurvol(false)}
       onDrop={deposer}
     >
-      {lectureSeule ? null : <Joindre joindre={joindre} envoi={envoi} />}
+      {joindreCache ? null : <Joindre joindre={joindre} envoi={envoi} />}
       {pieces.isPending ? <Chargement quoi="les documents joints" /> : null}
       {pieces.isError ? <Erreur erreur={pieces.error} onReessayer={() => void pieces.refetch()} /> : null}
       {pieces.data ? (
         <DataTable
           lignes={pieces.data}
-          colonnes={colonnes(lectureSeule, retirer)}
+          colonnes={colonnes(mode !== 'complet', retirer)}
           cle={(p) => p.id}
           recherche={false}
           hauteur="fenetre"

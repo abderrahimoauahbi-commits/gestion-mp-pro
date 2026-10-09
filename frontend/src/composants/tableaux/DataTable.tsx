@@ -9,6 +9,9 @@
  * - Pas de pagination visuelle : le tableau défile dans son `Cadre` (hauteur restante, en-tête
  *   collant) ; une liste paginée au serveur finit par « Charger les 500 suivants ».
  * - Pied de totaux par unité : jamais kg + ml, jamais deux devises additionnées.
+ * - Lignes de groupe (`groupe`) : une ligne d'en-tête avant chaque suite de lignes de même clé
+ *   (un mois de l'échéancier et ce qui y reste à payer).
+ * - Liste vide : `vide` dit pourquoi elle l'est ; `videFiltre`, ce que ne trouvent pas les critères.
  * - Export : le classeur du serveur avec la vue (onglet, recherche, filtres), ou ce qui est affiché.
  *
  * L'état (recherche, filtres) est local par défaut ; `useEtatTableAdresse` le met dans l'adresse.
@@ -21,7 +24,7 @@ import { Bouton } from '../saisie/Bouton'
 import { Cadre } from './Cadre'
 import { ChargerPlus, type ChargerPlusProps } from './ChargerPlus'
 import { brute, champsCherches, type Colonne } from './colonnes'
-import { Corps, Pied, Tete, type Tri } from './DataTableParties'
+import { Corps, Pied, Tete, type Groupe, type Tri } from './DataTableParties'
 import styles from './DataTable.module.css'
 import { ExportExcel, exporterCsv } from './ExportExcel'
 import { passe, trier, trouve, type Choix, type Filtre } from './filtrage'
@@ -47,6 +50,10 @@ export interface DataTableProps<T> {
   total?: number
   chargerPlus?: ChargerPlusProps
   vide?: ReactNode
+  /** Le texte quand les critères (recherche, filtres) n'en retiennent aucune. */
+  videFiltre?: ReactNode
+  /** Les lignes de groupe : la clé d'une ligne, et l'en-tête de son groupe (ses lignes retenues). */
+  groupe?: Groupe<T>
   exporter?: { route: string; parametres?: Record<string, Parametre> } | { fichier: string }
   outils?: ReactNode
   hauteur?: 'page' | 'court' | 'fenetre'
@@ -121,10 +128,10 @@ function Compte({ affichees, total }: { affichees: number; total: number }) {
 }
 
 /** Une liste vide dit pourquoi : rien du tout, ou rien qui réponde aux critères. */
-function ListeVide({ vide, texte }: { vide: boolean; texte?: ReactNode }) {
+function ListeVide({ vide, texte, filtre }: { vide: boolean; texte?: ReactNode; filtre?: ReactNode }) {
   return (
     <div className={styles.vide}>
-      {vide ? (texte ?? 'Aucun élément.') : 'Aucune ligne ne répond à ces critères.'}
+      {vide ? (texte ?? 'Aucun élément.') : (filtre ?? 'Aucune ligne ne répond à ces critères.')}
     </div>
   )
 }
@@ -173,10 +180,13 @@ export function DataTable<T>(props: DataTableProps<T>) {
             cle={props.cle}
             cliquable={props.cliquable}
             marquee={props.marquee}
+            groupe={props.groupe}
           />
           <Pied colonnes={colonnes} lignes={retenues} pied={props.pied} />
         </table>
-        {retenues.length === 0 ? <ListeVide vide={lignes.length === 0} texte={props.vide} /> : null}
+        {retenues.length === 0 ? (
+          <ListeVide vide={lignes.length === 0} texte={props.vide} filtre={props.videFiltre} />
+        ) : null}
         {props.chargerPlus ? <ChargerPlus {...props.chargerPlus} /> : null}
       </Cadre>
     </div>

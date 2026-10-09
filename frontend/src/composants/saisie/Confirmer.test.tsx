@@ -48,6 +48,33 @@ describe('Confirmer', () => {
     expect(oui).toHaveBeenCalledWith('Bobines mouillées')
   })
 
+  it('un motif trop court (motifMin) grise « Oui » avec la longueur attendue, sous son propre nom', async () => {
+    const oui = vi.fn()
+    render(
+      <Confirmer
+        question="Renvoyer aux achats ?"
+        oui="Oui, renvoyer"
+        motif="exige"
+        motifMin={3}
+        libelleMotif="Motif du renvoi aux achats"
+        exempleMotif="ex. attendre la baisse annoncée"
+        onOui={oui}
+      >
+        Renvoyer aux achats…
+      </Confirmer>,
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Renvoyer aux achats…' }))
+    const champ = screen.getByRole('textbox', { name: 'Motif du renvoi aux achats' })
+    expect(champ).toHaveAttribute('placeholder', 'ex. attendre la baisse annoncée')
+    await userEvent.type(champ, ' ok ')
+    const bouton = screen.getByRole('button', { name: 'Oui, renvoyer' })
+    expect(bouton).toBeDisabled()
+    expect(bouton).toHaveAttribute('data-raison', 'À renseigner : un motif de 3 caractères au moins.')
+    await userEvent.type(champ, 'é')
+    await userEvent.click(bouton)
+    expect(oui).toHaveBeenCalledWith('ok é')
+  })
+
   it('pendant l’envoi « Oui » est occupé ; un refus est dit et la question reste', async () => {
     render(
       <>

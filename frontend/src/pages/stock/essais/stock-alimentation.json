@@ -33,8 +33,8 @@
       "stock_min": 0.0,
       "stock_min_recalcule": 22.798864516129036,
       "stock_min_plafonne": 0.0,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 206.93162555344713,
       "couverture_cible_jours": 27.939784946236557,
       "conso_mensuelle": 24.480000000000004,
@@ -81,7 +81,9 @@
       ],
       "action": null,
       "matiere_id": 6,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 2,
+      "role_id": null
     },
     {
       "reference": "COTON CHAINE 12/6",
@@ -114,8 +116,8 @@
       "stock_min": 0.0,
       "stock_min_recalcule": 51.48894193548387,
       "stock_min_plafonne": 0.0,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 149.1338955653946,
       "couverture_cible_jours": 28.044086021505375,
       "conso_mensuelle": 55.080000000000005,
@@ -162,7 +164,9 @@
       ],
       "action": null,
       "matiere_id": 4,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 3,
+      "role_id": null
     },
     {
       "reference": "FRANGE COTON Écru",
@@ -195,8 +199,8 @@
       "stock_min": 0.0,
       "stock_min_recalcule": 0.6071741935483871,
       "stock_min_plafonne": 0.0,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 2421.690069576218,
       "couverture_cible_jours": 29.763440860215056,
       "conso_mensuelle": 0.612,
@@ -240,7 +244,9 @@
       "besoins": [0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612],
       "action": null,
       "matiere_id": 5,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 2,
+      "role_id": null
     },
     {
       "reference": "JUTE TRAME 4 Ply",
@@ -273,8 +279,8 @@
       "stock_min": 0.0,
       "stock_min_recalcule": 74.73572903225808,
       "stock_min_plafonne": 0.0,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 341.48487325451265,
       "couverture_cible_jours": 28.180893300248144,
       "conso_mensuelle": 79.56,
@@ -321,7 +327,9 @@
       ],
       "action": null,
       "matiere_id": 3,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 3,
+      "role_id": null
     },
     {
       "reference": "PP FRZ-2900 Bleu",
@@ -354,8 +362,8 @@
       "stock_min": 0.0,
       "stock_min_recalcule": 60.78635944700461,
       "stock_min_plafonne": 0.0,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 107.67046173308029,
       "couverture_cible_jours": 29.797235023041466,
       "conso_mensuelle": 61.20000000000001,
@@ -399,7 +407,9 @@
       "besoins": [61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2],
       "action": null,
       "matiere_id": 2,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 1,
+      "role_id": null
     },
     {
       "reference": "PP FRZ-2900 Rouge",
@@ -432,8 +442,8 @@
       "stock_min": 800.0,
       "stock_min_recalcule": 584.4718451612902,
       "stock_min_plafonne": 584.4718451612902,
-      "statut": "🟢 OK",
-      "statut_couverture": "🟢 OK",
+      "statut": "OK",
+      "statut_couverture": "OK",
       "couverture_jours": 220.09183688655725,
       "couverture_cible_jours": 84.26641366223906,
       "conso_mensuelle": 208.08,
@@ -480,7 +490,9 @@
       ],
       "action": null,
       "matiere_id": 1,
-      "valeur_machine_mad": null
+      "valeur_machine_mad": null,
+      "fournisseur_id": 1,
+      "role_id": null
     }
   ]
 }

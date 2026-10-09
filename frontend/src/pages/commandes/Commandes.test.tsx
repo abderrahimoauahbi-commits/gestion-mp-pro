@@ -156,6 +156,31 @@ describe('Commandes', () => {
     expect(within(fenetre).getByText(/ses lignes sont figées/)).toBeInTheDocument()
   })
 
+  it('date promise figée : le champ est grisé et dit la phrase du serveur (promesse_figee)', async () => {
+    const phrase = 'figée avec les prix : une nouvelle date va dans l’ETA (Suivi de l’expédition)'
+    serveur('achats', brouillon({ parti: true, promesse_figee: phrase }))
+    monterApp('/commandes/9')
+    await screen.findAllByLabelText(/Livraison prévue/)
+    await waitFor(() => expect(document.body.textContent).toContain(phrase))
+  })
+
+  it('reçu sous réserve : la ligne et la fiche disent la part en quarantaine, attendue jusqu’à sa libération', async () => {
+    serveur('achats', ficheEssai())
+    monterApp('/commandes/3')
+    const fenetre = await screen.findByRole('dialog', { name: /Bon de commande BC-2026-0002/ })
+    const tableau = within(fenetre).getByRole('table', { name: 'Lignes du bon' })
+    expect(
+      within(tableau).getByText(
+        'dont 505 kg reçus sous réserve, en quarantaine : attendus jusqu’à leur libération',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      within(fenetre).getByText(
+        /Reçu : Dont 505 kg reçus sous réserve, en quarantaine : attendus jusqu’à leur libération\./,
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('409 à l’enregistrement : le message du serveur et « Recharger la fiche », la saisie reste', async () => {
     serveur('achats', brouillon(), {
       'PUT /commandes/9': {
