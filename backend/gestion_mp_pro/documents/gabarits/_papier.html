@@ -1,0 +1,40 @@
+{#- Les pièces du papier à en-tête de l'usine (décision A22 ; lot D9), à importer :
+
+    {% import "_papier.html" as papier %}
+    {{ papier.en_tete(societe, mots) }}   {{ papier.pied(societe, mots) }}
+    {% call papier.feuille(societe, mots) %}…contenu d'une feuille A4…{% endcall %}
+
+`feuille` : en-tête, contenu, et le pied du papier en bas de chaque feuille imprimée.
+-#}
+{% macro en_tete(societe, mots) %}
+{% if societe.nom or societe.secteur or societe.forme_juridique or societe.adresse or societe.ville or societe.telephone %}
+<div class="entete-societe">
+  {% if societe.nom %}<div class="nom">{{ societe.nom }}</div>{% endif %}
+  {% if societe.secteur %}<div class="secteur">{{ societe.secteur }}</div>{% endif %}
+  {% if societe.forme_juridique %}<div class="ligne">{{ societe.forme_juridique }}</div>{% endif %}
+  {% if societe.adresse %}<div class="ligne">{{ mots.siege }}&ensp;{{ societe.adresse }}</div>{% endif %}
+  {% if societe.ville %}<div class="ligne">{{ societe.ville }}</div>{% endif %}
+  {% if societe.telephone %}<div class="ligne">{{ societe.telephone }}</div>{% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+{% macro pied(societe, mots) %}
+{% if societe.banques or societe.identifiants %}
+<footer class="pied-societe">
+  {% if societe.banques %}<div class="banques"><b>{{ mots.banques }}</b>&emsp;{% for b in societe.banques %}{{ b }}{% if not loop.last %}&emsp;&emsp;{% endif %}{% endfor %}</div>{% endif %}
+  {% if societe.identifiants %}<div class="identifiants">{% for libelle, valeur in societe.identifiants %}{{ libelle }} : {{ valeur }}{% if not loop.last %}&emsp;&emsp;{% endif %}{% endfor %}</div>{% endif %}
+</footer>
+{% endif %}
+{% endmacro %}
+{% macro feuille(societe, mots) %}
+<div class="page">
+  <table class="mise-en-page">
+    <tbody><tr><td>
+      {{ en_tete(societe, mots) }}
+      <main>{{ caller() }}</main>
+    </td></tr></tbody>
+    <tfoot><tr><td><div class="place-du-pied"></div></td></tr></tfoot>
+  </table>
+  {{ pied(societe, mots) }}
+</div>
+{% endmacro %}
