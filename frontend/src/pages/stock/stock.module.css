@@ -1,0 +1,231 @@
+/* Stock, sorties et production (lot F2) : seulement des jetons (stylelint). */
+
+.nul {
+  color: var(--texte-3);
+}
+
+.negatif {
+  color: var(--ton-critique);
+}
+
+.positif {
+  color: var(--ton-ok);
+}
+
+.dessous {
+  display: block;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  font-weight: 400;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.double {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.fort {
+  font-weight: 600;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.ref {
+  display: inline-flex;
+  flex-direction: column;
+  max-width: 260px;
+  white-space: nowrap;
+}
+
+.ref > * > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.ajout {
+  width: min(460px, 100%);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+.selecteur {
+  max-width: 220px;
+  padding: 4px 8px;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font-size: var(--taille-petite);
+}
+
+.selecteurPose {
+  border-color: var(--accent);
+}
+
+.champDate {
+  padding: 3px 6px;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font-size: var(--taille-petite);
+}
+
+.grille3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espace-3);
+}
+
+.paires {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--taille-tableau);
+}
+
+.paires td {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--bord);
+  vertical-align: top;
+}
+
+.paires .valeurPaire {
+  padding-left: var(--espace-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.total td {
+  border-top: 1px solid var(--bord-fort);
+  font-weight: 600;
+}
+
+.blocages {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+}
+
+.alerte {
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+}
+
+.ligneAlerte td {
+  background: var(--ton-critique-clair);
+}
+
+.tableSimple {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--taille-tableau);
+}
+
+.tableSimple th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--bord);
+  background: var(--surface-2);
+  color: var(--texte-3);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableSimple td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--bord);
+  vertical-align: middle;
+}
+
+.tableSimple tfoot td {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+
+.droite {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.courant {
+  background: var(--accent-clair);
+}
+
+.fige {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+
+.tableSimple th.fige {
+  z-index: 2;
+  background: var(--surface-2);
+}
+
+.lien {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cadreFenetre {
+  max-height: var(--cadre-fenetre);
+  overflow: auto;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+}
+
+@media (width <= 900px) {
+  .grille3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Au téléphone, la liste ne tient pas dans l'écran avec ses filtres : la carte prend sa hauteur
+   et la page défile, le tableau gardant son cadre (plancher de 200 px), comme le catalogue (F7). */
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+}

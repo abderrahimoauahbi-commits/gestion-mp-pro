@@ -251,8 +251,11 @@ Le plan de production, le plan glissant, le plan face au réalisé, et les besoi
 
 Au pied du métier : envoyer aux machines, retour des machines, trouver un lot (mots ou QR), déplacer un lot, monter un fil, signaler un besoin.
 
-- Une tâche par écran, de grands boutons ; la saisie en cours est gardée sur le téléphone jusqu’à l’enregistrement.
+- Une tâche par écran, de grands boutons ; la saisie en cours est gardée sur le téléphone jusqu’à l’enregistrement, même en changeant d’écran.
 - Ce qui sera refusé (inventaire en cours, date, quarantaine) est dit en tête, et « Valider » est grisé avec la raison écrite dessous.
+- Les quantités se saisissent en kg, en bobines ou en palettes : une bobine se compte entière, et toute conversion arrondie est dite.
+- Monter un fil n’écrit aucun mouvement : la confirmation annonce ce que devient le stock sur les métiers.
+- Sans réseau, l’écran le dit (« Pas de réseau ») et propose « Réessayer » : jamais une liste vide à la place.
 - Aucun prix ni montant n’y est jamais montré.
 
 ### Plan d’achat (`/plan-achat`)
@@ -288,17 +291,21 @@ Un dossier d’importation par facture : ses marchandises, ses frais répartis, 
 
 ### Inventaire (`/inventaire`)
 
-Ouvrir un inventaire sur un périmètre, compter, justifier les écarts au-delà de la tolérance, valider : un ajustement par écart.
+Ouvrir un inventaire sur un périmètre, compter à l’aveugle, justifier les écarts au-delà de la tolérance, valider : un ajustement par écart.
 
-- Pendant l’inventaire, les mouvements du périmètre compté sont suspendus ; le reste de l’usine travaille.
-- Le stock théorique est figé à l’ouverture ; la feuille de comptage s’imprime à l’aveugle.
+- Pendant l’inventaire, les mouvements des matières comptées sont suspendus dans son magasin (dans tous s’il est global) ; les autres matières continuent de bouger. Un seul inventaire ouvert par magasin.
+- Le stock théorique est figé à l’ouverture ; la **feuille de comptage** s’imprime sans lui (à l’aveugle), la **feuille de recomptage** avec lui, pour les lots hors tolérance enregistrés.
+- Au-delà de la tolérance, un écart se justifie (3 caractères au moins) et se recompte par une autre personne : un recomptage fait par la même personne, ou par celle qui a ouvert l’inventaire, est signalé.
+- Un lot trouvé sur place s’ajoute au comptage ; il n’est créé qu’à la validation (« Lot interne » : numéro LOT-AAAA-NNNN donné à ce moment).
+- Abandonner garde l’inventaire et son numéro, avec un motif ; un inventaire validé ne se défait que par son annulation (contre-passation, motif exigé), et passe « Annulé ».
 
 ### Ouvertures, transferts, ajustements (`/operations`)
 
-Un document par geste de stock : ouverture, transfert, ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.
+Un document par geste de stock : stock d’ouverture, transfert (dont quarantaine), ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.
 
-- L’alimentation y fait ses transferts et ses retours des machines ; le reste est aux achats.
-- Un document validé ne s’efface pas : il s’annule (contre-passation).
+- L’alimentation y fait ses transferts (mise en quarantaine comprise, en disant ce qui est douteux) et ses retours des machines ; libérer une quarantaine est une décision des achats ou de la direction.
+- Ce qui ferait refuser la validation est dit d’avance (« sera refusée ») : inventaire en cours sur la matière, lot épuisé, date, quarantaine.
+- Le numéro est donné à la validation ; un document validé ne s’efface pas : il s’annule (contre-passation).
 
 ### Matières, classification, fournisseurs (`/catalogue`)
 
@@ -321,6 +328,8 @@ Les qualités de tapis, leur poids par rôle, leur recette à 100 % par rôle, l
 Les métiers, leurs étages et les fils montés ; la direction règle le métier, l’alimentation monte les fils.
 
 - Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre.
+- La direction crée et règle les métiers ; l’alimentation monte les fils (ici ou au téléphone) ; les achats lisent.
+- « Enregistrer » annonce l’effet sur le stock sur les métiers et alerte quand un fil monté dépasse ce qui est parti aux machines en 30 jours.
 - Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25).
 
 ### Analyse (`/analyse`)

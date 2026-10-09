@@ -1,0 +1,417 @@
+[
+  {
+    "lot_id": 10,
+    "lot": "L-G-601",
+    "interne": false,
+    "matiere_id": 6,
+    "reference": "COLLE LATEX",
+    "designation": "",
+    "role": "Colle",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Cuirs du Sud",
+    "entre_le": "2026-08-20",
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "quantite": 195.8,
+    "disponible": 195.8,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 195.8
+      }
+    ],
+    "bobines": null,
+    "statut": "disponible",
+    "historique": {
+      "entre": 250.0,
+      "sorti": 54.2,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 1,
+          "numero": "OF-2026-0001"
+        },
+        {
+          "id": 3,
+          "numero": "OF-2026-0003"
+        },
+        {
+          "id": 7,
+          "numero": "OF-2026-0005"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 8,
+    "lot": "L-C-401",
+    "interne": false,
+    "matiere_id": 4,
+    "reference": "COTON CHAINE 12/6",
+    "designation": "",
+    "role": "Chaîne",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Tissages Fès",
+    "entre_le": "2026-07-16",
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "quantite": 388.7,
+    "disponible": 388.7,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 388.7
+      }
+    ],
+    "bobines": null,
+    "statut": "disponible",
+    "historique": {
+      "entre": 500.0,
+      "sorti": 111.3,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 1,
+          "numero": "OF-2026-0001"
+        },
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        },
+        {
+          "id": 3,
+          "numero": "OF-2026-0003"
+        },
+        {
+          "id": 7,
+          "numero": "OF-2026-0005"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 9,
+    "lot": "L-F-501",
+    "interne": false,
+    "matiere_id": 5,
+    "reference": "FRANGE COTON Écru",
+    "designation": "",
+    "role": "Franges",
+    "kg_par_ml": 0.02,
+    "fournisseur": "Cuirs du Sud",
+    "entre_le": "2026-08-10",
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "quantite": 50.0,
+    "disponible": 50.0,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 50.0
+      }
+    ],
+    "bobines": null,
+    "statut": "disponible",
+    "historique": {
+      "entre": 60.0,
+      "sorti": 10.0,
+      "dernier_mouvement": "2026-09-19",
+      "ordres": [
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 6,
+    "lot": "L-T-301",
+    "interne": false,
+    "matiere_id": 3,
+    "reference": "JUTE TRAME 4 Ply",
+    "designation": "",
+    "role": "Trame",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Tissages Fès",
+    "entre_le": "2026-07-21",
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "quantite": 737.6,
+    "disponible": 737.6,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 737.6
+      }
+    ],
+    "bobines": null,
+    "statut": "disponible",
+    "historique": {
+      "entre": 900.0,
+      "sorti": 162.4,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 1,
+          "numero": "OF-2026-0001"
+        },
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        },
+        {
+          "id": 3,
+          "numero": "OF-2026-0003"
+        },
+        {
+          "id": 7,
+          "numero": "OF-2026-0005"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 7,
+    "lot": "L-T-302",
+    "interne": false,
+    "matiere_id": 3,
+    "reference": "JUTE TRAME 4 Ply",
+    "designation": "",
+    "role": "Trame",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Tissages Fès",
+    "entre_le": "2026-09-24",
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "quantite": 333.3,
+    "disponible": 333.3,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 333.3
+      }
+    ],
+    "bobines": null,
+    "statut": "disponible",
+    "historique": {
+      "entre": 333.3,
+      "sorti": 0.0,
+      "dernier_mouvement": "2026-09-24",
+      "ordres": []
+    }
+  },
+  {
+    "lot_id": 5,
+    "lot": "L-B-201",
+    "interne": false,
+    "matiere_id": 2,
+    "reference": "PP FRZ-2900 Bleu",
+    "designation": "",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature Atlas",
+    "entre_le": "2026-07-31",
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "quantite": 310.0,
+    "disponible": 310.0,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 260.0
+      },
+      {
+        "magasin_id": 3,
+        "magasin": "ATELIER",
+        "type": "stock_courant",
+        "quantite": 50.0
+      }
+    ],
+    "bobines": 124,
+    "statut": "disponible",
+    "historique": {
+      "entre": 420.0,
+      "sorti": 110.0,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 1,
+    "lot": "L-R-101",
+    "interne": false,
+    "matiere_id": 1,
+    "reference": "PP FRZ-2900 Rouge",
+    "designation": "",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature Atlas",
+    "entre_le": "2026-07-11",
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "quantite": 731.3,
+    "disponible": 731.3,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 731.3
+      }
+    ],
+    "bobines": 293,
+    "statut": "disponible",
+    "historique": {
+      "entre": 1200.0,
+      "sorti": 468.7,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 1,
+          "numero": "OF-2026-0001"
+        },
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        },
+        {
+          "id": 3,
+          "numero": "OF-2026-0003"
+        },
+        {
+          "id": 7,
+          "numero": "OF-2026-0005"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 2,
+    "lot": "L-R-102",
+    "interne": false,
+    "matiere_id": 1,
+    "reference": "PP FRZ-2900 Rouge",
+    "designation": "",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature Atlas",
+    "entre_le": "2026-08-30",
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "quantite": 640.4,
+    "disponible": 640.4,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 640.4
+      }
+    ],
+    "bobines": 256,
+    "statut": "disponible",
+    "historique": {
+      "entre": 650.4,
+      "sorti": 10.0,
+      "dernier_mouvement": "2026-10-07",
+      "ordres": [
+        {
+          "id": 4,
+          "numero": "OF-2026-0004"
+        }
+      ]
+    }
+  },
+  {
+    "lot_id": 3,
+    "lot": "L-R-103",
+    "interne": false,
+    "matiere_id": 1,
+    "reference": "PP FRZ-2900 Rouge",
+    "designation": "",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature Atlas",
+    "entre_le": "2026-09-19",
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "quantite": 300.0,
+    "disponible": 300.0,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 3,
+        "magasin": "ATELIER",
+        "type": "stock_courant",
+        "quantite": 300.0
+      }
+    ],
+    "bobines": 120,
+    "statut": "disponible",
+    "historique": {
+      "entre": 300.0,
+      "sorti": 0.0,
+      "dernier_mouvement": "2026-09-19",
+      "ordres": []
+    }
+  },
+  {
+    "lot_id": 4,
+    "lot": "L-R-104",
+    "interne": false,
+    "matiere_id": 1,
+    "reference": "PP FRZ-2900 Rouge",
+    "designation": "",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature Atlas",
+    "entre_le": "2026-09-29",
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "quantite": 180.0,
+    "disponible": 180.0,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 3,
+        "magasin": "ATELIER",
+        "type": "stock_courant",
+        "quantite": 180.0
+      }
+    ],
+    "bobines": 72,
+    "statut": "disponible",
+    "historique": {
+      "entre": 180.0,
+      "sorti": 0.0,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": []
+    }
+  }
+]

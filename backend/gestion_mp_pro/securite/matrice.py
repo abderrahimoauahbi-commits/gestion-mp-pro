@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from typing import Any
@@ -58,11 +59,17 @@ class LigneMatrice:
         return [self.methode, self.chemin, self.attendu(None), *(self.attendu(r) for r in TOUS)]
 
 
+def _sans_convertisseur(chemin: str) -> str:
+    """`/fournisseurs/{ident:int}` → `/fournisseurs/{ident}` (le chemin de l'OpenAPI)."""
+    return re.sub(r"\{(\w+):\w+\}", r"{\1}", chemin)
+
+
 def _deplier(routes: Iterable[Any]) -> Iterator[tuple[str, APIRoute]]:
-    """Les routes et leur chemin complet, routeurs inclus dépliés (inclusion paresseuse)."""
+    """Les routes et leur chemin complet, routeurs inclus dépliés (inclusion paresseuse) ; un
+    convertisseur de chemin (`{ident:int}`, qui départage deux routes) n'est pas écrit."""
     for route in routes:
         if isinstance(route, APIRoute):
-            yield route.path, route
+            yield _sans_convertisseur(route.path), route
             continue
         candidats = getattr(route, "effective_candidates", None)
         if candidats is None:
@@ -70,7 +77,7 @@ def _deplier(routes: Iterable[Any]) -> Iterator[tuple[str, APIRoute]]:
         for candidat in candidats():
             originale = getattr(candidat, "original_route", None)
             if isinstance(originale, APIRoute):
-                yield str(candidat.path), originale
+                yield _sans_convertisseur(str(candidat.path)), originale
             else:
                 yield from _deplier([candidat])
 

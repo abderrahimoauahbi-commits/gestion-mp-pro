@@ -13,13 +13,13 @@ from decimal import Decimal
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.achats import Achat, reglage
+from fabriques.importations import ouvrir_facture
 from fabriques.receptions import (
     JOUR,
     Quai,
     acteur,
     camion,
     camions,
-    dossier,
     facture,
     fiche,
     geste,
@@ -180,14 +180,14 @@ def test_une_reception_ne_reecrit_pas_une_facture_reglee(
     r3 = geste(achats, camion(achats, eur.fournisseur_id, [_hc(m, quai, "R-3", 10)],
                               factures={"EUR": {"numero": "F-D", "date": j(), "montant": 50}}),
                "valider")  # fmt: skip
-    d = dossier(r3["facture"]["id"], clos=True)
+    d = ouvrir_facture(achats, r3["facture"]["id"], clos=True)
     refus = facture(achats, r3, 409, montant=60)
     assert "clos : la corriger depuis le dossier" in refus["detail"]
     assert refus["code"] == "dossier_clos" and d
     r4 = geste(achats, camion(achats, eur.fournisseur_id, [_hc(m, quai, "R-4", 10)],
                               factures={"EUR": {"numero": "F-O", "date": j(), "montant": 50}}),
                "valider")  # fmt: skip
-    dossier(r4["facture"]["id"], lignes=(r4["lignes"][0]["id"],))
+    ouvrir_facture(achats, r4["facture"]["id"])
     with reglage("date_cloture", j()):
         refus = facture(achats, r4, 409, montant=70)
     assert (
@@ -274,10 +274,10 @@ def test_les_factures_se_listent_avec_leurs_receptions(
     assert x["montant"] is None and x["montant_estime"] == 250 and x["poids"] == 100
     assert [y["numero"] for y in x["receptions"]] == [r["numero"]] and x["dossier"] is None
     assert ok(achats.get("/api/factures", params={"q": "fa 2026 117"}))[0]["id"] == x["id"]
-    dossier(x["id"])
+    d = ouvrir_facture(achats, x["id"])
     sans = ok(achats.get("/api/factures", params={"fournisseur": eur.fournisseur_id,
                                                   "sans_dossier": True}))  # fmt: skip
     assert x["id"] not in {f["id"] for f in sans}
     avec = ok(achats.get("/api/factures", params={"fournisseur": eur.fournisseur_id}))
-    assert next(f for f in avec if f["id"] == x["id"])["dossier"]["numero"].startswith("ANC-D4")
+    assert next(f for f in avec if f["id"] == x["id"])["dossier"]["numero"] == d["numero"]
     assert Decimal(str(x["montant_estime"])) == Decimal("250")

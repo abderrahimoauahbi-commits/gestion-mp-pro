@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Sorties vers les machines » (lot F2), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F2 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Sorties vers les machines » (lot F2), rassemblés par `routes.ts`. La fiche,
+ * la saisie et le retour s'ouvrent en fenêtre par-dessus la liste (même page, adresse stable) ; le
+ * chemin fixe `/ordres/nouveau` passe avant `/ordres/:id`.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Sorties')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -19,8 +19,7 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'brouillon', libelle: 'Brouillons' },
       { cle: 'annule', libelle: 'Annulés' },
     ],
-    lot: 'F2',
-    page: aVenir,
+    page,
   },
   {
     chemin: '/ordres/nouveau',
@@ -28,7 +27,22 @@ export const ecrans: readonly Ecran[] = [
     parent: '/sorties',
     roles: ['direction', 'alimentation'],
     aide: 'sorties',
-    lot: 'F2',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/ordres/:id',
+    titre: 'Ordre de fabrication',
+    parent: '/sorties',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'sorties',
+    page,
+  },
+  {
+    chemin: '/ordres/:id/retour',
+    titre: 'Retour des machines',
+    parent: '/sorties',
+    roles: ['direction', 'alimentation'],
+    aide: 'sorties',
+    page,
   },
 ]

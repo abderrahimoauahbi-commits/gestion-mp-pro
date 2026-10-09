@@ -1,0 +1,50 @@
+[
+  {
+    "lot_id": 1,
+    "lot": "L-R-101",
+    "matiere_id": 1,
+    "reference": "PP FRZ-2900 Rouge",
+    "designation": "",
+    "sorti_net": 51.2,
+    "kg_par_ml": 0.0,
+    "poids_bobine": 2.5,
+    "bobines_palette": 40.0,
+    "blocage": ""
+  },
+  {
+    "lot_id": 6,
+    "lot": "L-T-301",
+    "matiere_id": 3,
+    "reference": "JUTE TRAME 4 Ply",
+    "designation": "",
+    "sorti_net": 20.4,
+    "kg_par_ml": 0.0,
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "blocage": ""
+  },
+  {
+    "lot_id": 8,
+    "lot": "L-C-401",
+    "matiere_id": 4,
+    "reference": "COTON CHAINE 12/6",
+    "designation": "",
+    "sorti_net": 15.3,
+    "kg_par_ml": 0.0,
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "blocage": ""
+  },
+  {
+    "lot_id": 10,
+    "lot": "L-G-601",
+    "matiere_id": 6,
+    "reference": "COLLE LATEX",
+    "designation": "",
+    "sorti_net": 10.2,
+    "kg_par_ml": 0.0,
+    "poids_bobine": 0.0,
+    "bobines_palette": 0.0,
+    "blocage": ""
+  }
+]

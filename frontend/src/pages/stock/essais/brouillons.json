@@ -1,0 +1,85 @@
+{
+  "lignes": [
+    {
+      "genre": "ordre",
+      "type": "ordre",
+      "id": 6,
+      "version": 1,
+      "date": "2026-10-08",
+      "libelle": "Ordre de fabrication",
+      "resume": "hors recette · PP FRZ-2900 Rouge",
+      "quantite": 400.0,
+      "cree_par": "Direction",
+      "cree_le": "2026-10-09T10:24:11.044577Z",
+      "lien": "/ordres/6",
+      "peut_valider": true,
+      "raison": "",
+      "valide_par": "la direction, responsable alimentation machines",
+      "blocages": [
+        "un ordre daté du 09/10/2026 est déjà validé : dater cet ordre au moins de ce jour",
+        "lot L-R-103 de PP FRZ-2900 Rouge : épuisé au 08/10/2026 dans « Magasin principal », 400,000 kg demandés"
+      ]
+    },
+    {
+      "genre": "ordre",
+      "type": "ordre",
+      "id": 5,
+      "version": 1,
+      "date": "2026-10-09",
+      "libelle": "Ordre de fabrication",
+      "resume": "ATLAS 80 m² · JUTE TRAME 4 Ply, PP FRZ-2900 Rouge",
+      "quantite": 130.0,
+      "cree_par": "Direction",
+      "cree_le": "2026-10-09T10:24:11.033528Z",
+      "lien": "/ordres/5",
+      "peut_valider": true,
+      "raison": "",
+      "valide_par": "la direction, responsable alimentation machines",
+      "blocages": []
+    }
+  ],
+  "ordres": [
+    {
+      "genre": "ordre",
+      "type": "ordre",
+      "id": 6,
+      "version": 1,
+      "date": "2026-10-08",
+      "libelle": "Ordre de fabrication",
+      "resume": "hors recette · PP FRZ-2900 Rouge",
+      "quantite": 400.0,
+      "cree_par": "Direction",
+      "cree_le": "2026-10-09T10:24:11.044577Z",
+      "lien": "/ordres/6",
+      "peut_valider": true,
+      "raison": "",
+      "valide_par": "la direction, responsable alimentation machines",
+      "blocages": [
+        "un ordre daté du 09/10/2026 est déjà validé : dater cet ordre au moins de ce jour",
+        "lot L-R-103 de PP FRZ-2900 Rouge : épuisé au 08/10/2026 dans « Magasin principal », 400,000 kg demandés"
+      ]
+    },
+    {
+      "genre": "ordre",
+      "type": "ordre",
+      "id": 5,
+      "version": 1,
+      "date": "2026-10-09",
+      "libelle": "Ordre de fabrication",
+      "resume": "ATLAS 80 m² · JUTE TRAME 4 Ply, PP FRZ-2900 Rouge",
+      "quantite": 130.0,
+      "cree_par": "Direction",
+      "cree_le": "2026-10-09T10:24:11.033528Z",
+      "lien": "/ordres/5",
+      "peut_valider": true,
+      "raison": "",
+      "valide_par": "la direction, responsable alimentation machines",
+      "blocages": []
+    }
+  ],
+  "operations": [],
+  "receptions": [],
+  "nombre": 2,
+  "bloques": 1,
+  "validables": 1
+}

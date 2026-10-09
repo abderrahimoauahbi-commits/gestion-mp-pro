@@ -1,0 +1,62 @@
+/* Production et besoins (lot F2) : seulement des jetons (stylelint). */
+
+.cellule {
+  width: 62px;
+  min-width: 56px;
+  text-align: right;
+}
+
+.qualite {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.gestes {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.titre {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-3);
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.bas {
+  color: var(--ton-critique);
+  font-weight: 600;
+}
+
+.haut {
+  color: var(--ton-attention);
+  font-weight: 600;
+}
+
+.graphique {
+  padding: var(--espace-3);
+}
+
+/* Au téléphone, la liste ne tient pas dans l'écran avec ses filtres : la carte prend sa hauteur
+   et la page défile, le tableau gardant son cadre (plancher de 200 px), comme le catalogue (F7). */
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 2,
+    "code": "Quarantaine",
+    "nom": "Quarantaine",
+    "type": "quarantaine",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 0.0,
+    "version": 1
+  },
+  {
+    "id": 3,
+    "code": "ATELIER",
+    "nom": "Magasin de l'atelier",
+    "type": "stock_courant",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 530.0,
+    "version": 1
+  },
+  {
+    "id": 1,
+    "code": "Magasin principal",
+    "nom": "Magasin principal",
+    "type": "stock_courant",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 3337.1,
+    "version": 1
+  }
+]
