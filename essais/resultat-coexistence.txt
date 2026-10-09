@@ -1,0 +1,93 @@
+Coexistence Gestion MP (8030) / Gestion MP PRO (8050, base gestion_mp_pro) — 2026-10-09 11:18
+
+0. Gestion MP en service avant l'épreuve
+  ok  Gestion MP répond sur 8030 (processus 36178, version c1133ba)
+
+Démarrage de PRO par son raccourci (navigateur remplacé par un écho ; variables GESTION_MP_* hostiles)
+  ok  le raccourci a démarré PRO (processus 75929) puis ouvert ouvrir http://localhost:8050
+  ok  second double-clic : il ouvre seulement, même processus
+
+1. Dossier du projet : /Users/mohamed/gestion-mp / /Users/mohamed/gestion-mp-pro
+  ok  dossiers distincts, aucun dans l'autre
+  ok  PRO n'a aucun fichier ouvert dans ~/gestion-mp
+
+2. Port : 8030 / 8050
+  ok  ports différents
+  ok  les variables GESTION_MP_* n'ont pas déplacé PRO (rien sur 8999)
+  ok  PRO n'écoute que sur 127.0.0.1:8050
+  ok  processus disjoints : celui de 8030 n'est pas celui de 8050
+  ok  Gestion MP écoute toujours sur 8030, même processus
+
+3. Base : gestion_mp / gestion_mp_pro
+  ok  bases différentes
+  ok  PRO travaille sur gestion_mp_pro, connecté en gestion_mp_pro, à la révision attendue
+  ok  connexions à gestion_mp_pro : rôle gestion_mp_pro seulement (hors administration)
+  ok  aucune connexion du rôle gestion_mp_pro à gestion_mp
+  ok  le serveur PRO tient des connexions à gestion_mp_pro seulement
+
+4. Rôle PostgreSQL : utilisateur du Mac / gestion_mp_pro
+  ok  gestion_mp_pro : ni superutilisateur, ni création de base ou de rôle
+  ok  gestion_mp_pro n'est propriétaire que de bases gestion_mp_pro*
+  ok  gestion_mp_pro ne possède rien et n'a reçu aucun droit dans gestion_mp (pg_shdepend)
+  ok  gestion_mp appartient toujours à l'utilisateur du Mac
+  ok  gestion_mp_pro fermée à PUBLIC (CONNECT retiré)
+
+5. Copie figée : /Users/mohamed/Library/Application Support/Gestion MP/version / /Users/mohamed/Library/Application Support/Gestion MP PRO/version
+  ok  dossiers distincts, aucun dans l'autre
+  ok  /api/sante de PRO dit le VERSION de sa copie figée (a8c523b)
+  ok  le serveur tourne dans la copie (répertoire courant /Users/mohamed/Library/Application Support/Gestion MP PRO/version/backend)
+  ok  la copie de Gestion MP n'a pas bougé (VERSION c1133ba)
+
+6. Sauvegardes : /Users/mohamed/gestion-mp-sauvegardes / ~/gestion-mp-pro-sauvegardes
+  ok  dossier de PRO : /Users/mohamed/gestion-mp-pro-sauvegardes/gestion_mp_pro
+  ok  aucun fichier de PRO dans les sauvegardes de Gestion MP
+  ok  aucun fichier de Gestion MP dans celles de PRO
+
+7. Pièces jointes : /Users/mohamed/gestion-mp-pieces / ~/gestion-mp-pro-pieces
+  ok  dossier de PRO : /Users/mohamed/gestion-mp-pro-pieces/gestion_mp_pro
+  ok  rien de PRO dans les pièces de Gestion MP
+
+8. Journal du serveur : /Users/mohamed/Library/Logs/Gestion MP.log / /Users/mohamed/Library/Logs/Gestion MP PRO/
+  ok  PRO écrit son journal dans /Users/mohamed/Library/Logs/Gestion MP PRO/serveur.log
+  ok  PRO n'a ouvert aucun fichier du poste de Gestion MP (journal, sauvegardes, pièces, copie)
+  ok  Gestion MP n'a ouvert aucun fichier de PRO
+
+9. Raccourci : /Users/mohamed/Desktop/Gestion MP.app / /Users/mohamed/Desktop/Gestion MP PRO.app
+  ok  les deux raccourcis sont sur le bureau
+  ok  noms différents (Gestion MP / Gestion MP PRO)
+  ok  identifiants différents (ma.usine.gestion-mp.raccourci / fr.usine.gestion-mp-pro.raccourci)
+  ok  icônes différentes
+  ok  le raccourci de PRO ouvre le port 8050 ; hors commentaires, rien de Gestion MP (8030, ~/gestion-mp, GESTION_MP_*)
+  ok  le raccourci de Gestion MP n'a pas bougé
+
+10. Démarrage : double-clic / agent fr.usine.gestion-mp-pro
+  ok  étiquette de PRO distincte de celle de Gestion MP (ma.gestion-mp)
+  ok  un agent de PRO éventuel ne cite rien de Gestion MP
+
+11. Cookie de session : gestion_mp_session / gestion_mp_pro_session
+  ok  noms différents (gestion_mp_session / gestion_mp_pro_session, appareil gestion_mp_pro_appareil)
+
+12. En-tête anti-falsification : X-Gestion-MP / X-Gestion-MP-PRO
+  ok  une écriture avec l'en-tête de Gestion MP est refusée par PRO (403), rien n'est fait
+
+13. Verrous consultatifs : 7426101–7426110 / 7426201–7426209
+  ok  numéros de PRO (7426201 7426202 7426203 7426204 7426205 7426206) dans 7426201–7426209
+  ok  aucun numéro commun avec Gestion MP (7426101 7426102 7426110 )
+  ok  verrous tenus sur gestion_mp_pro : tous dans la plage de PRO
+  ok  aucun verrou de la plage de PRO sur gestion_mp
+
+14. Variables : GESTION_MP_* / GESTIONMPPRO_*
+  ok  PRO lancé avec GESTION_MP_PORT=8999 et GESTION_MP_BASE=gestion_mp : toujours 8050 et gestion_mp_pro
+  ok  les scripts de PRO ne lisent aucune variable GESTION_MP_*
+
+15. Application au téléphone : « Gestion MP » / « Gestion MP PRO »
+  ok  manifestes de noms différents (« Gestion MP — matières premières » / « Gestion MP PRO — matières premières »), autre origine (port)
+
+16. Arrêter PRO n'arrête pas Gestion MP (et inversement)
+  ok  ce qu'arreter.sh de PRO arrêterait (75929 ) : ni le processus de Gestion MP, ni rien d'autre que gestion_mp_pro.main
+  ok  PRO arrêté : port 8050 rendu
+  ok  Gestion MP répond après l'arrêt de PRO, même processus, même version
+  ok  arreter.sh de Gestion MP vise son port (8030) seul : il ne peut atteindre PRO
+  ok  Gestion MP lu 14 fois pendant le démarrage, le travail et l'arrêt de PRO : 0 sans réponse
+
+Coexistence : 54 vérification(s) tenue(s), 0 en défaut.

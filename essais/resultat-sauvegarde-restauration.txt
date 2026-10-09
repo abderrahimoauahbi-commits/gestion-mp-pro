@@ -1,0 +1,32 @@
+Sauvegarde et restauration : base gestion_mp_pro_x2_poste_essai (<essai>/sauv-essai/gestion_mp_pro_x2_poste_essai)
+  ok  sauvegarde manuelle écrite et son archive de pièces à côté
+  ok  la sauvegarde manuelle est au journal de la base
+      Gestion MP PRO : confirmation absente : ajouter --confirmation RESTAURER.
+  ok  sans confirmation (pas de terminal) : refusé, rien changé
+      Refusé : Dernière confirmation : taper RESTAURER pour remplacer toute la base.
+  ok  confirmation fausse : refusé, rien changé
+      Gestion MP PRO : base « gestion_mp » refusée : seules gestion_mp_pro et gestion_mp_pro_* sont de Gestion MP PRO (jamais gestion_mp, celle de Gestion MP).
+  ok  sur la base gestion_mp (Gestion MP) : refusé avant toute connexion
+      Refusé : Sauvegarde illisible : pg_restore: erreur : n'a pas pu lire à partir du fichier en entrée : fin du fichier — rien n'a été restauré.
+  ok  fichier abîmé : refusé, rien changé
+      Refusé : Cette sauvegarde est celle de la base « gestion_mp_pro_x2_poste_autre_essai », pas de « gestion_mp_pro_x2_poste_essai » : la restaurer remplacerait toutes les données par celles d'une autre base.
+  ok  sauvegarde d'une autre base (gestion_mp_pro_x2_poste_autre_essai) : refusée, rien changé
+      Gestion MP PRO : le fichier doit être dans <essai>/sauv-essai/gestion_mp_pro_x2_poste_essai (y copier la sauvegarde et son .pieces.tar).
+  ok  fichier hors du dossier de la base : refusé
+      Gestion MP PRO : le serveur tourne sur le port 8150 : l'arrêter d'abord (scripts/arreter.sh), ou restaurer depuis l'écran (Administration › Sauvegardes).
+  ok  serveur de cette base en marche : refusé, rien changé
+      Sauvegarde « avant restauration » : gestion-mp-pro-2026-10-09-111211-avant-restauration.dump
+      Base gestion_mp_pro_x2_poste_essai restaurée depuis gestion-mp-pro-2026-10-09-111204-manuelle.dump.
+  ok  restauration acceptée
+  ok  la valeur sauvegardée est revenue
+  ok  la pièce jointe perdue est revenue
+  ok  la table née après la sauvegarde n'existe plus
+  ok  sauvegarde « avant restauration » faite
+  ok  journal « restauration » écrit dans la base restaurée
+  ok  base descendue à 0003 pour l'épreuve
+      Sauvegarde « avant restauration » : gestion-mp-pro-2026-10-09-111215-avant-restauration.dump
+      Base gestion_mp_pro_x2_poste_essai restaurée depuis gestion-mp-pro-2026-10-09-111213-manuelle.dump.
+  ok  sauvegarde à 0003 restaurée puis migrée à head (0004)
+  ok  nouvelle version : sauvegarde « avant mise à jour » faite, copie refaite (aa58a55)
+  ok  même version : rien n'est refait ni sauvegardé
+Sauvegarde et restauration : 19 vérification(s) tenue(s), 0 en défaut.
