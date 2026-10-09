@@ -108,7 +108,6 @@ export function CourrielDuLundi() {
             </Badge>
           ) : null}
           <span className={styles.note}>
-            Adresses séparées par des virgules. Vide : pas de courriel. Il part chaque lundi matin.
             {a && !a.serveur_configure
               ? ' Pour l’envoyer, la personne qui installe le serveur règle GESTIONMPPRO_SMTP_HOTE (et l’expéditeur) dans son fichier de lancement.'
               : ''}

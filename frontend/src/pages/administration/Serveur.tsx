@@ -57,8 +57,8 @@ function IndicateursServeur({ e }: { e: Etat }) {
   return (
     <Indicateurs libelle="Indicateurs du serveur">
       <Kpi
-        titre="Gestion MP PRO"
-        valeur={`version ${e.application}`}
+        titre="Version de Gestion MP PRO"
+        valeur={e.application}
         detail={`schéma de base n° ${e.base.schema ?? '—'} · Python ${e.python}`}
         formule={formule('serveur_version')}
       />
@@ -132,7 +132,7 @@ function Installation({ e }: { e: Etat }) {
 
 export function Serveur() {
   const lu = useLecture<Etat>('/serveur', undefined, { refetchInterval: 60_000 })
-  const [vue, setVue] = useState<'taches' | 'sessions'>('taches')
+  const [vue, setVue] = useState<'installation' | 'taches' | 'sessions'>('installation')
   if (lu.isPending) return <Chargement quoi="l’état du serveur" />
   if (lu.isError) return <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} />
   const e = lu.data
@@ -146,6 +146,7 @@ export function Serveur() {
           <Bascule
             libelle="Vue du serveur"
             vues={[
+              { cle: 'installation', libelle: 'Installation' },
               { cle: 'taches', libelle: `Tâches de fond (${nombre(e.taches.length)})` },
               { cle: 'sessions', libelle: `Sessions ouvertes (${nombre(e.sessions.length)})` },
             ]}
@@ -157,10 +158,11 @@ export function Serveur() {
         remplir
         className={styles.carteListe}
       >
-        <div className={styles.marge}>
-          <Installation e={e} />
-        </div>
-        {vue === 'taches' ? (
+        {vue === 'installation' ? (
+          <div className={styles.apercu}>
+            <Installation e={e} />
+          </div>
+        ) : vue === 'taches' ? (
           <DataTable<Tache>
             libelle="Tâches de fond"
             lignes={e.taches}

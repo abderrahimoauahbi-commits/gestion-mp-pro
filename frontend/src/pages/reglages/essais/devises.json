@@ -1,0 +1,29 @@
+[
+  {
+    "code": "EUR",
+    "nom": "Euro",
+    "cours": 11.0,
+    "cours_le": "2026-10-09T11:00:09.029179Z",
+    "cours_repris": true,
+    "actif": true,
+    "version": 1
+  },
+  {
+    "code": "MAD",
+    "nom": "Dirham",
+    "cours": 1.0,
+    "cours_le": "2026-10-09T11:00:09.029179Z",
+    "cours_repris": true,
+    "actif": true,
+    "version": 1
+  },
+  {
+    "code": "USD",
+    "nom": "Dollar américain",
+    "cours": 9.5,
+    "cours_le": "2026-10-09T11:00:09.029179Z",
+    "cours_repris": true,
+    "actif": true,
+    "version": 1
+  }
+]

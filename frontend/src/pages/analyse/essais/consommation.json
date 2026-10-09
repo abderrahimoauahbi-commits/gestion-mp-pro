@@ -1,0 +1,886 @@
+[
+  {
+    "ordre_id": 319,
+    "numero": "OF-2026-0223",
+    "date": "2026-09-30",
+    "debut": "2026-09-30",
+    "fin": "2026-09-30",
+    "qualites": [],
+    "fabrication": "hors recette",
+    "m2": 0.0,
+    "commentaire": "Commande spéciale, hors recette",
+    "consomme": 4654.400000000001,
+    "retours": 0.0,
+    "net": 4654.4,
+    "prevu": 0.0,
+    "ecart": null,
+    "ecart_relatif": null,
+    "taux_perte": 0.02,
+    "references": [
+      {
+        "matiere_id": 5,
+        "reference": "Jute 16/2",
+        "quantite": 36.3,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 21,
+        "reference": "PES Fdy -1800 Deniers-Gold Cf-101 Turk",
+        "quantite": 120.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 22,
+        "reference": "PES Fdy -1800 Deniers-Taupe Cf-4001 Turk",
+        "quantite": 169.9,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 23,
+        "reference": "PES Fdy -1800 Deniers-White Cf-1001 Turk",
+        "quantite": 192.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 24,
+        "reference": "PES Fdy-1500 Deniers-Bleu  Fdy-542030-Gzm",
+        "quantite": 147.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 26,
+        "reference": "PES Fdy-1500 Deniers-Marron Fdy-36005-Gzm",
+        "quantite": 199.0,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 27,
+        "reference": "PES Fdy-1500 Deniers-Olive Fdy-93005-Gzm",
+        "quantite": 177.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 28,
+        "reference": "PES Fdy-1500 Deniers-Rose Fdy-423020-Gzm",
+        "quantite": 152.0,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 29,
+        "reference": "PES Fdy-1500 Deniers-Taupe Fdy-811100-Gzm",
+        "quantite": 122.9,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 30,
+        "reference": "PES Fdy-1500 Deniers-Turkoise Fdy-513020-Gzm",
+        "quantite": 214.7,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 33,
+        "reference": "PES Sh -1200 Deniers-Cream Cb-1056 Turk",
+        "quantite": 113.1,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 35,
+        "reference": "PES Sh -1200 Deniers-Grey Cb-7A Turk",
+        "quantite": 103.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 36,
+        "reference": "PES Sh-1200 Deniers- Cream Dtbc-H69-Gzm",
+        "quantite": 95.1,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 37,
+        "reference": "PES Sh-1200 Deniers-Antrasit 802-Tat",
+        "quantite": 119.9,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 38,
+        "reference": "PES Sh-1200 Deniers-Beige Cp-1432 Sf",
+        "quantite": 100.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 39,
+        "reference": "PES Sh-1200 Deniers-Cpbt Grey 801-Tat",
+        "quantite": 129.8,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 42,
+        "reference": "PES Sh-1500 Deniers-Beige Cp-2039 Sf",
+        "quantite": 104.3,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 46,
+        "reference": "PES Sh-1500 Deniers-D.Vizon Cp-2068 Sf",
+        "quantite": 75.8,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 48,
+        "reference": "PES Sh-1500 Deniers-Vizon Cp-2018 Sf",
+        "quantite": 133.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 50,
+        "reference": "PES Ver-1500 Deniers-BleuTex-8100 Text",
+        "quantite": 143.5,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 53,
+        "reference": "PES-20/2 GLOBALTEX",
+        "quantite": 24.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 55,
+        "reference": "PES-20/4 GLOBALTEX",
+        "quantite": 34.3,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 59,
+        "reference": "PES-3000 Deniers- Dk.Beige Ssl2271-Suj",
+        "quantite": 163.8,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 60,
+        "reference": "PES-3000 Deniers- Dk.Vison Ssl2176-Suj",
+        "quantite": 164.5,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 62,
+        "reference": "PES-3000 Deniers- Pink Ssl2259-Suj",
+        "quantite": 118.9,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 63,
+        "reference": "PES-3000 Deniers- Rouge Ssl2232-Suj",
+        "quantite": 103.1,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 83,
+        "reference": "PP FRZ-2900 Dtex- Grey 9095-Oz",
+        "quantite": 125.5,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 84,
+        "reference": "PP FRZ-2900 Dtex- Red 5001-Oz",
+        "quantite": 130.5,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 86,
+        "reference": "PP FRZ-2900 Dtex-A/Green 8068-Oz",
+        "quantite": 68.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 87,
+        "reference": "PP FRZ-2900 Dtex-Beige 2204-Oz",
+        "quantite": 141.0,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 90,
+        "reference": "PP FRZ-2900 Dtex-Black 9000-Oz",
+        "quantite": 124.5,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 92,
+        "reference": "PP FRZ-2900 Dtex-Brown 6161-Oz",
+        "quantite": 93.4,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 94,
+        "reference": "PP FRZ-2900 Dtex-Cream 1104-Tat",
+        "quantite": 86.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 98,
+        "reference": "PP FRZ-2900 Dtex-Gold 3034-Oz",
+        "quantite": 75.9,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 100,
+        "reference": "PP FRZ-2900 Dtex-Green Mlt 18-Tat",
+        "quantite": 103.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 103,
+        "reference": "PP FRZ-2900 Dtex-Navy Bleu 1697-Tat",
+        "quantite": 113.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 108,
+        "reference": "PP-1500 Dtex-Bleu 7201-Oz",
+        "quantite": 62.3,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 111,
+        "reference": "PP-1500 Dtex-D.Bleu 7200-Oz",
+        "quantite": 84.2,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 114,
+        "reference": "PP-1500 Dtex-Yellow 3151-Oz",
+        "quantite": 121.6,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 70,
+        "reference": "Plastique 35",
+        "quantite": 32.1,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 77,
+        "reference": "Plastique-35",
+        "quantite": 33.099999999999994,
+        "prevu": 0.0,
+        "ecart": null,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      }
+    ],
+    "lots": [
+      "CHE260904-934",
+      "CHE260925-516",
+      "EXT260903-304",
+      "EXT260913-438",
+      "GLO260728-588",
+      "GLO260728-833",
+      "GLO260822-257",
+      "GZM260513-722",
+      "GZM260618-311",
+      "GZM260628-849",
+      "GZM260708-532",
+      "GZM260725-389",
+      "GZM260725-769",
+      "GZM260803-441",
+      "INIT-2510-045",
+      "INIT-2510-059",
+      "INIT-2510-060",
+      "INIT-2510-061",
+      "INIT-2510-062",
+      "INIT-2510-063",
+      "INIT-2510-064",
+      "LOT-2026-0045",
+      "LOT-2026-0058",
+      "LOT-2026-0064",
+      "LOT-2026-0087",
+      "LOT-2026-0088",
+      "OZK260310-379",
+      "OZK260506-640",
+      "OZK260526-627",
+      "SOF260521-903",
+      "SOF260524-979",
+      "SOF260618-185",
+      "SOF260713-800",
+      "SOF260713-875",
+      "SOF260724-270",
+      "SUJ260405-847",
+      "SUJ260415-372",
+      "SUJ260415-980",
+      "SUJ260507-454",
+      "TAT260516-584",
+      "TAT260602-956",
+      "TEX260802-449",
+      "TUR260508-139",
+      "TUR260605-682",
+      "TUR260605-765",
+      "TUR260703-450"
+    ]
+  },
+  {
+    "ordre_id": 318,
+    "numero": "OF-2026-0222",
+    "date": "2026-09-30",
+    "debut": "2026-09-30",
+    "fin": "2026-09-30",
+    "qualites": [
+      {
+        "qualite_id": 6,
+        "qualite": "IS",
+        "m2": 2164.926
+      }
+    ],
+    "fabrication": "IS 2 165 m²",
+    "m2": 2164.926,
+    "commentaire": "",
+    "consomme": 5923.950000000001,
+    "retours": 0.0,
+    "net": 5923.95,
+    "prevu": 5891.54301936,
+    "ecart": 32.406980640000256,
+    "ecart_relatif": 0.005500593059154245,
+    "taux_perte": 0.02,
+    "references": [
+      {
+        "matiere_id": 3,
+        "reference": "Hotmelt",
+        "quantite": 21.2,
+        "prevu": 22.082245200000006,
+        "ecart": -0.882245200000007,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 4,
+        "reference": "Jute 12/1",
+        "quantite": 1269.0,
+        "prevu": 1269.729099,
+        "ecart": -0.7290989999999056,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 31,
+        "reference": "PES Nylon",
+        "quantite": 18.7,
+        "prevu": 18.880319646,
+        "ecart": -0.18031964600000094,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 54,
+        "reference": "PES-20/2 LOMAT",
+        "quantite": 238.79999999999998,
+        "prevu": 240.96145962239999,
+        "ecart": -2.1614596224000024,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 56,
+        "reference": "PES-20/4 LOMAT",
+        "quantite": 143.6,
+        "prevu": 147.68605589759997,
+        "ecart": -4.086055897599977,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 85,
+        "reference": "PP FRZ-2900 Dtex- Red 7612-Hs",
+        "quantite": 2272.65,
+        "prevu": 2208.9973985819993,
+        "ecart": 63.65260141800081,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 88,
+        "reference": "PP FRZ-2900 Dtex-Beige 44360-Hs",
+        "quantite": 582.3,
+        "prevu": 604.170228672,
+        "ecart": -21.870228672000053,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 89,
+        "reference": "PP FRZ-2900 Dtex-Black 8001-Hs",
+        "quantite": 602.25,
+        "prevu": 604.170228672,
+        "ecart": -1.9202286720000075,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 99,
+        "reference": "PP FRZ-2900 Dtex-Gold 3423-Hs",
+        "quantite": 346.85,
+        "prevu": 339.84575362799995,
+        "ecart": 7.004246372000068,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 73,
+        "reference": "Plastique 65",
+        "quantite": 1.5,
+        "prevu": 1.5457571640000003,
+        "ecart": -0.045757164000000294,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 75,
+        "reference": "Plastique-100",
+        "quantite": 4.6,
+        "prevu": 4.637271491999999,
+        "ecart": -0.03727149199999946,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 76,
+        "reference": "Plastique-140",
+        "quantite": 4.699999999999999,
+        "prevu": 4.637271491999999,
+        "ecart": 0.06272850800000018,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 81,
+        "reference": "Plastique-80",
+        "quantite": 4.5,
+        "prevu": 4.637271491999999,
+        "ecart": -0.1372714919999991,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 124,
+        "reference": "SBR 821",
+        "quantite": 413.3,
+        "prevu": 419.5626588,
+        "ecart": -6.262658799999997,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      }
+    ],
+    "lots": [
+      "CHE260820-108",
+      "CHE260820-287",
+      "CHE260904-925",
+      "EXT260827-745",
+      "GLO260914-603",
+      "HAS260515-819",
+      "HAS260515-904",
+      "HAS260529-829",
+      "HAS260620-283",
+      "HAS260620-712",
+      "HAS260717-331",
+      "LOM260806-567",
+      "LOM260811-577",
+      "LOM260903-289",
+      "LOM260903-445",
+      "LOT-2026-0041",
+      "LOT-2026-0084",
+      "LOT-2026-0094",
+      "LOT-2026-0097",
+      "SOF260824-813",
+      "SOF260907-401",
+      "SOF260915-136"
+    ]
+  },
+  {
+    "ordre_id": 317,
+    "numero": "OF-2026-0221",
+    "date": "2026-09-29",
+    "debut": "2026-09-29",
+    "fin": "2026-09-29",
+    "qualites": [
+      {
+        "qualite_id": 5,
+        "qualite": "FB",
+        "m2": 3498.281
+      }
+    ],
+    "fabrication": "FB 3 498 m²",
+    "m2": 3498.281,
+    "commentaire": "",
+    "consomme": 6912.450000000001,
+    "retours": 0.0,
+    "net": 6912.45,
+    "prevu": 6879.57948336,
+    "ecart": 32.87051663999955,
+    "ecart_relatif": 0.00477798341010598,
+    "taux_perte": 0.02,
+    "references": [
+      {
+        "matiere_id": 3,
+        "reference": "Hotmelt",
+        "quantite": 69.6,
+        "prevu": 71.36493240000001,
+        "ecart": -1.7649324000000206,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 8,
+        "reference": "Jute 30/1",
+        "quantite": 1895.4,
+        "prevu": 1873.3294755000002,
+        "ecart": 22.07052449999992,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 31,
+        "reference": "PES Nylon",
+        "quantite": 14.4,
+        "prevu": 14.629811141999998,
+        "ecart": -0.2298111419999973,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 54,
+        "reference": "PES-20/2 LOMAT",
+        "quantite": 379.6,
+        "prevu": 389.3670711744,
+        "ecart": -9.767071174399973,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 56,
+        "reference": "PES-20/4 LOMAT",
+        "quantite": 235.3,
+        "prevu": 238.64433394559998,
+        "ecart": -3.3443339455999705,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 82,
+        "reference": "PP FRZ-2900 Dtex- Grey 8933-Hs",
+        "quantite": 227.3,
+        "prevu": 234.07697827199996,
+        "ecart": -6.776978271999951,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 85,
+        "reference": "PP FRZ-2900 Dtex- Red 7612-Hs",
+        "quantite": 601.65,
+        "prevu": 585.19244568,
+        "ecart": 16.457554319999986,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 88,
+        "reference": "PP FRZ-2900 Dtex-Beige 44360-Hs",
+        "quantite": 587.4,
+        "prevu": 585.19244568,
+        "ecart": 2.2075543199999856,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 89,
+        "reference": "PP FRZ-2900 Dtex-Black 8001-Hs",
+        "quantite": 84.7,
+        "prevu": 87.778866852,
+        "ecart": -3.07886685199999,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 91,
+        "reference": "PP FRZ-2900 Dtex-Brown 44361-Hs",
+        "quantite": 599.0,
+        "prevu": 585.19244568,
+        "ecart": 13.807554320000008,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 93,
+        "reference": "PP FRZ-2900 Dtex-Camel 44416-Hs",
+        "quantite": 28.3,
+        "prevu": 29.259622283999995,
+        "ecart": -0.9596222839999946,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 95,
+        "reference": "PP FRZ-2900 Dtex-Cream 44412-Hs",
+        "quantite": 58.3,
+        "prevu": 58.51924456799999,
+        "ecart": -0.21924456799999348,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 96,
+        "reference": "PP FRZ-2900 Dtex-D.Bleu 6417-Hs",
+        "quantite": 29.1,
+        "prevu": 29.259622283999995,
+        "ecart": -0.1596222839999939,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 97,
+        "reference": "PP FRZ-2900 Dtex-D.Green 5463-Hs",
+        "quantite": 144.1,
+        "prevu": 146.29811142,
+        "ecart": -2.1981114200000036,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 99,
+        "reference": "PP FRZ-2900 Dtex-Gold 3423-Hs",
+        "quantite": 239.0,
+        "prevu": 234.07697827199996,
+        "ecart": 4.9230217280000375,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 101,
+        "reference": "PP FRZ-2900 Dtex-Grey 10575-Hs",
+        "quantite": 280.1,
+        "prevu": 277.966411698,
+        "ecart": 2.133588302000021,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 102,
+        "reference": "PP FRZ-2900 Dtex-Navy 7062 -Oz",
+        "quantite": 28.3,
+        "prevu": 29.259622283999995,
+        "ecart": -0.9596222839999946,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 104,
+        "reference": "PP FRZ-2900 Dtex-Pink 7639-Hs",
+        "quantite": 28.9,
+        "prevu": 29.259622283999995,
+        "ecart": -0.35962228399999674,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 75,
+        "reference": "Plastique-100",
+        "quantite": 7.3,
+        "prevu": 7.493317902,
+        "ecart": -0.19331790200000043,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 76,
+        "reference": "Plastique-140",
+        "quantite": 7.6,
+        "prevu": 7.493317902,
+        "ecart": 0.10668209799999939,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 78,
+        "reference": "Plastique-45",
+        "quantite": 1.2,
+        "prevu": 1.2488863170000002,
+        "ecart": -0.048886317000000235,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 79,
+        "reference": "Plastique-50",
+        "quantite": 1.3,
+        "prevu": 1.2488863170000002,
+        "ecart": 0.051113682999999854,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 81,
+        "reference": "Plastique-80",
+        "quantite": 7.3,
+        "prevu": 7.493317902,
+        "ecart": -0.19331790200000043,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 124,
+        "reference": "SBR 821",
+        "quantite": 1357.3,
+        "prevu": 1355.9337156000001,
+        "ecart": 1.366284399999813,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      }
+    ],
+    "lots": [
+      "CHE260816-719",
+      "CHE260820-108",
+      "CHE260820-287",
+      "CHE260904-691",
+      "GLO260822-195",
+      "HAS251210-593",
+      "HAS251210-939",
+      "HAS251219-497",
+      "HAS251223-598",
+      "HAS251230-536",
+      "HAS251230-968",
+      "HAS260319-658",
+      "HAS260505-159",
+      "HAS260515-819",
+      "HAS260515-904",
+      "HAS260620-712",
+      "LOM260723-114",
+      "LOM260806-567",
+      "LOM260811-577",
+      "LOM260903-289",
+      "LOT-2025-0011",
+      "LOT-2026-0041",
+      "LOT-2026-0084",
+      "OZK260210-713",
+      "SOF260824-813",
+      "SOF260907-753",
+      "SOF260915-136"
+    ]
+  }
+]

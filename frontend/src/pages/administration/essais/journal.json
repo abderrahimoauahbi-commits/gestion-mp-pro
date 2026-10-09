@@ -1,0 +1,76 @@
+{
+  "elements": [
+    {
+      "id": 9,
+      "quand": "2026-10-09T11:39:54.044572Z",
+      "utilisateur": "Direction",
+      "utilisateur_id": 6,
+      "role": "direction",
+      "action": "connexion",
+      "objet": "utilisateur",
+      "objet_id": 6,
+      "numero": "",
+      "detail": "",
+      "avant": null,
+      "apres": null
+    },
+    {
+      "id": 8,
+      "quand": "2026-10-09T11:36:09.892184Z",
+      "utilisateur": "Direction",
+      "utilisateur_id": 6,
+      "role": "direction",
+      "action": "connexion",
+      "objet": "utilisateur",
+      "objet_id": 6,
+      "numero": "",
+      "detail": "",
+      "avant": null,
+      "apres": null
+    },
+    {
+      "id": 7,
+      "quand": "2026-10-09T11:35:35.538570Z",
+      "utilisateur": "Administrateur",
+      "utilisateur_id": 9,
+      "role": "administrateur",
+      "action": "connexion",
+      "objet": "utilisateur",
+      "objet_id": 9,
+      "numero": "",
+      "detail": "",
+      "avant": null,
+      "apres": null
+    },
+    {
+      "id": 6,
+      "quand": "2026-10-09T11:35:13.631414Z",
+      "utilisateur": "Achats",
+      "utilisateur_id": 7,
+      "role": "achats",
+      "action": "connexion",
+      "objet": "utilisateur",
+      "objet_id": 7,
+      "numero": "",
+      "detail": "",
+      "avant": null,
+      "apres": null
+    },
+    {
+      "id": 5,
+      "quand": "2026-10-09T11:34:40.929191Z",
+      "utilisateur": "Direction",
+      "utilisateur_id": 6,
+      "role": "direction",
+      "action": "restauration",
+      "objet": "sauvegarde",
+      "objet_id": null,
+      "numero": "",
+      "detail": "gestion-mp-pro-2026-10-09-113410-manuelle.dump — Essai de restauration F8",
+      "avant": null,
+      "apres": null
+    }
+  ],
+  "total": 9,
+  "suivant": "WzVd"
+}

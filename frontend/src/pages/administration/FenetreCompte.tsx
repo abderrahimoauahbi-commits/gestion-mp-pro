@@ -12,7 +12,7 @@ import { Grille } from '../../composants/mise-en-page/Grille'
 import { dire } from '../../composants/retour/Messages'
 import { Note } from '../../composants/retour/Note'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Champ } from '../../composants/saisie/Champ'
+import { attributsDuChamp, Champ, useChamp } from '../../composants/saisie/Champ'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { api } from '../../lib/api'
@@ -146,6 +146,33 @@ interface ChampsProps {
   soi: boolean
 }
 
+/** Le rôle : une liste reliée à son libellé (nom accessible « Rôle »). */
+function ChoixRole({
+  valeur,
+  desactive,
+  onChange,
+}: {
+  valeur: Role
+  desactive: boolean
+  onChange: (r: Role) => void
+}) {
+  return (
+    <select
+      {...attributsDuChamp(useChamp())}
+      className={styles.choix}
+      value={valeur}
+      disabled={desactive}
+      onChange={(e) => onChange(ROLES.find((r) => r.cle === e.target.value)?.cle ?? 'achats')}
+    >
+      {ROLES.map((r) => (
+        <option key={r.cle} value={r.cle}>
+          {r.libelle}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 function Retaper({ f, poser }: Pick<ChampsProps, 'f' | 'poser'>) {
   return (
     <Champ
@@ -184,18 +211,7 @@ function ChampsCompte({ c, f, poser, soi }: ChampsProps) {
         />
       </Champ>
       <Champ libelle="Rôle" aide={ROLES.find((r) => r.cle === f.role)?.aide}>
-        <select
-          className={styles.choix}
-          value={f.role}
-          disabled={soi}
-          onChange={(e) => poser({ role: ROLES.find((r) => r.cle === e.target.value)?.cle ?? 'achats' })}
-        >
-          {ROLES.map((r) => (
-            <option key={r.cle} value={r.cle}>
-              {r.libelle}
-            </option>
-          ))}
-        </select>
+        <ChoixRole valeur={f.role} desactive={soi} onChange={(role) => poser({ role })} />
       </Champ>
       <Champ libelle="Courriel (facultatif)">
         <Saisie type="email" valeur={f.email} max={200} onChange={(v) => poser({ email: v })} />

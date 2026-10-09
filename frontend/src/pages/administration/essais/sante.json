@@ -1,0 +1,18 @@
+{
+  "etat": "ok",
+  "version": "0.1.0 (projet)",
+  "schema": "0004",
+  "schema_attendu": "0004",
+  "base_ms": 18.3,
+  "sauvegarde_age_h": 0.09,
+  "sauvegarde_alerte": "",
+  "taches": {
+    "sauvegarde": "jamais",
+    "photo_indicateurs": "jamais",
+    "courriel": "jamais",
+    "notifications": "jamais",
+    "purges": "jamais",
+    "restauration": "ok"
+  },
+  "courriels_en_attente": 0
+}
