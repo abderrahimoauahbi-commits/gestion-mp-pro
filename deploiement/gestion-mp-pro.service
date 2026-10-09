@@ -1,0 +1,42 @@
+# Gestion MP PRO sans Docker : service système (Linux). Procédure complète : docs/EXPLOITATION.md
+# (lot X3). À copier dans /etc/systemd/system/, avec le projet (copie figée : backend + écran
+# construit) dans /opt/gestion-mp-pro et les réglages dans /etc/gestion-mp-pro.env (droits 600).
+# Caddy sur le même serveur devant uvicorn : deploiement/Caddyfile avec « reverse_proxy
+# 127.0.0.1:8050 ». PostgreSQL 16 local (postgresql.service), base et rôle « gestion_mp_pro ».
+#   sudo systemctl enable --now gestion-mp-pro
+[Unit]
+Description=Gestion MP PRO
+After=network-online.target postgresql.service
+Wants=network-online.target postgresql.service
+
+[Service]
+User=gestionmppro
+Group=gestionmppro
+WorkingDirectory=/opt/gestion-mp-pro/backend
+# Base, adresse, SMTP, GESTIONMPPRO_FUSEAU (jamais la variable TZ : C16) et GESTIONMPPRO_PG_BIN
+# (dossier du pg_dump de même version que le serveur : sinon le premier pg_dump du PATH peut
+# être d'une autre version). GESTIONMPPRO_HTTPS=1 derrière Caddy.
+EnvironmentFile=/etc/gestion-mp-pro.env
+Environment=GESTIONMPPRO_ECRAN=/opt/gestion-mp-pro/frontend/dist
+Environment=GESTIONMPPRO_ECOUTE=127.0.0.1
+# /var/lib/gestion-mp-pro créé par systemd, au nom du service, fermé aux autres comptes ; les
+# sous-dossiers des sauvegardes et des pièces sont créés par l'application.
+StateDirectory=gestion-mp-pro
+StateDirectoryMode=0700
+Environment=GESTIONMPPRO_SAUVEGARDES=/var/lib/gestion-mp-pro/sauvegardes
+Environment=GESTIONMPPRO_PIECES=/var/lib/gestion-mp-pro/pieces
+# Fichiers écrits lisibles du seul service (les sauvegardes contiennent les empreintes des mots
+# de passe), y compris pendant leur écriture.
+UMask=0077
+# Migration au démarrage et portage des tâches : dans l'application (main). Deux processus.
+# Caddy, sur le même serveur, relaie depuis 127.0.0.1 : uvicorn lit l'adresse réelle du poste.
+# --no-access-log : le journal « une ligne par requête » est celui de journalisation.trace.
+ExecStart=/opt/gestion-mp-pro/backend/.venv/bin/uvicorn gestion_mp_pro.main:app --host 127.0.0.1 --port 8050 --workers 2 --no-access-log --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
