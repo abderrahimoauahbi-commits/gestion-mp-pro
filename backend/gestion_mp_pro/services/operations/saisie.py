@@ -110,7 +110,6 @@ def remplir(s: Session, o: Operation, e: SaisieOperation, role: str) -> None:
     o.motif_texte = motif.libelle if motif is not None else ""
     o.fournisseur_id = fournisseur
     o.lignes.clear()
-    s.flush()
     o.lignes.extend(x.ligne for x in lignes)
 
 

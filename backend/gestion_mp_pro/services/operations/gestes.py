@@ -78,7 +78,9 @@ def _decision_des_achats(s: Session, qui: Acteur, o: Operation, geste: str) -> N
 def creer(s: Session, qui: Acteur, e: SaisieOperation, *, valider: bool = False) -> Operation:
     """Route 117 : un brouillon (sans numéro, sans effet) ; `valider` le valide aussitôt."""
     droits.autoriser(qui.role, e.type)
-    o = Operation(type=e.type, date=e.date, cree_par_id=qui.id, cree_le=horloge.maintenant())
+    o = Operation(
+        type=e.type, date=e.date, cree_par_id=qui.id, cree_le=horloge.maintenant(), lignes=[]
+    )
     s.add(o)
     remplir(s, o, e, qui.role)
     s.flush()
@@ -133,11 +135,12 @@ def _valider(s: Session, qui: Acteur, o: Operation) -> Operation:
     if not peut:
         raise Refus.droit(raison)
     type_ = TypeOperation(o.type)
-    o.numero = numerotation.numero(s, droits.SERIES[type_], o.date)
     if type_ is TypeOperation.retour_machine:
         _controler_le_retour(s, o)
+    numero = numerotation.numero(s, droits.SERIES[type_], o.date)
+    o.numero, o.statut = numero, StatutDocument.validee  # ensemble (numéro ⇔ validée)
+    o.validee_par_id, o.validee_le = qui.id, horloge.maintenant()
     _ecrire(s, qui, o, type_)
-    o.statut, o.validee_par_id, o.validee_le = StatutDocument.validee, qui.id, horloge.maintenant()
     s.flush()
     audit.journal(
         s, qui, f"validation — {droits.LIBELLES[type_].lower()}", "operation", o.id,

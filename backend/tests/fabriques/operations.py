@@ -2,7 +2,8 @@
 
     from fabriques.operations import acteur, motif, ordre_valide, ligne, saisie, quarantaine
 
-Les référentiels sont ceux, minimaux, de `fabriques.stock` (le lot D1 écrira les siens) ; un
+Les référentiels viennent des fabriques du lot D1 (`fabriques.referentiels`, avec `s=` : dans
+la transaction de l'essai), les lots et le stock de celles du lot S4 (`fabriques.stock`) ; un
 ordre de fabrication validé est posé directement avec ses sorties (le lot D6 n'est pas encore
 là), par le seul chemin d'écriture du stock.
 """
@@ -13,7 +14,8 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 from decimal import Decimal
 
-from fabriques.stock import JOUR, entree, fournisseur, lot, magasin, matiere, unique, utilisateur
+from fabriques import referentiels as ref
+from fabriques.stock import JOUR, entree, lot, magasin, unique, utilisateur
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -68,17 +70,15 @@ def ordre_valide(
     s.add(o)
     s.flush()
     piece = stock.Piece(DocumentMouvement.ordre, o.id, o.numero or "")
-    for lot, q in sorties:
+    for x, q in sorties:
         stock.ecrire(
-            s, type=TypeMouvement.SORTIE, lot=lot, magasin_id=g.id, quantite=-Decimal(str(q)),
+            s, type=TypeMouvement.SORTIE, lot=x, magasin_id=g.id, quantite=-Decimal(str(q)),
             jour=le, piece=piece, auteur_id=None, liens=stock.Liens(ordre_id=o.id),
         )  # fmt: skip
     return o
 
 
-def ligne(
-    matiere_id: int, magasin_id: int, quantite: float | str, **champs: object
-) -> SaisieLigne:
+def ligne(matiere_id: int, magasin_id: int, quantite: float | str, **champs: object) -> SaisieLigne:
     """Une ligne saisie (kg par défaut)."""
     return SaisieLigne(
         matiere_id=matiere_id,
@@ -117,12 +117,20 @@ class Monde:
 def monde(s: Session, le: date = JOUR) -> Monde:
     """Le décor : E POIL BLEU (2 kg la bobine, 50 bobines la palette), E TRAME, E FRANGE (au
     mètre), entrés la veille de `le` à 20, 22, 8, 1 et 20 MAD/kg."""
-    f = fournisseur(s)
-    a1 = matiere(s, unique("E POIL BLEU"), fournisseur_id=f.id, poids_bobine=Decimal(2),
-                 bobines_palette=Decimal(50))  # fmt: skip
-    a2 = matiere(s, unique("E TRAME"), "Trame", fournisseur_id=f.id)
-    a3 = matiere(s, unique("E FRANGE"), "Franges", fournisseur_id=f.id)
-    m = Monde(a1, a2, a3, magasin(s), quarantaine(s), f.id)
+    f = ref.fournisseur(s=s)
+    a1 = s.get_one(
+        Matiere,
+        ref.matiere(
+            unique("E POIL BLEU"),
+            fournisseur_id=f,
+            s=s,
+            poids_bobine=Decimal(2),
+            bobines_palette=Decimal(50),
+        ),
+    )
+    a2 = s.get_one(Matiere, ref.matiere(unique("E TRAME"), role="Trame", fournisseur_id=f, s=s))
+    a3 = s.get_one(Matiere, ref.matiere(unique("E FRANGE"), role="Franges", fournisseur_id=f, s=s))
+    m = Monde(a1, a2, a3, magasin(s), quarantaine(s), f)
     veille = le - timedelta(days=1)
     for numero, mat, g, q, prix in (
         ("E-L1", a1, m.courant, 500, 20), ("E-L2", a1, m.courant, 300, 22),

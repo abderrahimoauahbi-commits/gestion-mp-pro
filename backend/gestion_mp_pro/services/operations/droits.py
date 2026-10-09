@@ -19,26 +19,23 @@ from collections.abc import Iterable
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles.enums import Role, SerieNumero, TypeMouvement, TypeOperation
 from gestion_mp_pro.services.comptes import libelle_role
+from gestion_mp_pro.services.referentiels import TYPES_MOTIF
 
 D, A, L = Role.direction, Role.achats, Role.alimentation
+_TYPES = {t.value for t in TypeOperation}
 
 LIBELLES: dict[TypeOperation, str] = {
-    TypeOperation.ouverture: "Stock d'ouverture",
-    TypeOperation.retour_machine: "Retour des machines",
-    TypeOperation.transfert: "Transfert entre magasins",
-    TypeOperation.ajustement: "Ajustement justifié",
-    TypeOperation.retour_fournisseur: "Retour au fournisseur",
+    TypeOperation(t.value): libelle for t, (libelle, _) in TYPES_MOTIF.items() if t.value in _TYPES
 }
-"""Libellés des types (S80)."""
+"""Libellés des types (S80) : ceux de `GET /motifs` (lot D1, une seule table)."""
 
 DROITS: dict[TypeOperation, frozenset[str]] = {
-    TypeOperation.ouverture: frozenset({D, A}),
-    TypeOperation.ajustement: frozenset({D, A}),
-    TypeOperation.retour_fournisseur: frozenset({D, A}),
-    TypeOperation.retour_machine: frozenset({D, L}),
-    TypeOperation.transfert: frozenset({D, A, L}),
+    TypeOperation(t.value): frozenset(roles)
+    for t, (_, roles) in TYPES_MOTIF.items()
+    if t.value in _TYPES
 }
-"""Les rôles qui créent, modifient, suppriment, valident et annulent chaque type."""
+"""Les rôles qui créent, modifient, suppriment, valident et annulent chaque type : la table de
+`services.referentiels.TYPES_MOTIF` (servie à l'écran par `GET /motifs`)."""
 
 LIBERATION = "Libération de quarantaine"
 MISE_EN_QUARANTAINE = "Mise en quarantaine"
