@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modèle de l'agent launchd de Gestion MP PRO (lot X2, ARCHITECTURE § 13.2).
+     Rempli et installé par deploiement/mac/installer_demarrage_automatique.sh : les noms
+     entre arobases doublés sont remplacés ; la ligne des variables reçoit les GESTIONMPPRO_*
+     de l'installation (base, port, écoute, journal, dossiers ; jamais de secret : ceux-là vont
+     dans le fichier « environnement » du poste, 0600). RunAtLoad = démarrage à l'ouverture de
+     session ; KeepAlive = relance automatique si le serveur tombe ou est tué. Le serveur est
+     scripts/demarrer.sh (copie installée) : copie figée, 127.0.0.1:8050, base gestion_mp_pro. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>@@ETIQUETTE@@</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@@DEMARRER@@</string>
+  </array>
+  <key>WorkingDirectory</key><string>@@APPLI@@</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    @@VARIABLES@@
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>LANG</key><string>fr_FR.UTF-8</string>
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <key>ProcessType</key><string>Interactive</string>
+  <key>StandardOutPath</key><string>@@SORTIE@@</string>
+  <key>StandardErrorPath</key><string>@@SORTIE@@</string>
+</dict>
+</plist>
