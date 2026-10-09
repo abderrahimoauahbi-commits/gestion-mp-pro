@@ -251,8 +251,11 @@ Le plan de production, le plan glissant, le plan face au réalisé, et les besoi
 
 Au pied du métier : envoyer aux machines, retour des machines, trouver un lot (mots ou QR), déplacer un lot, monter un fil, signaler un besoin.
 
-- Une tâche par écran, de grands boutons ; la saisie en cours est gardée sur le téléphone jusqu’à l’enregistrement.
+- Une tâche par écran, de grands boutons ; la saisie en cours est gardée sur le téléphone jusqu’à l’enregistrement, même en changeant d’écran.
 - Ce qui sera refusé (inventaire en cours, date, quarantaine) est dit en tête, et « Valider » est grisé avec la raison écrite dessous.
+- Les quantités se saisissent en kg, en bobines ou en palettes : une bobine se compte entière, et toute conversion arrondie est dite.
+- Monter un fil n’écrit aucun mouvement : la confirmation annonce ce que devient le stock sur les métiers.
+- Sans réseau, l’écran le dit (« Pas de réseau ») et propose « Réessayer » : jamais une liste vide à la place.
 - Aucun prix ni montant n’y est jamais montré.
 
 ### Plan d’achat (`/plan-achat`)
@@ -321,6 +324,8 @@ Les qualités de tapis, leur poids par rôle, leur recette à 100 % par rôle, l
 Les métiers, leurs étages et les fils montés ; la direction règle le métier, l’alimentation monte les fils.
 
 - Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre.
+- La direction crée et règle les métiers ; l’alimentation monte les fils (ici ou au téléphone) ; les achats lisent.
+- « Enregistrer » annonce l’effet sur le stock sur les métiers et alerte quand un fil monté dépasse ce qui est parti aux machines en 30 jours.
 - Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25).
 
 ### Analyse (`/analyse`)
