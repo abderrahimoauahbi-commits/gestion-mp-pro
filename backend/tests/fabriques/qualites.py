@@ -1,15 +1,15 @@
-"""Fabriques du lot D2 : qualités et métiers par l'API, ordres validés et sorties en décor.
+"""Fabriques du lot D2 : qualités et métiers par l'API, sorties en décor.
 
-Les référentiels viennent de `fabriques.referentiels` (lot D1). Les ordres de fabrication
-(lot D6) et les sorties vers les machines sont écrits **directement en base** (décor d'essai,
-validé : l'API les voit) ; le stock passe par `services/stock` (S4), seul chemin.
+Les référentiels viennent de `fabriques.referentiels` (lot D1), les ordres de fabrication de
+`fabriques.ordres` (lot D6). Les sorties vers les machines sont écrites **directement en base**
+(décor d'essai, validé : l'API le voit) ; le stock passe par `services/stock` (S4), seul chemin.
 
-    from fabriques.qualites import ok, creer_qualite, creer_metier, ordre_valide, sortir
+    from fabriques.qualites import ok, creer_qualite, creer_metier, sortir
 """
 
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -17,8 +17,8 @@ from fabriques.referentiels import _ecrire, magasin_seme, role_id, unique
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from gestion_mp_pro.modeles import Lot, Ordre, OrdreQualite
-from gestion_mp_pro.modeles.enums import DocumentMouvement, StatutOrdre, TypeMouvement
+from gestion_mp_pro.modeles import Lot
+from gestion_mp_pro.modeles.enums import DocumentMouvement, TypeMouvement
 from gestion_mp_pro.services import horloge, stock
 
 UN = [1] * 12
@@ -123,37 +123,6 @@ def lire_metier(client: TestClient, mid: int) -> dict[str, Any]:
 def version_etage(fiche: dict[str, Any], etage: int) -> int:
     """La version d'un étage lue dans la fiche du métier (1 pour un étage qui n'existe pas)."""
     return next((e["version"] for e in fiche["etages_detail"] if e["etage"] == etage), 1)  # type: ignore[no-any-return]
-
-
-def ordre_valide(
-    qualite_id: int,
-    m2: float | str,
-    *,
-    jour: date | None = None,
-    metier_id: int | None = None,
-    statut: StatutOrdre = StatutOrdre.valide,
-    s: Session | None = None,
-) -> int:
-    """Un ordre de fabrication (décor : écrit en base, sans sortie) qui tisse `m2` d'une
-    qualité ; validé par défaut."""
-
-    def faire(x: Session) -> int:
-        le = jour or horloge.aujourd_hui()
-        valide = statut == StatutOrdre.valide
-        o = Ordre(
-            numero=unique("OF") if valide else None,
-            statut=statut,
-            date=le,
-            magasin_id=magasin_seme(s=x),
-            metier_id=metier_id,
-            valide_le=datetime.combine(le, time(12), horloge.FUSEAU) if valide else None,
-        )
-        x.add(o)
-        x.flush()
-        x.add(OrdreQualite(ordre_id=o.id, qualite_id=qualite_id, m2=Decimal(str(m2))))
-        return o.id
-
-    return _ecrire(s, faire)
 
 
 def sortir(lot_id: int, kg: float | str, *, jour: date | None = None) -> None:

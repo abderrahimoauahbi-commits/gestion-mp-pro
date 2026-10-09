@@ -12,12 +12,12 @@ from typing import Any
 
 import pytest
 from fabrique import *  # noqa: F403
+from fabriques.ordres import ordre_valide
 from fabriques.qualites import (
     classeur_lu,
     creer_metier,
     lire_metier,
     ok,
-    ordre_valide,
     peser_lot,
     refus,
     sortir,
