@@ -14,11 +14,13 @@ de S1 (`tests/modele_monde.py`) pose `REC-2026-0001` et `RCL-2026-0001` à la ma
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
+import pytest
 from fabrique import assurer_comptes
 from fabriques.referentiels import magasin, unique
 from fastapi.testclient import TestClient
@@ -160,3 +162,158 @@ def recevoir_ligne(
         s.flush()
         receptions.valider(s, qui, r.id, r.version)
         return r.id
+
+
+# ── Bons, retours, libérations, performance ─────────────────────────────────
+
+
+def parti(
+    client: TestClient,
+    a: Any,
+    lignes: dict[int, float],
+    *,
+    envoye: str | None = None,
+    prix: float | None = None,
+    prevue: str | None = None,
+) -> dict[str, Any]:
+    """Un bon parti (envoyé `envoye`, 30 jours avant `JOUR` par défaut), prix confirmés si
+    `prix` est donné ; rend la fiche du bon (lot D3)."""
+    from fabriques.achats import bon
+    from fabriques.achats import geste as geste_bon
+
+    entete = {"date_livraison_prevue": prevue} if prevue else {}
+    b = geste_bon(client, bon(client, a, lignes, **entete), "envoyer", date=envoye or j(-30))
+    if prix is not None:
+        confirmes = [{"ligne_id": x["id"], "prix": prix} for x in b["lignes"]]
+        b = geste_bon(client, b, "prix", lignes=confirmes, mettre_a_jour_catalogue=False)
+    return b
+
+
+def bon_relu(client: TestClient, cid: int) -> dict[str, Any]:
+    """La fiche d'un bon relue."""
+    return ok(client.get(f"/api/commandes/{cid}"))  # type: ignore[no-any-return]
+
+
+def motif_operation(type_: str, libelle: str) -> int:
+    """L'identifiant d'un motif d'opération semé (lot D5)."""
+    from fabriques.operations import motif
+
+    with fabrique_de_sessions()() as s:
+        return motif(s, type_, libelle)
+
+
+def _ligne_op(x: dict[str, Any], kg: float, vers: int | None = None) -> dict[str, Any]:
+    ligne = {
+        "matiere_id": x["matiere_id"],
+        "lot_id": x["lot_id"],
+        "magasin_id": x["magasin_id"],
+        "quantite": kg,
+    }
+    return ligne | ({"magasin_destination_id": vers} if vers else {})
+
+
+def retour(client: TestClient, x: dict[str, Any], kg: float, *, le: str) -> dict[str, Any]:
+    """Un retour au fournisseur validé (lot D5, « Non-conformité qualité ») du lot d'une ligne
+    de réception validée."""
+    corps = {
+        "type": "retour_fournisseur",
+        "date": le,
+        "motif_id": motif_operation("retour_fournisseur", "Non-conformité qualité"),
+        "valider": True,
+        "lignes": [_ligne_op(x, kg)],
+    }
+    return ok(client.post("/api/operations", json=corps), 201)  # type: ignore[no-any-return]
+
+
+def liberer(
+    client: TestClient, x: dict[str, Any], vers: int, kg: float, *, le: str
+) -> dict[str, Any]:
+    """La libération de quarantaine (transfert validé, lot D5) du lot d'une ligne reçue sous
+    réserve, vers le magasin `vers`."""
+    corps = {
+        "type": "transfert",
+        "date": le,
+        "motif_id": motif_operation("transfert", "Libération de quarantaine"),
+        "valider": True,
+        "lignes": [_ligne_op(x, kg, vers)],
+    }
+    return ok(client.post("/api/operations", json=corps), 201)  # type: ignore[no-any-return]
+
+
+def performance(numero: str) -> Any:
+    """La note d'une réception (ponctualité, complétude, OTIF) calculée par le moteur."""
+    from gestion_mp_pro.calcul.fournisseurs import performance_receptions
+    from gestion_mp_pro.services import donnees_moteur
+
+    donnees_moteur.invalider()
+    with fabrique_de_sessions()() as s:
+        notes = performance_receptions(donnees_moteur.charger(s))
+    return next(p for p in notes if p.numero == numero)
+
+
+def dossier(facture_id: int | None, *, clos: bool = False, lignes: tuple[int, ...] = ()) -> int:
+    """Un dossier d'importation posé en base (le lot D7 les ouvrira par l'API) : il porte la
+    facture et, s'il y en a, des lignes reçues ; ouvert ou clos."""
+    from gestion_mp_pro.modeles import Dossier, DossierLigne, ReceptionLigne
+    from gestion_mp_pro.modeles.enums import StatutDossier
+
+    with fabrique_de_sessions()() as s, s.begin():
+        d = Dossier(
+            numero=unique("ANC-D4"),
+            saisi_a_la_main=True,
+            facture_id=facture_id,
+            statut=StatutDossier.clos if clos else StatutDossier.ouvert,
+            clos_le=horloge.maintenant() if clos else None,
+        )
+        s.add(d)
+        s.flush()
+        for lid in lignes:
+            x = s.get(ReceptionLigne, lid)
+            assert x is not None
+            s.add(
+                DossierLigne(
+                    dossier_id=d.id,
+                    reception_ligne_id=x.id,
+                    matiere_id=x.matiere_id,
+                    lot_id=x.lot_id,
+                    quantite_kg=x.quantite_pesee,
+                )
+            )
+        return d.id
+
+
+@pytest.fixture(scope="module")
+def menage() -> Iterator[None]:
+    """Après un module d'essais des réceptions : ses brouillons de réception supprimés, ses bons
+    partis encore ouverts soldés à la main (décor d'essai, écrit sans journal). La base est
+    partagée par la séance : d'autres essais (courriel du lundi de D10, indicateurs) comptent les
+    bons en retard et les brouillons en attente. Les données du lot sont datées en 2025."""
+    yield
+    from sqlalchemy import delete, update
+
+    from gestion_mp_pro.modeles import Commande, Reception
+    from gestion_mp_pro.modeles.enums import OrigineSolde, StatutCommande, StatutDocument
+    from gestion_mp_pro.services import donnees_moteur
+
+    with fabrique_de_sessions()() as s, s.begin():
+        s.execute(
+            delete(Reception).where(
+                Reception.statut == StatutDocument.brouillon, Reception.date <= JOUR
+            )
+        )
+        s.execute(
+            update(Commande)
+            .where(
+                Commande.numero.is_not(None),
+                Commande.date_commande <= JOUR,
+                Commande.statut.in_(
+                    [StatutCommande.envoyee, StatutCommande.confirmee, StatutCommande.a_approuver]
+                ),
+            )
+            .values(
+                statut=StatutCommande.soldee,
+                solde_origine=OrigineSolde.manuel,
+                solde_le=horloge.maintenant(),
+            )
+        )
+    donnees_moteur.invalider()

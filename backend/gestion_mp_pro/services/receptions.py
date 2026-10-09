@@ -163,6 +163,7 @@ def modifier(s: Session, qui: audit.Qui, rid: int, version: int, e: Saisie) -> R
         s.flush()
         appliquer_recalage(r, bons(s, [r]))
         toucher(r)
+        s.flush()
         geste.detail = f"{nom_reception(r)} · {len(lignes)} ligne(s)"
     return r
 

@@ -129,7 +129,7 @@ def _reclamations(s: Session, rid: int) -> list[ReclamationCourte]:
             x.quantite,
             str(x.issue) if x.issue else None,
         )  # fmt: skip
-        for x, lot, reference in s.execute(requete).tuples()
+        for x, lot, reference in s.execute(requete)
     ]
 
 

@@ -204,19 +204,19 @@ def _lire(s: Session, receptions: list[Reception]) -> _Lecture:
     valides = any(r.statut == StatutDocument.validee for r in receptions)
     return _Lecture(
         ctx,
-        dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).tuples().all()),
+        dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).all()),
         {f.id: f for f in s.scalars(select(Fournisseur))},
         {f.id: f for f in s.scalars(select(Facture).where(Facture.id.in_(fids)))} if fids else {},
-        dict(s.execute(select(Lot.id, Lot.numero).where(Lot.id.in_(lids))).tuples().all())
-        if lids
-        else {},
+        dict(s.execute(select(Lot.id, Lot.numero).where(Lot.id.in_(lids))).all()) if lids else {},
         retours_par_ligne_reception(s) if valides else {},
         reglages.nombre(s, "toler_ecart_pesee"),
     )
 
 
 def charger_receptions(s: Session, ids: list[int] | None = None) -> list[Reception]:
-    """Les réceptions et leurs lignes (la plus récente d'abord)."""
+    """Les réceptions et leurs lignes (la plus récente d'abord) ; ce qui attend dans la session
+    est d'abord écrit (sessions sans écriture automatique)."""
+    s.flush()
     requete = (
         select(Reception).options(selectinload(Reception.lignes)).order_by(Reception.id.desc())
     )

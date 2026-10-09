@@ -249,11 +249,11 @@ def bobines(s: Session, f: FiltresBobines) -> EvolutionBobines:
     """Route 177 : le calcul du moteur, filtré, avec les identifiants pour les liens."""
     d = donnees_moteur.charger(s, avec_journal=False)
     tol = d.parametres.toler_poids_bobine
-    matieres = dict(s.execute(select(Matiere.reference, Matiere.id)).tuples().all())
+    matieres = dict(s.execute(select(Matiere.reference, Matiere.id)).all())
     receptions = {
         r.numero: r.id for r in s.scalars(select(Reception).where(Reception.numero.is_not(None)))
     }
-    lots = {(m, n): i for i, m, n in s.execute(select(Lot.id, Lot.matiere_id, Lot.numero)).tuples()}
+    lots = {(m, n): i for i, m, n in s.execute(select(Lot.id, Lot.matiere_id, Lot.numero))}
     lignes: list[EvolutionLue] = []
     for e in evolution_bobines(d):
         mid = matieres.get(e.reference)

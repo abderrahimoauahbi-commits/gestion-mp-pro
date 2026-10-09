@@ -92,12 +92,12 @@ def _lire(s: Session, liste: list[Reclamation]) -> _Lus:
     lids = {x.reception_ligne_id for x in liste if x.reception_ligne_id}
     lots = {x.lot_id for x in liste if x.lot_id}
     return _Lus(
-        dict(s.execute(select(Fournisseur.id, Fournisseur.nom)).tuples().all()),
+        dict(s.execute(select(Fournisseur.id, Fournisseur.nom)).all()),
         {r.id: r for r in s.scalars(select(Reception).where(Reception.id.in_(rids)))},
         {x.id: x for x in s.scalars(select(ReceptionLigne).where(ReceptionLigne.id.in_(lids)))},
         {x.id: x for x in s.scalars(select(Lot).where(Lot.id.in_(lots)))},
-        dict(s.execute(select(Matiere.id, Matiere.reference)).tuples().all()),
-        dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).tuples().all()),
+        dict(s.execute(select(Matiere.id, Matiere.reference)).all()),
+        dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).all()),
     )
 
 
@@ -140,6 +140,7 @@ def _passe(x: ReclamationResume, f: FiltresReclamations) -> bool:
 
 def liste(s: Session, f: FiltresReclamations) -> list[ReclamationResume]:
     """Route 181 : les réclamations, la plus récente d'abord."""
+    s.flush()
     toutes = list(s.scalars(select(Reclamation).order_by(Reclamation.id.desc())))
     lu = _lire(s, toutes)
     return [r for r in (_resume(x, lu) for x in toutes) if _passe(r, f)]
@@ -147,6 +148,7 @@ def liste(s: Session, f: FiltresReclamations) -> list[ReclamationResume]:
 
 def fiche(s: Session, rid: int) -> ReclamationResume:
     """Route 182 : la fiche d'une réclamation."""
+    s.flush()
     x = s.get(Reclamation, rid, populate_existing=True)
     if x is None:
         raise Refus.introuvable("Réclamation introuvable.")

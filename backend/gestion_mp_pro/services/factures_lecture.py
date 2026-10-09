@@ -97,7 +97,7 @@ def _apports(s: Session, fids: set[int]) -> dict[int, _Apport]:
             ReceptionLigne.qualite != QualiteReception.refuse,
         )
     )
-    for fid, pese, prix in s.execute(requete).tuples():
+    for fid, pese, prix in s.execute(requete):
         if fid is not None:
             apports[fid].valeur += pese * prix
             apports[fid].poids += pese
@@ -113,8 +113,8 @@ def lister(s: Session, f: FiltresFactures) -> list[FactureResume]:
     fids = {x.id for x in toutes}
     if not fids:
         return []
-    noms = dict(s.execute(select(Fournisseur.id, Fournisseur.nom)).tuples().all())
-    personnes = dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).tuples().all())
+    noms = dict(s.execute(select(Fournisseur.id, Fournisseur.nom)).all())
+    personnes = dict(s.execute(select(Utilisateur.id, Utilisateur.nom)).all())
     receptions: dict[int, list[ReceptionDeFacture]] = defaultdict(list)
     for r in s.scalars(
         select(Reception).where(Reception.facture_id.in_(fids)).order_by(Reception.date)
