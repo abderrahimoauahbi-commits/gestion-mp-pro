@@ -1,8 +1,9 @@
 /**
  * Une carte : un titre, des actions à place fixe à droite (REGLES-ECRAN § 3, « boutons à place
- * fixe »), un corps. `remplir` : la carte prend la hauteur qui reste dans la page (le `Cadre`
- * de son tableau la mesure) ; `serre` : corps sans marge (un tableau bord à bord) ; `ton` : un
- * filet de couleur à gauche (fiche d'alerte ou conforme, à l'atelier).
+ * fixe » ; sous le titre au téléphone), un corps. `remplir` : la carte prend la hauteur qui
+ * reste dans la page (le `Cadre` de son tableau la mesure) ; `serre` : corps sans marge (un
+ * tableau bord à bord) ; `ton` : un filet de couleur à gauche (fiche d'alerte ou conforme, à
+ * l'atelier).
  */
 import type { ReactNode } from 'react'
 

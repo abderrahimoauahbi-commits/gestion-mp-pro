@@ -4,6 +4,7 @@ défaut, coexistence avec Gestion MP sans rien partager (lot S0)."""
 from __future__ import annotations
 
 import ast
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -158,3 +159,17 @@ def test_verrous_dans_leur_plage() -> None:
 
 def test_les_essais_tournent_sur_une_base_d_essai() -> None:
     assert config.reglages().nom_base.endswith("_essai")
+
+
+def test_essais_n_ecrivent_pas_dans_les_dossiers_reels() -> None:
+    """G-03 (`test_defauts_g::test_essais_n_ecrivent_pas_dans_les_pieces_reelles`) : pour toute
+    la séance, sauvegardes et pièces jointes vont dans un dossier temporaire (`conftest.py`) ;
+    aucune copie de sécurité n'est réglée. Un essai qui oublierait ses propres dossiers
+    n'atteint donc jamais `~/gestion-mp-pro-sauvegardes` ni `~/gestion-mp-pro-pieces`."""
+    r = config.reglages()
+    temporaire = Path(tempfile.gettempdir()).resolve()
+    reels = (ACCUEIL / "gestion-mp-pro-sauvegardes", ACCUEIL / "gestion-mp-pro-pieces")
+    for dossier in (r.sauvegardes, r.pieces, r.dossier_sauvegardes, r.dossier_pieces):
+        assert dossier.resolve().is_relative_to(temporaire), dossier
+        assert not any(dossier.resolve().is_relative_to(x) for x in reels), dossier
+    assert r.sauvegardes_copie is None

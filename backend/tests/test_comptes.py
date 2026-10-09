@@ -217,10 +217,19 @@ def test_desactiver_ferme_les_sessions(application: FastAPI, administrateur: Tes
     corps = {"nom": "C DESACTIVE", "role": "achats", "email": "", "actif": False, "version": 1}
     r = administrateur.put(f"/api/utilisateurs/{uid}", json=corps)
     assert (r.status_code, r.json()["actif"], r.json()["sessions_ouvertes"]) == (200, False, 0)
-    assert c.get("/api/moi").status_code == 401
+    # H-09 : la session fermée dit pourquoi (et l'écran « Ce compte n'est plus actif : voyez
+    # la direction. »), pas « Connectez-vous pour continuer. »
+    refus = c.get("/api/moi")
+    assert (refus.status_code, refus.json()) == (
+        401,
+        {"detail": "Ce compte n'est plus actif.", "code": "compte_inactif"},
+    )
     r = administrateur.put(f"/api/utilisateurs/{uid}", json=corps)
     assert r.status_code == 409 and r.json()["code"] == "conflit_version"
     assert "a été modifié entre-temps par Administrateur" in r.json()["detail"]
+    reactive = {**corps, "actif": True, "version": 2}
+    assert administrateur.put(f"/api/utilisateurs/{uid}", json=reactive).status_code == 200
+    assert c.get("/api/moi").json()["code"] == "non_connecte", "la session fermée ne revit pas"
     oublier_les_essais()
 
 

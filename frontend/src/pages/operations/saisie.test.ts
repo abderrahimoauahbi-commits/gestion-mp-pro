@@ -154,6 +154,14 @@ describe('l’encart de ligne', () => {
     })
   })
 
+  it('un retour des machines ne rend pas plus que ce qui est parti pour l’ordre', () => {
+    const e = { ...ENCART_VIERGE, matiere: 1, place: '11', magasin: 1, kg: 31 }
+    expect(manqueEncart('retour_machine', e, undefined, 30)).toEqual([
+      'une quantité qui ne dépasse pas les 30,0 kg partis pour l’ordre',
+    ])
+    expect(manqueEncart('retour_machine', { ...e, kg: 30 }, undefined, 30)).toEqual([])
+  })
+
   it('dit ce qui manque, dont le dépassement du lot', () => {
     const place = placesDeLots([lotEssai()])[0]
     const e = { ...ENCART_VIERGE, matiere: 1, place: place?.cle ?? null, kg: 500 }

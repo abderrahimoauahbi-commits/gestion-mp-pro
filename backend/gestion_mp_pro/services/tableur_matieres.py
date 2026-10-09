@@ -32,7 +32,7 @@ from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import Matiere, Utilisateur
 from gestion_mp_pro.modeles import longueurs as L
 from gestion_mp_pro.modeles.enums import ObjetJournal
-from gestion_mp_pro.services import audit
+from gestion_mp_pro.services import audit, horloge
 from gestion_mp_pro.services.matieres import BORNES, reference_libre, verifier
 from gestion_mp_pro.services.tableur_referentiels import (
     ACTIF,
@@ -334,7 +334,12 @@ def appliquer(s: Session, qui: audit.Qui, contenu: bytes, empreinte: str) -> Ape
         if not lue.ecrire:
             continue
         if lue.matiere_id is None:
-            m = Matiere(reference=lue.reference, **lue.ecrire, modifie_par_id=qui.id)
+            m = Matiere(
+                reference=lue.reference,
+                **lue.ecrire,
+                modifie_par_id=qui.id,
+                modifie_le=horloge.maintenant(),
+            )
             s.add(m)
             audit.creation(s, qui, "import des matières", m, detail=m.reference)
             continue

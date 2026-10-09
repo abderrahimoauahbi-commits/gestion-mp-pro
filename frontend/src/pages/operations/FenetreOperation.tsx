@@ -164,6 +164,7 @@ function ZoneEncart({
       matieres={d.matieres}
       magasins={d.magasins}
       devises={d.devises}
+      ordre={s.ordre_id}
       fournisseur={
         s.type === 'retour_fournisseur'
           ? (s.lignes.find((l) => l.cle !== encart.ligne?.cle)?.fournisseur ?? null)

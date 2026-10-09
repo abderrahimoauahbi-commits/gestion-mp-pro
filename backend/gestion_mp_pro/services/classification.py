@@ -253,10 +253,12 @@ def ajouter_role(s: Session, qui: audit.Qui, code: str, ordre: int) -> RoleNomen
 
 
 def modifier_role(
-    s: Session, qui: audit.Qui, ident: int, code: str, ordre: int
+    s: Session, qui: audit.Qui, ident: int, code: str, ordre: int, *, version: int
 ) -> RoleNomenclature:
-    """Ordre et nom d'un rôle (route 59) ; un rôle de base garde son nom (X-REF-04)."""
+    """Ordre et nom d'un rôle (route 59) ; un rôle de base garde son nom (X-REF-04) ; version
+    périmée → 409 `conflit_version`."""
     r = role(s, ident, verrou=True)
+    audit.verifier_version(s, r, version, "Ce rôle", feminin=False)
     nouveau = _code_role(s, code, ident)
     if nouveau != r.code and r.de_base:
         raise Refus.etat(f"« {r.code} » est un rôle de base du calcul : il garde son nom.")

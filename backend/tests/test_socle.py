@@ -59,3 +59,23 @@ def test_verrou_de_transaction() -> None:
         assert db.verrou_tenu(db.Verrou.ORDRES)
         s.rollback()
     assert not db.verrou_tenu(db.Verrou.ORDRES)
+
+
+def test_make_notice_regenere_la_notice() -> None:
+    """ARCHITECTURE § 10.2 (A7) : `make notice` régénère docs/NOTICE.md par
+    scripts/generer_notice.py (l'essai de l'écran vérifie qu'elle est à jour)."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    racine = Path(__file__).resolve().parents[2]
+    make = shutil.which("make")
+    assert make is not None
+    sortie = subprocess.run(  # noqa: S603 — make du poste, cible à nous, rien n'est exécuté (-n)
+        [make, "-n", "notice"], cwd=racine, capture_output=True, text=True, check=True
+    ).stdout
+    assert "scripts/generer_notice.py" in sortie and "--verifier" not in sortie
+    aide = subprocess.run(  # noqa: S603
+        [make, "aide"], cwd=racine, capture_output=True, text=True, check=True
+    ).stdout
+    assert any(ligne.startswith("notice") for ligne in aide.splitlines())

@@ -207,7 +207,7 @@ a tranché seul, la décision ci-dessous l'emporte.
 | E13 | Achats et postes de frais / codes douaniers | lecture pour A (partie 5) | retenu (API 34, 38) |
 | E14 | Pièces jointes d'un dossier clos | on joint, on ne retire plus (partie 5) | retenu |
 | E15 | Frais réglé | ni poste, ni montant, ni ligne modifiables sans annuler le règlement (partie 5) | retenu (I20) |
-| E16 | Papier à en-tête : « SIEGE SOCIAL », « BANQUES » en français sur le bon anglais | partie 4 | retenu : ce sont des éléments du papier à en-tête réel de l'usine, pas du texte du bon |
+| E16 | Papier à en-tête du bon anglais | partie 4 | **révisé le 8 octobre** : le bon fournisseur est en anglais jusque dans l'en-tête et le pied du papier (« HEAD OFFICE », « BANKS ») ; les documents français gardent « SIÈGE SOCIAL » et « BANQUES » (`documents/rendu.rendre(…, langue="en")`, lot D9) |
 | E17 | Noms de colonnes cités dans les parties | | les noms font foi dans `MODELE-DONNEES.md` (`commande_decision`, `solde_origine`, `annulation_motif`…) |
 
 ---
@@ -3092,14 +3092,14 @@ Gestion MP : `GET /api/commandes/{id}/impression` (HTML écrit en Python, `achat
 | **Aucun prix ni montant** | aucun prix, montant **ni devise** | point tranché |
 | Avertissement écran (non imprimé) si la raison sociale manque : « La raison sociale de l'usine n'est pas réglée (Réglages › Paramètres › Société) : elle manque en tête du bon. » | gardé sur le document (hors impression) **et** sur la fiche (4.7) | — |
 | Réglages « Société » : `nom_entreprise`, `forme_juridique`, `adresse`, `ville`, `telephone`, `banques`, `ice`, `rc`, `identifiant_fiscal`, `cnss`, `patente` ; `secteur` non utilisé | mêmes réglages (`GET parametres` famille Société) ; `secteur` imprimé sous la raison sociale s'il est réglé (DECISIONS A22) | conforme à A22 |
-| 1. En-tête papier : raison sociale rouge #d40000 19 pt, initiale 28 pt ; forme et capital ; « SIEGE SOCIAL » + adresse ; ville ; téléphone ; Times New Roman ; lignes vides omises | identique (jetons du gabarit) ; « SIEGE SOCIAL » et « BANQUES » restent en français : ils font partie du papier à en-tête réel de l'usine | anom. 4.11 tranchée : en-tête = papier réel |
+| 1. En-tête papier : raison sociale rouge #d40000 19 pt, initiale 28 pt ; forme et capital ; « SIEGE SOCIAL » + adresse ; ville ; téléphone ; Times New Roman ; lignes vides omises | identique (jetons du gabarit) ; le papier est en anglais sur ce bon : « HEAD OFFICE » au lieu de « SIÈGE SOCIAL » (décision du 8 octobre, E16) | bon entièrement en anglais |
 | 2. Titre : « Purchase order » ; n° ou « Draft — not sent » ; « Date » (`date_en` « 08 Oct 2026 » ou « on sending ») ; « Expected delivery » (date ou « to be agreed ») | identique ; date = date d'envoi réelle (envoi ou approbation) | — |
 | 3. Cadres « Supplier » (nom, pays, contact, téléphone, e-mail) et « Deliver to » (raison sociale ou « — », adresse, ville, « Expected date », « Incoterm ») | identique | — |
 | 4. Tableau (en-tête répété, ligne insécable) : « No. » · « Item » (référence + désignation) · « Packing » (`conditionnement_en` : « By weight », « Pallet », « Drum », « Bobbin », « Cone », « Bag », « Roll », « Carton », « Bale », « Case », « Can », sinon tel quel ; « of {contenance} kg ») · « Qty » (format anglais « 1,234.5 », « — » au poids) · « Total weight » (« {kg} kg » ; « ≈ {m} m » cuir, franges, ruban) ; pied « Total ordered » · « {Σ} kg » | colonnes communes HTML et Excel : « No. » · « Item » · « Description » · « Packing » · « Qty » · « Total weight (kg) » · « Length (m, indicative) » (colonne présente seulement si une ligne a des mètres) ; pied « Total ordered » | une seule définition pour les deux formes ; « m » en anglais (« ml » reste à l'écran) |
 | 5. « Remarks » (si `observations`) | « Remarks » = `remarques_fournisseur` | — |
 | 6. « Please confirm this order by return — quantities and delivery date — and quote its number on your delivery note and on your invoice. » | identique (même phrase dans l'Excel) | — |
 | 7. Signatures « For {raison sociale | the buyer} / Purchasing manager » et « Accepted by the supplier / Stamp and signature » | identique (l'Excel les porte aussi) | — |
-| 8. Pied du papier (Times 8,5 pt, fixé en bas de chaque page) : « **BANQUES** » + banques ; identifiants légaux « ICE : … R.C : … N.I.F : … C.N.S.S : … PATENTE : … » | identique | — |
+| 8. Pied du papier (Times 8,5 pt, fixé en bas de chaque page) : « **BANQUES** » + banques ; identifiants légaux « ICE : … R.C : … N.I.F : … C.N.S.S : … PATENTE : … » | « **BANKS** » + banques ; identifiants légaux inchangés | pied en anglais (E16) |
 
 | Geste GMP (libellé exact) | Rôles | Route API PRO | Confirmation / blocages | Changement PRO |
 |---|---|---|---|---|
@@ -3113,11 +3113,11 @@ Gestion MP : « Excel pour le fournisseur » (`exporter_bon_fournisseur`, `expor
 |---|---|---|
 | Lien `download` ; 404 « Bon de commande introuvable. » ; fichier « {n°}.xlsx » / « brouillon-{id}.xlsx » | idem ; brouillon « draft-{id}.xlsx » | nom anglais pour le fournisseur |
 | Feuille « Purchase order », anglais, sans prix ni montant | idem, sans devise ; mise en page A4 portrait (`fitToWidth`, en-têtes répétés) | identique au HTML |
-| En-tête usine (Times 18 pt rouge ; ou « Raison sociale à régler (Réglages › Paramètres › Société) ») ; forme, « SIEGE SOCIAL », ville, téléphone | mêmes blocs ; raison sociale absente → cellule vide (jamais un texte interne français dans le document fournisseur) ; avertissement sur la fiche | — |
+| En-tête usine (Times 18 pt rouge ; ou « Raison sociale à régler (Réglages › Paramètres › Société) ») ; forme, « SIEGE SOCIAL », ville, téléphone | mêmes blocs, « HEAD OFFICE » (E16) ; raison sociale absente → cellule vide (jamais un texte interne français dans le document fournisseur) ; avertissement sur la fiche | — |
 | « PURCHASE ORDER {n°} » / « PURCHASE ORDER — draft, not sent » ; « Date » ; « Expected delivery » | « Purchase order » + n° / « Draft — not sent », mêmes libellés que le HTML | libellés unifiés |
 | « Supplier » (Name, Country, Contact, Phone, Email) ; « Deliver to » (Company, Address, City, Expected date, Incoterm) | mêmes blocs que le HTML | — |
 | Tableau « No. », « Item », « Description », « Packing », « Qty », « Total weight (kg) », « Length (m, indicative) » ; « Total ordered » | colonnes communes (4.29) | — |
-| « Remarks » ; phrase de confirmation (variante entre parenthèses) ; pied « BANQUES » et identifiants ; largeurs A–G 16, 30, 36, 24, 12, 14, 14 | même phrase que le HTML ; + signatures ; pied identique | identique dans ses deux formes |
+| « Remarks » ; phrase de confirmation (variante entre parenthèses) ; pied « BANQUES » et identifiants ; largeurs A–G 16, 30, 36, 24, 12, 14, 14 | même phrase que le HTML ; + signatures ; pied « BANKS » comme le HTML | identique dans ses deux formes |
 
 Gestes : celui de la fiche (4.7).
 
@@ -3137,7 +3137,7 @@ Gestion MP : `exporter_bon_de_commande` (`exports.py:307-419`), français, avec 
 - **4.8** Confirmer des prix sur un brouillon fige le cours → volet Prix réservé aux bons partis (blocage serveur et écran).
 - **4.9** Boutons grisés sans raison (Enregistrer des lignes, Enregistrer le suivi, Oui renvoyer, Confirmer ces prix, Créer le bon, Enregistrer le brouillon, Imprimer les étiquettes, Ouvrir la réclamation, Enregistrer la réponse) → `Bouton({manque, blocages})` partout.
 - **4.10** Refus découverts au clic (envoi avec livraison passée ou période close, promesse passée, règlement avant la facture) → `blocages` serveur affichés avant le clic, bornes min/max des `DateChamp`.
-- **4.11** Vocabulaire : « Remarques au fournisseur » partout (fiche figée, export) ; « Reste à recevoir » → « Reste à livrer (MAD) » ; « Annoncé BL (kg) » = BL seul ; « BANQUES » / « SIEGE SOCIAL » gardés (papier à en-tête réel) ; « m » dans le document anglais, « ml » à l'écran.
+- **4.11** Vocabulaire : « Remarques au fournisseur » partout (fiche figée, export) ; « Reste à recevoir » → « Reste à livrer (MAD) » ; « Annoncé BL (kg) » = BL seul ; « HEAD OFFICE » / « BANKS » sur le bon anglais (E16, révisé le 8 octobre) ; « m » dans le document anglais, « ml » à l'écran.
 - **4.12** Bon sans numéro à approuver affiché « Brouillon » → `Badge` « À approuver » (table unique statut → libellé).
 - **4.13** Filtres sans « Effacer les filtres », filtre retard non exporté → `Filtres` liés + « Effacer les filtres » + `ExportExcel` avec tous les filtres.
 - **4.14** Plan d'achat : « À commander » sans unité, « Ruptures » sur toutes les matières sans le dire, export = tout le pilotage → « À commander (kg) », détail « sur toutes les matières », export de la liste (route ajoutée, API-PRO § 1.24) + classeur complet à part.
@@ -4381,7 +4381,7 @@ reste la fiche de stock de la matière, Partie 2.)
 | « Créer la matière » | D, A | `POST matieres` | `manque` ; blocage « référence déjà au catalogue » | succès « Matière créée : elle se commande dès maintenant. » ; la fenêtre passe à `/matieres/:id` |
 | « Enregistrer » | D, A | `PUT matieres/{id}` + `version` | grisé si envoi, manque, doublon, rien changé | « Fiche enregistrée. » ; 409 → R2 |
 | « Recharger la fiche » | D, A | `GET matieres/{id}` | — | R2 |
-| « Désactiver » | D, A | `PUT matieres/{id}` `{actif:false, version}` (corps partiel) | `Confirmer` danger « Désactiver « REF » ? Elle ne sera plus proposée aux commandes ni aux recettes ; son historique et son stock restent. » / « Oui, désactiver » ; blocage « Enregistrer d'abord les changements » | ne revalide plus toute la fiche (P7-21) ; « Matière désactivée. » |
+| « Désactiver » | D, A | `PUT matieres/{id}` : la fiche entière avec `actif: false` et `version` (API-PRO § 1.24 ; seul ce qui change est revalidé) | `Confirmer` danger « Désactiver « REF » ? Elle ne sera plus proposée aux commandes ni aux recettes ; son historique et son stock restent. » / « Oui, désactiver » ; blocage « Enregistrer d'abord les changements » | ne revalide plus toute la fiche (P7-21) ; « Matière désactivée. » |
 | « Réactiver » | D, A | `PUT matieres/{id}` `{actif:true, version}` | blocage « Choisir d'abord son fournisseur (onglet Achat) » ; infobulle « La remettre en service » | « Matière réactivée. » |
 | « Supprimer » | D, A | `DELETE matieres/{id}` | `Confirmer` danger « Supprimer définitivement « REF » ? » / « Oui, supprimer » ; `blocages` serveur : « des mouvements de stock », « des lots en stock ou passés », « des commandes », « des réceptions », « des ordres de fabrication », « des opérations (brouillons compris) », « des dossiers d'importation », « des recettes », « des fils montés sur les métiers », « des pièces jointes » avec les infobulles de GMP | ferme la fenêtre ; message « « REF » supprimée. » ajouté |
 | « Fermer » / « Abandonner les modifications » (infobulle « Fermer sans enregistrer : les modifications sont perdues ») | C | — | garde `sale` | P7-22 |
@@ -4795,7 +4795,7 @@ Anomalies : P7-1, P7-5, P7-6, P7-7, P7-8, P7-14, P7-22, P7-23, P7-30, P7-32, P7-
 18. Branches lecture seule mortes → vivantes et voulues : L lit les matières (sans prix), A lit les qualités, droits par rôle du registre `routes.ts`.
 19. Longueurs incohérentes (classification 64 / matière 32-48) et majuscules à un seul endroit → longueurs d'une seule déclaration ; majuscules dans les deux saisies.
 20. Unité d'achat « ml » tapable, bornes non contrôlées → liste fermée sans « ml », bornes à la frappe (R5).
-21. Désactiver revalide toute la fiche → `PUT` partiel `{actif, version}`.
+21. Désactiver revalide toute la fiche → `PUT` de la fiche entière (`actif: false`, `version`), le serveur ne revalide que ce qui change (H-28).
 22. Boutons « Abandonner… » / « Annuler les modifications » sans question → tous passent par la garde `sale`.
 23. Gestes sans infobulle → infobulle sur « Réactiver » fournisseur, « Supprimer » valeur, « Retirer » ; `Confirmer` ajouté à « Désactiver » une valeur.
 24. Délai en ton attention sans raison → `Kpi({formule})` dit la règle (mesuré > 120 % du déclaré, ≥ 3 livraisons).
@@ -4820,7 +4820,7 @@ Anomalies : P7-1, P7-5, P7-6, P7-7, P7-8, P7-14, P7-22, P7-23, P7-30, P7-32, P7-
 ### Routes demandées par la partie 7 (reportées dans API-PRO § 1.24)
 
 Aucune : chaque geste a sa route dans le contrat. Précisions de contrat (pas de nouvelle route) :
-`PUT matieres/{id}` et `PUT fournisseurs/{id}` acceptent un corps partiel (`{actif, version}`) ;
+`PUT matieres/{id}` et `PUT fournisseurs/{id}` reçoivent la fiche entière (API-PRO § 1.24, lot D1) ; désactiver ne revalide que ce qui change ;
 `PUT qualites/{id}` accepte `recette` dans le même corps (transaction unique) ;
 `GET matieres/tableur` ajoute les colonnes « Priorité dans le groupe », « Vider », « Version ».
 

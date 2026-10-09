@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 
 import pytest
 from fabrique import *  # noqa: F403
+from fabriques.ordres import ordre_repris, ordre_valide
 from fabriques.qualites import (
     UN,
     classeur_lu,
@@ -18,7 +19,6 @@ from fabriques.qualites import (
     creer_qualite,
     lire_qualite,
     ok,
-    ordre_valide,
     refus,
 )
 from fabriques.referentiels import matiere, stock_initial
@@ -218,7 +218,7 @@ def test_plan_des_mois_clos_fige(direction: TestClient) -> None:
             .where(PlanVersion.qualite_id == q["id"], PlanVersion.base_mensuelle == 1000)
             .values(valide_depuis=datetime(2025, 1, 1, tzinfo=horloge.FUSEAU))
         )
-    ordre_valide(q["id"], 300, jour=date(2026, 9, 5))
+    ordre_repris(q["id"], 300, jour=date(2026, 9, 5))
     avant = ok(direction.get("/api/production/realise"))
     ligne = next(x for x in avant["lignes"] if x["qualite_id"] == q["id"])
     clos = avant["mois_clos"]

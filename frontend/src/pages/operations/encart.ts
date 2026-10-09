@@ -75,7 +75,12 @@ export const sensImpose = (type: TypeOperation, e: EtatEncart, motif: MotifLu | 
   type === 'ajustement' && (e.place === NOUVEAU_LOT || motif?.libelle === MATIERE_RETROUVEE)
 
 /** Ce qui manque pour ajouter la ligne. */
-export function manqueEncart(type: TypeOperation, e: EtatEncart, place: Place | undefined): string[] {
+export function manqueEncart(
+  type: TypeOperation,
+  e: EtatEncart,
+  place: Place | undefined,
+  sortiNet?: number,
+): string[] {
   const manque: string[] = []
   if (e.matiere == null) return ['la matière']
   if (lotACreer(type, e)) {
@@ -89,6 +94,8 @@ export function manqueEncart(type: TypeOperation, e: EtatEncart, place: Place | 
     type === 'transfert' || type === 'retour_fournisseur' || (type === 'ajustement' && e.sens === '-')
   if (sort && place && e.kg != null && e.kg > place.quantite + 0.001)
     manque.push(`une quantité qui ne dépasse pas les ${nombre(place.quantite, 1)} kg du lot`)
+  if (type === 'retour_machine' && sortiNet != null && e.kg != null && e.kg > sortiNet + 0.001)
+    manque.push(`une quantité qui ne dépasse pas les ${nombre(sortiNet, 1)} kg partis pour l’ordre`)
   if (type === 'ouverture' && e.prix == null) manque.push('le prix au kilo')
   return manque
 }

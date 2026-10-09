@@ -36,7 +36,15 @@ import {
 import styles from './Operations.module.css'
 import { aucunLot, destinations, optionDePlace, placesDeLots, placesProposees } from './places'
 import type { LigneSaisie } from './saisie'
-import type { DeviseFiche, LotSolde, MagasinFiche, MatiereResume, MotifLu, TypeOperation } from './types'
+import type {
+  DeviseFiche,
+  LotSolde,
+  LotSorti,
+  MagasinFiche,
+  MatiereResume,
+  MotifLu,
+  TypeOperation,
+} from './types'
 
 export interface EncartProps {
   type: TypeOperation
@@ -45,6 +53,8 @@ export interface EncartProps {
   matieres: readonly MatiereResume[]
   magasins: readonly MagasinFiche[]
   devises: readonly DeviseFiche[]
+  /** L'ordre d'un retour des machines (ses lots sortis). */
+  ordre: number | null
   /** Le fournisseur des lignes déjà posées (retour au fournisseur). */
   fournisseur: string | null
   ligne: LigneSaisie | null
@@ -59,11 +69,18 @@ let rang = 0
 function useEncart(p: EncartProps) {
   const [e, setE] = useState<EtatEncart>(() => (p.ligne ? encartDe(p.ligne, p.type) : ENCART_VIERGE))
   const m = p.matieres.find((x) => x.id === e.matiere)
-  const lots = useLecture<LotSolde[]>(e.matiere == null || p.type === 'ouverture' ? null : '/lots', {
-    matiere: e.matiere,
-    date: p.date || undefined,
-    non_nuls: p.type === 'retour_machine' ? undefined : true,
-  })
+  const retour = p.type === 'retour_machine'
+  const lots = useLecture<LotSolde[]>(
+    e.matiere == null || p.type === 'ouverture' || retour ? null : '/lots',
+    {
+      matiere: e.matiere,
+      date: p.date || undefined,
+      non_nuls: true,
+    },
+  )
+  // Un retour des machines rend ce qui est parti pour son ordre (route 142), jamais plus.
+  const sortis = useLecture<LotSorti[]>(retour && p.ordre ? `/ordres/${p.ordre}/lots-sortis` : null)
+  const sorti = sortis.data?.find((l) => String(l.lot_id) === e.place)
   const toutes = placesDeLots(lots.data ?? [])
   const places = placesProposees(toutes, p.type, p.motif, p.fournisseur)
   const place = places.find((x) => x.cle === e.place)
@@ -75,10 +92,11 @@ function useEncart(p: EncartProps) {
   const poserLigne = () => {
     if (!m) return
     const cle = p.ligne?.cle ?? `n${(rang += 1)}`
-    const lot = (id: number) => lots.data?.find((l) => l.lot_id === id)?.lot ?? ''
+    const lot = (id: number) =>
+      (lots.data?.find((l) => l.lot_id === id) ?? sortis.data?.find((l) => l.lot_id === id))?.lot ?? ''
     p.onPoser(ligneDeLEncart(p.type, e, m, place, { magasin: nom, lot }, cle))
   }
-  return { e, poser, m, lots, toutes, places, place, rempli, poserLigne }
+  return { e, poser, m, lots, sortis, sorti, toutes, places, place, rempli, poserLigne }
 }
 
 type Encart = ReturnType<typeof useEncart>
@@ -89,7 +107,13 @@ function ChampLot({ p, x }: { p: EncartProps; x: Encart }) {
   if (p.type === 'ouverture') return null
   const options =
     p.type === 'retour_machine'
-      ? (x.lots.data ?? []).map((l) => ({ id: String(l.lot_id), titre: `Lot ${l.lot}`, sous: l.fournisseur }))
+      ? (x.sortis.data ?? [])
+          .filter((l) => l.matiere_id === e.matiere)
+          .map((l) => ({
+            id: String(l.lot_id),
+            titre: `Lot ${l.lot}`,
+            sous: `${kg(l.sorti_net)} partis pour l’ordre`,
+          }))
       : x.places.map((pl) => optionDePlace(pl, p.type))
   const avecNouveau =
     p.type === 'ajustement'
@@ -254,7 +278,7 @@ function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
   const { e, poser, m, place } = x
   if (p.type === 'ouverture') return <ChampsOuverture p={p} x={x} />
   const sort = p.type !== 'retour_machine' && !(p.type === 'ajustement' && e.sens === '+')
-  const borne = sort && place ? place.quantite : undefined
+  const borne = x.sorti ? x.sorti.sorti_net : sort && place ? place.quantite : undefined
   const apres =
     p.type === 'ajustement' && place && e.kg != null ? place.quantite + (e.sens === '-' ? -e.kg : e.kg) : null
   return (
@@ -272,7 +296,7 @@ function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
       />
       {borne != null ? (
         <Bouton taille="petit" variante="fantome" onClick={() => poser({ kg: borne, unite: 'kg' })}>
-          tout le lot : {kg(borne)}
+          {x.sorti ? 'tout ce qui est parti' : 'tout le lot'} : {kg(borne)}
         </Bouton>
       ) : null}
     </Champ>
@@ -285,7 +309,9 @@ export function EncartLigne(p: EncartProps) {
   const proposees =
     p.type === 'ouverture' || p.type === 'ajustement'
       ? p.matieres
-      : p.matieres.filter((m) => (m.stock ?? 0) > 0 || p.type === 'retour_machine')
+      : p.type === 'retour_machine'
+        ? p.matieres.filter((m) => x.sortis.data?.some((l) => l.matiere_id === m.id))
+        : p.matieres.filter((m) => (m.stock ?? 0) > 0)
   return (
     <Carte
       className={styles.encart}
@@ -299,7 +325,11 @@ export function EncartLigne(p: EncartProps) {
           ) : (
             <Bouton onClick={p.onAnnuler}>Annuler</Bouton>
           )}
-          <Bouton variante="principal" manque={manqueEncart(p.type, e, x.place)} onClick={x.poserLigne}>
+          <Bouton
+            variante="principal"
+            manque={manqueEncart(p.type, e, x.place, x.sorti?.sorti_net)}
+            onClick={x.poserLigne}
+          >
             {p.ligne ? 'Enregistrer la ligne' : 'Ajouter la ligne'}
           </Bouton>
         </>

@@ -1,7 +1,8 @@
 # ruff: noqa: S603, S607  (outils PostgreSQL et interpréteur des essais, arguments à nous)
 """Un vrai serveur (uvicorn) sur une base jetable à lui, pour les restaurations (lot D10).
 
-`gestion_mp_pro_d10_jetable_essai` est créée, migrée, peuplée de deux comptes (direction,
+`<base d'essai>_jetable_essai` (une par base d'essai : deux lots qui jouent leurs essais en même
+temps ne se la disputent pas) est créée, migrée, peuplée de deux comptes (direction,
 achats), servie sur un port libre, puis détruite ; ses sauvegardes et ses pièces vont dans un
 dossier temporaire. Jamais la base d'essai commune, jamais une base ni un dossier réels.
 """
@@ -19,12 +20,16 @@ from pathlib import Path
 
 import httpx2
 import pytest
+from sqlalchemy.engine import make_url
 
 from gestion_mp_pro.config import ENTETE_ANTI_FALSIFICATION
 
 __all__ = ["BASE", "URL", "Serveur", "serveur", "sql"]
 
-BASE = "gestion_mp_pro_d10_jetable_essai"
+BASE = (make_url(os.environ["GESTIONMPPRO_BASE"]).database or "gestion_mp_pro_essai").removesuffix(
+    "_essai"
+) + "_jetable_essai"
+"""La base jetable de cette séance, tirée de la base d'essai (posée par `conftest.py`)."""
 URL = f"postgresql+psycopg:///{BASE}"
 DOSSIER_SERVEUR = Path(__file__).resolve().parents[2]
 CODES = {"direction": "direction-1", "achats": "achats-12"}

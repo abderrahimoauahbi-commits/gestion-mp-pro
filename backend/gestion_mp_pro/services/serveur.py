@@ -17,7 +17,6 @@ import socket
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from urllib.parse import urlsplit
 
 from sqlalchemy import func, select, text
 from sqlalchemy.engine import make_url
@@ -29,10 +28,8 @@ from gestion_mp_pro.db import DISPONIBILITE, Verrou, fabrique, moteur, verrou_te
 from gestion_mp_pro.modeles import SessionOuverte, Utilisateur
 from gestion_mp_pro.services import courriel, execution, horloge, installation
 from gestion_mp_pro.services import sauvegarde_outils as o
-from gestion_mp_pro.services.appareils import est_local, ip_reseau
+from gestion_mp_pro.services.appareils import adresse_de
 from gestion_mp_pro.services.sauvegarde_etat import EtatSauvegardes, etat
-
-PORTS_IMPLICITES = {"http": 80, "https": 443}
 
 
 @dataclass(frozen=True)
@@ -97,20 +94,6 @@ def sante() -> Sante:
         taches=taches,
         courriels_en_attente=attente,
     )
-
-
-def adresse_de(adresse_demandee: str) -> str:
-    """L'adresse du serveur pour un autre poste : schéma et port de la requête ; un nom local
-    est remplacé par l'adresse IP du poste ; port implicite (80, 443) omis (G-13)."""
-    morceaux = urlsplit(adresse_demandee)
-    schema = morceaux.scheme or "http"
-    hote = morceaux.hostname or "localhost"
-    if est_local(adresse_demandee):
-        hote = ip_reseau()
-    port = morceaux.port
-    if port is None or PORTS_IMPLICITES.get(schema) == port:
-        return f"{schema}://{hote}"
-    return f"{schema}://{hote}:{port}"
 
 
 @dataclass(frozen=True)

@@ -14,6 +14,7 @@ export type MagasinFiche = Schema<'MagasinFiche'>
 export type MatiereResume = Schema<'MatiereResume'>
 export type DeviseFiche = Schema<'DeviseFiche'>
 export type LotSolde = Schema<'LotSolde'>
+export type LotSorti = Schema<'LotSorti'>
 export type TypeOperation = Schema<'TypeOperation'>
 
 export const TYPES: readonly TypeOperation[] = [
