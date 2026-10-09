@@ -7,10 +7,9 @@
 import { BoutonImprimer } from '../../composants/documents/BoutonImprimer'
 import { dire } from '../../composants/retour/Messages'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Confirmer } from '../../composants/saisie/Confirmer'
+import { Confirmer, MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { api } from '../../lib/api'
 import { useEcriture } from '../../lib/requetes'
-import { ConfirmerMotif } from '../commandes/ConfirmerMotif'
 import { lotsDe, questionValidation } from './calculFiche'
 import { Reglement } from './Reglement'
 import { raisonReception, type ReceptionFiche } from './types'
@@ -86,13 +85,16 @@ function Etiquettes({ r }: { r: ReceptionFiche }) {
 function Annuler({ r }: { r: ReceptionFiche }) {
   const ecrire = useEcriture((envoi: () => Promise<unknown>) => envoi())
   return (
-    <ConfirmerMotif
+    <Confirmer
+      motif="exige"
+      motifMin={MOTIF_MIN}
+      variante="danger"
       blocages={bloque(raisonReception(r, 'annuler'))}
       titre="Chaque entrée est contre-passée par un mouvement inverse, à la même date ; tout reste tracé"
       question="Annuler ? Les entrées seront contre-passées."
       libelleMotif="Motif"
-      placeholder="ex. saisie en double"
-      max={300}
+      exempleMotif="ex. saisie en double"
+      motifMax={300}
       oui="Oui, annuler (contre-passation)"
       onOui={async (motif) => {
         await ecrire.mutateAsync(() => api.post(`/receptions/${r.id}/annuler`, { version: r.version, motif }))
@@ -100,7 +102,7 @@ function Annuler({ r }: { r: ReceptionFiche }) {
       }}
     >
       Annuler (contre-passation)
-    </ConfirmerMotif>
+    </Confirmer>
   )
 }
 

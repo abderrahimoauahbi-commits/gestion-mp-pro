@@ -21,7 +21,7 @@ import { Note } from '../../composants/retour/Note'
 import { Vide } from '../../composants/retour/Vide'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { Champ } from '../../composants/saisie/Champ'
-import { Confirmer } from '../../composants/saisie/Confirmer'
+import { Confirmer, MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { Nombre } from '../../composants/saisie/Nombre'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { Zone } from '../../composants/saisie/Zone'
@@ -30,7 +30,6 @@ import { useOngletAdresse } from '../../lib/adresse'
 import { formule } from '../../lib/aide'
 import { date, kg, montant, nombre, VIDE } from '../../lib/format'
 import { useEcriture } from '../../lib/requetes'
-import { ConfirmerMotif } from '../commandes/ConfirmerMotif'
 import { memeForme, useFormeFiche, type FormeFiche } from '../commandes/useFormeFiche'
 import styles from '../plan-achat/achats.module.css'
 import { useMotifs, useReclamation } from './donnees'
@@ -174,12 +173,14 @@ function Clore({ r, f, ecrire }: { r: ReclamationFiche; f: Forme; ecrire: Ecrire
 
 function Rouvrir({ r, f, ecrire }: { r: ReclamationFiche; f: Forme; ecrire: Ecrire }) {
   return (
-    <ConfirmerMotif
+    <Confirmer
+      motif="exige"
+      motifMin={MOTIF_MIN}
       variante="neutre"
       titre="La réclamation redevient ouverte : on attend de nouveau le fournisseur"
       question="Rouvrir cette réclamation ?"
       libelleMotif="Pourquoi la rouvrir"
-      max={300}
+      motifMax={300}
       oui="Oui, rouvrir"
       onOui={async (motif) => {
         f.repartir(
@@ -191,7 +192,7 @@ function Rouvrir({ r, f, ecrire }: { r: ReclamationFiche; f: Forme; ecrire: Ecri
       }}
     >
       Rouvrir
-    </ConfirmerMotif>
+    </Confirmer>
   )
 }
 

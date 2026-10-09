@@ -6,19 +6,11 @@
  */
 import { BoutonImprimer } from '../../composants/documents/BoutonImprimer'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Confirmer } from '../../composants/saisie/Confirmer'
+import { Confirmer, MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { nombre } from '../../lib/format'
 import { questionValider, raisonsDeValider, type Totaux } from './calculComptage'
 import styles from './Inventaire.module.css'
 import type { InventaireFiche } from './types'
-
-/** Le motif le plus court d'un abandon ou d'une annulation (comme le serveur). */
-export const MOTIF_MINIMUM = 3
-
-/** Refuse un motif trop court avant d'appeler le serveur (le texte est dit par `Messages`). */
-export function exigerMotif(motif: string, message: string): void {
-  if (motif.trim().length < MOTIF_MINIMUM) throw new Error(message)
-}
 
 export interface GestesProps {
   fiche: InventaireFiche
@@ -95,12 +87,10 @@ function GestesSaisie(p: GestesProps) {
       <Confirmer
         variante="danger"
         motif="exige"
+        motifMin={MOTIF_MIN}
         question={`Abandonner ${fiche.numero} ? Rien n’est ajusté, les mouvements reprennent ; l’inventaire reste au statut « Abandonné » avec ses comptages.`}
         oui="Oui, abandonner"
-        onOui={(motif) => {
-          exigerMotif(motif, 'Dire pourquoi l’inventaire est abandonné (3 caractères au moins).')
-          return p.gestes.abandonner(motif)
-        }}
+        onOui={p.gestes.abandonner}
       >
         Abandonner
       </Confirmer>
@@ -136,13 +126,11 @@ export function GestesComptage(p: GestesProps) {
         <Confirmer
           variante="danger"
           motif="exige"
+          motifMin={MOTIF_MIN}
           titre="Annuler (contre-passation) : chaque ajustement de cet inventaire est contre-passé, avec un motif"
           question={`Annuler l’inventaire ${fiche.numero} ? Ses ajustements sont contre-passés à leur date (refusé en période close ou si la matière est déjà repartie).`}
           oui="Oui, annuler l’inventaire"
-          onOui={(motif) => {
-            exigerMotif(motif, 'Le motif de l’annulation fait au moins 3 caractères.')
-            return p.gestes.annuler(motif)
-          }}
+          onOui={p.gestes.annuler}
         >
           Annuler l’inventaire
         </Confirmer>

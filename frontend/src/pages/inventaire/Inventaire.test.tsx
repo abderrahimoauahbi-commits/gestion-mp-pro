@@ -183,7 +183,7 @@ describe('Inventaire : le comptage', () => {
     await userEvent.click(await bouton('Abandonner'))
     expect(screen.getByRole('button', { name: 'Oui, abandonner' })).toHaveAttribute(
       'data-raison',
-      'À renseigner : le motif.',
+      'À renseigner : un motif de 3 caractères au moins.',
     )
     await userEvent.type(screen.getByLabelText('Motif (obligatoire)'), 'Comptage reporté')
     await userEvent.click(screen.getByRole('button', { name: 'Oui, abandonner' }))
@@ -229,10 +229,11 @@ describe('Inventaire : l’annulation d’un inventaire validé', () => {
     expect(screen.queryByRole('button', { name: 'Valider l’inventaire' })).not.toBeInTheDocument()
     await userEvent.click(await bouton('Annuler l’inventaire'))
     await userEvent.type(screen.getByLabelText('Motif (obligatoire)'), 'ab')
-    await userEvent.click(screen.getByRole('button', { name: 'Oui, annuler l’inventaire' }))
-    expect(
-      await screen.findByText('Le motif de l’annulation fait au moins 3 caractères.'),
-    ).toBeInTheDocument()
+    // Trop court : « Oui » grisé avec la longueur attendue, rien ne part.
+    expect(screen.getByRole('button', { name: 'Oui, annuler l’inventaire' })).toHaveAttribute(
+      'data-raison',
+      'À renseigner : un motif de 3 caractères au moins.',
+    )
     expect(appels.some((a) => a.chemin === '/inventaires/7/annuler')).toBe(false)
     await userEvent.type(screen.getByLabelText('Motif (obligatoire)'), 'c pesée fausse')
     await userEvent.click(screen.getByRole('button', { name: 'Oui, annuler l’inventaire' }))
