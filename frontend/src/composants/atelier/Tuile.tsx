@@ -1,7 +1,8 @@
 /**
  * Une tuile de l'accueil de l'atelier : un geste par tuile (Envoyer aux machines, Retour des
  * machines…), grande cible, un compte quand il dit quelque chose (« 2 brouillons »). `Tuiles` les
- * range par deux ; à 360 × 640, toutes restent visibles.
+ * range par deux ; la tuile `principale` prend toute la largeur ; à 360 × 640, toutes restent
+ * visibles (détails courts : deux lignes au plus).
  */
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
@@ -17,15 +18,18 @@ export function Tuile({
   vers,
   icone,
   ton,
+  principale = false,
 }: {
   titre: string
   detail?: ReactNode
   vers: string
   icone?: NomIcone
   ton?: Ton
+  /** Le geste principal de l'écran, sur toute la largeur. */
+  principale?: boolean
 }) {
   return (
-    <Link to={vers} className={classes(styles.tuile, ton && styles[ton])}>
+    <Link to={vers} className={classes(styles.tuile, ton && styles[ton], principale && styles.principale)}>
       {icone ? <Icone nom={icone} taille={26} /> : null}
       <span className={styles.titre}>{titre}</span>
       {detail ? <span className={styles.detail}>{detail}</span> : null}

@@ -1,6 +1,7 @@
 /**
  * L'accueil de l'atelier (`/atelier`) : ce que l'atelier a sorti aujourd'hui (net des retours,
- * an. 22), sept tuiles, une astuce, « Se déconnecter » loin des tuiles et confirmé. Les compteurs
+ * an. 22), sept tuiles (« Envoyer aux machines » sur toute la largeur, les six autres par deux, aux
+ * détails courts : elles tiennent toutes à 360 × 640), une astuce, « Se déconnecter » loin des tuiles et confirmé. Les compteurs
  * des signalements sont ceux du compte connecté (filtrés au serveur par identifiant, an. 25).
  */
 import { EcranAtelier } from '../../composants/atelier/EcranAtelier'
@@ -20,8 +21,8 @@ export function compteSignalements(page: PageSignalements | undefined, moi: numb
   const miens = (page?.elements ?? []).filter((x) => x.par_id === moi)
   const attente = miens.filter((x) => !x.traite_le).length
   const reponses = miens.filter((x) => x.traite_le).length
-  if (!attente && !reponses) return 'Un fil qui manque, une palette qui finit.'
-  return `${nombre(attente)} en attente · ${nombre(reponses)} réponse(s) des achats`
+  if (!attente && !reponses) return 'Fil qui manque, palette qui finit.'
+  return `${nombre(attente)} en attente · ${nombre(reponses)} réponse(s)`
 }
 
 /** L'astuce : en http, l'appli ne s'installe pas, on n'en promet qu'un raccourci (H-05). */
@@ -62,13 +63,14 @@ function TuilesAtelier({ moi }: { moi: number }) {
         icone="envoyer"
         vers="/atelier/envoyer"
         ton="accent"
-        detail="Qualité et m² à fabriquer : les fils et les lots à prendre sont proposés."
+        principale
+        detail="Qualité et m² à fabriquer : fils et lots proposés."
       />
       <Tuile
         titre="Retour des machines"
         icone="retour"
         vers="/atelier/retour"
-        detail="Ce qui revient d’un ordre, lot par lot."
+        detail="Ce qui revient, lot par lot."
       />
       <Tuile
         titre="Ordres"
@@ -81,14 +83,14 @@ function TuilesAtelier({ moi }: { moi: number }) {
         titre="Trouver un lot"
         icone="recherche"
         vers="/atelier/chercher"
-        detail="Chercher ou scanner une étiquette."
+        detail="Chercher, scanner l’étiquette."
       />
       <Tuile titre="Déplacer" icone="lots" vers="/atelier/deplacer" detail="D’un magasin à un autre." />
       <Tuile
         titre="Monter les fils"
         icone="usine"
         vers="/atelier/montage"
-        detail="Ce qui est monté sur chaque métier, étage par étage."
+        detail="Par métier, étage par étage."
       />
       <Tuile
         titre="Signaler un besoin"

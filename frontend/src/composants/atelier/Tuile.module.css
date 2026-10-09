@@ -20,6 +20,11 @@
   color: var(--texte);
 }
 
+.principale {
+  grid-column: 1 / -1;
+  min-height: 72px;
+}
+
 .tuile:hover {
   text-decoration: none;
 }
