@@ -32,3 +32,8 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F6 | E0 | `lib/statuts.ts` : statuts d'inventaire « Annulé » et « Comptage en cours » (F6 tient sa table dans la page en attendant). |
 | F6 | D5 | Refus de libération de quarantaine : REGLES dit « achats » alors que la règle est « direction ou achats » — aligner le message. Historique d'une opération : sa place dans la fenêtre d'opération (ECRANS-PRO le cite sans la placer). |
 | F6 | V3 | `outils/routes_ecran.py` (tout appel de l'écran a sa route) n'existe pas encore. |
+| F3 | D8 | Routes 221–222 (signalements) : l'écran appelle `GET /signalements?mes=true` (filtrer par le compte) ; forme provisoire `SignalementFiche` dans `pages/atelier/types.ts` à remplacer par `Schema<…>`. |
+| F3 | D6 | `OrdreResume.metier` : rendre « CODE · Nom » (l'écran le reconstitue depuis /metiers). |
+| F3 | S4 | `GET /lots/{id}` rend `mouvements[].devise = "MAD"` à l'alimentation : retirer la devise pour elle. |
+| F3 | D2 | Un montage d'un seul étage fait au bureau (route 99) est rangé « téléphone » dans l'historique : poser l'origine réelle. |
+| F3 | E1 | `ScanQR` : rendre aussi le texte lu (QR à numéro → `GET /lots/scan`, messages « aucun lot » / « plusieurs lots ») ; `SelecteurLot` : suivre la forme de la route des lots disponibles ; `BoutonImprimer` 44 px en atelier ; 7 tuiles de l'accueil atelier à 360 × 640 (la page défile, sans débordement — textes à raccourcir ?). |
