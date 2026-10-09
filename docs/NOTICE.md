@@ -355,6 +355,16 @@ Les règles qui tiennent le stock juste, qui fait quoi, les gestes pas à pas, l
 - Les écrans que votre rôle ne voit pas sont indiqués sans lien.
 - Le bouton « ? » de chaque écran ouvre l’aide de cet écran.
 
+### Bon de commande (`/commandes/:id`)
+
+Un bon, du brouillon au solde : lignes et livraison, prix du fournisseur, suivi de l’expédition, réceptions, approbation, pièces jointes, historique.
+
+- Un brouillon se modifie librement ; il reçoit son numéro et sa date à l’envoi.
+- Au-delà du seuil d’approbation, « Envoyer, ou demander l’approbation » le soumet à la direction, qui l’approuve (au montant et au cours du moment) ou le renvoie avec un motif.
+- Le bon fournisseur s’imprime dans un nouvel onglet, en anglais, sans aucun prix ; l’Excel porte le même contenu.
+- Les prix se confirment au retour du fournisseur, sur un bon parti : le cours se fige à la première confirmation.
+- Un bon livré en partie se solde ; un bon parti jamais livré s’annule et garde son numéro.
+
 ### Connexion
 
 Touchez votre nom, puis tapez votre code ; hors du poste de l’usine et des téléphones enrôlés, tapez votre identifiant.
@@ -419,12 +429,58 @@ Votre nom, votre identifiant, votre rôle et votre courriel ; changer votre code
 - L’alimentation a un code d’exactement 4 chiffres ; les achats et la direction 8 caractères au moins ; l’administrateur technique 12.
 - L’apparence (claire, sombre, ou celle du poste) ne vaut que pour ce navigateur.
 
+### Nouvelle commande (`/commandes/nouvelle`)
+
+Chez quel fournisseur commander : la préparation s’ouvre avec les quantités que le calcul suggère.
+
+- Par défaut, les fournisseurs chez qui le calcul propose quelque chose, le plus gros budget d’abord.
+- La case montre aussi les autres fournisseurs actifs, pour une commande hors calcul.
+
 ### Première installation
 
 Au tout premier lancement, aucun compte n’existe : on crée celui de la direction, qui crée ensuite les autres comptes (Administration › Comptes).
 
 - L’identifiant retenu est annoncé sous le champ.
 - Le code de la direction fait 8 caractères au moins.
+
+### Préparer une commande (`/plan-achat/preparer/:fournisseurId`)
+
+La proposition du calcul chez un fournisseur, à arbitrer ligne par ligne, en kilos et dans l’unité où l’on commande (bobine, palette, fût…).
+
+- Cochez les lignes à commander ; la quantité se saisit dans l’unité de commande ou en kilos, les deux restent liées.
+- « Arrondir au conditionnement » monte chaque ligne à l’unité entière suivante ; « Revenir à la suggestion » retrouve le calcul.
+- Palettes par conteneur : une aide de calcul, retenue par poste, jamais imprimée.
+- Les remarques au fournisseur sont imprimées sur le bon, qui est en anglais.
+- Un bon par devise est créé en brouillon, sans numéro : il se relit et s’envoie depuis Commandes.
+
+### Réception (`/receptions/:id`)
+
+Un camion reçu : ses lignes pesées, ce qui bloquerait la validation, la facture du fournisseur, les réclamations, les pièces jointes et l’historique.
+
+- Un brouillon se corrige, se supprime, et se remet à jour seul si d’autres réceptions passent avant lui.
+- « Valider la réception » écrit les lots, les entrées en stock au prix payé et donne le numéro ; tout ce qui serait refusé est annoncé avant.
+- La facture se complète ou se corrige même après la validation, sans toucher au stock.
+- Annuler une réception validée contre-passe chaque entrée, à la même date, avec un motif.
+
+### Réclamation (`/reclamations/nouvelle`)
+
+Un défaut constaté chez un fournisseur (qualité, quantité, bobines, retard, documents) : ce qui est en cause, ce qui est demandé, la réponse et ce qui est obtenu.
+
+- Sur une réception validée, la ligne en cause garde sa référence même si elle a été refusée.
+- Clore demande l’issue (avoir, remplacement, remise, refusée, abandonnée) ; la réponse et l’avoir obtenu se complètent encore ensuite.
+- Rouvrir remet la réclamation en attente du fournisseur ; le motif reste au journal.
+
+### Saisie d’une réception (`/receptions/nouvelle`)
+
+Un camion à la bascule : le bon que le chauffeur apporte, puis ligne par ligne le lot, l’annonce du BL, la pesée, les bobines, le magasin et la qualité.
+
+- Tapez le n° du bon que le chauffeur apporte (ou choisissez le fournisseur) : cochez le ou les bons du camion, leurs lignes restant à livrer se chargent. Une matière sans commande : « Ajouter une matière hors commande ».
+- Recopiez le n° du BL et, si elle est là, la facture ; elle peut aussi se compléter après la validation.
+- Ligne par ligne : le lot imprimé sur l’étiquette (sinon « Lot interne »), la quantité annoncée sur le BL, la quantité pesée à la bascule — c’est elle qui entre en stock — puis les palettes complètes et les bobines en plus.
+- Deux lots d’une même ligne de bon : « + un autre lot ». L’excédent se compte tous lots ensemble.
+- Une ligne absente du camion : retirez-la. Elle reste due sur la commande.
+- Qualité : conforme ; sous réserve — entre en quarantaine, non utilisable ; refusé — n’entre pas, le fournisseur la doit toujours (dites pourquoi dans les observations).
+- Enregistrer crée un brouillon (un par devise du camion, en une fois) : rien n’entre en stock. La validation, depuis la fiche, fait entrer la marchandise et donne le numéro.
 
 ### Suivi de traçabilité (`/tracabilite`)
 
