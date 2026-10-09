@@ -15,11 +15,16 @@ n'a changé (ARCHITECTURE § 7, CALCULS A § 4 ; `gestion_mp/depot.py`).
   une transaction annulée ne peut pas laisser en cache une signature qui reviendrait.
 - **Ne jamais modifier en place** des `Donnees` rendues ici, ni ce que le moteur en tire : elles
   sont partagées entre les requêtes (`dataclasses.replace` pour une variante).
+- `deriver(s, nom, cle, calcul)` : un résultat tiré de la base seule (contrôles, lecture du
+  stock à une date, Cockpit…) gardé sous la même signature (V4 : à ×30, le Cockpit refaisait
+  3,7 s de calcul à chaque ouverture, et les 38 contrôles étaient rejoués à chaque page pour la
+  pastille du menu). Même règle : ne jamais modifier ce qui est rendu.
 """
 
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from datetime import date
 from typing import Any
 
@@ -43,6 +48,7 @@ from gestion_mp_pro.services.chargeur.referentiels import parametres, poids_bobi
 __all__ = [
     "charger",
     "charger_au",
+    "deriver",
     "en_quarantaine_par_ligne",
     "invalider",
     "lire",
@@ -58,6 +64,11 @@ Signature = tuple[Any, ...]
 
 _cache: dict[bool, tuple[Signature, c.Donnees]] = {}
 _verrou = threading.Lock()
+_derives: dict[tuple[Any, ...], Any] = {}
+_signature_des_derives: list[Signature] = []
+_verrou_des_derives = threading.Lock()
+DERIVES_MAX = 64
+"""Résultats dérivés gardés au plus (dates de référence différentes) ; au-delà, recalculés."""
 
 
 def signature(s: Session) -> Signature:
@@ -123,7 +134,31 @@ def charger_au(s: Session, jour: date, avec_journal: bool = True) -> c.Donnees:
     return a_la_date(charger(s, avec_journal), jour, aujourdhui=horloge.aujourd_hui())
 
 
+def deriver[T](s: Session, nom: str, cle: tuple[Any, ...], calcul: Callable[[], T]) -> T:
+    """Le résultat de `calcul()` (qui ne lit que la base et le jour de l'usine), calculé une
+    fois par signature et par processus ; `nom` et `cle` (date de référence…) le désignent.
+
+    La signature est lue **avant** le calcul : une écriture validée pendant le calcul change
+    la signature suivante, le résultat gardé n'est donc jamais relu sous une signature plus
+    récente que les données qu'il a vues."""
+    sig, k = signature(s), (nom, *cle)
+    with _verrou_des_derives:
+        if _signature_des_derives != [sig]:
+            _derives.clear()
+            _signature_des_derives[:] = [sig]
+        if k in _derives:
+            return _derives[k]  # type: ignore[no-any-return]
+    resultat = calcul()
+    with _verrou_des_derives:
+        if _signature_des_derives == [sig] and len(_derives) < DERIVES_MAX:
+            _derives[k] = resultat
+    return resultat
+
+
 def invalider() -> None:
     """Oublie le cache de ce processus (essais, reprise : la signature suffit d'ordinaire)."""
     with _verrou:
         _cache.clear()
+    with _verrou_des_derives:
+        _derives.clear()
+        _signature_des_derives.clear()

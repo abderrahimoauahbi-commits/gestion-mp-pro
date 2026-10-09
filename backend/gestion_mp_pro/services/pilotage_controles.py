@@ -15,6 +15,7 @@ information » à part (E-08 : `a_corriger`, direction et achats).
 from __future__ import annotations
 
 from collections.abc import Callable
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
@@ -24,7 +25,6 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul.controles import Colonne, Controle, Ligne, Synthese, controler, synthese
-from gestion_mp_pro.calcul.stock import etat_stock
 from gestion_mp_pro.modeles import (
     Commande,
     Dossier,
@@ -74,12 +74,17 @@ class Controles:
 
 
 def rejouer(s: Session, jour: date) -> list[Controle]:
-    """Les 38 contrôles au soir de `jour` (intégrité sur toutes les données)."""
-    lecture = lire(s, jour)
-    complet = donnees_moteur.charger(s)
-    return controler(
-        lecture.donnees, lecture.lignes, jour, complet=complet, aujourdhui=horloge.aujourd_hui()
-    )
+    """Les 38 contrôles au soir de `jour` (intégrité sur toutes les données), rejoués une
+    fois tant que la base n'a pas changé (`donnees_moteur.deriver`)."""
+
+    def calcul() -> list[Controle]:
+        lecture = lire(s, jour)
+        complet = donnees_moteur.charger(s)
+        return controler(
+            lecture.donnees, lecture.lignes, jour, complet=complet, aujourdhui=horloge.aujourd_hui()
+        )
+
+    return donnees_moteur.deriver(s, "controles", (jour,), calcul)
 
 
 Index = dict[str, Callable[[Ligne], int | None]]
@@ -179,8 +184,12 @@ def detail(s: Session, jour: date, code: str, q: str = "") -> tuple[ControleLu, 
 def cockpit(s: Session, jour: date) -> dict[str, Any]:
     """Route 209 : le Cockpit, avec la note des contrôles et les bons en retard (la règle de
     l'écran Commandes et du courriel du lundi)."""
-    retards = courriel_contenu.retards(s, donnees_moteur.charger_au(s, jour), jour)
-    return pilotage.cockpit(s, jour, synthese(rejouer(s, jour)), len(retards))
+
+    def calcul() -> dict[str, Any]:
+        retards = courriel_contenu.retards(s, donnees_moteur.charger_au(s, jour), jour)
+        return pilotage.cockpit(s, jour, synthese(rejouer(s, jour)), len(retards))
+
+    return deepcopy(donnees_moteur.deriver(s, "cockpit", (jour,), calcul))
 
 
 # ── Pastilles du menu ────────────────────────────────────────────────────────────────
@@ -190,8 +199,7 @@ def compteur_alerte_rouge(s: Session, role: str) -> int | None:
     """Matières en rupture ou critiques, aujourd'hui (direction, achats, alimentation)."""
     if role not in VOIENT_L_ALERTE:
         return None
-    jour = horloge.aujourd_hui()
-    return alerte_rouge(etat_stock(donnees_moteur.charger_au(s, jour), jour))
+    return alerte_rouge(lire(s, horloge.aujourd_hui()).lignes)
 
 
 def compteur_anomalies(s: Session, role: str) -> int | None:
