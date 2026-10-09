@@ -11,3 +11,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | E2 | D10 | `alerte_serveur` est une phrase affichée telle quelle en rouge pour D et T. |
 | E2 | S0 | Cible `make notice` (un essai vitest vérifie déjà que docs/NOTICE.md est à jour). |
 | S2 | docs | Reporter dans API-PRO les champs ajoutés par S2 (Connexion.compte, Visage.role_libelle, Moi.vu_le/version, UtilisateurModification.code, ValeursJournal, Contexte.compteurs/base_essai/roles_au_metre, Acces.adresse_qr) ; ARCHITECTURE : `securite/` est un paquet. |
+| S4 | D9 | Route 114 `GET /documents/etiquettes` : les données sont prêtes dans `services.lots_lecture.etiquettes` ; brancher la route (`api/documents/`) et le gabarit. |
+| S4 | docs | API-PRO : `/lots/scan` (110) rend une liste (un numéro peut exister pour deux matières), 404 si vide ; ARCHITECTURE § 7 : le chargeur fait ~60 requêtes groupées (nombre fixe), pas « une dizaine ». |
+| S4 | tous les lots D | Toute écriture passe par `services/audit` (journal) : c'est aussi ce qui invalide le cache du moteur. Champs `Numeric` en sortie : type `api.communs.Nombre`. |

@@ -13,16 +13,21 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+from decimal import Decimal
 from importlib import import_module
 from importlib.util import find_spec
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter
 from fastapi.routing import APIRoute
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 from gestion_mp_pro.api import ETIQUETTES
 from gestion_mp_pro.api.erreurs import Refus
+
+Nombre = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
+"""Un `NUMERIC` de la base, rendu en nombre JSON (API-PRO § 0.1), pas en texte : le type de tout
+champ de sortie qui lit une colonne `Numeric` (quantités, prix, montants, cours)."""
 
 LIMITE_DEFAUT = 500
 LIMITE_MAX = 5000
