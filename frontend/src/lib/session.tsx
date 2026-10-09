@@ -17,7 +17,7 @@ import { Chargement } from '../composants/retour/Chargement'
 import { Erreur } from '../composants/retour/Erreur'
 import { api, SESSION_PERDUE } from './api'
 import { useLecture } from './requetes'
-import type { Contexte, Moi } from './types-provisoires-s2'
+import type { Contexte, Moi } from './types-coque'
 import type { Role } from './types'
 
 export interface Session {

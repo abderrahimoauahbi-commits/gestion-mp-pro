@@ -17,7 +17,7 @@ const RESULTATS = [
     sous_titre: 'IMP FRISÉ ROUGE',
     lien: '/stock?onglet=matieres',
   },
-  { genre: 'lot', id: 884, titre: 'Lot GLO260914-884', lien: '/lots/884' },
+  { genre: 'lot', id: 884, titre: 'Lot GLO260914-884', sous_titre: '', lien: '/lots/884' },
 ]
 
 describe('RechercheGlobale', () => {

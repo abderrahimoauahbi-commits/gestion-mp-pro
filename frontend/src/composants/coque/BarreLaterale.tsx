@@ -9,7 +9,7 @@
 import { Link } from 'react-router'
 
 import { menuDe } from '../../lib/droits'
-import type { CompteursMenu } from '../../lib/types-provisoires-s2'
+import type { CompteursMenu } from '../../lib/types-coque'
 import type { Role } from '../../lib/types'
 import type { Ecran } from '../../routes'
 import { classes } from '../mise-en-page/classes'
@@ -18,7 +18,8 @@ import { Pastille } from '../retour/Pastille'
 import styles from './BarreLaterale.module.css'
 
 interface DefPastille {
-  cle: keyof CompteursMenu
+  /** Le nom du compteur dans `contexte.compteurs`. */
+  cle: string
   roles: readonly Role[]
   titre: string
   /** L'adresse du lien quand la pastille est allumée. */

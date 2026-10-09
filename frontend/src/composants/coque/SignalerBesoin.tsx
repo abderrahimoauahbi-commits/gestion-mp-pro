@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 import { api } from '../../lib/api'
 import { useEcriture, useLecture } from '../../lib/requetes'
-import type { MatiereResumee } from '../../lib/types-provisoires-s2'
+import type { MatiereResumee, SignalementCreation } from '../../lib/types-provisoires'
 import { Fenetre } from '../mise-en-page/Fenetre'
 import { Grille } from '../mise-en-page/Grille'
 import { Erreur } from '../retour/Erreur'
@@ -18,13 +18,7 @@ import { Segments } from '../saisie/Segments'
 import { SelecteurMatiere, type MatiereChoix } from '../saisie/SelecteurMatiere'
 import { Zone } from '../saisie/Zone'
 
-type Urgence = 'normale' | 'urgente'
-
-export interface Signalement {
-  matiere_id: number | null
-  texte: string
-  urgence: Urgence
-}
+type Urgence = SignalementCreation['urgence']
 
 /** Ce que le sélecteur de matière lit d'une matière. */
 export function versChoix(m: MatiereResumee): MatiereChoix {
@@ -50,7 +44,7 @@ export function SignalerBesoin({ onFermer }: { onFermer: () => void }) {
   const [matiere, setMatiere] = useState<number | null>(null)
   const [texte, setTexte] = useState('')
   const [urgence, setUrgence] = useState<Urgence>('normale')
-  const envoi = useEcriture((s: Signalement) => api.post('/signalements', s))
+  const envoi = useEcriture((s: SignalementCreation) => api.post('/signalements', s))
   const envoyer = async () => {
     await envoi.mutateAsync({ matiere_id: matiere, texte: texte.trim(), urgence })
     dire('Signalé : les achats le voient sur leur accueil.')

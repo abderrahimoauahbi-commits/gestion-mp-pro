@@ -19,9 +19,9 @@ const NON_CONNECTE = {
   corps: { detail: 'Connectez-vous pour continuer.', code: 'non_connecte' },
 }
 const VISAGES = [
-  { id: 1, nom: 'MAZARI', role: 'direction', longueur_code: null },
-  { id: 3, nom: 'Ahmed', role: 'alimentation', longueur_code: 4 },
-  { id: 2, nom: 'Karim BENALI', role: 'achats', longueur_code: null },
+  { id: 1, nom: 'MAZARI', role: 'direction', role_libelle: 'Direction', longueur_code: null },
+  { id: 3, nom: 'Ahmed', role: 'alimentation', role_libelle: 'Alimentation des machines', longueur_code: 4 },
+  { id: 2, nom: 'Karim BENALI', role: 'achats', role_libelle: 'Achats', longueur_code: null },
 ]
 
 function serveur(autres = {}) {
@@ -38,15 +38,20 @@ describe('Connexion', () => {
     expect(libelleCode('Ahmed')).toBe('Code d’Ahmed')
     expect(libelleCode('Karim')).toBe('Code de Karim')
     expect(libelleCode('Hicham')).toBe('Code d’Hicham')
-    expect(entreeAuQuatrieme({ id: 3, nom: 'A', role: 'alimentation', longueur_code: 4 })).toBe(true)
-    expect(entreeAuQuatrieme({ id: 3, nom: 'A', role: 'alimentation', longueur_code: 5 })).toBe(false)
-    expect(entreeAuQuatrieme({ id: 2, nom: 'K', role: 'achats' })).toBe(false)
-    expect(corpsDuVisage({ id: 3, nom: 'A', role: 'alimentation' }, '1234')).toEqual({
+    const ahmed = {
+      id: 3,
+      nom: 'A',
+      role: 'alimentation',
+      role_libelle: 'Alimentation des machines',
+    } as const
+    expect(entreeAuQuatrieme({ ...ahmed, longueur_code: 4 })).toBe(true)
+    expect(entreeAuQuatrieme({ ...ahmed, longueur_code: 5 })).toBe(false)
+    expect(
+      entreeAuQuatrieme({ id: 2, nom: 'K', role: 'achats', role_libelle: 'Achats', longueur_code: null }),
+    ).toBe(false)
+    expect(corpsDuVisage({ ...ahmed, longueur_code: 4 }, '1234')).toEqual({
       compte: 3,
-      code: '1234',
-    })
-    expect(corpsDuVisage({ id: 3, nom: 'A', role: 'alimentation', identifiant: 'ahmed' }, '1234')).toEqual({
-      identifiant: 'ahmed',
+      identifiant: '',
       code: '1234',
     })
   })
@@ -61,7 +66,11 @@ describe('Connexion', () => {
     expect(appels.some((a) => a.chemin === '/connexion')).toBe(false)
     await userEvent.type(code, '4')
     await waitFor(() => expect(app.adresse()).toBe('/accueil'))
-    expect(appels.find((a) => a.chemin === '/connexion')?.corps).toEqual({ compte: 3, code: '1234' })
+    expect(appels.find((a) => a.chemin === '/connexion')?.corps).toEqual({
+      compte: 3,
+      identifiant: '',
+      code: '1234',
+    })
   })
 
   it('les achats entrent par Entrée ; un refus est dit et le code vidé', async () => {

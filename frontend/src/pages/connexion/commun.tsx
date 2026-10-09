@@ -9,7 +9,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { attributsDuChamp, useChamp } from '../../composants/saisie/Champ'
 import controle from '../../composants/saisie/controle.module.css'
 import { destinationApresConnexion } from '../../lib/droits'
-import type { Moi } from '../../lib/types-provisoires-s2'
+import type { Moi } from '../../lib/types-coque'
 import styles from './connexion.module.css'
 
 /** Les lectures publiques, gardées quand on vide le cache de la session précédente. */

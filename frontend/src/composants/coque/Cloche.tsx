@@ -11,7 +11,7 @@ import { api } from '../../lib/api'
 import { permis } from '../../lib/droits'
 import { horodatageRelatif, nombre } from '../../lib/format'
 import { useEcriture, useLecture } from '../../lib/requetes'
-import type { Notification, PageNotifications } from '../../lib/types-provisoires-s2'
+import type { Notification, PageNotifications } from '../../lib/types-coque'
 import type { Role } from '../../lib/types'
 import { classes } from '../mise-en-page/classes'
 import { Icone, type NomIcone } from '../mise-en-page/Icone'
@@ -23,7 +23,7 @@ import { proteger } from './garde'
 /** Le nombre de notifications lues à la fois dans le panneau. */
 export const NOTIFICATIONS_LUES = 30
 
-const ICONES: Record<Notification['ton'], NomIcone> = {
+const ICONES: Readonly<Record<string, NomIcone>> = {
   info: 'info',
   succes: 'coche',
   alerte: 'attention',
@@ -59,7 +59,7 @@ function Ligne({ n, role, onOuvrir }: { n: Notification; role: Role; onOuvrir: (
         onClick={() => onOuvrir(n)}
         title={lien ? 'Ouvrir le document' : undefined}
       >
-        <Icone nom={ICONES[n.ton]} />
+        <Icone nom={ICONES[n.ton] ?? 'info'} />
         <span className={styles.texte}>
           {n.texte}
           <span className={styles.quand}>{horodatageRelatif(n.quand)}</span>

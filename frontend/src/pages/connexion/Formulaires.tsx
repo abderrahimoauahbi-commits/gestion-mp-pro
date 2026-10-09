@@ -9,7 +9,7 @@ import { Champ } from '../../composants/saisie/Champ'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { api, messageErreur } from '../../lib/api'
 import { LIBELLES_ROLES } from '../../lib/droits'
-import type { Connexion, Moi, Visage } from '../../lib/types-provisoires-s2'
+import type { Connexion, Moi, Visage } from '../../lib/types-coque'
 import { classes } from '../../composants/mise-en-page/classes'
 import { ChampCode, libelleCode, useEntrer } from './commun'
 import styles from './connexion.module.css'
@@ -19,9 +19,9 @@ export function entreeAuQuatrieme(v: Visage): boolean {
   return v.role === 'alimentation' && (v.longueur_code ?? 4) === 4
 }
 
-/** Le corps de la connexion depuis un visage : l'identifiant s'il est publié, sinon le compte. */
+/** Le corps de la connexion depuis un visage : le compte (son id), jamais un identifiant (F-02). */
 export function corpsDuVisage(v: Visage, code: string): Connexion {
-  return v.identifiant ? { identifiant: v.identifiant, code } : { compte: v.id, code }
+  return { compte: v.id, identifiant: '', code }
 }
 
 function useConnecter() {
@@ -65,7 +65,7 @@ function GrilleVisages({
           onClick={() => onChoisir(v)}
         >
           <strong>{v.nom}</strong>
-          <span>{LIBELLES_ROLES[v.role]}</span>
+          <span>{v.role_libelle || LIBELLES_ROLES[v.role]}</span>
         </button>
       ))}
     </div>

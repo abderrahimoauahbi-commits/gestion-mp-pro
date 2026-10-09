@@ -95,7 +95,7 @@ export function Coque() {
               <MenuCompte />
             </div>
           </header>
-          <BandeauServeur alerte={contexte.alerte_serveur} role={role} baseEssai={contexte.base_essai} />
+          <BandeauServeur alerte={contexte.alerte_serveur} baseEssai={contexte.base_essai} />
           <EcranReserve key={lieu.key} etat={lieu.state} />
           <main className={styles.contenu}>
             <Outlet />

@@ -15,7 +15,7 @@ import { Saisie } from '../../composants/saisie/Saisie'
 import { api, ErreurApi, messageErreur } from '../../lib/api'
 import { sansAccents } from '../../lib/recherche'
 import { useLecture } from '../../lib/requetes'
-import type { EtatInstallation, Installation as CorpsInstallation, Moi } from '../../lib/types-provisoires-s2'
+import type { EtatInstallation, Installation as CorpsInstallation, Moi } from '../../lib/types-coque'
 import { TetePublique, useEntrer } from './commun'
 import styles from './connexion.module.css'
 

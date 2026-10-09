@@ -62,11 +62,27 @@ describe('Mon compte', () => {
     fauxServeur({
       ...reponsesConnecte('direction'),
       'GET /appareils': {
-        corps: [{ id: 1, nom: 'Téléphone atelier 1', enrole_le: '2026-10-01T09:00:00+01:00' }],
+        corps: [
+          {
+            id: 1,
+            nom: 'Téléphone atelier 1',
+            actif: true,
+            enrole: true,
+            enrole_le: '2026-10-01T09:00:00+01:00',
+          },
+          {
+            id: 2,
+            nom: 'Téléphone retiré',
+            actif: false,
+            enrole: true,
+            enrole_le: '2026-09-01T09:00:00+01:00',
+          },
+        ],
       },
     })
     monterApp('/compte')
     expect(await screen.findByText('Téléphone atelier 1')).toBeInTheDocument()
+    expect(screen.queryByText('Téléphone retiré')).toBeNull()
   })
 
   it('l’apparence se pose sur la page et se retient', () => {

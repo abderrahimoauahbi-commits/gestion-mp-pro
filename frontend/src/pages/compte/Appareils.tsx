@@ -5,12 +5,12 @@ import { Chargement } from '../../composants/retour/Chargement'
 import { Erreur } from '../../composants/retour/Erreur'
 import { date } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
-import type { AppareilFiche } from '../../lib/types-provisoires-s2'
+import type { AppareilFiche } from '../../lib/types-coque'
 import styles from './MonCompte.module.css'
 
 export function Appareils() {
   const lecture = useLecture<AppareilFiche[]>('/appareils')
-  const actifs = (lecture.data ?? []).filter((a) => a.enrole_le && !a.revoque_le)
+  const actifs = (lecture.data ?? []).filter((a) => a.actif && a.enrole)
   return (
     <section className={styles.appareils} aria-label="Appareils enrôlés">
       <h3>Appareils enrôlés</h3>

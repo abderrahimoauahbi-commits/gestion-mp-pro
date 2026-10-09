@@ -14,7 +14,7 @@ import { ECRANS } from '../routes'
 import { LIBELLES_ROLES } from '../lib/droits'
 import { creerClientRequetes } from '../lib/requetes'
 import { SessionFournie, type Session } from '../lib/session'
-import type { Contexte, Moi } from '../lib/types-provisoires-s2'
+import type { Contexte, Moi } from '../lib/types-coque'
 import type { Role } from '../lib/types'
 
 export type Reponse =
@@ -36,6 +36,8 @@ export function moiDe(role: Role, autres: Partial<Moi> = {}): Moi {
     role_libelle: LIBELLES_ROLES[role],
     email: '',
     voit_prix: role === 'direction' || role === 'achats',
+    droits: [],
+    vu_le: null,
     version: 1,
     ...autres,
   }
@@ -45,6 +47,10 @@ export function moiDe(role: Role, autres: Partial<Moi> = {}): Moi {
 export function contexteDe(role: Role, autres: Partial<Contexte> = {}): Contexte {
   return {
     moi: moiDe(role),
+    menu: [],
+    heure_serveur: '2026-10-08T10:15:00+01:00',
+    roles_au_metre: ['cuir', 'franges', 'ruban'],
+    base_essai: false,
     societe: 'Tapis de l’Atlas',
     date_cloture: null,
     inventaires_ouverts: [],

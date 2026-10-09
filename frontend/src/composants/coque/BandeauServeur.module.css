@@ -18,11 +18,6 @@
   color: var(--ton-critique);
 }
 
-.attention {
-  background: var(--ton-attention-clair);
-  color: var(--ton-attention);
-}
-
 .info {
   background: var(--ton-accent-clair);
   color: var(--ton-accent);
