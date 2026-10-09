@@ -78,7 +78,9 @@
       "besoins": [81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6, 81.6],
       "action": "AUCUNE",
       "matiere_id": 6,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 2,
+      "role_id": 4
     },
     {
       "reference": "COTON CHAINE 12/6",
@@ -156,7 +158,9 @@
       "besoins": [168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3, 168.3],
       "action": "CREER_BC",
       "matiere_id": 4,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 3,
+      "role_id": 2
     },
     {
       "reference": "FRANGE COTON Écru",
@@ -234,7 +238,9 @@
       "besoins": [1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53, 1.53],
       "action": "AUCUNE",
       "matiere_id": 5,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 2,
+      "role_id": 6
     },
     {
       "reference": "IMP FRISÉ ROUGE",
@@ -314,7 +320,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 7,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 4,
+      "role_id": 1
     },
     {
       "reference": "JUTE TRAME 4 Ply",
@@ -396,7 +404,9 @@
       ],
       "action": "CREER_BC",
       "matiere_id": 3,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 3,
+      "role_id": 3
     },
     {
       "reference": "PP FRZ-2900 Bleu",
@@ -474,7 +484,9 @@
       "besoins": [306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0, 306.0],
       "action": "CREER_BC",
       "matiere_id": 2,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 1,
+      "role_id": 1
     },
     {
       "reference": "PP FRZ-2900 Rouge",
@@ -554,7 +566,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 1,
-      "valeur_machine_mad": 420.0
+      "valeur_machine_mad": 420.0,
+      "fournisseur_id": 1,
+      "role_id": 1
     },
     {
       "reference": "PP FRZ-2900 Rouge (Fès)",
@@ -632,7 +646,9 @@
       "besoins": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
       "action": "AUCUNE",
       "matiere_id": 8,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 3,
+      "role_id": 1
     }
   ]
 }

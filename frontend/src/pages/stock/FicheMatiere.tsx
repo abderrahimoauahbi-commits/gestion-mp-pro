@@ -272,7 +272,7 @@ export function FicheMatiere({
           fiche={fiche.data}
           a={a}
           voitPrix={voitPrix}
-          fournisseur={catalogue?.fournisseur_id ?? null}
+          fournisseur={l?.fournisseur_id ?? null}
           onSuivre={onSuivre}
         />
       ) : null}

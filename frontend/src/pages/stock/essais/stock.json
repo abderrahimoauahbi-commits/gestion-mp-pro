@@ -81,7 +81,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 6,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 2,
+      "role_id": null
     },
     {
       "reference": "COTON CHAINE 12/6",
@@ -162,7 +164,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 4,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 3,
+      "role_id": null
     },
     {
       "reference": "FRANGE COTON Écru",
@@ -240,7 +244,9 @@
       "besoins": [0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612, 0.612],
       "action": "AUCUNE",
       "matiere_id": 5,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 2,
+      "role_id": null
     },
     {
       "reference": "JUTE TRAME 4 Ply",
@@ -321,7 +327,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 3,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 3,
+      "role_id": null
     },
     {
       "reference": "PP FRZ-2900 Bleu",
@@ -399,7 +407,9 @@
       "besoins": [61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2, 61.2],
       "action": "AUCUNE",
       "matiere_id": 2,
-      "valeur_machine_mad": 0.0
+      "valeur_machine_mad": 0.0,
+      "fournisseur_id": 1,
+      "role_id": null
     },
     {
       "reference": "PP FRZ-2900 Rouge",
@@ -480,7 +490,9 @@
       ],
       "action": "AUCUNE",
       "matiere_id": 1,
-      "valeur_machine_mad": 30.0
+      "valeur_machine_mad": 30.0,
+      "fournisseur_id": 1,
+      "role_id": null
     }
   ]
 }

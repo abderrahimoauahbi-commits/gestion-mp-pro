@@ -62,7 +62,7 @@ export function lignesMatieres(etat: EtatStock | undefined, matieres: readonly M
   return (etat?.lignes ?? [])
     .map((l): LigneMatiere => {
       const m = l.matiere_id != null ? parId.get(l.matiere_id) : undefined
-      return { ...l, role: m?.role ?? '', fournisseur_id: m?.fournisseur_id ?? null }
+      return { ...l, role: m?.role ?? '', fournisseur_id: l.fournisseur_id ?? null }
     })
     .sort(
       (a, b) =>

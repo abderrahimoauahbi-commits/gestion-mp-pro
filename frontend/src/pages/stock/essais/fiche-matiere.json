@@ -78,7 +78,9 @@
     ],
     "action": "AUCUNE",
     "matiere_id": 1,
-    "valeur_machine_mad": 30.0
+    "valeur_machine_mad": 30.0,
+    "fournisseur_id": 1,
+    "role_id": null
   },
   "besoins_par_qualite": [
     {
