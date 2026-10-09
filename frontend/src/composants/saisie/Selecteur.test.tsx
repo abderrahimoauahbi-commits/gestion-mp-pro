@@ -63,6 +63,24 @@ describe('Selecteur', () => {
     expect(vu).toHaveBeenCalledWith(2)
   })
 
+  it('le focus seul n’ouvre pas la liste ; ↓ l’ouvre sur la première option, la frappe aussi', async () => {
+    render(
+      <Fenetre titre="Ligne" onFermer={() => {}}>
+        <Essai />
+      </Fenetre>,
+    )
+    const champ = screen.getByRole('combobox')
+    expect(champ).toHaveFocus()
+    expect(champ).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(champ).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getAllByRole('option')[0]).toHaveAttribute('aria-selected', 'true')
+    await userEvent.keyboard('{Escape}')
+    await userEvent.keyboard('coton')
+    expect(screen.getAllByRole('option')).toHaveLength(1)
+  })
+
   it('Échap ferme la liste sans fermer la fenêtre ; un second Échap la ferme', async () => {
     const fermer = vi.fn()
     render(
@@ -72,6 +90,7 @@ describe('Selecteur', () => {
     )
     const champ = screen.getByRole('combobox')
     expect(champ).toHaveFocus()
+    await userEvent.keyboard('{ArrowDown}')
     expect(champ).toHaveAttribute('aria-expanded', 'true')
     await userEvent.keyboard('{Escape}')
     expect(champ).toHaveAttribute('aria-expanded', 'false')
