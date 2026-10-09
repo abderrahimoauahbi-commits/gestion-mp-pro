@@ -1,3 +1,12 @@
+[Lot K8B — réception bi-devise scindée] Cette passe (PRO 2b6c34c, lot-K8B avant le merge de
+main) PROUVE le lot : K8b est réécrite en « réception scindée » (K8b 277 expliqués) et le
+total « À CORRIGER » est 0. Après `git merge main`, un nouveau tirage donne 27 111 écarts,
+TOUS dus au changement de forme des codes du stock livré par RESTES3 (emoji « 🟡 ATTENTION »
+→ code « ATTENTION », + role_id/fournisseur_id ; cockpit, stock, plan d'achat, pilotage),
+documenté RESTES3.md §1.1 comme travail de R2/C1 — AUCUN ne touche la devise ni la scission.
+La réconciliation de cette forme n'appartient pas au lot K8B (hors des fichiers cités) ; à
+router vers C1. Voir le rapport du lot et docs/lots/R1.md.
+
 PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
 le 2026-10-09 14:32 · Gestion MP d10180e · PRO 2b6c34c
 source : gestion_mp_comparaison (copie : gestion_mp_pro_k8b_source_essai) → PRO gestion_mp_pro_k8b_cible_essai
