@@ -1,6 +1,6 @@
 # Comparaison avec Gestion MP — Production de Gestion MP (référentiels réels, sa commande réelle)
 
-- Faite le **2026-10-09 18:13**, mode **moteurs**.
+- Faite le **2026-10-09 18:28**, mode **moteurs**.
 - Gestion MP servi : `d10180e` · Gestion MP PRO : `0.1.0 (projet)`.
 - Source : `gestion_mp` (copie en lecture seule) → base PRO reprise ; 13 date(s) : 2026-10-08, 2025-10-31, 2025-11-30, 2025-12-31, 2026-01-31, 2026-02-28, 2026-03-31, 2026-04-30, 2026-05-31, 2026-06-30, 2026-07-31, 2026-08-31, 2026-09-30.
 - Empreinte de `gestion_mp` et de la source : inchangées (aucune écriture).

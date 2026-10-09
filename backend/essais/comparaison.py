@@ -30,9 +30,25 @@ import comparaison_bases as cb
 import gestion_mp_calcul as calcul
 import parite_api_passe as api
 import parite_bases as pb
+import parite_chaine_base as pcb
 import parite_donnees as pd
 import parite_serveurs as srv
 import parite_statique as st
+
+
+def _contexte_scinde(bases: pb.Bases, dossier: Path) -> pd.Contexte:
+    """K8b : le dépôt de Gestion MP relu sur une copie où les réceptions bi-devises sont
+    scindées (comme `parite_gestion_mp.donnees_scindees`)."""
+    adresse = pb.url(f"{bases.prefixe}_scindee_essai")
+    try:
+        pb.copier(bases.copie.rsplit("/", 1)[-1], adresse)
+        comptes = pcb.traduire(adresse, "K8b")
+        (dossier / "scindee").mkdir(parents=True, exist_ok=True)
+        d0s = st.donnees_gestion_mp(adresse, dossier / "scindee")["donnees"]
+    finally:
+        pb.supprimer(adresse)
+    return pd.lire_contexte(d0s, comptes["reception.scindee"])
+
 
 Saboteur = Callable[[dict[str, Any]], list[str]]
 """Perturbe les sorties de PRO (moteurs) ; rend la liste des fautes réellement injectées."""
@@ -92,7 +108,7 @@ def comparer_moteurs(  # noqa: PLR0917
     d0 = st.donnees_gestion_mp(bases.copie, dossier)["donnees"]
     complet = st.donnees_pro(bases.pro)
     dpro = pd.sans_index(json.loads(calcul.texte_json(complet)))
-    ecarts = pd.ecarts(d0, dpro, pd.lire_contexte(bases.copie))
+    ecarts = pd.ecarts(d0, dpro, _contexte_scinde(bases, dossier))
     chaine = pd.chaine(d0, ecarts)
     jeux = st.ecrire_jeux(dossier, d0, chaine)
     st.calculer_gestion_mp(jeux, dossier, tuple(dates))
@@ -153,7 +169,7 @@ def comparer_api(  # noqa: PLR0917
     d0 = st.donnees_gestion_mp(bases.copie, dossier)["donnees"]
     complet = st.donnees_pro(bases.pro)
     dpro = pd.sans_index(json.loads(calcul.texte_json(complet)))
-    ecarts = pd.ecarts(d0, dpro, pd.lire_contexte(bases.copie))
+    ecarts = pd.ecarts(d0, dpro, _contexte_scinde(bases, dossier))
     jeux = {p.stem: p for p in st.ecrire_jeux(dossier, d0, pd.chaine(d0, ecarts))}
     with srv.demarrer(bases, dossier) as s:
         r.versions = dict(s.versions)

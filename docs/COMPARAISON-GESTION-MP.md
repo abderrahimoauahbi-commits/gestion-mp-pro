@@ -18,11 +18,11 @@ La comparaison a été jouée sur les deux bases de Gestion MP, telle une photo 
 | Base comparée | Dates | Valeurs comparées | Différences voulues | **À corriger** |
 |---|---|---:|---:|---:|
 | **Production** `gestion_mp` (référentiels réels : 124 matières, 18 qualités, 319 recettes, sa commande réelle) | aujourd'hui + 12 fins de mois | **292 359** | 0 | **0** |
-| **Année d'essai** `gestion_mp_comparaison` (import de l'ERP Fil : 10 438 mouvements, 317 réceptions, 320 ordres) | aujourd'hui + 12 fins de mois | **2 151 240** | 115 021 | **0** |
+| **Année d'essai** `gestion_mp_comparaison` (import de l'ERP Fil : 10 438 mouvements, 317 réceptions, 320 ordres) | aujourd'hui + 12 fins de mois | **2 151 240** | 114 926 | **0** |
 
 À quoi s'ajoute la parité de calcul de fond (lot R2), rejouée sur l'année d'essai à 19 dates,
 par l'écran (155 paires de routes) et geste par geste (un mois d'usine joué dans les deux
-logiciels) : **à corriger 0**, 188 705 différences toutes expliquées.
+logiciels) : **à corriger 0**, 188 579 différences toutes expliquées.
 
 Chaque nombre de l'état du stock (par magasin, sur les métiers, en quarantaine), de la
 valorisation (CMUP, valeurs), des besoins, du plan d'achat, des contrôles, du cockpit, du coût
@@ -50,7 +50,7 @@ de la source : sinon, elle serait « à corriger ». Voici toutes celles qui exi
 | Code | Ce que PRO fait | Pourquoi |
 |---|---|---|
 | **K8a** | Le prix des sorties, transferts et retours machine n'est pas repris (mis à 0). | Ces mouvements sont valorisés au coût moyen ; leur prix d'origine ne sert à rien et n'était pas fiable (8 747 lignes sur l'année d'essai). |
-| **K8b** | Une réception payée en **deux devises** garde un seul en-tête (la devise de la facture). | Scinder la réception changerait son numéro REC ; les prix des lignes sont gardés tels quels (4 réceptions). *À trancher par Mohamed s'il préfère des réceptions distinctes.* |
+| **K8b** | Une réception payée en **deux devises** est **scindée** en une réception par devise (chaque ligne garde sa devise). | Une réception n'a qu'une devise dans PRO ; le découpage garde les identifiants et les quantités, et les stocks et valeurs en dirhams sont inchangés (4 réceptions → 8). |
 | **K8c** | Une unité d'achat sans contenance (« Palette ») est lue au kilo. | Gestion MP déduisait déjà la palette du catalogue : même stock. |
 | **K8d** | Un brouillon qui portait un numéro le perd (le numéro est gardé pour n'être jamais redonné). | Dans PRO, un brouillon n'a pas de numéro tant qu'il n'est pas validé. |
 | **K8e** | Un ordre validé sans heure prend la fin de son jour (23:59:59). | C'est l'instant que le moteur de Gestion MP prenait déjà à défaut : même recette en vigueur. |
@@ -194,9 +194,10 @@ différences dans l'autre sens sont voulues :
   reste à faire par l'informaticien **le jour de la livraison** ; d'ici là, PRO n'est qu'un
   miroir.
 
-Quelques points de métier restent **ouverts pour Mohamed** : PRO garde exactement le
-comportement de Gestion MP et les signale (il ne change rien en silence). Le principal est la
-réception payée en deux devises (K8b) : à garder en l'état, ou à scinder en deux réceptions.
+Quelques points de métier restent **ouverts pour Mohamed** : là où Gestion MP n'avait pas
+tranché, PRO garde son comportement et le signale (il ne change rien en silence) — par exemple
+les prix de la bande et du cuir, le rôle « Franges », la valorisation à la facture. Ces points
+sont listés dans le rapport de reprise et dans `docs/heritage/DECISIONS.md`.
 
 ---
 
