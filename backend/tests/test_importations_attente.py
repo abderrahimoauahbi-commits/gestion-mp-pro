@@ -185,12 +185,17 @@ def test_une_facture_d_un_dossier_repris_n_ouvre_pas_un_second_dossier(
 ) -> None:
     """Hérité :
     test_importations::test_une_facture_d_un_dossier_repris_n_ouvre_pas_un_second_dossier,
-    test_defauts_b::test_dossier_repris_n_est_pas_a_la_main (B-11)."""
+    test_defauts_b::test_dossier_repris_n_est_pas_a_la_main (B-11),
+    test_importations_second_audit::test_la_saisie_a_la_main_est_reservee_aux_dossiers_d_avant
+    (dossier repris)."""
     imp: Import = reprise["imp"]
     d = fiche(achats, reprise["dossier"])
     assert d["repris"] and not d["a_la_main"]
     assert d["factures"] == sorted([imp.f("REP-FA"), imp.f("REP-FB")])
     assert d["actions"]["saisir"].startswith(f"Le dossier {d['numero']} porte des réceptions")
+    corps = {"matiere_id": imp.matiere("ROUGE"), "lot_numero": unique("NEUF"), "quantite_kg": 1}
+    refus = geste(achats, d, "lignes", 409, **corps, valeur_devise=1)
+    assert refus["detail"] == d["actions"]["saisir"]
     x = next(y for y in d["lignes"] if y["reception"] == reprise["ra1"]["numero"])
     assert x["reception_id"] == reprise["ra1"]["id"]
     r = achats.delete(f"/api/dossiers/{d['id']}/lignes/{x['id']}", params={"version": d["version"]})

@@ -303,7 +303,8 @@ def test_echeancier_du_dossier_regle_et_estime(achats: TestClient) -> None:
 def test_une_ligne_en_dirhams_se_fige_a_sa_valeur(
     achats: TestClient, direction: TestClient
 ) -> None:
-    """Hérité : test_importations_second_audit::test_une_ligne_en_dirhams_se_fige_a_sa_valeur —
+    """Hérité : test_importations_second_audit::test_une_ligne_en_dirhams_se_fige_a_sa_valeur,
+    et (partie API) test_importations::test_une_ligne_en_dirhams_n_a_pas_de_cours —
     1 000 et 3 000 MAD, transit 400 à la valeur : 1 100 / 3 300, inchangés après un changement
     de clé (répartition figée) ; une marchandise en MAD n'a jamais de cours (contrainte)."""
     imp = Import.nouveau(code="MAD", pays="")
