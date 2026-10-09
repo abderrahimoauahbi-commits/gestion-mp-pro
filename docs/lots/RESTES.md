@@ -29,3 +29,11 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D4 | D8 | Route 229 : appeler `services/factures.regler` (annulation par la direction seule, motif exigé) ; réutiliser `verifier_annulation_reglement` et `verifier_date_reglement` pour les frais ; porter les preuves de l'échéancier (domaine 7) et `test_suivi::test_l_atelier_signale_un_besoin_que_les_achats_traitent`. |
 | D4 | D7 | Remplacer la fabrique `fabriques/receptions.dossier` (dossier posé en base) par de vrais dossiers. |
 | D4 | docs | Écarts de D4 (docs/lots/D4.md § 4) : 169 `factures` par devise et `devise` sur les lignes (ECRANS-PRO 4.16 : liste) ; 170 une devise, rend la fiche ; 173 motif exigé ; 174 version de la réception ; 175–177, 181 plus riches ; 184 permise sur close ; 229 `motif` ; modules ajoutés (ARCHITECTURE § 3) ; refus de validation en 409 (essai hérité « deux postes » → [200, 409]). |
+| F6 | E0 | `lib/statuts.ts` : statuts d'inventaire « Annulé » et « Comptage en cours » (F6 tient sa table dans la page en attendant). |
+| F6 | D5 | Refus de libération de quarantaine : REGLES dit « achats » alors que la règle est « direction ou achats » — aligner le message. Historique d'une opération : sa place dans la fenêtre d'opération (ECRANS-PRO le cite sans la placer). |
+| F6 | V3 | `outils/routes_ecran.py` (tout appel de l'écran a sa route) n'existe pas encore. |
+| F3 | D8 | Routes 221–222 (signalements) : l'écran appelle `GET /signalements?mes=true` (filtrer par le compte) ; forme provisoire `SignalementFiche` dans `pages/atelier/types.ts` à remplacer par `Schema<…>`. |
+| F3 | D6 | `OrdreResume.metier` : rendre « CODE · Nom » (l'écran le reconstitue depuis /metiers). |
+| F3 | S4 | `GET /lots/{id}` rend `mouvements[].devise = "MAD"` à l'alimentation : retirer la devise pour elle. |
+| F3 | D2 | Un montage d'un seul étage fait au bureau (route 99) est rangé « téléphone » dans l'historique : poser l'origine réelle. |
+| F3 | E1 | `ScanQR` : rendre aussi le texte lu (QR à numéro → `GET /lots/scan`, messages « aucun lot » / « plusieurs lots ») ; `SelecteurLot` : suivre la forme de la route des lots disponibles ; `BoutonImprimer` 44 px en atelier ; 7 tuiles de l'accueil atelier à 360 × 640 (la page défile, sans débordement — textes à raccourcir ?). |

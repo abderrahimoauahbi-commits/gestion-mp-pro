@@ -45,7 +45,7 @@ describe('Arrivée et garde des écrans', () => {
     fauxServeur(reponsesConnecte('alimentation'))
     const app = monterApp('/')
     await waitFor(() => expect(app.adresse()).toBe('/atelier'))
-    expect(await screen.findByText(/Cet écran arrive avec le lot F3/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Atelier' })).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Menu principal' })).toBeNull()
   })
 

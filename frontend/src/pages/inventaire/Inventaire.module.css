@@ -1,0 +1,107 @@
+/* Inventaire : liste, ouverture, comptage (lot F6). Jetons seulement. */
+
+.negatif {
+  color: var(--ton-rupture);
+  font-weight: 600;
+}
+
+.positif {
+  color: var(--ton-ok);
+  font-weight: 600;
+}
+
+.valeur {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  font-weight: 400;
+}
+
+.cellule {
+  width: 92px;
+}
+
+.petit {
+  width: 64px;
+}
+
+.justification {
+  width: 210px;
+}
+
+/* Une justification qui manque : le champ en rouge (la ligne est marquée). */
+.manque input {
+  border-color: var(--ton-rupture);
+  box-shadow: inset 3px 0 0 var(--ton-rupture);
+}
+
+.gestes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.volet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-height: 0;
+}
+
+.vues {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.fenetre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+}
+
+.cases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-1) var(--espace-3);
+}
+
+.cases label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  min-height: 28px;
+}
+
+.eteinte td {
+  opacity: 0.5;
+}
+
+.puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-1);
+}
+
+.lot {
+  white-space: nowrap;
+}
+
+.enLigne {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--espace-1);
+  white-space: nowrap;
+}

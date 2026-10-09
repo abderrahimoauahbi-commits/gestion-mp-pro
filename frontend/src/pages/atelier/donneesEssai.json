@@ -1,0 +1,1498 @@
+{
+  "MAGASINS": [
+    {
+      "id": 2,
+      "code": "Quarantaine",
+      "nom": "Quarantaine",
+      "type": "quarantaine",
+      "contenu": "",
+      "actif": true,
+      "kg_detenus": 70.0,
+      "version": 1
+    },
+    {
+      "id": 3,
+      "code": "Atelier",
+      "nom": "Atelier tissage",
+      "type": "stock_courant",
+      "contenu": "",
+      "actif": true,
+      "kg_detenus": 110.0,
+      "version": 1
+    },
+    {
+      "id": 1,
+      "code": "Magasin principal",
+      "nom": "Magasin principal",
+      "type": "stock_courant",
+      "contenu": "",
+      "actif": true,
+      "kg_detenus": 1033.721,
+      "version": 1
+    }
+  ],
+  "MOTIFS": {
+    "types": [
+      {
+        "type": "ouverture",
+        "libelle": "Stock d'ouverture",
+        "roles": ["direction", "achats"]
+      },
+      {
+        "type": "retour_machine",
+        "libelle": "Retour des machines",
+        "roles": ["direction", "alimentation"]
+      },
+      {
+        "type": "transfert",
+        "libelle": "Transfert entre magasins",
+        "roles": ["direction", "achats", "alimentation"]
+      },
+      {
+        "type": "ajustement",
+        "libelle": "Ajustement justifié",
+        "roles": ["direction", "achats"]
+      },
+      {
+        "type": "retour_fournisseur",
+        "libelle": "Retour au fournisseur",
+        "roles": ["direction", "achats"]
+      },
+      {
+        "type": "inventaire",
+        "libelle": "Inventaire",
+        "roles": ["direction", "achats"]
+      }
+    ],
+    "motifs": [
+      {
+        "id": 8,
+        "type": "ajustement",
+        "libelle": "Écart constaté au comptage",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 9,
+        "type": "ajustement",
+        "libelle": "Matière retrouvée",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 10,
+        "type": "ajustement",
+        "libelle": "Perte / casse",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 11,
+        "type": "ajustement",
+        "libelle": "Correction de saisie",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 16,
+        "type": "inventaire",
+        "libelle": "Écart d'inventaire",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 4,
+        "type": "retour_fournisseur",
+        "libelle": "Non-conformité qualité",
+        "code_r": "R3",
+        "impose_role": null
+      },
+      {
+        "id": 5,
+        "type": "retour_fournisseur",
+        "libelle": "Excédent de réception",
+        "code_r": "R5",
+        "impose_role": null
+      },
+      {
+        "id": 6,
+        "type": "retour_fournisseur",
+        "libelle": "Bobines endommagées",
+        "code_r": "R6",
+        "impose_role": null
+      },
+      {
+        "id": 7,
+        "type": "retour_fournisseur",
+        "libelle": "Refus après quarantaine",
+        "code_r": "R3",
+        "impose_role": null
+      },
+      {
+        "id": 1,
+        "type": "retour_machine",
+        "libelle": "Reliquat de fin d'ordre",
+        "code_r": "R1",
+        "impose_role": null
+      },
+      {
+        "id": 2,
+        "type": "retour_machine",
+        "libelle": "Changement de série / arrêt machine",
+        "code_r": "R2",
+        "impose_role": null
+      },
+      {
+        "id": 3,
+        "type": "retour_machine",
+        "libelle": "Erreur de prélèvement",
+        "code_r": "R4",
+        "impose_role": null
+      },
+      {
+        "id": 12,
+        "type": "transfert",
+        "libelle": "Rangement",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 13,
+        "type": "transfert",
+        "libelle": "Libération de quarantaine",
+        "code_r": null,
+        "impose_role": "achats"
+      },
+      {
+        "id": 14,
+        "type": "transfert",
+        "libelle": "Mise en quarantaine",
+        "code_r": null,
+        "impose_role": null
+      },
+      {
+        "id": 15,
+        "type": "transfert",
+        "libelle": "Approvisionnement de l'atelier",
+        "code_r": null,
+        "impose_role": null
+      }
+    ],
+    "reclamation_motifs": [
+      {
+        "code": "qualite",
+        "libelle": "Qualité (défaut du fil)"
+      },
+      {
+        "code": "quantite_manquante",
+        "libelle": "Quantité manquante"
+      },
+      {
+        "code": "poids_bobines",
+        "libelle": "Poids des bobines"
+      },
+      {
+        "code": "bobines_endommagees",
+        "libelle": "Bobines endommagées"
+      },
+      {
+        "code": "retard",
+        "libelle": "Retard de livraison"
+      },
+      {
+        "code": "documents",
+        "libelle": "Documents (facture, BL, certificat)"
+      },
+      {
+        "code": "autre",
+        "libelle": "Autre"
+      }
+    ],
+    "reclamation_issues": [
+      {
+        "code": "avoir",
+        "libelle": "Avoir"
+      },
+      {
+        "code": "remplacement",
+        "libelle": "Remplacement"
+      },
+      {
+        "code": "remise",
+        "libelle": "Remise sur la prochaine commande"
+      },
+      {
+        "code": "refusee",
+        "libelle": "Refusée"
+      },
+      {
+        "code": "abandonnee",
+        "libelle": "Abandonnée"
+      }
+    ]
+  },
+  "QUALITES": [
+    {
+      "id": 1,
+      "code": "ATL-01",
+      "nom": "Atlas classique",
+      "actif": true,
+      "version": 2,
+      "base_mensuelle": 0.0,
+      "saisonnalite": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "poids": [
+        {
+          "role_id": 1,
+          "role": "Poil",
+          "lineaire": false,
+          "poids": 1.2
+        },
+        {
+          "role_id": 2,
+          "role": "Chaîne",
+          "lineaire": false,
+          "poids": 0.4
+        },
+        {
+          "role_id": 3,
+          "role": "Trame",
+          "lineaire": false,
+          "poids": 0.3
+        }
+      ],
+      "recette": [
+        {
+          "qualite_id": 1,
+          "qualite": "ATL-01",
+          "matiere_id": 1,
+          "reference": "POIL ROUGE 2900",
+          "role_id": 1,
+          "role": "Poil",
+          "lineaire": false,
+          "nature": "",
+          "designation": "Poil acrylique rouge",
+          "fournisseur": "Filature du Rif",
+          "pourcentage": 60.0,
+          "kg_m2": 0.72,
+          "ml_m2": null,
+          "densite": 0.0,
+          "prix_kg": null,
+          "prix": null,
+          "unite_prix": null,
+          "devise_prix": null,
+          "cout_m2_mad": null
+        },
+        {
+          "qualite_id": 1,
+          "qualite": "ATL-01",
+          "matiere_id": 2,
+          "reference": "POIL BEIGE 1100",
+          "role_id": 1,
+          "role": "Poil",
+          "lineaire": false,
+          "nature": "",
+          "designation": "Poil acrylique beige",
+          "fournisseur": "Filature du Rif",
+          "pourcentage": 40.0,
+          "kg_m2": 0.48,
+          "ml_m2": null,
+          "densite": 0.0,
+          "prix_kg": null,
+          "prix": null,
+          "unite_prix": null,
+          "devise_prix": null,
+          "cout_m2_mad": null
+        },
+        {
+          "qualite_id": 1,
+          "qualite": "ATL-01",
+          "matiere_id": 3,
+          "reference": "CHAINE COTON 12",
+          "role_id": 2,
+          "role": "Chaîne",
+          "lineaire": false,
+          "nature": "",
+          "designation": "Chaîne coton",
+          "fournisseur": "Filature du Rif",
+          "pourcentage": 100.0,
+          "kg_m2": 0.4,
+          "ml_m2": null,
+          "densite": 0.0,
+          "prix_kg": null,
+          "prix": null,
+          "unite_prix": null,
+          "devise_prix": null,
+          "cout_m2_mad": null
+        },
+        {
+          "qualite_id": 1,
+          "qualite": "ATL-01",
+          "matiere_id": 4,
+          "reference": "TRAME JUTE 8",
+          "role_id": 3,
+          "role": "Trame",
+          "lineaire": false,
+          "nature": "",
+          "designation": "Trame jute",
+          "fournisseur": "Filature du Rif",
+          "pourcentage": 100.0,
+          "kg_m2": 0.3,
+          "ml_m2": null,
+          "densite": 0.0,
+          "prix_kg": null,
+          "prix": null,
+          "unite_prix": null,
+          "devise_prix": null,
+          "cout_m2_mad": null
+        }
+      ],
+      "controle": {
+        "roles_utilises": 3,
+        "roles_conformes": 3,
+        "ecarts": [],
+        "conforme": true
+      },
+      "kg_m2": 1.9,
+      "cout_m2_mad": null,
+      "fabrications": 2,
+      "facteurs_cout": {
+        "perte": 1.02,
+        "cours": null
+      }
+    }
+  ],
+  "METIERS": [
+    {
+      "id": 3,
+      "code": "M3",
+      "nom": "Ancien métier",
+      "laize": 4.0,
+      "bobines_par_metre": 300.0,
+      "etages": 4,
+      "actif": false,
+      "commentaire": "",
+      "version": 1,
+      "fils": [],
+      "poids": 0.0,
+      "sur_les_metiers": 0.0,
+      "valeur_mad": null,
+      "bobines": 0.0,
+      "metres": 0.0,
+      "etages_detail": [
+        {
+          "etage": 1,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 2,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 3,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 4,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        }
+      ],
+      "etages_garnis": 0,
+      "etages_trop_larges": [],
+      "densite_a_saisir": false,
+      "fils_sans_poids": 0,
+      "ordres": 0,
+      "tolerance_bobine": 0.05,
+      "dernier_montage": null
+    },
+    {
+      "id": 1,
+      "code": "M1",
+      "nom": "Van de Wiele n° 1",
+      "laize": 4.2,
+      "bobines_par_metre": 320.0,
+      "etages": 6,
+      "actif": true,
+      "commentaire": "",
+      "version": 1,
+      "fils": [
+        {
+          "id": 2,
+          "matiere_id": 1,
+          "reference": "POIL ROUGE 2900",
+          "designation": "Poil acrylique rouge",
+          "fournisseur": "Filature du Rif",
+          "etage": 1,
+          "metres": 1.5,
+          "pourcentage": 100.0,
+          "commentaire": "",
+          "bobines": 480.0,
+          "poids_bobine": 2.4952,
+          "poids_bobine_utilise": 2.4952,
+          "source_poids": "catalogue",
+          "ecart_mesure": null,
+          "ecart_hors_tolerance": false,
+          "poids": 1197.696,
+          "valeur_mad": null
+        }
+      ],
+      "poids": 1197.696,
+      "sur_les_metiers": 1197.696,
+      "valeur_mad": null,
+      "bobines": 480.0,
+      "metres": 1.5,
+      "etages_detail": [
+        {
+          "etage": 1,
+          "version": 3,
+          "fils": 1,
+          "metres": 1.5,
+          "bobines": 480.0,
+          "poids": 1197.696,
+          "trop_large": false,
+          "monte_le": "2026-10-09T10:12:11.199672Z",
+          "monte_par": "Ahmed"
+        },
+        {
+          "etage": 2,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 3,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 4,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 5,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 6,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        }
+      ],
+      "etages_garnis": 1,
+      "etages_trop_larges": [],
+      "densite_a_saisir": false,
+      "fils_sans_poids": 0,
+      "ordres": 1,
+      "tolerance_bobine": 0.05,
+      "dernier_montage": {
+        "par": "Ahmed",
+        "quand": "2026-10-09T10:12:11.203428Z",
+        "etage": 1,
+        "effet_kg": -2155.853
+      }
+    },
+    {
+      "id": 2,
+      "code": "M2",
+      "nom": "Van de Wiele n° 2",
+      "laize": 4.2,
+      "bobines_par_metre": 320.0,
+      "etages": 6,
+      "actif": true,
+      "commentaire": "",
+      "version": 1,
+      "fils": [],
+      "poids": 0.0,
+      "sur_les_metiers": 0.0,
+      "valeur_mad": null,
+      "bobines": 0.0,
+      "metres": 0.0,
+      "etages_detail": [
+        {
+          "etage": 1,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 2,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 3,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 4,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 5,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        },
+        {
+          "etage": 6,
+          "version": 1,
+          "fils": 0,
+          "metres": 0.0,
+          "bobines": 0.0,
+          "poids": 0.0,
+          "trop_large": false,
+          "monte_le": null,
+          "monte_par": null
+        }
+      ],
+      "etages_garnis": 0,
+      "etages_trop_larges": [],
+      "densite_a_saisir": false,
+      "fils_sans_poids": 0,
+      "ordres": 0,
+      "tolerance_bobine": 0.05,
+      "dernier_montage": null
+    }
+  ],
+  "MATIERES_MONTAGE": [
+    {
+      "matiere_id": 3,
+      "reference": "CHAINE COTON 12",
+      "designation": "Chaîne coton",
+      "actif": true,
+      "poids_bobine_catalogue": 3.2,
+      "poids_bobine_compte": 3.2,
+      "origine_poids": "catalogue",
+      "sorti_30_j": 81.6,
+      "deja_monte": 0.0,
+      "jours": 30
+    },
+    {
+      "matiere_id": 2,
+      "reference": "POIL BEIGE 1100",
+      "designation": "Poil acrylique beige",
+      "actif": true,
+      "poids_bobine_catalogue": 2.5,
+      "poids_bobine_compte": 2.5,
+      "origine_poids": "catalogue",
+      "sorti_30_j": 98.96,
+      "deja_monte": 0.0,
+      "jours": 30
+    },
+    {
+      "matiere_id": 5,
+      "reference": "POIL GRIS 450",
+      "designation": "Poil gris",
+      "actif": true,
+      "poids_bobine_catalogue": 2.6,
+      "poids_bobine_compte": 2.6,
+      "origine_poids": "catalogue",
+      "sorti_30_j": 0.0,
+      "deja_monte": 0.0,
+      "jours": 30
+    },
+    {
+      "matiere_id": 1,
+      "reference": "POIL ROUGE 2900",
+      "designation": "Poil acrylique rouge",
+      "actif": true,
+      "poids_bobine_catalogue": 2.4952,
+      "poids_bobine_compte": 2.4952,
+      "origine_poids": "catalogue",
+      "sorti_30_j": 74.519,
+      "deja_monte": 1197.696,
+      "jours": 30
+    },
+    {
+      "matiere_id": 4,
+      "reference": "TRAME JUTE 8",
+      "designation": "Trame jute",
+      "actif": true,
+      "poids_bobine_catalogue": 0.0,
+      "poids_bobine_compte": 0.0,
+      "origine_poids": "",
+      "sorti_30_j": 61.2,
+      "deja_monte": 0.0,
+      "jours": 30
+    }
+  ],
+  "ORDRE_VALIDE": {
+    "id": 1,
+    "version": 2,
+    "numero": "OF-2026-0001",
+    "statut": "valide",
+    "date": "2026-10-08",
+    "magasin_id": 1,
+    "magasin": "Magasin principal",
+    "metier_id": 1,
+    "metier": "Van de Wiele n° 1",
+    "commentaire": "Équipe du matin",
+    "cree_par": "MAZARI",
+    "cree_le": "2026-10-09T09:43:10.535950Z",
+    "valide_par": "MAZARI",
+    "valide_le": "2026-10-09T09:43:10.569325Z",
+    "annule_par": "",
+    "annule_le": null,
+    "annulation_motif": "",
+    "prevu_fige": true,
+    "taux_perte": 0.02,
+    "qualites": [
+      {
+        "qualite_id": 1,
+        "qualite": "ATL-01",
+        "nom": "Atlas classique",
+        "m2": 100.0
+      }
+    ],
+    "fabrication": "ATL-01 100 m²",
+    "m2": 100.0,
+    "total": 193.8,
+    "retours": [],
+    "revenu": 0.0,
+    "prevu": 193.8,
+    "net": 193.8,
+    "ecart": 0.0,
+    "ecart_relatif": 0.0,
+    "lots": ["L-2601", "L-2603", "L-2604", "L-2605"],
+    "matieres": ["CHAINE COTON 12", "POIL BEIGE 1100", "POIL ROUGE 2900", "TRAME JUTE 8"],
+    "blocages": [],
+    "lignes": [
+      {
+        "id": 1,
+        "matiere_id": 3,
+        "reference": "CHAINE COTON 12",
+        "designation": "Chaîne coton",
+        "kg_par_ml": 0.0,
+        "lot_id": 4,
+        "lot": "L-2604",
+        "quantite": 40.8,
+        "poids_bobine": 3.2,
+        "bobines_palette": 36.0,
+        "bobines": null
+      },
+      {
+        "id": 2,
+        "matiere_id": 2,
+        "reference": "POIL BEIGE 1100",
+        "designation": "Poil acrylique beige",
+        "kg_par_ml": 0.0,
+        "lot_id": 3,
+        "lot": "L-2603",
+        "quantite": 48.96,
+        "poids_bobine": 2.5,
+        "bobines_palette": 40.0,
+        "bobines": null
+      },
+      {
+        "id": 3,
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "designation": "Poil acrylique rouge",
+        "kg_par_ml": 0.0,
+        "lot_id": 1,
+        "lot": "L-2601",
+        "quantite": 73.44,
+        "poids_bobine": 2.4952,
+        "bobines_palette": 40.0,
+        "bobines": null
+      },
+      {
+        "id": 4,
+        "matiere_id": 4,
+        "reference": "TRAME JUTE 8",
+        "designation": "Trame jute",
+        "kg_par_ml": 0.0,
+        "lot_id": 5,
+        "lot": "L-2605",
+        "quantite": 30.6,
+        "poids_bobine": 0.0,
+        "bobines_palette": 0.0,
+        "bobines": null
+      }
+    ],
+    "par_matiere": [
+      {
+        "matiere_id": 3,
+        "reference": "CHAINE COTON 12",
+        "quantite": 40.8,
+        "prevu": 40.8,
+        "ecart": 0.0,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 2,
+        "reference": "POIL BEIGE 1100",
+        "quantite": 48.96,
+        "prevu": 48.96,
+        "ecart": 0.0,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "quantite": 73.44,
+        "prevu": 73.44,
+        "ecart": 0.0,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      },
+      {
+        "matiere_id": 4,
+        "reference": "TRAME JUTE 8",
+        "quantite": 30.6,
+        "prevu": 30.6,
+        "ecart": 0.0,
+        "hors_recette": false,
+        "kg_par_ml": 0.0
+      }
+    ],
+    "message": ""
+  },
+  "LOTS_SORTIS": [
+    {
+      "lot_id": 1,
+      "lot": "L-2601",
+      "matiere_id": 1,
+      "reference": "POIL ROUGE 2900",
+      "designation": "Poil acrylique rouge",
+      "sorti_net": 73.44,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 2.4952,
+      "bobines_palette": 40.0,
+      "blocage": ""
+    },
+    {
+      "lot_id": 3,
+      "lot": "L-2603",
+      "matiere_id": 2,
+      "reference": "POIL BEIGE 1100",
+      "designation": "Poil acrylique beige",
+      "sorti_net": 48.96,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "blocage": ""
+    },
+    {
+      "lot_id": 4,
+      "lot": "L-2604",
+      "matiere_id": 3,
+      "reference": "CHAINE COTON 12",
+      "designation": "Chaîne coton",
+      "sorti_net": 40.8,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 3.2,
+      "bobines_palette": 36.0,
+      "blocage": ""
+    },
+    {
+      "lot_id": 5,
+      "lot": "L-2605",
+      "matiere_id": 4,
+      "reference": "TRAME JUTE 8",
+      "designation": "Trame jute",
+      "sorti_net": 30.6,
+      "kg_par_ml": 0.0,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "blocage": ""
+    }
+  ],
+  "LOTS": [
+    {
+      "lot_id": 4,
+      "lot": "L-2604",
+      "interne": false,
+      "matiere_id": 3,
+      "reference": "CHAINE COTON 12",
+      "designation": "Chaîne coton",
+      "role": "Chaîne",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 3.2,
+      "bobines_palette": 36.0,
+      "quantite": 318.4,
+      "disponible": 318.4,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 318.4
+        }
+      ],
+      "bobines": 100,
+      "statut": "disponible",
+      "historique": {
+        "entre": 400.0,
+        "sorti": 81.6,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": [
+          {
+            "id": 1,
+            "numero": "OF-2026-0001"
+          },
+          {
+            "id": 2,
+            "numero": "OF-2026-0002"
+          }
+        ]
+      }
+    },
+    {
+      "lot_id": 3,
+      "lot": "L-2603",
+      "interne": false,
+      "matiere_id": 2,
+      "reference": "POIL BEIGE 1100",
+      "designation": "Poil acrylique beige",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 201.04,
+      "disponible": 201.04,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 201.04
+        }
+      ],
+      "bobines": 80,
+      "statut": "disponible",
+      "historique": {
+        "entre": 300.0,
+        "sorti": 98.96,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": [
+          {
+            "id": 1,
+            "numero": "OF-2026-0001"
+          },
+          {
+            "id": 2,
+            "numero": "OF-2026-0002"
+          }
+        ]
+      }
+    },
+    {
+      "lot_id": 7,
+      "lot": "L-2607",
+      "interne": false,
+      "matiere_id": 2,
+      "reference": "POIL BEIGE 1100",
+      "designation": "Poil acrylique beige",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "quantite": 60.0,
+      "disponible": 0.0,
+      "quarantaine": 60.0,
+      "magasins": [
+        {
+          "magasin_id": 2,
+          "magasin": "Quarantaine",
+          "type": "quarantaine",
+          "quantite": 60.0
+        }
+      ],
+      "bobines": 24,
+      "statut": "quarantaine",
+      "historique": {
+        "entre": 60.0,
+        "sorti": 0.0,
+        "dernier_mouvement": "2026-10-01",
+        "ordres": []
+      }
+    },
+    {
+      "lot_id": 6,
+      "lot": "L-2606",
+      "interne": false,
+      "matiere_id": 5,
+      "reference": "POIL GRIS 450",
+      "designation": "Poil gris",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 2.6,
+      "bobines_palette": 40.0,
+      "quantite": 120.0,
+      "disponible": 110.0,
+      "quarantaine": 10.0,
+      "magasins": [
+        {
+          "magasin_id": 3,
+          "magasin": "Atelier",
+          "type": "stock_courant",
+          "quantite": 110.0
+        },
+        {
+          "magasin_id": 2,
+          "magasin": "Quarantaine",
+          "type": "quarantaine",
+          "quantite": 10.0
+        }
+      ],
+      "bobines": 46,
+      "statut": "partiel",
+      "historique": {
+        "entre": 120.0,
+        "sorti": 0.0,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": []
+      }
+    },
+    {
+      "lot_id": 1,
+      "lot": "L-2601",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "POIL ROUGE 2900",
+      "designation": "Poil acrylique rouge",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 2.4952,
+      "bobines_palette": 40.0,
+      "quantite": 175.481,
+      "disponible": 175.481,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 175.481
+        }
+      ],
+      "bobines": 70,
+      "statut": "disponible",
+      "historique": {
+        "entre": 250.0,
+        "sorti": 74.519,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": [
+          {
+            "id": 1,
+            "numero": "OF-2026-0001"
+          },
+          {
+            "id": 2,
+            "numero": "OF-2026-0002"
+          }
+        ]
+      }
+    },
+    {
+      "lot_id": 2,
+      "lot": "L-2602",
+      "interne": false,
+      "matiere_id": 1,
+      "reference": "POIL ROUGE 2900",
+      "designation": "Poil acrylique rouge",
+      "role": "Poil",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 2.4952,
+      "bobines_palette": 40.0,
+      "quantite": 180.0,
+      "disponible": 180.0,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 180.0
+        }
+      ],
+      "bobines": 72,
+      "statut": "disponible",
+      "historique": {
+        "entre": 180.0,
+        "sorti": 0.0,
+        "dernier_mouvement": "2026-10-01",
+        "ordres": []
+      }
+    },
+    {
+      "lot_id": 5,
+      "lot": "L-2605",
+      "interne": false,
+      "matiere_id": 4,
+      "reference": "TRAME JUTE 8",
+      "designation": "Trame jute",
+      "role": "Trame",
+      "kg_par_ml": 0.0,
+      "fournisseur": "Filature du Rif",
+      "entre_le": "2026-10-01",
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "quantite": 158.8,
+      "disponible": 158.8,
+      "quarantaine": 0.0,
+      "magasins": [
+        {
+          "magasin_id": 1,
+          "magasin": "Magasin principal",
+          "type": "stock_courant",
+          "quantite": 158.8
+        }
+      ],
+      "bobines": null,
+      "statut": "disponible",
+      "historique": {
+        "entre": 220.0,
+        "sorti": 61.2,
+        "dernier_mouvement": "2026-10-09",
+        "ordres": [
+          {
+            "id": 1,
+            "numero": "OF-2026-0001"
+          },
+          {
+            "id": 2,
+            "numero": "OF-2026-0002"
+          }
+        ]
+      }
+    }
+  ],
+  "LOT": {
+    "lot_id": 1,
+    "lot": "L-2601",
+    "interne": false,
+    "matiere_id": 1,
+    "reference": "POIL ROUGE 2900",
+    "designation": "Poil acrylique rouge",
+    "role": "Poil",
+    "kg_par_ml": 0.0,
+    "fournisseur": "Filature du Rif",
+    "entre_le": "2026-10-01",
+    "poids_bobine": 2.4952,
+    "bobines_palette": 40.0,
+    "quantite": 175.481,
+    "disponible": 175.481,
+    "quarantaine": 0.0,
+    "magasins": [
+      {
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "type": "stock_courant",
+        "quantite": 175.481
+      }
+    ],
+    "bobines": 70,
+    "statut": "disponible",
+    "historique": {
+      "entre": 250.0,
+      "sorti": 74.519,
+      "dernier_mouvement": "2026-10-09",
+      "ordres": [
+        {
+          "id": 1,
+          "numero": "OF-2026-0001"
+        },
+        {
+          "id": 2,
+          "numero": "OF-2026-0002"
+        }
+      ]
+    },
+    "poids_bobine_le": null,
+    "commentaire": "",
+    "reception": null,
+    "mouvements": [
+      {
+        "id": 1,
+        "date": "2026-10-01",
+        "saisi_le": "2026-10-09T09:43:10.330563Z",
+        "type": "OUVERTURE",
+        "libelle": "Stock d'ouverture",
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "lot_id": 1,
+        "lot": "L-2601",
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "quantite": 250.0,
+        "prix": null,
+        "devise": "MAD",
+        "cours": null,
+        "document": "operation",
+        "document_id": 1,
+        "document_numero": "OUV-2026-0001",
+        "ordre_id": null,
+        "paire_id": null,
+        "motif": "",
+        "commentaire": "",
+        "auteur": "MAZARI",
+        "contrepasse_id": null,
+        "cout_mad": null,
+        "valeur_mad": null
+      },
+      {
+        "id": 10,
+        "date": "2026-10-08",
+        "saisi_le": "2026-10-09T09:43:10.591348Z",
+        "type": "SORTIE",
+        "libelle": "Sortie vers les machines",
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "lot_id": 1,
+        "lot": "L-2601",
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "quantite": -73.44,
+        "prix": null,
+        "devise": "MAD",
+        "cours": null,
+        "document": "ordre",
+        "document_id": 1,
+        "document_numero": "OF-2026-0001",
+        "ordre_id": 1,
+        "paire_id": null,
+        "motif": "",
+        "commentaire": "",
+        "auteur": "MAZARI",
+        "contrepasse_id": null,
+        "cout_mad": null,
+        "valeur_mad": null
+      },
+      {
+        "id": 14,
+        "date": "2026-10-09",
+        "saisi_le": "2026-10-09T10:03:56.402549Z",
+        "type": "SORTIE",
+        "libelle": "Sortie vers les machines",
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "lot_id": 1,
+        "lot": "L-2601",
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "quantite": -73.44,
+        "prix": null,
+        "devise": "MAD",
+        "cours": null,
+        "document": "ordre",
+        "document_id": 2,
+        "document_numero": "OF-2026-0002",
+        "ordre_id": 2,
+        "paire_id": null,
+        "motif": "",
+        "commentaire": "",
+        "auteur": "Ahmed",
+        "contrepasse_id": null,
+        "cout_mad": null,
+        "valeur_mad": null
+      },
+      {
+        "id": 16,
+        "date": "2026-10-09",
+        "saisi_le": "2026-10-09T10:04:23.333211Z",
+        "type": "RETOUR_MACHINE",
+        "libelle": "Retour des machines",
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "lot_id": 1,
+        "lot": "L-2601",
+        "magasin_id": 1,
+        "magasin": "Magasin principal",
+        "quantite": 72.361,
+        "prix": null,
+        "devise": "MAD",
+        "cours": null,
+        "document": "operation",
+        "document_id": 2,
+        "document_numero": "RET-2026-0001",
+        "ordre_id": 2,
+        "paire_id": null,
+        "motif": "Reliquat de fin d'ordre",
+        "commentaire": "",
+        "auteur": "Ahmed",
+        "contrepasse_id": null,
+        "cout_mad": null,
+        "valeur_mad": null
+      }
+    ],
+    "version": 1
+  },
+  "PROPOSITION": {
+    "date": "2026-10-09",
+    "magasin_id": 1,
+    "taux_perte": 0.02,
+    "prevu": 193.8,
+    "manque": 0.0,
+    "lignes": [
+      {
+        "matiere_id": 3,
+        "reference": "CHAINE COTON 12",
+        "designation": "Chaîne coton",
+        "role": "Chaîne",
+        "prevu": 40.8,
+        "kg_par_ml": 0.0,
+        "poids_bobine": 3.2,
+        "bobines_palette": 36.0,
+        "par_qualite": [
+          {
+            "qualite_id": 1,
+            "qualite": "ATL-01",
+            "kg": 40.8
+          }
+        ],
+        "lots": [
+          {
+            "lot_id": 4,
+            "lot": "L-2604",
+            "entre_le": "2026-10-01",
+            "disponible": 318.4,
+            "poids_bobine": 3.2,
+            "propose": 40.8
+          }
+        ],
+        "disponibles": [
+          {
+            "lot_id": 4,
+            "lot": "L-2604",
+            "entre_le": "2026-10-01",
+            "disponible": 318.4,
+            "poids_bobine": 3.2,
+            "propose": 40.8
+          }
+        ],
+        "manque": 0.0
+      },
+      {
+        "matiere_id": 2,
+        "reference": "POIL BEIGE 1100",
+        "designation": "Poil acrylique beige",
+        "role": "Poil",
+        "prevu": 48.96,
+        "kg_par_ml": 0.0,
+        "poids_bobine": 2.5,
+        "bobines_palette": 40.0,
+        "par_qualite": [
+          {
+            "qualite_id": 1,
+            "qualite": "ATL-01",
+            "kg": 48.96
+          }
+        ],
+        "lots": [
+          {
+            "lot_id": 3,
+            "lot": "L-2603",
+            "entre_le": "2026-10-01",
+            "disponible": 201.04,
+            "poids_bobine": 2.5,
+            "propose": 48.96
+          }
+        ],
+        "disponibles": [
+          {
+            "lot_id": 3,
+            "lot": "L-2603",
+            "entre_le": "2026-10-01",
+            "disponible": 201.04,
+            "poids_bobine": 2.5,
+            "propose": 48.96
+          }
+        ],
+        "manque": 0.0
+      },
+      {
+        "matiere_id": 1,
+        "reference": "POIL ROUGE 2900",
+        "designation": "Poil acrylique rouge",
+        "role": "Poil",
+        "prevu": 73.44,
+        "kg_par_ml": 0.0,
+        "poids_bobine": 2.4952,
+        "bobines_palette": 40.0,
+        "par_qualite": [
+          {
+            "qualite_id": 1,
+            "qualite": "ATL-01",
+            "kg": 73.44
+          }
+        ],
+        "lots": [
+          {
+            "lot_id": 1,
+            "lot": "L-2601",
+            "entre_le": "2026-10-01",
+            "disponible": 175.481,
+            "poids_bobine": 2.4952,
+            "propose": 73.44
+          }
+        ],
+        "disponibles": [
+          {
+            "lot_id": 1,
+            "lot": "L-2601",
+            "entre_le": "2026-10-01",
+            "disponible": 175.481,
+            "poids_bobine": 2.4952,
+            "propose": 73.44
+          },
+          {
+            "lot_id": 2,
+            "lot": "L-2602",
+            "entre_le": "2026-10-01",
+            "disponible": 180.0,
+            "poids_bobine": 2.4952,
+            "propose": 0.0
+          }
+        ],
+        "manque": 0.0
+      },
+      {
+        "matiere_id": 4,
+        "reference": "TRAME JUTE 8",
+        "designation": "Trame jute",
+        "role": "Trame",
+        "prevu": 30.6,
+        "kg_par_ml": 0.0,
+        "poids_bobine": 0.0,
+        "bobines_palette": 0.0,
+        "par_qualite": [
+          {
+            "qualite_id": 1,
+            "qualite": "ATL-01",
+            "kg": 30.6
+          }
+        ],
+        "lots": [
+          {
+            "lot_id": 5,
+            "lot": "L-2605",
+            "entre_le": "2026-10-01",
+            "disponible": 158.8,
+            "poids_bobine": 0.0,
+            "propose": 30.6
+          }
+        ],
+        "disponibles": [
+          {
+            "lot_id": 5,
+            "lot": "L-2605",
+            "entre_le": "2026-10-01",
+            "disponible": 158.8,
+            "poids_bobine": 0.0,
+            "propose": 30.6
+          }
+        ],
+        "manque": 0.0
+      }
+    ],
+    "manques": [],
+    "recettes_incompletes": [],
+    "blocages": []
+  }
+}

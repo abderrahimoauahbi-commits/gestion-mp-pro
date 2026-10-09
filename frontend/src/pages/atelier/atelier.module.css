@@ -1,0 +1,209 @@
+/* Les écrans de l'atelier au téléphone : cibles ≥ 44 px, champs de 46 px en 16 px (pas de zoom
+   d'iOS), aucun débordement à 360 px. Couleurs : jetons seulement. */
+
+.pile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-width: 0;
+}
+
+.pile :is(input, select, textarea) {
+  min-height: var(--champ-atelier);
+  font-size: var(--texte-atelier);
+}
+
+.pile :is(textarea) {
+  min-height: 96px;
+}
+
+.fiche {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-width: 0;
+  padding: var(--espace-3);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre);
+}
+
+.alerte {
+  border-color: var(--ton-critique);
+  border-left: var(--filet-ton) solid var(--ton-critique);
+  background: var(--ton-critique-clair);
+}
+
+.ok {
+  border-left: var(--filet-ton) solid var(--ton-ok);
+}
+
+.titreFiche {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+.ligne > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.valeur {
+  flex: none;
+  max-width: 60%;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.grand {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.note {
+  margin: 0;
+  color: var(--texte-2);
+  font-size: var(--taille-note-atelier);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.lienBouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--cible-tactile);
+  min-height: var(--champ-atelier);
+  padding: 0 18px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.lienBouton:hover {
+  text-decoration: none;
+}
+
+.principal {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--sur-accent);
+}
+
+.carteLien {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: var(--cible-tactile);
+  min-height: var(--cible-tactile);
+  padding: var(--espace-3);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre);
+  color: var(--texte);
+}
+
+.carteLien:hover {
+  text-decoration: none;
+}
+
+.carteLien.alerte {
+  border-left: var(--filet-ton) solid var(--ton-critique);
+}
+
+.lienTexte {
+  display: inline-flex;
+  align-items: center;
+  min-width: var(--cible-tactile);
+  min-height: var(--cible-tactile);
+}
+
+.gestes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}
+
+.adroite {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.grilleEtages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espace-2);
+}
+
+.etage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: var(--cible-tactile);
+  min-height: 56px;
+  padding: var(--espace-2) var(--espace-3);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.etage:hover {
+  text-decoration: none;
+}
+
+.garni {
+  background: var(--ton-ok-clair);
+}
+
+.tropLarge {
+  background: var(--ton-critique-clair);
+}
+
+.raison {
+  margin: 0;
+  color: var(--ton-critique);
+  font-size: var(--taille-note-atelier);
+}
+
+.prise {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: var(--espace-2);
+  border-top: 1px solid var(--bord);
+}
+
+.liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.imprimer a {
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  min-height: var(--champ-atelier);
+  font-size: 15px;
+}

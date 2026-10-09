@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Atelier au téléphone » (lot F3), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F3 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans de l'atelier au téléphone (lot F3, ECRANS-PRO partie 3), hors de la coque du bureau,
+ * rassemblés par `routes.ts`. Direction et alimentation ; les achats et l'administrateur sont
+ * renvoyés à leur accueil avec la raison (`EcranReserve`, an. 2). Le QR `/lot/:id` mène à la fiche
+ * du lot de l'atelier pour l'alimentation au téléphone, à celle du bureau sinon (App, lot E2).
+ * Chaque entrée est écrite en entier : `scripts/generer_notice.py` lit `chemin` et `aide` ici.
  */
 import type { Ecran } from '../../routes'
-
-const aVenir = () => import('../../composants/coque/EcranAVenir')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -16,8 +16,52 @@ export const ecrans: readonly Ecran[] = [
     roles: ['direction', 'alimentation'],
     aide: 'atelier',
     atelier: true,
-    lot: 'F3',
-    page: aVenir,
+    page: () => import('./Accueil'),
+  },
+  {
+    chemin: '/atelier/envoyer',
+    titre: 'Envoyer aux machines',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Envoyer'),
+  },
+  {
+    chemin: '/atelier/ordres',
+    titre: 'Ordres',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Ordres'),
+  },
+  {
+    chemin: '/atelier/ordres/:id',
+    titre: 'Ordre',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Ordre'),
+  },
+  {
+    chemin: '/atelier/retour',
+    titre: 'Retour des machines',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Retour'),
+  },
+  {
+    chemin: '/atelier/chercher',
+    titre: 'Trouver un lot',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Chercher'),
   },
   {
     chemin: '/atelier/lots/:id',
@@ -26,7 +70,33 @@ export const ecrans: readonly Ecran[] = [
     roles: ['direction', 'alimentation'],
     aide: 'atelier',
     atelier: true,
-    lot: 'F3',
-    page: aVenir,
+    page: () => import('./LotFiche'),
+  },
+  {
+    chemin: '/atelier/deplacer',
+    titre: 'Déplacer',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Deplacer'),
+  },
+  {
+    chemin: '/atelier/montage',
+    titre: 'Monter les fils',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Montage'),
+  },
+  {
+    chemin: '/atelier/signaler',
+    titre: 'Signaler un besoin',
+    parent: '/atelier',
+    roles: ['direction', 'alimentation'],
+    aide: 'atelier',
+    atelier: true,
+    page: () => import('./Signaler'),
   },
 ]
