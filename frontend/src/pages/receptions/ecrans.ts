@@ -1,18 +1,19 @@
 /**
- * Écrans du domaine « Réceptions » (lot F4), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F4 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Réceptions » (lot F4), rassemblés par `routes.ts`. Les fiches (réception,
+ * réclamation) et la saisie s'ouvrent en fenêtre par-dessus la liste (même page, adresse stable) ;
+ * les chemins fixes passent avant les chemins à paramètre.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Receptions')
+const roles = ['direction', 'achats'] as const
 
 export const ecrans: readonly Ecran[] = [
   {
     chemin: '/receptions',
     titre: 'Réceptions',
     groupe: 'Achats',
-    roles: ['direction', 'achats'],
+    roles,
     aide: 'receptions',
     onglets: [
       { cle: 'brouillon', libelle: 'Brouillons' },
@@ -22,16 +23,49 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'bobines', libelle: 'Poids des bobines', court: 'Bobines' },
       { cle: 'pesees', libelle: 'Archive des pesées', court: 'Pesées' },
     ],
-    lot: 'F4',
-    page: aVenir,
+    page,
   },
   {
     chemin: '/receptions/nouvelle',
     titre: 'Nouvelle réception',
     parent: '/receptions',
-    roles: ['direction', 'achats'],
-    aide: 'receptions',
-    lot: 'F4',
-    page: aVenir,
+    roles,
+    aide: 'reception_saisie',
+    page,
+  },
+  {
+    chemin: '/receptions/:id',
+    titre: 'Réception',
+    parent: '/receptions',
+    roles,
+    aide: 'reception',
+    onglets: [
+      { cle: 'lignes', libelle: 'Lignes pesées' },
+      { cle: 'reclamations', libelle: 'Réclamations' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
+  },
+  {
+    chemin: '/reclamations/nouvelle',
+    titre: 'Nouvelle réclamation',
+    parent: '/receptions',
+    roles,
+    aide: 'reclamation',
+    page,
+  },
+  {
+    chemin: '/reclamations/:id',
+    titre: 'Réclamation',
+    parent: '/receptions',
+    roles,
+    aide: 'reclamation',
+    onglets: [
+      { cle: 'reponse', libelle: 'Réponse du fournisseur' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]

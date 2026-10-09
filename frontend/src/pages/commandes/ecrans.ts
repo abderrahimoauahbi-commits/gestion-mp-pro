@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Commandes » (lot F4), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F4 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Commandes » (lot F4), rassemblés par `routes.ts`. Les fiches s'ouvrent en
+ * fenêtre par-dessus la liste (même page, adresse stable) ; le chemin fixe passe avant le chemin à
+ * paramètre.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Commandes')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -21,16 +21,31 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'confirmee', libelle: 'Confirmées' },
       { cle: 'clos', libelle: 'Soldées / annulées' },
     ],
-    lot: 'F4',
-    page: aVenir,
+    page,
   },
   {
     chemin: '/commandes/nouvelle',
     titre: 'Nouvelle commande',
     parent: '/commandes',
     roles: ['direction', 'achats'],
-    aide: 'commandes',
-    lot: 'F4',
-    page: aVenir,
+    aide: 'nouvelle_commande',
+    page,
+  },
+  {
+    chemin: '/commandes/:id',
+    titre: 'Bon de commande',
+    parent: '/commandes',
+    roles: ['direction', 'achats'],
+    aide: 'commande',
+    onglets: [
+      { cle: 'lignes', libelle: 'Lignes et livraison' },
+      { cle: 'prix', libelle: 'Prix du fournisseur', court: 'Prix' },
+      { cle: 'expedition', libelle: 'Suivi de l’expédition', court: 'Expédition' },
+      { cle: 'receptions', libelle: 'Réceptions' },
+      { cle: 'approbation', libelle: 'Approbation' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]

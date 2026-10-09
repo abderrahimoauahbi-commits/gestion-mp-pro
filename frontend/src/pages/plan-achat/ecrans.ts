@@ -1,11 +1,10 @@
 /**
- * Écrans du domaine « Plan d'achat » (lot F4), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F4 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Plan d'achat » (lot F4), rassemblés par `routes.ts`. La préparation s'ouvre
+ * en fenêtre par-dessus le plan, à adresse stable (même page).
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./PlanAchat')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -18,7 +17,14 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'fournisseurs', libelle: 'Par fournisseur' },
       { cle: 'references', libelle: 'Références à commander' },
     ],
-    lot: 'F4',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/plan-achat/preparer/:fournisseurId',
+    titre: 'Préparer une commande',
+    parent: '/plan-achat',
+    roles: ['direction', 'achats'],
+    aide: 'preparation',
+    page,
   },
 ]
