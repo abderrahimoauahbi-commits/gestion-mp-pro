@@ -49,6 +49,7 @@ class RoleFiche(Sortie):
     lineaire: bool
     de_base: bool
     ordre: int
+    version: int
     nb_matieres: int = 0
     nb_qualites: int = 0
 
@@ -73,13 +74,9 @@ class RoleCreation(Entree):
 
 
 class RoleModification(RoleCreation):
-    """Ordre et nom d'un rôle (route 59).
+    """Ordre et nom d'un rôle (route 59) ; `version` lue avec la fiche (409 si périmée)."""
 
-    `version` est accepté pour l'écran mais la table `role_nomenclature` n'a pas de colonne
-    `version` (écart signalé au coordinateur, docs/lots/D1.md) : il n'est pas contrôlé.
-    """
-
-    version: int | None = Field(default=None, ge=1)
+    version: int = Field(ge=1)
 
 
 class ValeurCreation(Entree):

@@ -57,6 +57,25 @@ def ip_reseau() -> str:
         return "127.0.0.1"
 
 
+PORTS_IMPLICITES = {"http": 80, "https": 443}
+
+
+def adresse_de(adresse_demandee: str, hote: str | None = None) -> str:
+    """L'adresse du serveur pour un autre poste : schéma et port **de la requête** ; l'hôte
+    donné, sinon celui de la requête (un nom local devient l'adresse IP du poste) ; port
+    implicite (80, 443) omis — derrière HTTPS, `https://nom` sans « :8050 » (G-13)."""
+    morceaux = urlsplit(adresse_demandee)
+    schema = morceaux.scheme or "http"
+    if hote is None:
+        hote = morceaux.hostname or "localhost"
+        if est_local(adresse_demandee):
+            hote = ip_reseau()
+    port = morceaux.port
+    if port is None or PORTS_IMPLICITES.get(schema) == port:
+        return f"{schema}://{hote}"
+    return f"{schema}://{hote}:{port}"
+
+
 def adresse_publique(s: Session) -> str:
     """Le réglage `adresse_publique`, sinon `GESTIONMPPRO_ADRESSE` (sans « / » final)."""
     p = s.get(Parametre, "adresse_publique")
@@ -75,13 +94,15 @@ class Acces:
 
 
 def acces(s: Session, adresse_demandee: str) -> Acces:
-    """Les adresses d'accès (route 5) ; `adresse_demandee` = celle par laquelle on appelle."""
-    r = reglages()
-    schema = "https" if r.https else "http"
-    reseau = f"{schema}://{ip_reseau()}:{r.port}"
-    machine = f"{schema}://{socket.gethostname().split('.')[0].lower()}:{r.port}"
-    publique = adresse_publique(s)
+    """Les adresses d'accès (route 5) ; `adresse_demandee` = celle par laquelle on appelle :
+    son schéma et son port font ceux des adresses rendues (G-13), sinon les réglages."""
     demandee = adresse_demandee.rstrip("/")
+    if not urlsplit(demandee).scheme:
+        r = reglages()
+        demandee = f"{'https' if r.https else 'http'}://localhost:{r.port}"
+    reseau = adresse_de(demandee, ip_reseau())
+    machine = adresse_de(demandee, socket.gethostname().split(".")[0].lower())
+    publique = adresse_publique(s)
     qr = publique or (demandee if demandee and not est_local(demandee) else reseau)
     adresses = [("Adresse réseau", reseau), ("Nom de la machine", machine)]
     if publique:

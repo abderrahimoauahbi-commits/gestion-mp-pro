@@ -90,11 +90,11 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/sante` | P | — | `Sante` {etat, version, schema (révision Alembic), schema_attendu, base_ms, sauvegarde_age_h, sauvegarde_alerte, taches, courriels_en_attente} | B1 |
+| 1 | GET | `/sante` | P | — | `Sante` {etat, version, schema (révision Alembic), schema_attendu, base_ms, sauvegarde_age_h, sauvegarde_alerte, taches `{tâche: "ok" \| "échec : …" \| "jamais" \| "en cours"}` (+ `restauration` dès qu'il y en a eu une), courriels_en_attente} | B1 |
 | 2 | GET | `/etat` | P | — | `EtatInstallation` {installe, societe, version} | B2 |
-| 3 | GET | `/contexte` | Tous | — | `Contexte` {moi, menu (entrées permises), heure_serveur, date_cloture, inventaires_ouverts [{numero, magasin, matieres}], societe, alerte_serveur (D, T)} | nouveau (remplace plusieurs lectures de démarrage) |
+| 3 | GET | `/contexte` | Tous | — | `Contexte` {moi, menu (entrées permises), heure_serveur, date_cloture, inventaires_ouverts [{numero, magasin, matieres}], societe, roles_au_metre, base_essai, compteurs {clé: nombre} (pastilles du menu), alerte_serveur (D, T)} | nouveau (remplace plusieurs lectures de démarrage) |
 | 4 | GET | `/serveur` | D, T | — | `EtatServeur` (versions, base, réseau, tâches, sauvegardes, sessions par compte) | B22 |
-| 5 | GET | `/acces` | C | — | `Acces` {adresses, adresse_publique, alerte_localhost} | B28 |
+| 5 | GET | `/acces` | C | — | `Acces` {adresses, adresse_publique, adresse_qr, alerte_localhost} (schéma et port **de la requête**, port implicite omis : derrière HTTPS, `https://nom` sans « :8050 », G-13) | B28 |
 | 6 | GET | `/acces/qr` | C | `?adresse=` | SVG | B29 |
 | 7 | GET | `/donnees/{table}` | D | `?date=` | JSON brut d'une table métier (liste fermée) pour la vérification indépendante | nouveau |
 
@@ -102,19 +102,19 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 8 | GET | `/visages` | P (poste local ou appareil enrôlé ; sinon liste vide) | — | `[Visage]` {id, nom, role, longueur_code} | B3 |
+| 8 | GET | `/visages` | P (poste local ou appareil enrôlé ; sinon liste vide) | — | `[Visage]` {id, nom, role, role_libelle, longueur_code} | B3 |
 | 9 | POST | `/installation` | P (une fois) | `Installation` {societe, identifiant, nom, code} | `Moi` | B4 |
-| 10 | POST | `/connexion` | P | `Connexion` {identifiant, code} | `Moi` (cookie) | B5 |
+| 10 | POST | `/connexion` | P | `Connexion` {identifiant \| compte (id du visage : poste local ou appareil enrôlé, 403 `poste_non_autorise` sinon), code} | `Moi` (cookie) | B5 |
 | 11 | POST | `/deconnexion` | Tous | — | 204 | B6 |
-| 12 | GET | `/moi` | Tous | — | `Moi` {id, identifiant, nom, role, role_libelle, email, voit_prix, droits} | B7 |
+| 12 | GET | `/moi` | Tous | — | `Moi` {id, identifiant, nom, role, role_libelle, email, voit_prix, droits, vu_le, version} | B7 |
 | 13 | PUT | `/moi` | Tous | `MoiModification` {email, version} | `Moi` | nouveau |
 | 14 | PUT | `/moi/code` | Tous | `ChangementCode` {ancien, nouveau} | 204 (ferme les autres sessions) | B8 |
-| 15 | GET | `/utilisateurs` | D, T | — | `[UtilisateurFiche]` | B9 |
+| 15 | GET | `/utilisateurs` | D, T | — | `[UtilisateurFiche]` {id, identifiant, nom, role, role_libelle, email, actif, historique, vu_le, code_change_le, cree_le, version, sessions_ouvertes} | B9 |
 | 16 | POST | `/utilisateurs` | D, T | `UtilisateurCreation` {identifiant, nom, role, email, code} | `UtilisateurFiche` | B10 |
-| 17 | PUT | `/utilisateurs/{id}` | D, T | `UtilisateurModification` {nom, role, email, actif, version} | `UtilisateurFiche` | B11 |
+| 17 | PUT | `/utilisateurs/{id}` | D, T | `UtilisateurModification` {nom, role, email, actif, version, code (facultatif : un changement de rôle qui exige un nouveau code se fait en une requête)} | `UtilisateurFiche` | B11 |
 | 18 | POST | `/utilisateurs/{id}/code` | D, T | `NouveauCode` {code} | 204 (ferme ses sessions) | B11 (champ `code`) |
-| 19 | GET | `/appareils` | D, T | — | `[AppareilFiche]` | nouveau |
-| 20 | POST | `/appareils` | D, T | `AppareilCreation` {nom} | `Enrolement` {id, lien, qr_svg, expire_le} | nouveau |
+| 19 | GET | `/appareils` | D, T | — | `[AppareilFiche]` {id, nom, actif, enrole, enrole_le, enrolement_expire_le, vu_le, cree_le, cree_par, sessions_ouvertes} | nouveau |
+| 20 | POST | `/appareils` | D, T | `AppareilCreation` {nom} | `Enrolement` {id, nom, lien, qr_svg, expire_le} | nouveau |
 | 21 | DELETE | `/appareils/{id}` | D, T | — | 204 (révoque, ferme ses sessions) | nouveau |
 | 22 | POST | `/appareils/enroler` | P (jeton unique) | `{jeton}` | 204 (cookie d'appareil) | nouveau |
 
@@ -122,26 +122,26 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 23 | GET | `/parametres` | D ; A (lecture) ; T (familles techniques) | — | `[Reglage]` {cle, libelle, famille, unite, echelle, aide, bas, haut, texte, defaut, valeur, technique} | B14 |
-| 24 | PUT | `/parametres` | D (métier) ; D, T (techniques) | `{cle: valeur}` + `version_globale` | `[Reglage]` | B15 |
+| 23 | GET | `/parametres` | D ; A (lecture) ; T (familles techniques) | — | `[Reglage]` {cle, libelle, famille, unite, echelle, aide, bas, haut, texte, defaut, valeur, technique, modifiable, version, version_globale} | B14 |
+| 24 | PUT | `/parametres` | D (métier) ; D, T (techniques) | `{valeurs: {clé: valeur}, version_globale}` (Σ des `version` des 57 lignes ; périmée → 409 ; tout ou rien) | `[Reglage]` | B15 |
 | 25 | GET | `/parametres/historique` | D, T | `?cle=` | `Page[ReglageHistorique]` {cle, libelle, avant, apres, quand, par, motif} | B16 |
-| 26 | PUT | `/periode-close` | D | `ClotureEntree` {date_cloture \| null, motif ≥ 3} | `Periode` {date_cloture, par, quand} | B15 (clé `date_cloture`) |
-| 27 | GET | `/devises` | D, A | — | `[DeviseFiche]` {code, nom, cours, cours_le, actif, version} | B17 |
-| 28 | GET | `/devises/{code}/cours` | D, A | — | `Page[CoursHistorique]` | B18 |
+| 26 | PUT | `/periode-close` | D | `ClotureEntree` {date_cloture \| null, motif ≥ 3, version} (celle de la ligne `date_cloture`) | `Periode` {date_cloture, par, quand, version} | B15 (clé `date_cloture`) |
+| 27 | GET | `/devises` | D, A | — | `[DeviseFiche]` {code, nom, cours, cours_le, cours_repris, actif, version} | B17 |
+| 28 | GET | `/devises/{code}/cours` | D, A | — | `Page[CoursHistorique]` {id, cours, saisi_le, par, variation} | B18 |
 | 29 | POST | `/devises` | D, A | `DeviseCreation` {code, nom, cours} | `DeviseFiche` | B19 (création) |
 | 30 | PUT | `/devises/{code}` | D, A | `DeviseModification` {nom, cours, actif, version} | `DeviseFiche` | B19 (modification) |
-| 31 | GET | `/magasins` | C | — | `[MagasinFiche]` {id, code, nom, type, contenu, actif, kg_detenus} | A26 |
+| 31 | GET | `/magasins` | C | — | `[MagasinFiche]` {id, code, nom, type, contenu, actif, kg_detenus, version} | A26 |
 | 32 | POST | `/magasins` | D | `MagasinCreation` | `MagasinFiche` | A27 |
 | 33 | PUT | `/magasins/{id}` | D | `MagasinModification` (+version) | `MagasinFiche` | A28 |
-| 34 | GET | `/postes-frais` | D, A | — | `[PosteFiche]` {id, code, libelle, recuperable, nature, cle, ordre, systeme, frais_ouverts, frais_clos} | A36, A40 |
+| 34 | GET | `/postes-frais` | D, A | — | `[PosteFiche]` {id, code, libelle, recuperable, nature, entre_valeur_douane, cle, ordre, systeme, frais_ouverts, frais_clos, dossiers_ouverts, dossiers_clos, utilise, version} | A36, A40 |
 | 35 | POST | `/postes-frais` | D | `PosteCreation` | `PosteFiche` | A41 |
 | 36 | PUT | `/postes-frais/{id}` | D | `PosteModification` (+version) | `PosteFiche` (+ `parts_figees` : nombre de frais de dossiers clos figés) | A42 |
 | 37 | DELETE | `/postes-frais/{id}` | D | `?version=` | 204 | A43 |
-| 38 | GET | `/codes-douaniers` | D, A | — | `[CodeDouanierFiche]` (+ nb matières) | A44 |
+| 38 | GET | `/codes-douaniers` | D, A | — | `[CodeDouanierFiche]` {id, code, libelle, taux_droits, actif, nb_matieres, version} | A44 |
 | 39 | POST | `/codes-douaniers` | D | `CodeDouanierCreation` | `CodeDouanierFiche` | A45 |
 | 40 | PUT | `/codes-douaniers/{id}` | D | `CodeDouanierModification` | `CodeDouanierFiche` | A46 |
-| 41 | DELETE | `/codes-douaniers/{id}` | D | — | 204 | A47 |
-| 42 | GET | `/motifs` | C | — | `Motifs` {types [{type, libelle, roles}], motifs [{id, type, libelle, code_r, impose_role}]} | B32 |
+| 41 | DELETE | `/codes-douaniers/{id}` | D | `?version=` (facultatif, contrôlé s'il est donné) | 204 | A47 |
+| 42 | GET | `/motifs` | C | — | `Motifs` {types [{type, libelle, roles}], motifs [{id, type, libelle, code_r, impose_role}], reclamation_motifs, reclamation_issues} | B32 |
 
 Clés des routes 23–25 : la liste fermée `modeles.CLES_REGLAGES` (MODELE-DONNEES § 3.1.6 ; une clé
 inconnue → 422), soit 56 clés semées par la révision 0002, dont `delai_frais_import_jours`
@@ -154,19 +154,19 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 43 | GET | `/sauvegardes` | D, T | — | `EtatSauvegardes` {dernière, âge, alerte, politique, dossier, copie, fichiers [{nom, genre, base, taille, quand, tables}]} | B20 |
+| 43 | GET | `/sauvegardes` | D, T | — | `EtatSauvegardes` {base, derniere, age_h, alerte, politique, dossier, copie, nb, autres, outils, fichiers [{nom, genre, nature, base, autre_base, taille, quand, tables, pieces, copie}]} | B20 |
 | 44 | POST | `/sauvegardes` | D, T | — | `EtatSauvegardes` | B21 |
-| 45 | POST | `/sauvegardes/{nom}/restaurer` | D, T | `Restauration` {confirmation: "RESTAURER", motif} | 202 `EtatRestauration` (tâche ; l'écran interroge `/sante`) | B23 |
+| 45 | POST | `/sauvegardes/{nom}/restaurer` | D, T | `Restauration` {confirmation: "RESTAURER" (casse indifférente, 422 `confirmation_requise` sinon), motif 3–300} | 202 `EtatRestauration` {etat, fichier, avant, debut, message} dès la sauvegarde « avant restauration » faite (refus tous synchrones : 404, 409, 422, 503) ; l'écran suit `/sante` → `taches.restauration` | B23 |
 | 46 | GET | `/taches` | D, T | — | `[TacheEtat]` | nouveau |
 | 47 | GET | `/courriels` | D, T | — | `Page[CourrielFiche]` | nouveau |
-| 48 | GET | `/courriel/apercu` | D | — | `ApercuCourriel` {sujet, texte, serveur_configure, destinataires} | B98 |
+| 48 | GET | `/courriel/apercu` | D | — | `ApercuCourriel` {sujet, texte, serveur_configure, destinataires, illisibles} | B98 |
 
 ### 1.5 Journal et historique (`api/journal`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 49 | GET | `/journal` | D, T | `?q=&utilisateur=&action=&objet=&objet_id=&du=&au=` | `Page[LigneJournal]` {quand, utilisateur, role, action, objet, objet_id, numero, detail, avant, apres} | B12 |
-| 50 | GET | `/journal/valeurs` | D, T | — | `ValeursJournal` | B13 |
+| 49 | GET | `/journal` | D, T | `?q=&utilisateur=&action=&objet=&objet_id=&du=&au=` | `Page[LigneJournal]` {id, quand, utilisateur, utilisateur_id, role, action, objet, objet_id, numero, detail, avant, apres} (`utilisateur=` : l'id du compte) | B12 |
+| 50 | GET | `/journal/valeurs` | D, T | — | `ValeursJournal` {utilisateurs: [{id, nom}], actions, objets} | B13 |
 | 51 | GET | `/historique/{objet}/{id}` | droit de lecture de la fiche (prix filtrés pour L) | — | `[LigneHistorique]` (différences lisibles) | nouveau |
 | 52 | GET | `/export/journal` | D, T | mêmes filtres | xlsx | B108 |
 
@@ -185,40 +185,40 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 57 | GET | `/classification` | C | — | `Classification` {compositions, types_fil, titrages, couleurs: [ValeurFiche + nb_matieres], roles: [RoleFiche + nb_matieres, nb_qualites, de_base]} | A1 |
+| 57 | GET | `/classification` | C | — | `Classification` {compositions, types_fil, titrages, couleurs: [ValeurFiche + nb_matieres], roles: [RoleFiche {id, code, lineaire, de_base, ordre, version} + nb_matieres, nb_qualites]} | A1 |
 | 58 | POST | `/classification/roles` | D | `RoleCreation` {code, ordre} | `RoleFiche` | A2 |
 | 59 | PUT | `/classification/roles/{id}` | D | `RoleModification` {code, ordre, version} | `RoleFiche` | A3 |
 | 60 | DELETE | `/classification/roles/{id}` | D | — | 204 | A4 |
 | 61 | POST | `/classification/{liste}` | D, A | `ValeurCreation` | `ValeurFiche` | A5 |
-| 62 | PUT | `/classification/{liste}/{id}` | D, A | `ValeurModification` (+version) | `ValeurFiche` | A6 |
-| 63 | DELETE | `/classification/{liste}/{id}` | D, A | — | 204 | A7 |
+| 62 | PUT | `/classification/{liste}/{id}` | D, A | `ValeurModification` (+version) | `ValeurFiche` (+ `avertissement` : une valeur désactivée encore portée) | A6 |
+| 63 | DELETE | `/classification/{liste}/{id}` | D, A | `?version=` (facultatif) | 204 | A7 |
 
 ### 1.8 Fournisseurs (`api/fournisseurs`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 64 | GET | `/fournisseurs` | C (L : `FournisseurResume` {id, nom, pays, actif}) | `?q=&actif=` | `[FournisseurFiche]` (+ nb matières, lots, commandes, délai mesuré, utilisé) | A8 |
+| 64 | GET | `/fournisseurs` | C (L : `FournisseurResume` {id, nom, pays, actif}) | `?q=&actif=` | `[FournisseurFiche \| FournisseurResume]` (+ `nb_matieres`, `nb_commandes`, `nb_receptions`, `nb_lots`, `nb_operations`, `nb_factures`, `nb_pieces`, délai mesuré, `local`, `devises`, `utilise`, `empechements`) | A8 |
 | 65 | GET | `/fournisseurs/{id}` | D, A | — | `FournisseurFiche` | nouveau (fiche à adresse stable) |
 | 66 | POST | `/fournisseurs` | D, A | `FournisseurCreation` | `FournisseurFiche` | A9 |
 | 67 | PUT | `/fournisseurs/{id}` | D, A | `FournisseurModification` (+version) | `FournisseurFiche` | A10 |
-| 68 | DELETE | `/fournisseurs/{id}` | D, A | — | 204 | A11 |
+| 68 | DELETE | `/fournisseurs/{id}` | D, A | `?version=` (facultatif) | 204 | A11 |
 | 69 | GET | `/export/fournisseurs/fiches` | D, A | — | xlsx | A38 |
 
 ### 1.9 Matières (`api/matieres`)
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 70 | GET | `/matieres` | C (prix filtrés) | `?q=&role=&fournisseur=&actif=` | `[MatiereResume]` (référence, classification, fournisseur, prix, unite_prix, prix_kg, devise, densité, kg_par_ml, stock, utilisée) | A12 |
-| 71 | GET | `/matieres/{id}` | C | — | `MatiereFiche` (+ usages, version) | nouveau |
+| 70 | GET | `/matieres` | C (prix filtrés) | `?q=&role=&fournisseur=&actif=` | `[MatiereResume]` (référence, classification en codes **et** ids — `role_id`, `composition_id`, `type_fil_id`, `titrage_id`, `couleur_id`, `code_douanier_id`, `fournisseur_id` —, prix, unite_prix, prix_kg, devise, densité, kg_par_ml, conditionnement, stock, utilisée, version) | A12 |
+| 71 | GET | `/matieres/{id}` | C | — | `MatiereFiche` (champs de `MatiereResume` + usages, modifie_le, modifie_par) | nouveau |
 | 72 | POST | `/matieres` | D, A | `MatiereCreation` | `MatiereFiche` | A13 |
 | 73 | PUT | `/matieres/{id}` | D, A | `MatiereModification` (+version) | `MatiereFiche` | A14 |
-| 74 | DELETE | `/matieres/{id}` | D, A | — | 204 | A15 |
+| 74 | DELETE | `/matieres/{id}` | D, A | `?version=` (facultatif) | 204 | A15 |
 | 75 | GET | `/matieres/reference` | C | `?composition_id=&type_fil_id=&titrage_id=&couleur_id=&couleur_code=&suffixe=` | `ReferenceComposee` {reference, designation} | A17 (POST → GET : lecture) |
 | 76 | GET | `/matieres/classement` | D, A | — | `ApercuClassement` | A16 (`appliquer=false`) |
 | 77 | POST | `/matieres/classement` | D, A | `{ids, versions}` | `ResultatClassement` | A16 (`appliquer=true`) |
 | 78 | GET | `/matieres/tableur` | D, A | — | xlsx (modèle = catalogue actuel, avec colonne `version`) | B96 |
-| 79 | POST | `/matieres/tableur/apercu` | D, A | fichier xlsx | `ApercuImport` {lignes [{ligne, reference, etat: nouvelle\|modifiee\|inchangee\|erreur, changements, erreurs}], appliquable} | B97 (`appliquer=false`) |
-| 80 | POST | `/matieres/tableur/appliquer` | D, A | fichier xlsx + `empreinte_apercu` | `ResultatImport` | B97 (`appliquer=true`) |
+| 79 | POST | `/matieres/tableur/apercu` | D, A | fichier xlsx | `ApercuImport` {lignes [{ligne, reference, etat: nouvelle\|modifiee\|inchangee\|erreur, changements, erreurs}], creees, modifiees, inchangees, erreurs, appliquable, empreinte_apercu} | B97 (`appliquer=false`) |
+| 80 | POST | `/matieres/tableur/appliquer` | D, A | formulaire : fichier xlsx + champ `empreinte_apercu` (plan d'écriture refait ; différent → 409) | `ResultatImport` (mêmes compteurs) | B97 (`appliquer=true`) |
 | 81 | GET | `/export/matieres` | D, A | `?q=…` | xlsx | A37 |
 
 ### 1.10 Qualités, recettes, plan (`api/qualites`)
@@ -263,11 +263,11 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 | 107 | GET | `/lots` | C | `?matiere=&magasin=&statut=&non_nuls=&q=` | `[LotSolde]` (soldes par magasin, statut calculé) | B25 |
 | 108 | GET | `/lots/{id}` | C (prix filtrés) | — | `LotFiche` (en-tête, soldes, mouvements, réception, poids de bobine, commentaire, version) | B26 |
 | 109 | PUT | `/lots/{id}` | D, A | `{commentaire, version}` | `LotFiche` | nouveau (`lot.commentaire`) |
-| 110 | GET | `/lots/scan` | C | `?code=` | `LotResume` \| 404 | B27 |
+| 110 | GET | `/lots/scan` | C | `?code=` | `[LotResume]` (un même numéro peut exister pour deux matières) ; 404 si vide | B27 |
 | 111 | GET | `/lots/disponibles` | C | `?matiere=&date=&magasin=` | `[LotDisponible]` (présents à la date, hors quarantaine, FIFO) | B78 |
 | 112 | GET | `/tracabilite` | C | `?lot=&ordre=&matiere=` | `Tracabilite` (vocabulaire de la base, plus de codes ERP Fil à émojis) | B79 |
 | 113 | GET | `/controles/soldes` | D, A | — | `ControleSoldes` (libellés : référence, lot, magasin) | B31 |
-| 114 | GET | `/documents/etiquettes` | C | `?lots=1,2,3` | HTML A4 (étiquettes QR 100 × 70) | B30 |
+| 114 | GET | `/documents/etiquettes` | C | `?lots=1,2,3` | HTML, une étiquette QR de 100 × 70 mm par page (404 HTML « Aucun lot à étiqueter. ») | B30 |
 
 ### 1.13 Opérations de stock et brouillons (`api/operations`)
 

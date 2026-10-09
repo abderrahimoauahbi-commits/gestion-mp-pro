@@ -6,12 +6,13 @@ n'a changé (ARCHITECTURE § 7, CALCULS A § 4 ; `gestion_mp/depot.py`).
 - `charger_au(s, jour)` : les données telles qu'elles étaient le soir du `jour`
   (`calcul.a_la_date`, avec la date du jour de l'horloge de l'usine).
 - **Cache** par processus, clé = `signature(s)`, lue **en base** à chaque appel : le jour,
-  `max(journal.id)`, `max(mouvement.id)`, `max(parametre.modifie_le)`, `count(mouvement)`,
-  `Σ solde.quantite`. Tout geste écrit au journal (S2), tout mouvement change le journal du
-  stock, tout réglage sa date, et un solde touché hors du chemin d'écriture change la somme :
-  un chiffre n'est jamais périmé, même avec plusieurs processus (la signature n'est pas en
-  mémoire). Les identifiants ne se réutilisent jamais : une transaction annulée ne peut pas
-  laisser en cache une signature qui reviendrait.
+  `max(journal.id)`, `max(mouvement.id)`, `max(parametre.modifie_le)`, `Σ parametre.version`,
+  `Σ devise.version`, `count(mouvement)`, `Σ solde.quantite`. Tout geste écrit au journal (S2),
+  tout mouvement change le journal du stock, tout réglage et tout cours leur `version` (même à
+  horloge figée, ou deux écritures dans la même microseconde), et un solde touché hors du
+  chemin d'écriture change la somme : un chiffre n'est jamais périmé, même avec plusieurs
+  processus (la signature n'est pas en mémoire). Les identifiants ne se réutilisent jamais :
+  une transaction annulée ne peut pas laisser en cache une signature qui reviendrait.
 - **Ne jamais modifier en place** des `Donnees` rendues ici, ni ce que le moteur en tire : elles
   sont partagées entre les requêtes (`dataclasses.replace` pour une variante).
 """
@@ -27,7 +28,7 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.a_la_date import a_la_date
-from gestion_mp_pro.modeles import Journal, Mouvement, Parametre, Solde
+from gestion_mp_pro.modeles import Devise, Journal, Mouvement, Parametre, Solde
 from gestion_mp_pro.services import horloge
 from gestion_mp_pro.services.chargeur import achats, journal, production, qualites, receptions
 from gestion_mp_pro.services.chargeur import referentiels as ref
@@ -66,6 +67,8 @@ def signature(s: Session) -> Signature:
             select(func.max(Journal.id)).scalar_subquery(),
             select(func.max(Mouvement.id)).scalar_subquery(),
             select(func.max(Parametre.modifie_le)).scalar_subquery(),
+            select(func.sum(Parametre.version)).scalar_subquery(),
+            select(func.sum(Devise.version)).scalar_subquery(),
             select(func.count()).select_from(Mouvement).scalar_subquery(),
             select(func.sum(Solde.quantite)).scalar_subquery(),
         )

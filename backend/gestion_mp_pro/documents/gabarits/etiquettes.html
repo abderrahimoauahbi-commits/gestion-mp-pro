@@ -44,6 +44,7 @@ body { color: #000; }
       {% if e.lot.fournisseur %}<div>{{ e.lot.fournisseur }}</div>{% endif %}
       <div>Entré le {{ e.lot.entre_le|date }}</div>
       <div>Reste {{ e.lot.texte_quantite }}</div>
+      {% if e.lot.texte_bobines %}<div class="bobines">{{ e.lot.texte_bobines }}</div>{% endif %}
       <div class="id">N° {{ e.lot.lot_id }}</div>
       {% if e.lot.texte_quarantaine %}<div class="quarantaine">{{ e.lot.texte_quarantaine }}</div>{% endif %}
     </div>

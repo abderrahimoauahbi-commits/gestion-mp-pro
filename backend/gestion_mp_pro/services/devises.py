@@ -5,8 +5,8 @@
   ne fait pas croire à un nouveau cours (E-13).
 - **Un mois clos ne se revalorise pas** (E-02, V3) : avant qu'un cours change, les marchandises
   des dossiers d'importation ouverts entrées dans la période close, sans cours de banque,
-  prennent le cours d'avant le changement (noté sur la ligne) ; la clôture d'une période fige de
-  même le cours du jour (`figer_a_la_cloture`, branché sur `periode.APRES_CLOTURE`).
+  prennent le cours d'avant le changement (`cours_origine = periode_close`) ; la clôture d'une
+  période fige de même le cours du jour (`figer_a_la_cloture`, branché sur `periode.APRES_CLOTURE`).
 """
 
 from __future__ import annotations
@@ -220,18 +220,18 @@ def figer_cours_periode_close(
     code: str | None = None,
     ancien: Decimal | None = None,
     jusqu_au: date | None = None,
-    geste: str = "au changement",
 ) -> int:
     """Fige le cours des marchandises sans cours entrées dans la période close (E-02).
 
     `code` : une seule devise (son cours d'avant le changement : `ancien`) ; sinon toutes, au
-    cours du jour. Rend le nombre de marchandises figées.
+    cours du jour. Le cours figé dit d'où il vient (`cours_origine = periode_close`, révision
+    0004) ; le commentaire de la marchandise reste à qui l'a écrit. Rend le nombre de marchandises
+    figées.
     """
     limite = jusqu_au or periode.fin_de_periode_close(s)
     if limite is None or code == DIRHAM:
         return 0
     cours = {d.code: d.cours for d in s.scalars(select(Devise))}
-    note = f"cours figé {geste} du {horloge.aujourd_hui():%d/%m/%Y}"
     n = 0
     for ligne in entrees_ouvertes(s, limite):
         if ligne.devise == DIRHAM or ligne.cours is not None or (code and ligne.devise != code):
@@ -239,16 +239,14 @@ def figer_cours_periode_close(
         taux = ancien if code and ancien else cours.get(ligne.devise)
         if not taux:
             continue
-        ligne.cours, ligne.cours_origine = taux, OrigineCours.saisi
-        texte = f"{ligne.commentaire} · {note}" if ligne.commentaire else note
-        ligne.commentaire = texte[: L.COMMENTAIRE]
+        ligne.cours, ligne.cours_origine = taux, OrigineCours.periode_close
         n += 1
     return n
 
 
 def figer_a_la_cloture(s: Session, qui: audit.Qui, jour: date) -> None:
     """À la clôture d'une période : les marchandises encore en dossier ouvert gardent leur cours."""
-    n = figer_cours_periode_close(s, qui, jusqu_au=jour, geste="à la clôture")
+    n = figer_cours_periode_close(s, qui, jusqu_au=jour)
     _journal_figees(s, qui, n, "", f"jusqu'au {jour:%d/%m/%Y} gardent leur cours du jour")
 
 

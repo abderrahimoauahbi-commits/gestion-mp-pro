@@ -23,10 +23,12 @@ GENRES_DU_REGISTRE = {
     "manuelle": GenreSauvegarde.manuelle,
     "avant-restauration": GenreSauvegarde.avant_restauration,
     "avant-reprise": GenreSauvegarde.avant_reprise,
+    "avant-vidage": GenreSauvegarde.avant_vidage,
+    "avant-mise-a-jour": GenreSauvegarde.avant_mise_a_jour,
     "reference-vide": GenreSauvegarde.reference_vide,
 }
-"""Les genres que le registre sait écrire (« avant-vidage » et « avant-mise-a-jour » : disque
-seulement, en attendant leur valeur dans l'énumération — demandé au coordinateur)."""
+"""Le genre d'un nom de fichier → sa valeur au registre : tous les genres du disque
+(`sauvegarde_outils.GENRES`) depuis la révision 0004."""
 
 
 @dataclass(frozen=True)

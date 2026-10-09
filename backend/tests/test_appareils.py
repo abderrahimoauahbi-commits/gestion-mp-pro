@@ -8,6 +8,7 @@ mène à localhost (héritage A11–A13, X5).
 from __future__ import annotations
 
 from datetime import timedelta
+from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
 from conftest import ENTETE_ECRAN
@@ -17,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from gestion_mp_pro.config import COOKIE_APPAREIL
+from gestion_mp_pro.config import COOKIE_APPAREIL, COOKIE_SESSION
 from gestion_mp_pro.db import fabrique as sessions_db
 from gestion_mp_pro.modeles import Journal, SessionOuverte
 from gestion_mp_pro.services import appareils, horloge
@@ -126,3 +127,25 @@ def test_alerte_si_le_qr_mene_a_localhost() -> None:
     assert not a.adresse_qr.startswith("http://localhost")
     if appareils.est_local(a.adresse_qr):
         assert a.alerte_localhost is not None
+
+
+def test_acces_https_sans_port(application: FastAPI, alimentation: TestClient) -> None:
+    """Hérité : test_defauts_g::test_acces_https_sans_port (G-13) — les adresses d'accès
+    reprennent le schéma et le port de la requête : derrière HTTPS, ni « :8050 » ni « http »."""
+    jeton = str(alimentation.cookies.get(COOKIE_SESSION))
+    ip = appareils.ip_reseau()
+
+    def acces(base_url: str) -> dict[str, Any]:
+        poste = TestClient(application, base_url=base_url, headers=ENTETE_ECRAN)
+        poste.cookies.set(COOKIE_SESSION, jeton)
+        r = poste.get("/api/acces")
+        assert r.status_code == 200, r.text
+        return dict(r.json())
+
+    https = acces("https://localhost")
+    assert https["adresse_qr"] == f"https://{ip}"
+    assert https["adresses"][0] == {"libelle": "Adresse réseau", "adresse": f"https://{ip}"}
+    assert https["adresses"][1]["adresse"].startswith("https://")
+    assert ":8050" not in https["adresses"][1]["adresse"]
+    assert acces("http://localhost:8030")["adresse_qr"] == f"http://{ip}:8030"
+    assert acces("https://mac-usine:443")["adresses"][0]["adresse"] == f"https://{ip}"

@@ -1,7 +1,8 @@
 """Les étiquettes QR des lots (route 114 ; ECRANS-PRO « Étiquettes de lots » ; DEFAUTS C-18).
 
 Une étiquette par page de 100 × 70 mm (rouleau d'étiquettes) : le QR de l'adresse du lot, la
-référence, « Lot {n°} », le fournisseur, « Entré le … », ce qui reste à l'impression, « N° {id} »,
+référence, « Lot {n°} », le fournisseur, « Entré le … », ce qui reste à l'impression (kilos à
+la règle § 9.3, « ≈ N bobines » si le poids d'une bobine est connu), « N° {id} »,
 et « QUARANTAINE — NE PAS SORTIR » encadré pour un lot en quarantaine (« dont … en quarantaine »
 s'il n'y est qu'en partie). Les identifiants inconnus sont dits en tête de page (écran seulement) ;
 sans aucun lot connu, une page lisible « Aucun lot à étiqueter. » (404), jamais un JSON brut.
