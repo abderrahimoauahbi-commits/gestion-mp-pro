@@ -64,3 +64,8 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F1 | F4 | Fermer une fiche commande ouverte depuis le Cockpit ramène à `/commandes` au lieu du Cockpit (passer `state.retour`). |
 | F1 | E1 | `.masque-accessible` (position absolue) allonge le document au téléphone quand `<main>` défile (F1 contourne par `position: relative`). |
 | F1 | V3 | Recette navigateur : un profil de navigateur à part par passage (cookies de session partagés entre serveurs `localhost`). |
+| F8 | S2/D10 | QR en SVG (routes 6 et 20) sans `xmlns` : ne s'affiche pas dans une `<img>` (l'écran l'ajoute dans `administration/qr.ts`) — produire le SVG avec l'espace de noms (segno `svgns`), puis retirer le contournement. |
+| F8 | D8/D1 | Nombre de brouillons datés de la période à clore : une route (ou un champ) pour l'annoncer avant la fenêtre de clôture. |
+| F8 | E1 | `FenetreConfirmation` sans étapes (F8 a construit la restauration sur `Fenetre`) ; `Onglets` sans garde de saisie. |
+| F8 | docs | ECRANS-PRO : 7 ordres de seuils et non 5 ; note de la Valorisation sur le fil monté à une date passée (fausse depuis D8). |
+| F8 | F5 | En-tête de `pages/importations/ecrans.ts` : retirer la mention des pages provisoires supprimées. |
