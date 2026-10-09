@@ -214,12 +214,13 @@ class Contexte:
 
 def famille(m: Matiere, compositions: dict[int, str], types: dict[int, str],
             titrages: dict[int, Titrage]) -> str:  # fmt: skip
-    """« PP Frisé 2900 Dtex » : la matière, la façon, le titrage — sans la couleur (M56)."""
+    """« PP Frisé 2900 Dtex » : la matière, la façon, le titrage (son code, comme Gestion MP :
+    « Plastique 45 », pas « Plastique 45 Cm ») — sans la couleur (M56)."""
     titrage = titrages.get(m.titrage_id) if m.titrage_id else None
     morceaux = [
         compositions.get(m.composition_id, "") if m.composition_id else "",
         types.get(m.type_fil_id, "").split(" (")[0] if m.type_fil_id else "",
-        f"{titrage.valeur} {titrage.unite}".strip() if titrage else "",
+        titrage.code if titrage else "",
     ]
     return " ".join(x for x in morceaux if x) or m.reference
 
