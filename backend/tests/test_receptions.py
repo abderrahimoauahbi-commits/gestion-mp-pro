@@ -93,6 +93,11 @@ def test_reception_partielle_avec_une_ligne_sous_reserve(
     c = bon_relu(achats, b["id"])
     assert c["statut"] == "confirmee" and c["livraison"] == "sous_reserve"
     assert c["lignes"][1]["en_quarantaine"] == pytest.approx(960)
+    assert c["kg_en_quarantaine"] == pytest.approx(960)  # RESTES3 (V1) : dit sur la fiche
+    assert (
+        c["promesse_figee"] is not None
+        and "figée depuis la confirmation des prix" in (c["promesse_figee"])
+    )  # RESTES3 (F4) : la fiche dit pourquoi la date promise ne se change plus
     ligne_vert = r["lignes"][1]
     lot = ok(achats.get(f"/api/lots/{ligne_vert['lot_id']}"))
     assert lot["quarantaine"] == pytest.approx(960) and lot["disponible"] == 0

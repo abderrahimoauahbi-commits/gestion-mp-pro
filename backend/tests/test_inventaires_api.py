@@ -132,6 +132,7 @@ def test_feuille_de_comptage(m: Monde, achats: TestClient, alimentation: TestCli
         )
     )
     assert a["statut"] == "abandonne" and "Abandonné" in achats.get(url).text
+    assert (a["abandon_motif"], a["annulation_motif"]) == ("reporté", "")  # RESTES3 : 0005
     assert achats.get("/api/documents/inventaires/999999/feuille").status_code == 404
 
 

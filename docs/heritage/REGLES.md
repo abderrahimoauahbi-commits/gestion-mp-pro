@@ -921,6 +921,8 @@ défaut celui du jour) (`STK:63-74`, `STK:181-212`).
 | X-RCP-27 | devise de facture inconnue | 422 | `f"Devise inconnue : {devise}."` | `REC:645-646` |
 | X-RCP-28 | changer la devise d'une facture qui porte d'autres réceptions | 409 | `f"La facture {f.numero} est en {f.devise} et porte d'autres réceptions : elle ne change pas de devise."` | `REC:647-651` |
 
+> Note PRO (RESTES3) : codes HTTP des refus de réception selon la convention PRO (422 saisie, 409 état) au lieu du 422 unique ; à la validation, un blocage garde son code (`excedent`, `bon_clos`, `etat_incompatible`, `inventaire_en_cours`, `periode_close` → 409 ; `date_invalide`, `quantite_invalide`, `saisie_invalide` → 422) (lot D4, décision 2).
+
 ### 3.13 Décisions (commits et conformité)
 
 | Hash / source | Décision |
@@ -1154,6 +1156,8 @@ Entrée `ChargeEntree` : `poste` ≤ 16, `montant` −1e9…1e9, `ligne_id`, `pi
 | X-IMP-41 | clôture avec frais non répartis | 409 | `"Des frais ne trouvent pas de marchandise où se répartir : les affecter à tout le dossier, ou les retirer, avant de clore."` | `IMP:1042-1044` |
 | X-IMP-42 | réouverture d'un dossier ouvert | 409 | `"Ce dossier est déjà ouvert."` | `IMP:1073-1074` |
 | X-IMP-43 | dates hors 2000–2100 (arrivée, pièce, échéance) | 422 | Pydantic, textes `"date d'arrivée hors période"` / `"date hors période"` | `IMP:524-529`, `IMP:938-943` |
+
+> Note PRO (RESTES3) : X-IMP-17 est **sans objet** dans PRO — rattacher se fait par facture seulement (`{version, facture_id}`, API-PRO 192, sans `reception_ligne_ids`) ; le refus « … n'a plus de marchandise à rattacher » couvre le cas (lot D7, décision 4).
 
 ### 4.19 Analyse du coût de revient (`ANA`, achats)
 
@@ -1580,6 +1584,8 @@ Refus de `_remplir` (dans l'ordre) :
 | OR26 | mise en quarantaine et `e.motif != "Mise en quarantaine"` | 422 | `f"Une entrée en quarantaine se fait avec le motif « {MISE_EN_QUARANTAINE} »."` | `OPE:316-318` |
 | OR27 | retour fournisseur et plus d'un fournisseur parmi les lots | 422 | `"Un retour au fournisseur ne mêle pas deux fournisseurs."` | `OPE:329-331` |
 
+> Note PRO (RESTES3) : OR24 — la règle est « direction **ou** achats » ; PRO sert « Libérer une quarantaine est une décision de la direction ou des achats, après contrôle de la matière. » (403), et pour la suppression ou l'annulation d'une libération par un autre rôle « Supprimer une libération de quarantaine est une décision de la direction ou des achats. » / « Annuler une libération de quarantaine est une décision de la direction ou des achats. ».
+
 ### B.1.13 Blocages annoncés sur un brouillon d'opération
 
 `blocages_operation(s, o, magasins)` — `OPE:78-138`. Calculés **sans rien écrire**, renvoyés
@@ -1625,6 +1631,8 @@ une opération non brouillon. Les raisons sont dédoublonnées dans l'ordre d'ap
 | OR35 | valider : refus de l'écriture | 409/422 | SR1–SR11 | `OPE:420-435` |
 | OR36 | annuler et `statut != "validee"` | 409 | `"Seule une opération validée s'annule ; un brouillon se supprime."` | `OPE:450-451` |
 | OR37 | annuler : déjà annulé / refus de l'écriture | 409/422 | SR12, SR2–SR9 | `OPE:452` |
+
+> Note PRO (RESTES3) : OR33 sert le même message qu'OR24 (« … décision de la direction ou des achats, après contrôle de la matière. »).
 
 ### B.1.15 « À valider » et « Tout valider » (`BRO`)
 

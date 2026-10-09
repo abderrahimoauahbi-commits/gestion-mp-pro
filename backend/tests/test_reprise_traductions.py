@@ -146,6 +146,27 @@ def test_importations(reprise: tuple[Resultat, Path]) -> None:
     assert sum(plus_forts_restes(Decimal("-10.01"), [3.0, 7.0])) == Decimal("-10.01")
 
 
+def test_la_reprise_relie_les_dossiers_a_leur_facture(reprise: tuple[Resultat, Path]) -> None:
+    """Hérité : test_importations::test_la_reprise_relie_les_dossiers_a_leur_facture — un dossier
+    d'une facture la garde (un dossier = une facture, I3) ; un dossier d'avant, sans facture
+    unique, n'en reçoit aucune (saisi à la main) ; rejouer ne change rien (RESTES3, R1)."""
+    lies = valeurs("SELECT d.numero, f.numero FROM dossier d LEFT JOIN facture f"
+                   " ON f.id = d.facture_id")  # fmt: skip
+    assert lies == {"01/26": "F-1", "ANC-X-OLD": None}
+
+
+def test_les_morceaux_d_un_ancien_eclatement_redeviennent_une_piece(
+    reprise: tuple[Resultat, Path],
+) -> None:
+    """Hérité : test_importations_second_audit::test_les_morceaux_d_un_ancien_eclatement_
+    redeviennent_une_piece — un frais réparti sur deux marchandises reste **une** pièce (sans
+    marchandise propre), ses parts au centime font son montant (RESTES3, R1)."""
+    frais = lire("SELECT id, ligne_id, montant FROM dossier_frais WHERE piece = 'D1'")
+    assert frais == [(1, None, Decimal("1000.01"))]
+    parts = lire("SELECT ligne_id, montant FROM dossier_frais_part WHERE frais_id = 1 ORDER BY 1")
+    assert [x for x, _ in parts] == [1, 2] and sum(m for _, m in parts) == Decimal("1000.01")
+
+
 def test_referentiels(reprise: tuple[Resultat, Path]) -> None:
     f = valeurs("SELECT id, pays FROM fournisseur")
     assert f == {1: "TURQUIE", 2: "MAROC"}

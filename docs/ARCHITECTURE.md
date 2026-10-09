@@ -35,7 +35,7 @@ fond · 13. Exploitation · 14. Coexistence et comparaison avec Gestion MP · 15
 | Couche | Technologie (versions minimales) | Rôle |
 |---|---|---|
 | Écran | React 19, TypeScript 5 strict, Vite 7, React Router 7, TanStack Query 5 | ≈ 26 écrans de bureau, 11 écrans d'atelier, système de composants maison |
-| API | FastAPI ≥ 0.115, Pydantic 2, uvicorn | 245 routes typées (entrée **et** sortie), OpenAPI `/api/docs` |
+| API | FastAPI ≥ 0.115, Pydantic 2, uvicorn | 246 routes typées (entrée **et** sortie), OpenAPI `/api/docs` |
 | Métier | Python 3.12, paquet `gestion_mp_pro` | `services/` (un module par domaine), `calcul/` (moteur sans base) |
 | Données | SQLAlchemy 2 (`Mapped[...]`), psycopg 3, PostgreSQL 16, Alembic | 71 tables, `NUMERIC`, CHECK, FK, index, verrous, `version` |
 | Documents | Jinja2, segno (QR), openpyxl | bon de commande anglais A4, étiquettes QR, feuille de comptage, bilan |
@@ -136,6 +136,11 @@ gestion-mp-pro/
 │   │   │   ├── classification/  fournisseurs/  matieres/  qualites/  metiers/
 │   │   │   ├── stock/  operations/  inventaires/  ordres/  production/  plan_achat/
 │   │   │   ├── commandes/  receptions/  reclamations/  importations/  pilotage/  suivi/
+│   │   │   │                       (un domaine large se découpe : routeur.py (routeur et filtres partagés),
+│   │   │   │                       routes_*.py, schemas_*.py — p. ex. commandes/routes_documents.py porte la
+│   │   │   │                       route 164 du bon, receptions/routes_pesees.py, importations/routes_gestes.py,
+│   │   │   │                       pilotage/routes_exports.py, suivi/routes_pieces.py ; la route 7 est servie par
+│   │   │   │                       pilotage/, la 164 par commandes/)
 │   │   │   ├── reprise/            état et rafraîchissement du miroir de Gestion MP (243–244)
 │   │   │   └── documents/          routes.py (HTML imprimables : bon, étiquettes, feuille, bilan)
 │   │   ├── services/               un module par domaine ; transactions ; aucun objet HTTP
@@ -158,28 +163,41 @@ gestion-mp-pro/
 │   │   │   ├── fournisseurs.py     fiches, usages, délai mesuré
 │   │   │   ├── matieres.py         fiches, usages, composition de référence, classement
 │   │   │   ├── tableur_matieres.py modèle, aperçu, application (mêmes règles que la fiche)
-│   │   │   ├── qualites.py         qualités, recettes (100 %), versions, plan (versions)
-│   │   │   ├── metiers.py          métiers, étages, montage (effet, alerte 30 j, événement)
+│   │   │   ├── qualites.py         qualités, recettes (100 %), versions, plan (versions) ; recettes.py (recettes,
+│   │   │   │                       oublis d'un rôle pesant), qualites_lecture.py
+│   │   │   ├── metiers.py          métiers, étages, montage (effet, alerte 30 j, événement) ; montage.py,
+│   │   │   │                       metiers_lecture.py (fiches, historique des montages)
 │   │   │   ├── stock.py            LE chemin d'écriture : lot_ou_creer, ecrire, transferer, contrepasser,
 │   │   │   │                       couvert_a_sa_date, suspension par inventaire
 │   │   │   ├── conversions.py      kg ↔ bobines ↔ palettes (poids mesuré du lot, sinon catalogue)
 │   │   │   ├── lots.py             soldes, fiche de lot, scan, disponibles, statut calculé, étiquettes
-│   │   │   ├── operations.py       brouillons, blocages, validation, annulation ; table des droits par type
+│   │   │   ├── operations/         paquet : saisie, blocages, gestes (validation, annulation), lecture ; droits.py
+│   │   │   │                       (table des droits par type, libération de quarantaine)
 │   │   │   ├── brouillons.py       « À valider », « Tout valider » (ordre des dates)
-│   │   │   ├── inventaires.py      ouverture (périmètre), comptages, lots trouvés, validation, abandon, tournant
-│   │   │   ├── ordres.py           proposition FIFO, brouillons, blocages, validation (verrou ORDRES), annulation
-│   │   │   ├── production.py       plan global, réalisé, besoins détaillés
+│   │   │   ├── inventaires/        paquet : perimetre (ouverture, un inventaire ouvert par magasin), comptage (lots
+│   │   │   │                       trouvés), gestes (validation, abandon, annulation), lecture, feuille, document, tournant
+│   │   │   ├── ordres/             paquet : proposition FIFO, saisie, brouillon, blocages, regles, gestes (validation,
+│   │   │   │                       verrou ORDRES, annulation), prevu (prévu figé), consommation, lecture
+│   │   │   ├── production.py       plan global, réalisé, besoins détaillés ; production_lecture.py
 │   │   │   ├── plan_achat.py       plan d'achat, préparation par fournisseur
-│   │   │   ├── commandes.py        brouillons, envoi, prix, expédition, solde, réouverture, recaler_soldes
+│   │   │   ├── commandes.py        brouillons, envoi, prix, expédition, solde, réouverture, recaler_soldes ;
+│   │   │   │                       commandes_socle.py, commandes_saisie.py, commandes_gestes.py, commandes_suivi.py,
+│   │   │   │                       commandes_lecture.py, commandes_fiche.py ; bon_fournisseur.py (contenu du bon)
 │   │   │   ├── approbation.py      garde-fou du montant, versions parties, décisions
-│   │   │   ├── receptions.py       brouillons, recalage, blocages, validation, annulation, lot interne
-│   │   │   ├── factures.py         facture d'une réception, échéance, règlement
-│   │   │   ├── reclamations.py     ouverture, réponse, clôture, réouverture
-│   │   │   ├── importations.py     dossiers, rattachement, lignes, cours, frais, parts figées, clôture, annulation
+│   │   │   ├── receptions.py       créer (une réception par devise), modifier, supprimer, valider, annuler ;
+│   │   │   │                       receptions_socle.py (verrous, recalage calculé), receptions_saisie.py (rangée par
+│   │   │   │                       devise), receptions_blocages.py, receptions_facture.py (route 174),
+│   │   │   │                       receptions_lecture.py, receptions_fiche.py, receptions_pesees.py (176, 177)
+│   │   │   ├── factures.py         facture d'une réception, échéance, règlement (regler, garde-fous) ; factures_lecture.py
+│   │   │   ├── reclamations.py     ouverture, réponse, clôture, réouverture ; reclamations_lecture.py
+│   │   │   ├── importations/       paquet : ouverture, attente (à rattacher), marchandises, lignes, frais, parties
+│   │   │   │                       (parts figées), etats (clôture, réouverture, annulation), fiche, lecture, socle
 │   │   │   ├── analyse_revient.py  coût de revient par axe, coût d'une qualité
-│   │   │   ├── pilotage.py         cockpit, valorisation, prix, opportunités, contrôles, performance
+│   │   │   ├── pilotage.py         cockpit, valorisation, opportunités ; pilotage_machine.py (fil monté à toute date),
+│   │   │   │                       pilotage_kpi.py, pilotage_controles.py, pilotage_prix.py, pilotage_fournisseurs.py
+│   │   │   ├── donnees_brutes.py   route 7 : lignes brutes d'une table métier (liste fermée)
 │   │   │   ├── suivi.py            signalements
-│   │   │   ├── pieces.py           pièces jointes (types, taille, empreinte, chemin relatif, retrait logique)
+│   │   │   ├── pieces.py           pièces jointes (taille, empreinte, chemin relatif, retrait logique) ; pieces_types.py
 │   │   │   ├── echeancier.py       factures et frais dus, règlements
 │   │   │   ├── indicateurs.py      photo du jour, historique
 │   │   │   ├── bilan.py            bilan du mois (données)
@@ -223,12 +241,13 @@ gestion-mp-pro/
 │   │   │   ├── qr.py               segno → SVG
 │   │   │   ├── format.py           règle d'affichage § 9.3 (jumeau de format.ts), filtres des gabarits et classeurs
 │   │   │   ├── etiquettes.py       mise en page des étiquettes de lots (route 114)
+│   │   │   ├── bon_commande.py     données du bon de commande (route 164)
 │   │   │   └── gabarits/  _papier_a_en_tete.html  _papier.html (macros)  _impression.css  bon_commande.html  etiquettes.html
 │   │   │                  feuille_comptage.html  bilan.html
 │   │   ├── exports/
 │   │   │   ├── classeur.py         conventions communes (en-tête, formats, largeurs, volets, filtre, dates, `=` en texte)
 │   │   │   ├── referentiels.py  achats.py  receptions.py  stock.py  ordres.py  importations.py
-│   │   │   └── pilotage.py  journal.py  echeancier.py  bon_fournisseur.py
+│   │   │   └── pilotage.py  pilotage_achats.py  journal.py  echeancier.py  bon_fournisseur.py
 │   │   └── reprise/
 │   │       ├── __main__.py         python -m gestion_mp_pro.reprise --source … --mode …
 │   │       ├── source.py           connexion lecture seule, photo REPEATABLE READ, empreinte
@@ -273,7 +292,8 @@ gestion-mp-pro/
 │   └── mac/
 │       ├── fr.usine.gestion-mp-pro.plist   launchd : démarrage à l'ouverture de session, KeepAlive, journaux
 │       ├── creer-raccourci.sh      ~/Desktop/Gestion MP PRO.app (ouvre http://localhost:8050, démarre au besoin)
-│       ├── installer.sh            base, rôle, venv, construction, launchd, raccourci (idempotent)
+│       ├── installer.sh            base, rôle, environnement, construction, raccourci (idempotent) ; l'agent
+│       │                           launchd seulement avec `--demarrage-automatique`
 │       └── GestionMPPRO.icns  icone.svg
 ├── scripts/
 │   ├── demarrer.sh                 copie figée (git archive + dist construit) puis uvicorn ; écrit VERSION
@@ -624,10 +644,13 @@ Docker : `deploiement/gestion-mp-pro.service` (systemd).
 
 - PostgreSQL 16 de Homebrew (le même serveur que Gestion MP, **une autre base** :
   `gestion_mp_pro`, rôle propriétaire `gestion_mp_pro`).
-- `deploiement/mac/installer.sh` : crée base et rôle, `.venv`, construit l'écran, installe le
-  LaunchAgent `fr.usine.gestion-mp-pro` (démarrage à l'ouverture de session, `KeepAlive` =
-  relance automatique, journaux `~/Library/Logs/Gestion MP PRO/serveur.log` avec rotation),
-  crée le raccourci `~/Desktop/Gestion MP PRO.app`.
+- `deploiement/mac/installer.sh` (idempotent) : crée base et rôle, un environnement Python par
+  `requirements.lock` dans `~/Library/Application Support/Gestion MP PRO/` (pas le `.venv` de
+  développement du projet), construit l'écran, crée le raccourci `~/Desktop/Gestion MP PRO.app`.
+  Le LaunchAgent `fr.usine.gestion-mp-pro` (démarrage à l'ouverture de session, `KeepAlive` =
+  relance automatique, journaux dans `~/Library/Logs/Gestion MP PRO/`) n'est installé **qu'avec
+  `--demarrage-automatique`** : le réglage du Mac est laissé à son utilisateur ; sans l'agent, le
+  serveur démarre par un double-clic sur le raccourci.
 - `scripts/demarrer.sh` : **copie figée** (dernier commit `git archive` + écran construit) dans
   `~/Library/Application Support/Gestion MP PRO/version/`, fichier `VERSION` (hash), puis uvicorn
   `127.0.0.1:8050` (`GESTIONMPPRO_ECOUTE` pour ouvrir au réseau). Travailler dans le projet ne
@@ -672,7 +695,7 @@ PRO (8050) tourne à côté, et l'on doit pouvoir **comparer** les deux.
 | Pièces jointes | `~/gestion-mp-pieces/` | `~/gestion-mp-pro-pieces/` |
 | Journal du serveur | `~/Library/Logs/Gestion MP.log` | `~/Library/Logs/Gestion MP PRO/` |
 | Raccourci | `~/Desktop/Gestion MP.app` | `~/Desktop/Gestion MP PRO.app` (icône distincte, titre « Gestion MP PRO ») |
-| Démarrage | double-clic | LaunchAgent `fr.usine.gestion-mp-pro` |
+| Démarrage | double-clic | double-clic sur le raccourci ; LaunchAgent `fr.usine.gestion-mp-pro` seulement si l'utilisateur du Mac l'a installé (`installer.sh --demarrage-automatique`) |
 | Cookie de session | `gestion_mp_session` | `gestion_mp_pro_session` (les cookies ne s'isolent pas par port) |
 | En-tête anti-falsification | `X-Gestion-MP` | `X-Gestion-MP-PRO` |
 | Verrous consultatifs | 7426101–7426110 | 7426201–7426209 |

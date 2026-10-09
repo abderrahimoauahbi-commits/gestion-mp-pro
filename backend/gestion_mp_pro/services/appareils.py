@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import io
 import socket
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -117,8 +118,13 @@ def acces(s: Session, adresse_demandee: str) -> Acces:
 
 
 def qr_svg(texte: str, echelle: int = 6, marge: int = 2) -> str:
-    """Le QR d'un texte en SVG en ligne (correction d'erreur « m »)."""
-    return str(segno.make(texte, error="m").svg_inline(scale=echelle, border=marge))
+    """Le QR d'un texte en SVG (correction d'erreur « m »), **avec** l'espace de noms SVG : il
+    s'affiche aussi bien en ligne que dans une `<img>` (routes 6 et 20 ; RESTES3, F8)."""
+    tampon = io.BytesIO()
+    segno.make(texte, error="m").save(
+        tampon, kind="svg", scale=echelle, border=marge, xmldecl=False, svgns=True, nl=False
+    )
+    return tampon.getvalue().decode()
 
 
 # ── Appareils ────────────────────────────────────────────────────────────────

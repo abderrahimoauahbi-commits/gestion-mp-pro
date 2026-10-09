@@ -23,10 +23,11 @@ from gestion_mp_pro.calcul.nomenclature import kg_par_m2
 from gestion_mp_pro.calcul.plan import plan_mensuel
 from gestion_mp_pro.calcul.stock import LigneStock, etat_stock, fils_en_machine
 from gestion_mp_pro.calcul.valorisation import cmup_par_reference
-from gestion_mp_pro.modeles import Matiere
+from gestion_mp_pro.modeles import Magasin, Matiere
 from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import donnees_moteur
 from gestion_mp_pro.services.lots import FiltresLots, LotSolde, lister
+from gestion_mp_pro.services.pilotage_machine import avec_montage
 
 CONSEIL_D_ACHAT = (
     "quantite_a_commander", "quantite_a_commander_achat", "quantite_theorique",
@@ -49,6 +50,7 @@ class EtatStock:
 
     date_reference: date
     magasins: list[str]
+    magasin_ids: dict[str, int]
     lignes: list[dict[str, Any]]
 
 
@@ -59,12 +61,26 @@ def _lignes(d: c.Donnees, jour: date) -> tuple[list[LigneStock], dict[str, float
     return lignes, couts
 
 
-def _ligne(
-    x: LigneStock, ids: dict[str, int], couts: dict[str, float], conseil: bool
-) -> dict[str, Any]:
-    """Une ligne pour l'écran (sans conseil d'achat si `conseil` est faux)."""
+@dataclass(frozen=True)
+class Ids:
+    """Les identifiants que l'écran suit en lien : matière, son rôle, son fournisseur."""
+
+    matieres: dict[str, tuple[int, int | None, int | None]]
+
+    @classmethod
+    def lire(cls, s: Session) -> Ids:
+        """Référence → (matière, rôle, fournisseur)."""
+        lignes = s.execute(select(Matiere.reference, Matiere.id, Matiere.role_id,
+                                  Matiere.fournisseur_id)).all()  # fmt: skip
+        return cls({r: (i, role, f) for r, i, role, f in lignes})
+
+
+def _ligne(x: LigneStock, ids: Ids, couts: dict[str, float], conseil: bool) -> dict[str, Any]:
+    """Une ligne pour l'écran (sans conseil d'achat si `conseil` est faux) ; ids de la matière,
+    de son rôle et de son fournisseur (liens de l'écran, RESTES3)."""
     rendu = asdict(x)
-    rendu["matiere_id"] = ids.get(x.reference)
+    matiere_id, role_id, fournisseur_id = ids.matieres.get(x.reference, (None, None, None))
+    rendu |= {"matiere_id": matiere_id, "role_id": role_id, "fournisseur_id": fournisseur_id}
     rendu["valeur_machine_mad"] = x.stock_machine * couts.get(x.reference, 0.0)
     if not conseil:
         rendu |= dict.fromkeys(CONSEIL_D_ACHAT)
@@ -72,8 +88,9 @@ def _ligne(
 
 
 def etat(s: Session, jour: date, q: str = "", conseil: bool = True) -> EtatStock:
-    """Route 103 : l'état du stock au soir du `jour` ; `q` : tous les mots, sans accents."""
-    d = donnees_moteur.charger_au(s, jour)
+    """Route 103 : l'état du stock au soir du `jour` ; `q` : tous les mots, sans accents. Le
+    fil monté est celui de ce soir-là (`pilotage_machine`) : même chiffre que la Valorisation."""
+    d = avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
     lignes, couts = _lignes(d, jour)
     mots = normaliser(q).split()
     if mots:
@@ -84,10 +101,12 @@ def etat(s: Session, jour: date, q: str = "", conseil: bool = True) -> EtatStock
                 m in normaliser(" ".join(str(getattr(x, k)) for k in CHAMPS_CHERCHES)) for m in mots
             )
         ]
-    ids = dict(s.execute(select(Matiere.reference, Matiere.id)).all())
+    ids = Ids.lire(s)
+    codes = dict(s.execute(select(Magasin.code, Magasin.id)).all())
     return EtatStock(
         date_reference=jour,
         magasins=[g.code for g in d.magasins if g.actif],
+        magasin_ids={g.code: codes[g.code] for g in d.magasins if g.code in codes},
         lignes=[_ligne(x, ids, couts, conseil) for x in lignes],
     )
 
@@ -139,11 +158,12 @@ def fiche_matiere(
     m = s.get(Matiere, matiere_id)
     if m is None:
         raise Refus.introuvable("Matière introuvable.")
-    d = donnees_moteur.charger_au(s, jour)
+    d = avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
     lignes, couts = _lignes(d, jour)
     ligne = next(x for x in lignes if x.reference == m.reference)
+    ids = Ids({m.reference: (m.id, m.role_id, m.fournisseur_id)})
     return FicheStockMatiere(
-        ligne=_ligne(ligne, {m.reference: m.id}, couts, conseil),
+        ligne=_ligne(ligne, ids, couts, conseil),
         besoins_par_qualite=_besoins(d, jour, m.reference),
         lots=lister(s, FiltresLots(matiere_id=matiere_id, jour=jour)),
         sur_les_metiers=[asdict(f) for f in fils_en_machine(d) if f.reference == m.reference]

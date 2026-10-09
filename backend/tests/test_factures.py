@@ -271,6 +271,9 @@ def test_les_factures_se_listent_avec_leurs_receptions(
     assert x["montant"] is None and x["montant_estime"] == 250 and x["poids"] == 100
     assert [y["numero"] for y in x["receptions"]] == [r["numero"]] and x["dossier"] is None
     assert ok(achats.get("/api/factures", params={"q": "fa 2026 117"}))[0]["id"] == x["id"]
+    for q in ("FA-2026-117", "fa2026117", "FA 2026.117"):  # RESTES3 (F5) : la ponctuation près
+        assert [f["id"] for f in ok(achats.get("/api/factures", params={"q": q}))] == [x["id"]]
+    assert ok(achats.get("/api/factures", params={"q": "FA-2026-118"})) == []
     d = ouvrir_facture(achats, x["id"])
     sans = ok(achats.get("/api/factures", params={"fournisseur": eur.fournisseur_id,
                                                   "sans_dossier": True}))  # fmt: skip

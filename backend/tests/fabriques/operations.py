@@ -21,14 +21,10 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.modeles import Lot, Magasin, Matiere, Motif, Ordre, Solde
 from gestion_mp_pro.modeles.enums import (
-    DocumentMouvement,
     Role,
-    StatutOrdre,
     TypeMagasin,
-    TypeMouvement,
     TypeOperation,
 )
-from gestion_mp_pro.services import horloge, stock
 from gestion_mp_pro.services.comptes import Acteur
 from gestion_mp_pro.services.operations import SaisieLigne, SaisieOperation
 
@@ -65,26 +61,19 @@ def quarantaine(s: Session) -> Magasin:
 def ordre_valide(
     s: Session, sorties: list[tuple[Lot, float]], le: date = JOUR, g: Magasin | None = None
 ) -> Ordre:
-    """Un ordre validé et ses sorties vers les machines (comme le ferait le lot D6)."""
+    """Un ordre validé et ses sorties vers les machines, **par le service des ordres** (D6 :
+    `fabriques.ordres.valide`, RESTES3 — le décor écrit à la main de D5 est retiré)."""
+    from fabriques.ordres import saisie as saisie_ordre
+    from fabriques.ordres import valide
+
     if g is None:  # le magasin où le premier lot a du stock
         g = s.scalars(
             select(Magasin)
             .join(Solde, Solde.magasin_id == Magasin.id)
             .where(Solde.lot_id == sorties[0][0].id, Solde.quantite > 0)
         ).first() or magasin(s)
-    o = Ordre(
-        numero=unique("OF"), statut=StatutOrdre.valide, date=le, magasin_id=g.id,
-        valide_le=horloge.maintenant(),
-    )  # fmt: skip
-    s.add(o)
-    s.flush()
-    piece = stock.Piece(DocumentMouvement.ordre, o.id, o.numero or "")
-    for x, q in sorties:
-        stock.ecrire(
-            s, type=TypeMouvement.SORTIE, lot=x, magasin_id=g.id, quantite=-Decimal(str(q)),
-            jour=le, piece=piece, auteur_id=None, liens=stock.Liens(ordre_id=o.id),
-        )  # fmt: skip
-    return o
+    qui = acteur(s, Role.direction)
+    return valide(s, qui, saisie_ordre(g.id, [(x, q) for x, q in sorties], le=le))
 
 
 def ligne(matiere_id: int, magasin_id: int, quantite: float | str, **champs: object) -> SaisieLigne:
