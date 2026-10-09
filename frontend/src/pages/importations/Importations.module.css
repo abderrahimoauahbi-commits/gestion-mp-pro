@@ -1,0 +1,226 @@
+/* Importations & coût de revient (lot F5) : liste, attente, fiche du dossier. Jetons seulement. */
+
+.valeur {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.rouge {
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.gras {
+  font-weight: 600;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-height: 0;
+}
+
+.pousse {
+  flex: 1;
+}
+
+.liens {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 var(--espace-2);
+}
+
+/* « + N non répartis » : la liste des dossiers qui en portent, chacun ouvrable. */
+.nonRepartis {
+  position: relative;
+  display: inline-block;
+}
+
+.nonRepartis > summary {
+  cursor: pointer;
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+  list-style: none;
+}
+
+.nonRepartis > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nonRepartis ul {
+  position: absolute;
+  z-index: var(--plan-liste);
+  min-width: 220px;
+  margin: var(--espace-1) 0 0;
+  padding: var(--espace-2) var(--espace-3);
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  box-shadow: var(--ombre-haute);
+}
+
+.nonRepartis li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espace-3);
+  padding: 2px 0;
+  white-space: nowrap;
+}
+
+/* La fiche du dossier : en-tête serré, gestes à droite. */
+.entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-1) var(--espace-3);
+  font-size: var(--taille-petite);
+  color: var(--texte-2);
+}
+
+.entete strong {
+  color: var(--texte);
+}
+
+.gestes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  margin-left: auto;
+}
+
+.enregistre {
+  color: var(--ton-ok);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.panneau {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espace-2) var(--espace-3);
+  padding: var(--espace-2) var(--espace-3);
+  background: var(--surface-2);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+}
+
+.panneau > label,
+.panneau > div {
+  min-width: 0;
+}
+
+.large {
+  flex: 1 1 260px;
+}
+
+.moyen {
+  flex: 0 1 180px;
+}
+
+.etroit {
+  flex: 0 1 130px;
+}
+
+/* Encarts de contrôle de l'onglet Frais : deux côte à côte. */
+.controles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espace-2);
+}
+
+.controle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-1) var(--espace-3);
+  padding: var(--espace-1) var(--espace-3);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+  background: var(--surface-2);
+  font-size: var(--taille-petite);
+}
+
+.ecart {
+  border-color: var(--ton-critique);
+  background: var(--ton-critique-clair);
+}
+
+/* Cellule de saisie dans un tableau : prend la largeur de sa colonne. */
+.cellule {
+  min-width: 90px;
+}
+
+.cellule input,
+.cellule select {
+  width: 100%;
+}
+
+.ajout td {
+  background: var(--accent-clair);
+  vertical-align: top;
+}
+
+.totaux td {
+  font-weight: 600;
+}
+
+.groupe td {
+  background: var(--surface-3);
+  font-weight: 600;
+}
+
+@media (width <= 700px) {
+  .controles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Une cellule de pied posée à la main : chiffres à droite, alignés. */
+.chiffre {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Un texte long dans une cellule : une ligne, le reste en infobulle. */
+.coupe {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sansCoupure {
+  white-space: nowrap;
+}
+
+/* Un choix dans une cellule (poste, « porte sur ») : lisible. */
+.celluleLarge {
+  display: block;
+  min-width: 170px;
+}
