@@ -1,0 +1,58 @@
+{#- Étiquettes QR des lots (route 114, lot D9) : une étiquette par page de 100 × 70 mm. -#}
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ titre }}</title>
+<style>
+@page { size: 100mm 70mm; margin: 4mm; }
+{% include "_impression.css" %}
+body { color: #000; }
+.etiquettes { display: flex; flex-direction: column; align-items: center; gap: 6mm; padding: 6mm 0 12mm; }
+.etiquette { display: flex; gap: 4mm; align-items: center; width: 92mm; height: 62mm; padding: 3mm;
+  background: #fff; border: 1pt dashed #bbb; overflow: hidden; }
+.qr { flex: none; width: 34mm; height: 34mm; }
+.qr svg { display: block; width: 34mm; height: 34mm; }
+.texte { font-size: 10pt; line-height: 1.35; min-width: 0; }
+.ref { font-size: 13pt; font-weight: 700; overflow-wrap: anywhere; }
+.lot { font-size: 16pt; font-weight: 800; margin: 1mm 0; overflow-wrap: anywhere; }
+.id { color: #555; font-size: 9pt; }
+.quarantaine { margin-top: 1mm; padding: 1mm 2mm; border: 1.5pt solid #000; font-weight: 800; font-size: 11pt; }
+.aucun { width: 92mm; margin: 12mm auto; font-size: 13pt; font-weight: 700; }
+@media print {
+  .etiquettes { display: block; padding: 0; }
+  .etiquette { width: auto; height: 62mm; border: 0; padding: 0; break-after: page; page-break-after: always; }
+  .etiquette:last-child { break-after: auto; page-break-after: auto; }
+}
+</style>
+</head>
+<body>
+{% if etiquettes %}
+<div class="barre ecran-seulement"><button type="button" id="imprimer">Imprimer les étiquettes (100 × 70 mm)</button></div>
+{% endif %}
+{% if alerte_localhost %}<p class="avertissement ecran-seulement">{{ alerte_localhost }}</p>{% endif %}
+{% if ignores %}<p class="avertissement ecran-seulement ignores">Ignorés (lots inconnus, sans étiquette) : {{ ignores|join(", ") }}</p>{% endif %}
+{% if etiquettes %}
+<div class="etiquettes">
+{% for e in etiquettes %}
+  <section class="etiquette" data-lot="{{ e.lot.lot_id }}">
+    <div class="qr">{{ e.qr_svg }}</div>
+    <div class="texte">
+      <div class="ref">{{ e.lot.reference }}</div>
+      <div class="lot">Lot {{ e.lot.lot }}</div>
+      {% if e.lot.fournisseur %}<div>{{ e.lot.fournisseur }}</div>{% endif %}
+      <div>Entré le {{ e.lot.entre_le|date }}</div>
+      <div>Reste {{ e.lot.texte_quantite }}</div>
+      <div class="id">N° {{ e.lot.lot_id }}</div>
+      {% if e.lot.texte_quarantaine %}<div class="quarantaine">{{ e.lot.texte_quarantaine }}</div>{% endif %}
+    </div>
+  </section>
+{% endfor %}
+</div>
+<script>{{ script_imprimer }}</script>
+{% else %}
+<p class="aucun">{{ aucun_lot }}</p>
+{% endif %}
+</body>
+</html>

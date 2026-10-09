@@ -1,0 +1,38 @@
+{#- Le papier à en-tête de l'usine (décision A22 de Mohamed ; lot D9) : la base de tout document A4.
+
+Un document l'étend et remplit `contenu` :
+
+    {% extends "_papier_a_en_tete.html" %}
+    {% block contenu %}<h1>…</h1>…{% endblock %}
+
+Autres blocs : `style` (CSS propre au document), `avant_pages` (à l'écran, au-dessus de la
+feuille), `pages` (plusieurs feuilles : chacune `<div class="page">` avec `papier.en_tete(…)`,
+importé par `{% import "_papier.html" as papier %}`), `en_tete_non_regle` (la phrase
+du bandeau). Variables posées par `rendu.rendre` : societe, titre, langue, mots, paysage,
+script_imprimer.
+-#}
+{% import "_papier.html" as papier %}
+<!doctype html>
+<html lang="{{ langue }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ titre }}</title>
+<style>
+@page { size: A4{% if paysage %} landscape{% endif %}; margin: 12mm 13mm 10mm; }
+{% include "_impression.css" %}
+{% block style %}{% endblock %}
+</style>
+</head>
+<body class="{{ 'paysage' if paysage else 'portrait' }}">
+<div class="barre ecran-seulement"><button type="button" id="imprimer">Imprimer / enregistrer en PDF (A4)</button></div>
+{% if not societe.reglee %}
+<p class="avertissement ecran-seulement">{% block en_tete_non_regle %}En-tête non réglé : la raison sociale de l'usine n'est pas réglée (Réglages › Paramètres › Société) ; elle manque en tête de ce document.{% endblock %}</p>
+{% endif %}
+{% block avant_pages %}{% endblock %}
+{% block pages %}
+{% call papier.feuille(societe, mots) %}{% block contenu %}{% endblock %}{% endcall %}
+{% endblock %}
+<script>{{ script_imprimer }}</script>
+</body>
+</html>
