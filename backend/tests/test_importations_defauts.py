@@ -309,3 +309,22 @@ def test_le_journal_ecrit_les_montants_a_la_francaise(
         assert (
             s.scalar(select(DossierLigne.cours).where(DossierLigne.dossier_id == d["id"])) is None
         )
+
+
+def test_l_ecart_de_tva_tolere_se_lit_dans_son_reglage(achats: TestClient) -> None:
+    """E-10 (C29 et la fiche, Gestion MP 26459d4) : l'écart de TVA toléré de la fiche est
+    |TVA attendue| × `toler_tva_import` — le même réglage que le contrôle C29."""
+    imp = Import.nouveau(cours="10")
+    imp.recevoir(achats, "DB-TOL", [("FIL", "DBTO-1", 100, 2)])
+    d = ouvrir(achats, imp.f("DB-TOL"))
+    attendue = d["tva_attendue_mad"]
+    assert d["tva_ecart_tolere_mad"] == pytest.approx(attendue * 0.05)
+    with reglage("toler_tva_import", "0.1"):
+        d = fiche(achats, d["id"])
+        assert d["toler_tva_import"] == pytest.approx(0.1)
+        assert d["tva_ecart_tolere_mad"] == pytest.approx(attendue * 0.1)
+        d = frais(achats, d, "TVA", round(attendue * 1.08, 2))
+        assert d["tva_ecart_mad"] is None and "TVA ≠ attendue" not in d["a_verifier"]
+    d = fiche(achats, d["id"])
+    assert d["tva_ecart_mad"] == pytest.approx(attendue * 0.08, abs=0.01)
+    assert "TVA ≠ attendue" in d["a_verifier"] and "TVA ≠ attendue." in d["alertes"]
