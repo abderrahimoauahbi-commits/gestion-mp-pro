@@ -22,7 +22,7 @@ describe('Table des statuts', () => {
       document: ['brouillon', 'validee', 'annulee'],
       ordre: ['brouillon', 'valide', 'annule'],
       qualite_reception: ['conforme', 'reserve', 'refuse'],
-      inventaire: ['ouvert', 'valide', 'abandonne'],
+      inventaire: ['ouvert', 'valide', 'abandonne', 'annule'],
       dossier: ['ouvert', 'clos', 'annule'],
       reclamation: ['ouverte', 'close'],
       issue_reclamation: ['avoir', 'remplacement', 'remise', 'refusee', 'abandonnee'],
@@ -49,6 +49,8 @@ describe('Table des statuts', () => {
     expect(statut('document', 'annulee')).toEqual({ libelle: 'Annulée', ton: 'rupture' })
     expect(statut('ordre', 'valide').libelle).toBe('Validé')
     expect(statut('lot', 'partiel').libelle).toBe('En partie en quarantaine')
+    expect(statut('inventaire', 'ouvert')).toEqual({ libelle: 'Comptage en cours', ton: 'attention' })
+    expect(statut('inventaire', 'annule')).toEqual({ libelle: 'Annulé', ton: 'neutre' })
   })
 
   it('une valeur inconnue se montre telle quelle, en neutre ; un vide « — »', () => {

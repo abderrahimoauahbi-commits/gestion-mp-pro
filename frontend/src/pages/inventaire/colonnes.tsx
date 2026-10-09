@@ -7,7 +7,8 @@ import type { Colonne } from '../../composants/tableaux/colonnes'
 import { date, horodatage, nombre, part } from '../../lib/format'
 import { BadgeHorsTolerance, EcartKg, ValeurEcart } from './communs'
 import styles from './Inventaire.module.css'
-import { magasinDe, statutInventaire, type InventaireResume } from './types'
+import { statut } from '../../lib/statuts'
+import { magasinDe, type InventaireResume } from './types'
 
 type C = Colonne<InventaireResume>
 
@@ -70,11 +71,8 @@ const valeur: C = {
 const etat: C = {
   cle: 'etat',
   titre: 'État',
-  valeur: (i) => statutInventaire(i.statut).libelle,
-  rendu: (i) => {
-    const s = statutInventaire(i.statut)
-    return <Badge ton={s.ton}>{s.libelle}</Badge>
-  },
+  valeur: (i) => statut('inventaire', i.statut).libelle,
+  rendu: (i) => <Badge famille="inventaire" valeur={i.statut} />,
 }
 
 /** « {ouvreur} · validé par {nom} le … » [« · annulé par {nom} le … »]. */

@@ -111,10 +111,12 @@ export const STATUTS = {
     a_surveiller: s('À surveiller', 'attention'),
     a_challenger: s('À challenger', 'critique'),
   },
+  /** Inventaire (`StatutInventaire`) : abandonné = ouvert puis laissé, annulé = validé puis défait. */
   inventaire: {
-    ouvert: s('Ouvert', 'attention'),
+    ouvert: s('Comptage en cours', 'attention'),
     valide: s('Validé', 'ok'),
     abandonne: s('Abandonné', 'neutre'),
+    annule: s('Annulé', 'neutre'),
   },
   dossier: {
     ouvert: s('Ouvert', 'accent'),
