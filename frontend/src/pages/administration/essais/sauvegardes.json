@@ -1,0 +1,38 @@
+{
+  "base": "gestion_mp_pro_f8_essai",
+  "derniere": "2026-10-09T11:34:40Z",
+  "age_h": 0.09,
+  "alerte": null,
+  "politique": "Une sauvegarde automatique par jour, relue, gardée 14 jours, puis la première de chaque mois gardée 12 mois ; la copie de sécurité suit la même conservation ; les sauvegardes manuelles et « avant » (restauration, reprise, vidage, mise à jour) ne s'effacent jamais seules.",
+  "dossier": "/private/tmp/claude-501/-Users-mohamed-erp-fil/4e04b189-49c6-4a03-8959-dbff180239bb/scratchpad/f8/sauvegardes/gestion_mp_pro_f8_essai",
+  "copie": null,
+  "nb": 2,
+  "autres": 0,
+  "outils": true,
+  "fichiers": [
+    {
+      "nom": "gestion-mp-pro-2026-10-09-113440-avant-restauration.dump",
+      "genre": "avant-restauration",
+      "nature": "avant une restauration",
+      "base": "gestion_mp_pro_f8_essai",
+      "autre_base": false,
+      "taille": 572181,
+      "quand": "2026-10-09T11:34:40Z",
+      "tables": 71,
+      "pieces": true,
+      "copie": false
+    },
+    {
+      "nom": "gestion-mp-pro-2026-10-09-113410-manuelle.dump",
+      "genre": "manuelle",
+      "nature": "manuelle",
+      "base": "gestion_mp_pro_f8_essai",
+      "autre_base": false,
+      "taille": 571966,
+      "quand": "2026-10-09T11:34:10Z",
+      "tables": 71,
+      "pieces": true,
+      "copie": false
+    }
+  ]
+}

@@ -1,12 +1,9 @@
 /**
- * Écrans du domaine « Analyse » (lot F8), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F8 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Analyse » (lot F8), rassemblés par `routes.ts` : une page à neuf onglets
+ * (ECRANS-PRO partie 8). Les fenêtres ont leur adresse sur la page (`&fournisseur=ID`,
+ * `&controle=Cxx`, `&ordre=ID`) ; le « Coût de revient » est un onglet réalisé par le lot F5.
  */
 import type { Ecran } from '../../routes'
-
-// Page provisoire du lot F5 (onglet « Coût de revient ») tant que le lot F8 n'a pas livré la sienne.
-const aVenir = () => import('../importations/PageAnalyse')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -17,7 +14,7 @@ export const ecrans: readonly Ecran[] = [
     roles: ['direction', 'achats'],
     aide: 'analyse',
     onglets: [
-      { cle: 'valorisation', libelle: 'Valorisation' },
+      { cle: 'valorisation', libelle: 'Valorisation', court: 'Valeur' },
       { cle: 'matrice', libelle: 'Matrice' },
       { cle: 'historique', libelle: 'Prix payés' },
       { cle: 'opportunites', libelle: 'Opportunités d’économies', court: 'Opportunités' },
@@ -27,7 +24,6 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'controles', libelle: 'Contrôles' },
       { cle: 'production', libelle: 'Production' },
     ],
-    lot: 'F8',
-    page: aVenir,
+    page: () => import('./Analyse'),
   },
 ]

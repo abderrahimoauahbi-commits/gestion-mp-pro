@@ -1,0 +1,15 @@
+{
+  "adresses": [
+    {
+      "libelle": "Adresse réseau",
+      "adresse": "http://192.168.3.102:8128"
+    },
+    {
+      "libelle": "Nom de la machine",
+      "adresse": "http://macbook-pro-14-mohamed:8128"
+    }
+  ],
+  "adresse_publique": "",
+  "adresse_qr": "http://192.168.3.102:8128",
+  "alerte_localhost": null
+}

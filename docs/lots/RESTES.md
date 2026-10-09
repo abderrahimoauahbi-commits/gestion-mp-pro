@@ -64,3 +64,11 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F1 | F4 | Fermer une fiche commande ouverte depuis le Cockpit ramène à `/commandes` au lieu du Cockpit (passer `state.retour`). |
 | F1 | E1 | `.masque-accessible` (position absolue) allonge le document au téléphone quand `<main>` défile (F1 contourne par `position: relative`). |
 | F1 | V3 | Recette navigateur : un profil de navigateur à part par passage (cookies de session partagés entre serveurs `localhost`). |
+| F8 | S2/D10 | QR en SVG (routes 6 et 20) sans `xmlns` : ne s'affiche pas dans une `<img>` (l'écran l'ajoute dans `administration/qr.ts`) — produire le SVG avec l'espace de noms (segno `svgns`), puis retirer le contournement. |
+| F8 | D8/D1 | Nombre de brouillons datés de la période à clore : une route (ou un champ) pour l'annoncer avant la fenêtre de clôture. |
+| F8 | E1 | `FenetreConfirmation` sans étapes (F8 a construit la restauration sur `Fenetre`) ; `Onglets` sans garde de saisie. |
+| F8 | docs | ECRANS-PRO : 7 ordres de seuils et non 5 ; note de la Valorisation sur le fil monté à une date passée (fausse depuis D8). |
+| F8 | F5 | En-tête de `pages/importations/ecrans.ts` : retirer la mention des pages provisoires supprimées. |
+| V1 | D3 + écran (décision du coordinateur) | Bon reçu sous réserve : la fiche commande montre un reste de 0 (règle de Gestion MP gardée pour la parité) alors que le Cockpit et le plan d'achat le comptent attendu tant que la matière est en quarantaine (D-02). Décision : garder les chiffres, mais la fiche du bon et sa ligne disent « dont X kg reçus sous réserve, en quarantaine : attendus jusqu'à leur libération », et l'aide de l'indicateur du Cockpit l'explique — une seule vérité lisible des deux côtés. |
+| V1 | S0 | Cible `make verifier-chiffres`. |
+| V1 | V2/V5 | Vérification sur la 3e base (copie après le scénario V2) ; familles non recomptées (stock sur les métiers, plan et besoins, projeté, statuts, XYZ, dormants, prévu des ordres non figés, coût d'une qualité, photo du jour, contrôles C06, C08, C13, C15, C17, C18, C20, C22–C25, C30, C32, C33, C35, C38) : à étendre si possible avant la recette. |
