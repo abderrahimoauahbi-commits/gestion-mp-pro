@@ -1,7 +1,7 @@
 #!/bin/bash
 # Lanceur de « Gestion MP PRO.app » (bureau) : démarre le serveur s'il ne tourne pas, puis ouvre
 # http://localhost:8050 dans le navigateur par défaut. Recopié dans l'application par
-# deploiement/mac/creer-raccourci.sh, qui écrit la ligne OUTILS juste au-dessous.
+# deploiement/mac/creer-raccourci.sh, qui écrit en tête la ligne OUTILS de ce poste.
 # Gestion MP (8030, « Gestion MP.app ») n'est jamais touché.
 OUTILS="${OUTILS:-$HOME/Library/Application Support/Gestion MP PRO/outils}"
 PORT=8050

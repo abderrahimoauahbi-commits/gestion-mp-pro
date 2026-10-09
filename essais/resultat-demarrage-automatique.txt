@@ -1,0 +1,18 @@
+Démarrage automatique : étiquette fr.usine.gestion-mp-pro.essai, base gestion_mp_pro_x2_poste_essai, port 8150
+  ok  Gestion MP répond avant l'épreuve (8030, processus 36178)
+  ok  aucun agent d'essai ni serveur sur 8150 avant
+Démarrage automatique installé (/Users/mohamed/Library/LaunchAgents/fr.usine.gestion-mp-pro.essai.plist) : Gestion MP PRO répond sur le port 8150.
+  ok  l'agent a démarré le serveur (RunAtLoad), /api/sante 200
+  ok  le serveur qui répond est celui de l'agent (processus 65201)
+  ok  l'agent porte KeepAlive et RunAtLoad
+  ok  relancé après kill -TERM (65201 → 65522)
+  ok  relancé après kill -KILL (65522 → 65805)
+  ok  Gestion MP a répondu pendant les relances, même processus
+Démarrage automatique suspendu jusqu'à la prochaine ouverture de session (fr.usine.gestion-mp-pro.essai).
+Gestion MP PRO arrêté (port 8150).
+  ok  arreter.sh : arrêté et pas relancé (15 s)
+  ok  réinstallé (idempotent) : il répond de nouveau
+Démarrage automatique retiré (fr.usine.gestion-mp-pro.essai) : lancer Gestion MP PRO par le raccourci du bureau.
+  ok  --retirer : agent déchargé, fichier retiré, port rendu, pas de relance
+  ok  Gestion MP répond après l'épreuve, même processus (36178)
+Démarrage automatique : 12 vérification(s) tenue(s), 0 en défaut.

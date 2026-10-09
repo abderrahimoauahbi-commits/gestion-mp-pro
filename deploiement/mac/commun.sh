@@ -11,6 +11,8 @@
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin${PATH:+:$PATH}"
 export PATH
 export PYTHONUTF8=1 LANG="${LANG:-fr_FR.UTF-8}"
+# Sauvegardes, pièces, journaux et copie : lisibles du seul compte du Mac (empreintes des codes).
+umask 077
 
 ETIQUETTE_DEFAUT="fr.usine.gestion-mp-pro"
 _ici_commun="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
