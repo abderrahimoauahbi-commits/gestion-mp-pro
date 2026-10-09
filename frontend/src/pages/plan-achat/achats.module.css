@@ -1,0 +1,218 @@
+/* Les achats (lot F4 : plan d'achat, commandes, réceptions) : seulement des jetons (stylelint). */
+
+.dessous {
+  display: block;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  font-weight: 400;
+}
+
+.fort {
+  font-weight: 600;
+}
+
+.ref {
+  display: inline-block;
+  max-width: 170px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.coupe {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espace-3);
+}
+
+.rangeeCentree {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.attention {
+  color: var(--ton-attention);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.critique {
+  color: var(--ton-critique);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.eteinte {
+  opacity: 0.5;
+}
+
+.volet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-width: 0;
+  min-height: 0;
+}
+
+.pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  padding: var(--espace-3);
+  background: var(--surface-2);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+}
+
+.lien {
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--taille-petite);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.champEtroit {
+  width: 110px;
+}
+
+.champCourt {
+  width: 92px;
+}
+
+.champMoyen {
+  width: 150px;
+}
+
+.champLarge {
+  width: 340px;
+  max-width: 100%;
+}
+
+.pleine {
+  width: 100%;
+}
+
+.liste {
+  margin: 0;
+  padding-left: var(--espace-4);
+}
+
+.carteListe {
+  min-height: 0;
+}
+
+/* Au téléphone, la liste ne tient pas dans l'écran avec ses filtres : la carte prend sa hauteur
+   et la page défile, le tableau gardant son cadre (plancher de 200 px). */
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+
+  .champLarge {
+    width: 100%;
+  }
+}
+
+/* Une liste déroulante courte dans un tableau de saisie (unité, magasin, qualité). */
+.choix {
+  min-width: 0;
+  min-height: var(--hauteur-champ);
+  padding: 4px 6px;
+  color: var(--texte);
+  background: var(--surface);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+}
+
+.choix:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--anneau);
+}
+
+.cellule {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 96px;
+}
+
+/* Un tableau dans une fenêtre : il garde sa hauteur (le corps de la fenêtre défile au besoin)
+   au lieu d'être écrasé par ce qui le précède. */
+.tableFenetre {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 160px;
+}
+
+/* Une date saisie au fil d'une question (« Envoyé le [date] : … »). */
+.dateEnLigne {
+  display: inline-block;
+  width: 160px;
+  vertical-align: middle;
+}
+
+.sansCoupure {
+  white-space: nowrap;
+}
+
+/* Des volets repliables côte à côte (mode d'emploi, facture, ce qui sera refusé) : une seule
+   rangée tant qu'ils sont repliés. */
+.replis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--espace-2);
+}
+
+.repli {
+  flex: 0 1 auto;
+  padding: var(--espace-1) var(--espace-2);
+  background: var(--surface-2);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+}
+
+.repli[open] {
+  flex-basis: 100%;
+}
+
+.repli > summary {
+  cursor: pointer;
+}
