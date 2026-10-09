@@ -135,6 +135,14 @@ class SoldeMagasin:
     quantite: Decimal
 
 
+@dataclass(frozen=True)
+class OrdreServi:
+    """Un ordre de fabrication qu'un lot a servi."""
+
+    id: int
+    numero: str
+
+
 @dataclass
 class Historique:
     """Ce qu'a vécu un lot : entré, sorti (net des retours des machines), dernier mouvement,
@@ -143,7 +151,7 @@ class Historique:
     entre: Decimal = ZERO
     sorti: Decimal = ZERO
     dernier_mouvement: date | None = None
-    ordres: list[tuple[int, str]] = field(default_factory=list)
+    ordres: list[OrdreServi] = field(default_factory=list)
 
 
 def historique(s: Session, ids: set[int]) -> dict[int, Historique]:
@@ -188,7 +196,7 @@ def historique(s: Session, ids: set[int]) -> dict[int, Historique]:
         if x.ordre_id and x.type == TypeMouvement.SORTIE:
             ordres[x.lot_id][x.ordre_id] = numeros.get(x.ordre_id) or ""
     for lot, h in histoire.items():
-        h.ordres = sorted(ordres[lot].items(), key=lambda kv: kv[1])
+        h.ordres = [OrdreServi(i, n) for i, n in sorted(ordres[lot].items(), key=lambda kv: kv[1])]
     return histoire
 
 
@@ -258,6 +266,7 @@ class FiltresLots:
 
     matiere_id: int | None = None
     magasin_id: int | None = None
+    lot_id: int | None = None
     statut: str | None = None
     non_nuls: bool = True
     q: str = ""
@@ -275,6 +284,8 @@ def lister(s: Session, f: FiltresLots = FiltresLots()) -> list[LotSolde]:  # noq
         requete = requete.where(Lot.matiere_id == f.matiere_id)
     if f.magasin_id is not None:
         requete = requete.where(Solde.magasin_id == f.magasin_id)
+    if f.lot_id is not None:
+        requete = requete.where(Lot.id == f.lot_id)
     rangs = [(lot, mag, q) for lot, mag, q in s.execute(requete)]
     if f.jour is not None and f.jour < horloge.aujourd_hui():
         au = presents_au(s, {(lot.id, mag) for lot, mag, _ in rangs}, f.jour)
@@ -300,3 +311,11 @@ def lister(s: Session, f: FiltresLots = FiltresLots()) -> list[LotSolde]:  # noq
     if f.statut:
         lignes = [x for x in lignes if x.statut == f.statut]
     return sorted(lignes, key=lambda x: (x.reference, x.entre_le, x.lot_id))
+
+
+def ligne_du_lot(s: Session, lot: Lot) -> LotSolde:
+    """La ligne d'un lot, ses magasins vides compris (un lot sans solde est épuisé)."""
+    trouve = lister(s, FiltresLots(lot_id=lot.id, non_nuls=False))
+    if trouve:
+        return trouve[0]
+    return _completer(_nouveau(lire(s), lot), historique(s, {lot.id}).get(lot.id))
