@@ -77,14 +77,14 @@ def rejouer(s: Session, jour: date) -> list[Controle]:
     """Les 38 contrôles au soir de `jour` (intégrité sur toutes les données), rejoués une
     fois tant que la base n'a pas changé (`donnees_moteur.deriver`)."""
 
-    def calcul() -> list[Controle]:
+    def _calcul() -> list[Controle]:
         lecture = lire(s, jour)
         complet = donnees_moteur.charger(s)
         return controler(
             lecture.donnees, lecture.lignes, jour, complet=complet, aujourdhui=horloge.aujourd_hui()
         )
 
-    return donnees_moteur.deriver(s, "controles", (jour,), calcul)
+    return donnees_moteur.deriver(s, "controles", (jour,), _calcul)
 
 
 Index = dict[str, Callable[[Ligne], int | None]]
@@ -185,11 +185,11 @@ def cockpit(s: Session, jour: date) -> dict[str, Any]:
     """Route 209 : le Cockpit, avec la note des contrôles et les bons en retard (la règle de
     l'écran Commandes et du courriel du lundi)."""
 
-    def calcul() -> dict[str, Any]:
+    def _calcul() -> dict[str, Any]:
         retards = courriel_contenu.retards(s, donnees_moteur.charger_au(s, jour), jour)
         return pilotage.cockpit(s, jour, synthese(rejouer(s, jour)), len(retards))
 
-    return deepcopy(donnees_moteur.deriver(s, "cockpit", (jour,), calcul))
+    return deepcopy(donnees_moteur.deriver(s, "cockpit", (jour,), _calcul))
 
 
 # ── Pastilles du menu ────────────────────────────────────────────────────────────────

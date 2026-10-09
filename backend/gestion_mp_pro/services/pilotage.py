@@ -55,11 +55,11 @@ def lire(s: Session, jour: date) -> Lecture:
     """Les données au soir de `jour`, fil monté compris, et l'état du stock (gardé tant que
     la base n'a pas changé : `donnees_moteur.deriver` ; ne jamais le modifier en place)."""
 
-    def calcul() -> Lecture:
+    def _calcul() -> Lecture:
         d = avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
         return Lecture(jour, d, etat_stock(d, jour))
 
-    return donnees_moteur.deriver(s, "lecture", (jour,), calcul)
+    return donnees_moteur.deriver(s, "lecture", (jour,), _calcul)
 
 
 def ids_matieres(s: Session) -> dict[str, int]:
