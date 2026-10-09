@@ -18,3 +18,5 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | R2 | Mohamed (livraison) | K8b : 4 réceptions payées en deux devises — PRO affiche 5 prix payés en USD comme des EUR (historique, matrice, Cockpit). Garder tel quel ou scinder ces réceptions. |
 | R2 | V2 | La dynamique réduite joue tous les gestes en direction : V2 prend chaque rôle. |
 | V2 | R2, DECISIONS | Correction voulue à déclarer : un changement de cours dans PRO ne revalorise jamais le passé (les entrées reprises sans cours reçoivent le cours du jour de la reprise, V3), alors que Gestion MP valorise ces entrées au cours du jour. K7 couvre aussi `/stock?date=` et le plan d'achat passés : rejouer `parite_k7` (GESTIONMPPRO_ESSAIS_COMPLETS=1). |
+| RESTES4 | serveur (proposition d'ordre) | La phrase d'empêchement dit « écrire la vraie date dans le commentaire » ; l'écran dit « dans les observations » — aligner le texte du serveur. |
+| RESTES4 | docs | ECRANS-PRO partie 3 : tuiles de l'atelier raccourcies, tuile « Envoyer » pleine largeur ; P2-25 / EcartFil : zone 0,5–5 % passée `ok` (règle unifiée bureau/atelier). |
