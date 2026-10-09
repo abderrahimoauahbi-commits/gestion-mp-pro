@@ -147,19 +147,19 @@ class FraisEntree(Version):
         return _plausible(v, "date hors période")
 
 
-class Cloture(Version):
+class ClotureDossier(Version):
     """Clore : les alertes du dossier ont été lues (sinon elles sont rendues en refus)."""
 
     alertes_lues: bool = False
 
 
-class Reouverture(Version):
+class ReouvertureDossier(Version):
     """Rouvrir pour corriger (motif facultatif, au journal)."""
 
     motif: str = Field("", max_length=L.MOTIF)
 
 
-class Annulation(Version):
+class AnnulationDossier(Version):
     """Annuler le dossier (il garde son numéro) : le motif est exigé."""
 
     motif: str = Field(max_length=L.MOTIF)

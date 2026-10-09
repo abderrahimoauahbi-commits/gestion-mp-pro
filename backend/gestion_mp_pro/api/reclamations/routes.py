@@ -14,12 +14,12 @@ from gestion_mp_pro.api.communs import nouveau_routeur
 from gestion_mp_pro.api.dependances import SessionDep
 from gestion_mp_pro.api.erreurs import reponses
 from gestion_mp_pro.api.reclamations.schemas import (
-    Cloture,
+    ClotureReclamation,
     ReclamationCreation,
     ReclamationFiche,
     ReclamationModification,
     ReclamationResume,
-    Reouverture,
+    ReouvertureReclamation,
 )
 from gestion_mp_pro.securite import A, D, QuiDep, droit
 from gestion_mp_pro.services import reclamations
@@ -105,7 +105,7 @@ def completer(
     summary="Clore la réclamation avec son issue (avoir, remplacement, remise, refusée…).",
     responses=GESTE,
 )
-def clore(rid: int, corps: Cloture, qui: QuiDep, s: SessionDep) -> ReclamationFiche:
+def clore(rid: int, corps: ClotureReclamation, qui: QuiDep, s: SessionDep) -> ReclamationFiche:
     """Route 185."""
     reclamations.clore(
         s,
@@ -127,7 +127,9 @@ def clore(rid: int, corps: Cloture, qui: QuiDep, s: SessionDep) -> ReclamationFi
     summary="Rouvrir une réclamation close (motif au journal) : on attend le fournisseur.",
     responses=GESTE,
 )
-def rouvrir(rid: int, corps: Reouverture, qui: QuiDep, s: SessionDep) -> ReclamationFiche:
+def rouvrir(
+    rid: int, corps: ReouvertureReclamation, qui: QuiDep, s: SessionDep
+) -> ReclamationFiche:
     """Route 186."""
     reclamations.rouvrir(s, qui, rid, corps.version, corps.motif)
     return _fiche(s, rid)
