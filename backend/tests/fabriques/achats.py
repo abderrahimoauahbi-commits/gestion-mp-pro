@@ -42,7 +42,7 @@ from gestion_mp_pro.modeles.enums import (
     TypeMagasin,
     TypeMouvement,
 )
-from gestion_mp_pro.services import donnees_moteur, horloge, lots, numerotation, stock
+from gestion_mp_pro.services import horloge, lots, numerotation, stock
 from gestion_mp_pro.services.commandes import recaler_soldes
 
 __all__ = [
@@ -122,8 +122,7 @@ def reglage(cle: str, valeur: str) -> Iterator[None]:
     with fabrique_de_sessions()() as s, s.begin():
         p = s.get(Parametre, cle)
         assert p is not None
-        avant, p.valeur = p.valeur, valeur
-    donnees_moteur.invalider()  # l'horloge des essais est figée : la signature ne bouge pas
+        avant, p.valeur = p.valeur, valeur  # sa `version` change la signature du cache
     try:
         yield
     finally:
@@ -131,7 +130,6 @@ def reglage(cle: str, valeur: str) -> Iterator[None]:
             p = s.get(Parametre, cle)
             assert p is not None
             p.valeur = avant
-        donnees_moteur.invalider()
 
 
 @contextmanager
@@ -140,8 +138,7 @@ def cours(code: str, valeur: str) -> Iterator[None]:
     with fabrique_de_sessions()() as s, s.begin():
         d = s.get(Devise, code)
         assert d is not None
-        avant, d.cours = d.cours, Decimal(valeur)
-    donnees_moteur.invalider()
+        avant, d.cours = d.cours, Decimal(valeur)  # sa `version` change la signature du cache
     try:
         yield
     finally:
@@ -149,7 +146,6 @@ def cours(code: str, valeur: str) -> Iterator[None]:
             d = s.get(Devise, code)
             assert d is not None
             d.cours = avant
-        donnees_moteur.invalider()
 
 
 def devise_essai(cours_du_jour: str = "10") -> str:
