@@ -1,0 +1,141 @@
+{
+  "id": 7,
+  "version": 3,
+  "numero": "OF-2026-0005",
+  "statut": "valide",
+  "date": "2026-10-09",
+  "magasin_id": 1,
+  "magasin": "Magasin principal",
+  "metier_id": null,
+  "metier": "",
+  "commentaire": "",
+  "cree_par": "Direction",
+  "cree_le": "2026-10-09T10:27:18.793778Z",
+  "valide_par": "Direction",
+  "valide_le": "2026-10-09T10:27:34.355369Z",
+  "annule_par": "",
+  "annule_le": null,
+  "annulation_motif": "",
+  "prevu_fige": true,
+  "taux_perte": 0.02,
+  "qualites": [
+    {
+      "qualite_id": 1,
+      "qualite": "ATLAS",
+      "nom": "Atlas berbère",
+      "m2": 50.0
+    }
+  ],
+  "fabrication": "ATLAS 50 m²",
+  "m2": 50.0,
+  "total": 107.1,
+  "retours": [
+    {
+      "id": 3,
+      "numero": "RET-2026-0002",
+      "date": "2026-10-09",
+      "quantite": 10.0
+    }
+  ],
+  "revenu": 10.0,
+  "prevu": 107.1,
+  "net": 97.1,
+  "ecart": -10.0,
+  "ecart_relatif": -0.09337068160597572,
+  "lots": ["L-C-401", "L-G-601", "L-R-101", "L-T-301"],
+  "matieres": ["COLLE LATEX", "COTON CHAINE 12/6", "JUTE TRAME 4 Ply", "PP FRZ-2900 Rouge"],
+  "blocages": [],
+  "lignes": [
+    {
+      "id": 22,
+      "matiere_id": 4,
+      "reference": "COTON CHAINE 12/6",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 8,
+      "lot": "L-C-401",
+      "quantite": 15.3,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "bobines": null
+    },
+    {
+      "id": 23,
+      "matiere_id": 6,
+      "reference": "COLLE LATEX",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 10,
+      "lot": "L-G-601",
+      "quantite": 10.2,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "bobines": null
+    },
+    {
+      "id": 24,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 1,
+      "lot": "L-R-101",
+      "quantite": 61.2,
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "bobines": null
+    },
+    {
+      "id": 25,
+      "matiere_id": 3,
+      "reference": "JUTE TRAME 4 Ply",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 6,
+      "lot": "L-T-301",
+      "quantite": 20.4,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "bobines": null
+    }
+  ],
+  "par_matiere": [
+    {
+      "matiere_id": 6,
+      "reference": "COLLE LATEX",
+      "quantite": 10.2,
+      "prevu": 10.2,
+      "ecart": 0.0,
+      "hors_recette": false,
+      "kg_par_ml": 0.0
+    },
+    {
+      "matiere_id": 4,
+      "reference": "COTON CHAINE 12/6",
+      "quantite": 15.3,
+      "prevu": 15.3,
+      "ecart": 0.0,
+      "hors_recette": false,
+      "kg_par_ml": 0.0
+    },
+    {
+      "matiere_id": 3,
+      "reference": "JUTE TRAME 4 Ply",
+      "quantite": 20.4,
+      "prevu": 20.4,
+      "ecart": 0.0,
+      "hors_recette": false,
+      "kg_par_ml": 0.0
+    },
+    {
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "quantite": 51.2,
+      "prevu": 61.2,
+      "ecart": -10.0,
+      "hors_recette": false,
+      "kg_par_ml": 0.0
+    }
+  ],
+  "message": ""
+}

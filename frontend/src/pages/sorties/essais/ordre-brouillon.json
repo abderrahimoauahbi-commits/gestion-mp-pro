@@ -1,0 +1,71 @@
+{
+  "id": 5,
+  "version": 1,
+  "numero": null,
+  "statut": "brouillon",
+  "date": "2026-10-09",
+  "magasin_id": 1,
+  "magasin": "Magasin principal",
+  "metier_id": 1,
+  "metier": "Métier un",
+  "commentaire": "Brouillon du jour",
+  "cree_par": "Direction",
+  "cree_le": "2026-10-09T10:24:11.033528Z",
+  "valide_par": "",
+  "valide_le": null,
+  "annule_par": "",
+  "annule_le": null,
+  "annulation_motif": "",
+  "prevu_fige": false,
+  "taux_perte": 0.02,
+  "qualites": [
+    {
+      "qualite_id": 1,
+      "qualite": "ATLAS",
+      "nom": "Atlas berbère",
+      "m2": 80.0
+    }
+  ],
+  "fabrication": "ATLAS 80 m²",
+  "m2": 80.0,
+  "total": 130.0,
+  "retours": [],
+  "revenu": 0.0,
+  "prevu": 0.0,
+  "net": 130.0,
+  "ecart": null,
+  "ecart_relatif": null,
+  "lots": ["L-R-102", "L-T-302"],
+  "matieres": ["JUTE TRAME 4 Ply", "PP FRZ-2900 Rouge"],
+  "blocages": [],
+  "lignes": [
+    {
+      "id": 15,
+      "matiere_id": 1,
+      "reference": "PP FRZ-2900 Rouge",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 2,
+      "lot": "L-R-102",
+      "quantite": 100.0,
+      "poids_bobine": 2.5,
+      "bobines_palette": 40.0,
+      "bobines": 40
+    },
+    {
+      "id": 16,
+      "matiere_id": 3,
+      "reference": "JUTE TRAME 4 Ply",
+      "designation": "",
+      "kg_par_ml": 0.0,
+      "lot_id": 7,
+      "lot": "L-T-302",
+      "quantite": 30.0,
+      "poids_bobine": 0.0,
+      "bobines_palette": 0.0,
+      "bobines": null
+    }
+  ],
+  "par_matiere": [],
+  "message": ""
+}
