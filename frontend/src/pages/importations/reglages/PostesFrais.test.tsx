@@ -159,10 +159,16 @@ describe('Postes de frais', () => {
     const supprimer = within(fenetre).getByRole('button', { name: 'Supprimer' })
     expect(supprimer).toBeDisabled()
     expect(supprimer.dataset.raison).toContain('Ce poste sert aux calculs du dossier : il ne se supprime pas')
+    // L'interrupteur reste visible, grisé avec sa raison (jamais un contrôle muet), et la note la dit.
+    const nature = within(fenetre).getByRole('switch', { name: /récupérable/ })
+    expect(nature).toBeDisabled()
+    expect(nature).toHaveAttribute(
+      'data-raison',
+      'Nature figée : les calculs du dossier lisent ce poste ainsi.',
+    )
     expect(
-      within(fenetre).getByText('Nature figée : les calculs du dossier lisent ce poste ainsi.'),
-    ).toBeTruthy()
-    expect(within(fenetre).queryByRole('switch')).not.toBeInTheDocument()
+      within(fenetre).getAllByText('Nature figée : les calculs du dossier lisent ce poste ainsi.').length,
+    ).toBeGreaterThan(0)
   })
 
   it('un poste libre se supprime après « Oui, supprimer » ; la fenêtre se ferme', async () => {
