@@ -1,0 +1,1504 @@
+{
+  "date_reference": "2026-10-09",
+  "synthese": {
+    "total": 26,
+    "conformes": 15,
+    "garantis": 12,
+    "anomalies": 11,
+    "a_corriger": 6,
+    "bloquants": 1,
+    "score": 0.5769230769230769
+  },
+  "controles": [
+    {
+      "code": "C01",
+      "libelle": "Recette dont un rôle ne fait pas 100 %",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 6,
+      "conforme": false,
+      "quoi_faire": "La direction ouvre la qualité (Qualités et recettes › Recette) et corrige les pourcentages du rôle signalé jusqu'à 100 % (les achats, qui la lisent seulement, le lui signalent) : tant que ce n'est pas fait, le besoin en fil de cette qualité est faux, et le plan d'achat avec lui.",
+      "lien": "/qualites",
+      "colonnes": [
+        {
+          "cle": "qualite",
+          "libelle": "Qualité",
+          "unite": "texte"
+        },
+        {
+          "cle": "roles",
+          "libelle": "Rôles",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [
+        {
+          "qualite": "8M",
+          "roles": "Franges (0 %)",
+          "qualite_id": 2
+        },
+        {
+          "qualite": "8S",
+          "roles": "Franges (0 %)",
+          "qualite_id": 3
+        },
+        {
+          "qualite": "LP",
+          "roles": "Franges (0 %)",
+          "qualite_id": 8
+        }
+      ],
+      "lignes_total": 6,
+      "tronque": false
+    },
+    {
+      "code": "C02",
+      "libelle": "Sortie vers les machines sans ordre (n° OF)",
+      "gravite": "avertissement",
+      "garanti": "Un ordre de fabrication reçoit son numéro en même temps qu'il écrit ses sorties : une sortie vers les machines porte toujours le sien (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/sorties",
+      "colonnes": [
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C03",
+      "libelle": "Retour sans motif, ou avec le motif d'une autre famille",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Ouvrir le retour et vérifier son motif : un retour des machines porte R1, R2 ou R4, un retour au fournisseur R3, R5 ou R6. S'il manque, annuler le retour (contre-passation) et le ressaisir avec son motif.",
+      "lien": "/operations?onglet=retour_machine",
+      "colonnes": [
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "type",
+          "libelle": "Type",
+          "unite": "texte"
+        },
+        {
+          "cle": "motif",
+          "libelle": "Motif",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C04",
+      "libelle": "Mouvement de stock sans auteur",
+      "gravite": "avertissement",
+      "garanti": "Chaque écriture de stock porte le nom du compte connecté qui la valide (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C05",
+      "libelle": "Matière sans fournisseur",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Ouvrir la matière (Matières, classification, fournisseurs) et lui donner son fournisseur — ou la désactiver si elle ne s'achète plus. Sans fournisseur, le plan d'achat ne sait pas à qui la commander.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C06",
+      "libelle": "Commande non livrée à sa date prévue (ETA, date promise, sinon délai du fournisseur)",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 11,
+      "conforme": false,
+      "quoi_faire": "Relancer le fournisseur et noter la nouvelle date d'arrivée (ETA) dans le suivi d'expédition de la commande. S'il ne livrera pas le reste, solder la commande : elle ne comptera plus dans le stock projeté.",
+      "lien": "/commandes?filtre=retard",
+      "colonnes": [
+        {
+          "cle": "numero",
+          "libelle": "N°",
+          "unite": "texte"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "date_bc",
+          "libelle": "Date de la commande",
+          "unite": "date"
+        },
+        {
+          "cle": "jours_commande",
+          "libelle": "Jours depuis la commande",
+          "unite": "j"
+        },
+        {
+          "cle": "echeance",
+          "libelle": "Livraison attendue",
+          "unite": "date"
+        },
+        {
+          "cle": "retard_jours",
+          "libelle": "Retard (j)",
+          "unite": "j"
+        }
+      ],
+      "lignes": [
+        {
+          "numero": "BC-2026-0164",
+          "fournisseur": "TAT TEXTIL",
+          "date_bc": "2026-07-06",
+          "jours_commande": 95,
+          "echeance": "2026-09-09",
+          "retard_jours": 30,
+          "commande_id": 242,
+          "fournisseur_id": 4
+        },
+        {
+          "numero": "BC-2026-0159",
+          "fournisseur": "GLOBALTEX",
+          "date_bc": "2026-07-06",
+          "jours_commande": 95,
+          "echeance": "2026-09-22",
+          "retard_jours": 17,
+          "commande_id": 237,
+          "fournisseur_id": 10
+        },
+        {
+          "numero": "BC-2026-0176",
+          "fournisseur": "OZKARALAR",
+          "date_bc": "2026-07-20",
+          "jours_commande": 81,
+          "echeance": "2026-09-23",
+          "retard_jours": 16,
+          "commande_id": 254,
+          "fournisseur_id": 5
+        }
+      ],
+      "lignes_total": 11,
+      "tronque": false
+    },
+    {
+      "code": "C07",
+      "libelle": "Matière jamais utilisée (ni recette, ni mouvement)",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Si la matière ne sert plus, la désactiver dans sa fiche ; si elle doit servir, l'ajouter à la recette d'une qualité. Pour information seulement.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C08",
+      "libelle": "Écart de pesée supérieur à 2 %",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Comparer la pesée au bon de livraison avec le fournisseur. Écart confirmé : le réclamer (avoir ou complément). Pesée fausse : corriger le stock par un ajustement motivé.",
+      "lien": "/receptions?onglet=pesees",
+      "colonnes": [
+        {
+          "cle": "reception",
+          "libelle": "Réception",
+          "unite": "texte"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "attendu",
+          "libelle": "Attendu",
+          "unite": "kg"
+        },
+        {
+          "cle": "pesee",
+          "libelle": "Pesé",
+          "unite": "kg"
+        },
+        {
+          "cle": "ecart",
+          "libelle": "Écart (%)",
+          "unite": "%"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C09",
+      "libelle": "Prix négatif au catalogue",
+      "gravite": "bloquant",
+      "garanti": "La base refuse un prix négatif (contrainte article_prix_check).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Corriger le prix d'achat dans la fiche matière.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "prix",
+          "libelle": "Prix",
+          "unite": "nombre"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C10",
+      "libelle": "Délai fournisseur nul ou négatif",
+      "gravite": "bloquant",
+      "garanti": "La base refuse un délai fournisseur nul ou négatif (fournisseur_delai_jours_check).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Corriger le délai (en jours, au moins 1) dans la fiche fournisseur.",
+      "lien": "/catalogue?onglet=fournisseurs",
+      "colonnes": [
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "delai",
+          "libelle": "Délai (j)",
+          "unite": "j"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C11",
+      "libelle": "Devise employée (catalogue, bons, dossiers) sans cours",
+      "gravite": "bloquant",
+      "garanti": "La base refuse un cours de change nul ou négatif (devise_taux_check).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Saisir le cours de la devise dans Réglages › Devises (ouvert à la direction et aux achats) : sans lui, ses prix se lisent comme des dirhams.",
+      "lien": "/reglages?onglet=devises",
+      "colonnes": [
+        {
+          "cle": "taux",
+          "libelle": "Cours",
+          "unite": "texte"
+        },
+        {
+          "cle": "valeur",
+          "libelle": "Valeur (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "type",
+          "libelle": "Type",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C12",
+      "libelle": "Stock tenu (soldes des lots) différent du journal des mouvements",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Bloquant : le stock tenu ne retombe plus sur le journal des mouvements. Ne plus rien saisir sur ces matières et prévenir l'administrateur technique : une écriture a contourné le chemin normal.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "lot",
+          "libelle": "Lot",
+          "unite": "texte"
+        },
+        {
+          "cle": "magasin",
+          "libelle": "Magasin",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock",
+          "libelle": "Stock",
+          "unite": "kg"
+        },
+        {
+          "cle": "attendu",
+          "libelle": "Attendu",
+          "unite": "kg"
+        },
+        {
+          "cle": "somme_magasins",
+          "libelle": "Somme des magasins",
+          "unite": "kg"
+        },
+        {
+          "cle": "stock_net",
+          "libelle": "Stock net",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C13",
+      "libelle": "Stock projeté négatif pendant le délai d'approvisionnement",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Commander tout de suite (Plan d'achat), ou faire avancer une livraison déjà commandée : la matière manquera avant que la commande n'arrive.",
+      "lien": "/plan-achat",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock_net",
+          "libelle": "Stock net",
+          "unite": "kg"
+        },
+        {
+          "cle": "stock_projete",
+          "libelle": "Stock projeté",
+          "unite": "kg"
+        },
+        {
+          "cle": "manque",
+          "libelle": "Manque",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C14",
+      "libelle": "Mouvement de stock à une date future",
+      "gravite": "avertissement",
+      "garanti": "Une écriture datée après aujourd'hui est refusée (« Date dans le futur ») ; une annulation prend la date de l'écriture qu'elle défait (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C15",
+      "libelle": "Matière d'une recette sans prix d'achat, ou désactivée",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Saisir le prix d'achat dans la fiche matière : sans lui, le coût au m² de la qualité et le budget d'achat sont sous-évalués. Une matière désactivée encore dans la recette : la remplacer dans la recette (la direction), ou la remettre en service — le plan d'achat ne la proposera plus.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "qualite",
+          "libelle": "Qualité",
+          "unite": "texte"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "motif",
+          "libelle": "Motif",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C16",
+      "libelle": "Intégrité référentielle des mouvements",
+      "gravite": "bloquant",
+      "garanti": "Les mouvements pointent leur matière et leur fournisseur (par le lot) par des clés étrangères : un mouvement orphelin ne peut pas s'écrire.",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C17",
+      "libelle": "Matière en alerte sans second fournisseur",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 11,
+      "conforme": false,
+      "quoi_faire": "Chercher un second fournisseur pour cette matière, ou un fil équivalent (et lui donner son groupe d'équivalence) : elle est en alerte et ne dépend que d'un seul.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "montant_a_commander_mad",
+          "libelle": "À commander (MAD)",
+          "unite": "MAD"
+        }
+      ],
+      "lignes": [
+        {
+          "reference": "PES -1500 Deniers-Bordeau 61043-Gzm",
+          "fournisseur": "GZM TEXTIL",
+          "montant_a_commander_mad": 71500.8,
+          "matiere_id": 16,
+          "fournisseur_id": 3
+        },
+        {
+          "reference": "PES -1200 Deniers-Anty Bordeau 61043-Gzm",
+          "fournisseur": "GZM TEXTIL",
+          "montant_a_commander_mad": 60775.68000000001,
+          "matiere_id": 15,
+          "fournisseur_id": 3
+        },
+        {
+          "reference": "PES Fdy -1800 Deniers-Taupe Cf-4001 Turk",
+          "fournisseur": "TURKAN",
+          "montant_a_commander_mad": 32452.0,
+          "matiere_id": 22,
+          "fournisseur_id": 7
+        }
+      ],
+      "lignes_total": 11,
+      "tronque": false
+    },
+    {
+      "code": "C18",
+      "libelle": "Stock dormant depuis plus de 180 jours",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 5,
+      "conforme": false,
+      "quoi_faire": "Voir si la matière peut servir une autre qualité, se rendre au fournisseur ou se vendre ; sinon, la déclasser. Pour information seulement.",
+      "lien": "/stock",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock",
+          "libelle": "Stock",
+          "unite": "kg"
+        },
+        {
+          "cle": "jours_sans_mouvement",
+          "libelle": "Jours sans mouvement",
+          "unite": "j"
+        }
+      ],
+      "lignes": [
+        {
+          "reference": "Micro PES-7360 Deniers-Multi L.Beige 1305-130-Suj",
+          "stock": 5365.3,
+          "jours_sans_mouvement": 232,
+          "matiere_id": 13
+        },
+        {
+          "reference": "PES Sh-1500 Deniers-Beige Tex-7500 Text",
+          "stock": 1872.5000000000002,
+          "jours_sans_mouvement": 239,
+          "matiere_id": 44
+        },
+        {
+          "reference": "PES Sh-1500 Deniers-Cream H-1008-Tat",
+          "stock": 2583.3999999999996,
+          "jours_sans_mouvement": 196,
+          "matiere_id": 45
+        }
+      ],
+      "lignes_total": 5,
+      "tronque": false
+    },
+    {
+      "code": "C19",
+      "libelle": "Fournisseur qui facture en plusieurs devises",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 1,
+      "conforme": false,
+      "quoi_faire": "Normal si le fournisseur facture vraiment en deux monnaies : un bon de commande part par devise. Sinon, corriger la devise de la matière dans sa fiche.",
+      "lien": "/catalogue?onglet=fournisseurs",
+      "colonnes": [
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "devises",
+          "libelle": "Devises",
+          "unite": "texte"
+        },
+        {
+          "cle": "devise_par_defaut",
+          "libelle": "Devise par défaut",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [
+        {
+          "fournisseur": "LOMAT",
+          "devises": "EUR (1 matière(s)) · USD (2 matière(s))",
+          "devise_par_defaut": "USD",
+          "fournisseur_id": 9
+        }
+      ],
+      "lignes_total": 1,
+      "tronque": false
+    },
+    {
+      "code": "C20",
+      "libelle": "Stock négatif sur une matière sans consommation",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Faire compter la matière (Inventaire) et corriger le stock par un ajustement motivé.",
+      "lien": "/inventaire",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock_net",
+          "libelle": "Stock net",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C21",
+      "libelle": "Prix au catalogue sans devise",
+      "gravite": "bloquant",
+      "garanti": "La devise d'un prix est une clé étrangère vers les devises : un prix sans devise connue ne peut pas s'écrire.",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Choisir la devise du prix dans la fiche matière.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "prix",
+          "libelle": "Prix",
+          "unite": "nombre"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C22",
+      "libelle": "Étage monté plus large que la laize du métier",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Ouvrir le métier (Métiers à tisser) et ramener les mètres montés à cet étage à la laize du métier.",
+      "lien": "/metiers",
+      "colonnes": [
+        {
+          "cle": "metier",
+          "libelle": "Métier",
+          "unite": "texte"
+        },
+        {
+          "cle": "etage",
+          "libelle": "Étage",
+          "unite": "nombre"
+        },
+        {
+          "cle": "laize",
+          "libelle": "Laize (m)",
+          "unite": "m"
+        },
+        {
+          "cle": "metres_montes",
+          "libelle": "Mètres montés",
+          "unite": "m"
+        },
+        {
+          "cle": "fils",
+          "libelle": "Matières",
+          "unite": "nombre"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C23",
+      "libelle": "Fil monté sans poids de bobine (ni pesé au lot, ni au catalogue)",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Saisir le poids d'une bobine (kg / bobine) dans la fiche matière : sans lui, le fil monté pèse zéro et manque au stock.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "metier",
+          "libelle": "Métier",
+          "unite": "texte"
+        },
+        {
+          "cle": "etage",
+          "libelle": "Étage",
+          "unite": "nombre"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "metres",
+          "libelle": "Mètres",
+          "unite": "m"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C24",
+      "libelle": "Fil monté à un étage que le métier n'a pas",
+      "gravite": "avertissement",
+      "garanti": "Un fil ne se monte qu'à un étage du métier, et le métier ne perd pas un étage garni (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Retirer le fil de cet étage, ou augmenter le nombre d'étages du métier.",
+      "lien": "/metiers",
+      "colonnes": [
+        {
+          "cle": "metier",
+          "libelle": "Métier",
+          "unite": "texte"
+        },
+        {
+          "cle": "etage",
+          "libelle": "Étage",
+          "unite": "nombre"
+        },
+        {
+          "cle": "etages",
+          "libelle": "Étages du métier",
+          "unite": "nombre"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C25",
+      "libelle": "Fil monté plus lourd que le sorti net vers les machines (le magasin le compte encore)",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Enregistrer la sortie vers les machines de ce fil (Sorties vers les machines) : sans elle, le magasin le compte encore en stock alors qu'il est monté — et le stock le compte deux fois. Si la sortie existe, vérifier les mètres montés.",
+      "lien": "/sorties",
+      "colonnes": [
+        {
+          "cle": "metier",
+          "libelle": "Métier",
+          "unite": "texte"
+        },
+        {
+          "cle": "etage",
+          "libelle": "Étage",
+          "unite": "nombre"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "poids",
+          "libelle": "Poids (kg)",
+          "unite": "kg"
+        },
+        {
+          "cle": "monte",
+          "libelle": "Monté (kg)",
+          "unite": "kg"
+        },
+        {
+          "cle": "sorties",
+          "libelle": "Sorti",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C26",
+      "libelle": "Sortie de stock sans numéro de lot",
+      "gravite": "avertissement",
+      "garanti": "Une sortie se fait toujours d'un lot, et un lot a toujours un numéro (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "quantite",
+          "libelle": "Quantité",
+          "unite": "kg"
+        },
+        {
+          "cle": "numero_of",
+          "libelle": "Ordre (n° OF)",
+          "unite": "texte"
+        },
+        {
+          "cle": "utilisateur",
+          "libelle": "Par",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C27",
+      "libelle": "Lot dont il est sorti plus qu'il n'est entré",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Bloquant : ouvrir le lot (son numéro mène à Stock › Lots, lots épuisés compris) et cliquer « Suivre » pour trouver la sortie de trop ; l'annuler (contre-passation), ou enregistrer l'entrée oubliée.",
+      "lien": "/stock?onglet=lots",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "lot",
+          "libelle": "Lot",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock",
+          "libelle": "Stock",
+          "unite": "kg"
+        },
+        {
+          "cle": "entrees",
+          "libelle": "Entré",
+          "unite": "kg"
+        },
+        {
+          "cle": "sorties",
+          "libelle": "Sorti",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C28",
+      "libelle": "Dossier d'importation arrivé depuis plus de 30 jours et sans frais hors TVA",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Saisir les frais du dossier (droits, fret, transit…) dans Importations : sans eux, le coût de revient n'est que le prix de la facture.",
+      "lien": "/importations",
+      "colonnes": [
+        {
+          "cle": "dossier",
+          "libelle": "Dossier",
+          "unite": "texte"
+        },
+        {
+          "cle": "arrivee",
+          "libelle": "Arrivée",
+          "unite": "date"
+        },
+        {
+          "cle": "marchandises",
+          "libelle": "Marchandises",
+          "unite": "nombre"
+        },
+        {
+          "cle": "jours_arrivee",
+          "libelle": "Jours depuis l'arrivée",
+          "unite": "j"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C29",
+      "libelle": "TVA d'importation à plus de 5 % de la TVA attendue (20 % de la valeur en douane, droits et TPI compris)",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 15,
+      "conforme": false,
+      "quoi_faire": "Comparer la TVA saisie dans les frais du dossier à la quittance de la douane ; corriger le frais, ou la valeur en douane des marchandises.",
+      "lien": "/importations",
+      "colonnes": [
+        {
+          "cle": "dossier",
+          "libelle": "Dossier",
+          "unite": "texte"
+        },
+        {
+          "cle": "tva_saisie",
+          "libelle": "TVA saisie (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "tva_attendue",
+          "libelle": "TVA attendue (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "ecart_mad",
+          "libelle": "Écart (MAD)",
+          "unite": "MAD"
+        }
+      ],
+      "lignes": [
+        {
+          "dossier": "02/25",
+          "tva_saisie": 8745.3,
+          "tva_attendue": 8148.9584633700015,
+          "ecart_mad": 596.3415366299978,
+          "dossier_id": 2
+        },
+        {
+          "dossier": "06/25",
+          "tva_saisie": 15652.35,
+          "tva_attendue": 14730.748974055003,
+          "ecart_mad": 921.6010259449977,
+          "dossier_id": 6
+        },
+        {
+          "dossier": "11/26",
+          "tva_saisie": 4053.93,
+          "tva_attendue": 3352.1688044375,
+          "ecart_mad": 701.7611955624998,
+          "dossier_id": 18
+        }
+      ],
+      "lignes_total": 15,
+      "tronque": false
+    },
+    {
+      "code": "C30",
+      "libelle": "Poids de bobine reçu éloigné du catalogue de plus de 5 %",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 12,
+      "conforme": false,
+      "quoi_faire": "Vérifier le poids de bobine avec le fournisseur ; si le nouveau poids est le bon, le reporter dans la fiche matière (kg / bobine).",
+      "lien": "/receptions?onglet=bobines",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "catalogue",
+          "libelle": "Catalogue (kg / bobine)",
+          "unite": "kg"
+        },
+        {
+          "cle": "constate",
+          "libelle": "Constaté (kg / bobine)",
+          "unite": "kg"
+        },
+        {
+          "cle": "ecart",
+          "libelle": "Écart (%)",
+          "unite": "%"
+        },
+        {
+          "cle": "reception",
+          "libelle": "Réception",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [
+        {
+          "reference": "PP FRZ-2900 Dtex-Brown 44361-Hs",
+          "fournisseur": "HASIRCI TEXTILE",
+          "catalogue": 3.15,
+          "constate": 2.759903381642512,
+          "ecart": -0.12384019630396448,
+          "reception": "REC-2026-0270",
+          "matiere_id": 91,
+          "reception_id": 310,
+          "fournisseur_id": 1
+        },
+        {
+          "reference": "PP FRZ-2900 Dtex- Grey 8933-Hs",
+          "fournisseur": "HASIRCI TEXTILE",
+          "catalogue": 3.15,
+          "constate": 3.400892857142857,
+          "ecart": 0.07964852607709748,
+          "reception": "REC-2026-0270",
+          "matiere_id": 82,
+          "reception_id": 310,
+          "fournisseur_id": 1
+        },
+        {
+          "reference": "PES Sh-1200 Deniers- Cream Dtbc-H69-Gzm",
+          "fournisseur": "GZM TEXTIL",
+          "catalogue": 2.0,
+          "constate": 1.8416494845360825,
+          "ecart": -0.07917525773195877,
+          "reception": "REC-2026-0210",
+          "matiere_id": 36,
+          "reception_id": 250,
+          "fournisseur_id": 3
+        }
+      ],
+      "lignes_total": 12,
+      "tronque": false
+    },
+    {
+      "code": "C31",
+      "libelle": "Ordre de fabrication servi à plusieurs dates",
+      "gravite": "avertissement",
+      "garanti": "Un ordre de fabrication porte une seule date et un numéro qui n'est qu'à lui (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/sorties",
+      "colonnes": [
+        {
+          "cle": "numero_of",
+          "libelle": "Ordre (n° OF)",
+          "unite": "texte"
+        },
+        {
+          "cle": "dates",
+          "libelle": "Dates",
+          "unite": "texte"
+        },
+        {
+          "cle": "nb_dates",
+          "libelle": "Nombre de dates",
+          "unite": "nombre"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C32",
+      "libelle": "Ordre de fabrication daté avant un ordre de numéro inférieur",
+      "gravite": "information",
+      "garanti": "Un ordre ne se valide pas à une date antérieure au dernier ordre validé : les numéros suivent les dates (garanti par la saisie).",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Gestion MP refuse déjà cette saisie : la ligne vient d'une reprise de données ou d'une écriture faite hors de l'écran. Prévenir l'administrateur technique, puis annuler le document fautif (contre-passation) et le ressaisir.",
+      "lien": "/sorties",
+      "colonnes": [
+        {
+          "cle": "numero_of",
+          "libelle": "Ordre (n° OF)",
+          "unite": "texte"
+        },
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "texte"
+        },
+        {
+          "cle": "apres",
+          "libelle": "Après",
+          "unite": "texte"
+        },
+        {
+          "cle": "date_apres",
+          "libelle": "Date de l'ordre suivant",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C33",
+      "libelle": "Stock minimum du catalogue supérieur à 3 mois de consommation",
+      "gravite": "information",
+      "garanti": "",
+      "anomalies": 85,
+      "conforme": false,
+      "quoi_faire": "Baisser le stock minimum dans la fiche matière : il immobilise plus de mois de consommation que le plafond réglé (le plan d'achat le plafonne déjà).",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "stock_min_catalogue",
+          "libelle": "Stock minimum",
+          "unite": "kg"
+        },
+        {
+          "cle": "conso_mensuelle",
+          "libelle": "Conso / mois",
+          "unite": "kg"
+        },
+        {
+          "cle": "mois",
+          "libelle": "Mois",
+          "unite": "nombre"
+        },
+        {
+          "cle": "retenu",
+          "libelle": "Retenu",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [
+        {
+          "reference": "Micro PES-7360 Deniers-Multi L.Brown 1305-61-Suj",
+          "stock_min_catalogue": 2960.0,
+          "conso_mensuelle": 30.1,
+          "mois": 98.3,
+          "retenu": 90,
+          "matiere_id": 14
+        },
+        {
+          "reference": "PP-1000*2 Dtex-Beige Mn-3203 L-Tat",
+          "stock_min_catalogue": 7765.0,
+          "conso_mensuelle": 255.1,
+          "mois": 30.4,
+          "retenu": 765,
+          "matiere_id": 105
+        },
+        {
+          "reference": "PES Sh-1500 Deniers-Beige H-2001-Tat",
+          "stock_min_catalogue": 3544.0,
+          "conso_mensuelle": 117.7,
+          "mois": 30.1,
+          "retenu": 353,
+          "matiere_id": 43
+        }
+      ],
+      "lignes_total": 85,
+      "tronque": false
+    },
+    {
+      "code": "C34",
+      "libelle": "Dossier d'importation avec des frais mais sans marchandise",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 1,
+      "conforme": false,
+      "quoi_faire": "Rattacher les marchandises au dossier (Importations › À rattacher), ou retirer les frais saisis par erreur.",
+      "lien": "/importations?onglet=rattacher",
+      "colonnes": [
+        {
+          "cle": "dossier",
+          "libelle": "Dossier",
+          "unite": "texte"
+        },
+        {
+          "cle": "frais",
+          "libelle": "Frais hors TVA (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "tva",
+          "libelle": "TVA (MAD)",
+          "unite": "MAD"
+        }
+      ],
+      "lignes": [
+        {
+          "dossier": "80/26",
+          "frais": 6551041.0,
+          "tva": 0,
+          "dossier_id": 87
+        }
+      ],
+      "lignes_total": 1,
+      "tronque": false
+    },
+    {
+      "code": "C35",
+      "libelle": "Dossier d'importation (ou une de ses marchandises) dont les frais dépassent 100 % de la marchandise",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 1,
+      "conforme": false,
+      "quoi_faire": "Reprendre les frais du dossier sur leurs pièces (quittance, facture du transitaire) : un zéro de trop, ou les frais d'un autre dossier. Tant qu'ils restent, ils entrent dans le coût moyen du stock.",
+      "lien": "/importations",
+      "colonnes": [
+        {
+          "cle": "dossier",
+          "libelle": "Dossier",
+          "unite": "texte"
+        },
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "marchandise_mad",
+          "libelle": "Marchandise (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "frais_mad",
+          "libelle": "Frais hors TVA (MAD)",
+          "unite": "MAD"
+        },
+        {
+          "cle": "surcout",
+          "libelle": "Frais / marchandise (%)",
+          "unite": "%"
+        }
+      ],
+      "lignes": [
+        {
+          "dossier": "83/26",
+          "reference": "(tout le dossier)",
+          "marchandise_mad": 5985.23,
+          "frais_mad": 836073.0,
+          "surcout": 139.6893686625243,
+          "dossier_id": 90
+        }
+      ],
+      "lignes_total": 1,
+      "tronque": false
+    },
+    {
+      "code": "C36",
+      "libelle": "Facture d'un dossier d'importation éloignée de plus de 2 % de la marchandise reçue",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 1,
+      "conforme": false,
+      "quoi_faire": "Rapprocher la facture du bon de livraison et de la pesée : un manque de poids se réclame au fournisseur (avoir), une facture mal saisie se corrige sur sa réception, un camion pas encore rattaché rejoint le dossier. Le coût, lui, reste à la pesée × le prix. Une facture sans montant se complète ; une marchandise dans une autre devise que sa facture se vérifie (elle ne peut pas se rapprocher).",
+      "lien": "/importations",
+      "colonnes": [
+        {
+          "cle": "dossier",
+          "libelle": "Dossier",
+          "unite": "texte"
+        },
+        {
+          "cle": "facture",
+          "libelle": "Facture",
+          "unite": "texte"
+        },
+        {
+          "cle": "facture_montant",
+          "libelle": "Facture (devise)",
+          "unite": "nombre"
+        },
+        {
+          "cle": "recu",
+          "libelle": "Reçu, pesée × prix (devise)",
+          "unite": "nombre"
+        },
+        {
+          "cle": "devise",
+          "libelle": "Devise",
+          "unite": "texte"
+        },
+        {
+          "cle": "ecart",
+          "libelle": "Écart (%)",
+          "unite": "%"
+        },
+        {
+          "cle": "motif",
+          "libelle": "Motif",
+          "unite": "texte"
+        }
+      ],
+      "lignes": [
+        {
+          "dossier": "33/26",
+          "facture": "F26-663625",
+          "devise": "USD",
+          "motif": "marchandise en EUR : ne se rapproche pas",
+          "dossier_id": 40
+        }
+      ],
+      "lignes_total": 1,
+      "tronque": false
+    },
+    {
+      "code": "C37",
+      "libelle": "Lot sous zéro à une date passée (écriture datée avant l'entrée de la matière)",
+      "gravite": "bloquant",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Bloquant : une écriture est datée avant l'entrée de son lot, ou a pris plus que ce que le lot portait ce jour-là — elle est partie à coût nul. Ouvrir le journal du lot, annuler l'écriture fautive (contre-passation) et la ressaisir à une date où la matière était là, ou sur un autre lot.",
+      "lien": "/stock?onglet=mouvements",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "lot",
+          "libelle": "Lot",
+          "unite": "texte"
+        },
+        {
+          "cle": "magasin",
+          "libelle": "Magasin",
+          "unite": "texte"
+        },
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "manque",
+          "libelle": "Manque",
+          "unite": "kg"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    },
+    {
+      "code": "C38",
+      "libelle": "Prix du catalogue à plus de 3 fois (ou moins d'un 3e) du dernier prix payé",
+      "gravite": "avertissement",
+      "garanti": "",
+      "anomalies": 0,
+      "conforme": true,
+      "quoi_faire": "Comparer le prix de la fiche matière au dernier achat (tous deux lus au kilo — un prix au mètre l'est par la densité ; unité du prix, densité, devise) et le corriger s'il est faux — ou confirmer le dernier prix payé avec le fournisseur. C'est au responsable du référentiel de trancher : le contrôle ne corrige rien.",
+      "lien": "/catalogue?onglet=matieres",
+      "colonnes": [
+        {
+          "cle": "reference",
+          "libelle": "Référence",
+          "unite": "texte"
+        },
+        {
+          "cle": "fournisseur",
+          "libelle": "Fournisseur",
+          "unite": "texte"
+        },
+        {
+          "cle": "prix_catalogue",
+          "libelle": "Prix du catalogue",
+          "unite": "texte"
+        },
+        {
+          "cle": "prix_paye",
+          "libelle": "Dernier prix payé",
+          "unite": "texte"
+        },
+        {
+          "cle": "date",
+          "libelle": "Date",
+          "unite": "date"
+        },
+        {
+          "cle": "rapport",
+          "libelle": "Catalogue / payé",
+          "unite": "nombre"
+        }
+      ],
+      "lignes": [],
+      "lignes_total": 0,
+      "tronque": false
+    }
+  ]
+}

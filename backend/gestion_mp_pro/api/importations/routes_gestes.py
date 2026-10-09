@@ -6,15 +6,15 @@ from __future__ import annotations
 from gestion_mp_pro.api.dependances import SessionDep, VersionDep
 from gestion_mp_pro.api.importations.routeur import GESTE, fiche_relue, routeur
 from gestion_mp_pro.api.importations.schemas import (
-    Annulation,
-    Cloture,
+    AnnulationDossier,
+    ClotureDossier,
     CoursDevise,
     Detachement,
     FraisEntree,
     LigneManuelle,
     LigneModification,
     Rattachement,
-    Reouverture,
+    ReouvertureDossier,
     Version,
 )
 from gestion_mp_pro.api.importations.schemas_fiche import DossierFiche
@@ -181,7 +181,7 @@ def retirer_frais(
     summary="Clore le dossier : son coût se fige (un cours vide prend le cours du jour).",
     responses=GESTE,
 )
-def cloturer(did: int, corps: Cloture, qui: QuiDep, s: SessionDep) -> DossierFiche:
+def cloturer(did: int, corps: ClotureDossier, qui: QuiDep, s: SessionDep) -> DossierFiche:
     """Route 202."""
     etats.cloturer(s, qui, did, corps.version, corps.alertes_lues)
     return fiche_relue(s, did)
@@ -194,7 +194,7 @@ def cloturer(did: int, corps: Cloture, qui: QuiDep, s: SessionDep) -> DossierFic
     summary="Rouvrir un dossier clos pour corriger (c'est tracé).",
     responses=GESTE,
 )
-def rouvrir(did: int, corps: Reouverture, qui: QuiDep, s: SessionDep) -> DossierFiche:
+def rouvrir(did: int, corps: ReouvertureDossier, qui: QuiDep, s: SessionDep) -> DossierFiche:
     """Route 203."""
     etats.rouvrir(s, qui, did, corps.version, corps.motif)
     return fiche_relue(s, did)
@@ -207,7 +207,7 @@ def rouvrir(did: int, corps: Reouverture, qui: QuiDep, s: SessionDep) -> Dossier
     summary="Annuler le dossier : il garde son numéro, sa facture et sa marchandise attendent.",
     responses=GESTE,
 )
-def annuler(did: int, corps: Annulation, qui: QuiDep, s: SessionDep) -> DossierFiche:
+def annuler(did: int, corps: AnnulationDossier, qui: QuiDep, s: SessionDep) -> DossierFiche:
     """Route 204."""
     etats.annuler(s, qui, did, corps.version, corps.motif)
     return fiche_relue(s, did)

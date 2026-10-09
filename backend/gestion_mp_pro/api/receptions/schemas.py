@@ -83,7 +83,7 @@ class ReceptionModification(ReceptionCreation):
     version: int = Field(ge=1)
 
 
-class Annulation(Entree):
+class AnnulationReception(Entree):
     """Annuler une réception validée : le motif est exigé (il reste sur la fiche)."""
 
     version: int = Field(ge=1)

@@ -137,20 +137,25 @@ class IndicateurJour(Sortie):
 
 # ── Bilan du mois (233) ───────────────────────────────────────────────────────────────
 
+# Noms propres au bilan : la dataclass du moteur porterait sinon le nom `ConsommationOrdre`, déjà
+# pris par le schéma de la route 143, et la génération des types de l'écran renommerait l'un.
+# Le prévu perte comprise, le taux appliqué et la densité des fils (`OrdreAjuste`), comme
+# Gestion MP les rend (parité R2, réciproque).
 ReferenceOrdreBilan = du_moteur(
     ReferenceAjustee, "ReferenceOrdreBilan", "Un fil d'un ordre : prévu perte comprise, densité."
 )
-OrdreBilan = du_moteur(
+EcartOrdreBilan = du_moteur(
     OrdreAjuste,
-    "OrdreBilan",
-    "Un ordre du mois tel que l'écran Sorties le lit (prévu perte comprise, taux appliqué).",
+    "EcartOrdreBilan",
+    "Un ordre du mois et son écart au prévu (bilan), tel que l'écran Sorties le lit.",
     references=(list[ReferenceOrdreBilan], ...),  # type: ignore[valid-type]
 )
+
 BilanMois = du_moteur(
     _BilanMois,
     "BilanMois",
     "Le bilan matières d'un mois : magasins et métiers, en kilos et en dirhams.",
-    ecarts_ordres=(list[OrdreBilan], ...),  # type: ignore[valid-type]
+    ecarts_ordres=(list[EcartOrdreBilan], ...),  # type: ignore[valid-type]
     mois_iso=(str, ...),
     du=(date, ...),
     au=(date, ...),

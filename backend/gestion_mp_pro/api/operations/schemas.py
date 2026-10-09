@@ -1,9 +1,9 @@
 """Schémas Pydantic du domaine « Opérations de stock » (API-PRO § 1.13 : routes 115–123, 241).
 
 Entrées `OperationCreation` (+ `valider`), `OperationModification` (+ `version`), gestes
-`ValidationVersion`, `Annulation` ; sorties `OperationFiche`, `PageOperations`, `Brouillons`,
-`ResultatValidationGroupee`. Les champs monétaires suivent les motifs du filtre des prix
-(`prix`, `valeurs`) : l'alimentation les reçoit à `null`.
+`ValidationVersion`, `AnnulationOperation` ; sorties `OperationFiche`, `PageOperations`,
+`Brouillons`, `ResultatValidationGroupee`. Les champs monétaires suivent les motifs du filtre
+des prix (`prix`, `valeurs`) : l'alimentation les reçoit à `null`.
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ class OperationModification(_OperationSaisie):
     version: int = Field(ge=1)
 
 
-class Annulation(Entree):
+class AnnulationOperation(Entree):
     """Route 121 : la version lue et, si l'on veut, pourquoi on annule."""
 
     version: int = Field(ge=1)
@@ -89,7 +89,7 @@ class LigneOperation(Sortie):
     devise: str | None
 
 
-class ValeurDevise(Sortie):
+class ValeurDeviseOperation(Sortie):
     """La valeur d'une ouverture dans une devise."""
 
     devise: str
@@ -128,7 +128,7 @@ class OperationFiche(Sortie):
     liberation: bool
     mise_en_quarantaine: bool
     lignes: list[LigneOperation]
-    valeurs: list[ValeurDevise] | None
+    valeurs: list[ValeurDeviseOperation] | None
     blocages: list[str]
 
 

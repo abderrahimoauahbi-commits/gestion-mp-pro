@@ -182,7 +182,7 @@ def test_la_famille_d_un_fil_dit_le_code_de_son_titrage() -> None:
 def test_le_bilan_rend_la_perte_et_la_densite_de_ses_ordres() -> None:
     """Parité (réciproque, route 233) : `ecarts_ordres` rend ce que Gestion MP rendait —
     `taux_perte` de l'ordre, `kg_par_ml` de chaque fil (l'écran Sorties le lit ainsi)."""
-    from gestion_mp_pro.api.suivi.schemas import BilanMois, OrdreBilan
+    from gestion_mp_pro.api.suivi.schemas import BilanMois, EcartOrdreBilan
 
     ordre = {
         "numero_of": "OF-1", "consomme": 10.0, "retours": 0.0, "lots": [], "net": 10.0,
@@ -192,9 +192,9 @@ def test_le_bilan_rend_la_perte_et_la_densite_de_ses_ordres() -> None:
         "references": [{"reference": "R", "quantite": 10.0, "theorique": 9.0, "ecart": 1.0,
                         "hors_recette": False, "kg_par_ml": 0.014}],
     }  # fmt: skip
-    lu = OrdreBilan.model_validate(ordre).model_dump()
+    lu = EcartOrdreBilan.model_validate(ordre).model_dump()
     assert lu["taux_perte"] == 0.02 and lu["references"][0]["kg_par_ml"] == 0.014
-    assert "OrdreBilan" in str(BilanMois.model_fields["ecarts_ordres"].annotation)
+    assert "EcartOrdreBilan" in str(BilanMois.model_fields["ecarts_ordres"].annotation)
 
 
 def test_K9_les_prix_d_une_date_passee_sont_ceux_connus_ce_jour_la(usine: Usine) -> None:

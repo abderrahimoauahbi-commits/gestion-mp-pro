@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#17497f"/>
+      <stop offset="1" stop-color="#0f1f35"/>
+    </linearGradient>
+  </defs>
+  <rect x="80" y="80" width="864" height="864" rx="190" fill="url(#f)"/>
+  <g fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round">
+    <ellipse cx="512" cy="282" rx="168" ry="54"/>
+    <path d="M344 282v296c0 30 75 54 168 54s168-24 168-54V282"/>
+    <path d="M344 380c0 30 75 54 168 54s168-24 168-54M344 478c0 30 75 54 168 54s168-24 168-54" opacity=".55"/>
+  </g>
+  <rect x="242" y="690" width="540" height="160" rx="44" fill="#2f6fe4"/>
+  <text x="512" y="800" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="104" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="6">MP PRO</text>
+</svg>

@@ -2,11 +2,12 @@
   "ecran": {
     "accueil": {
       "titre": "Ma journée",
-      "resume": "Ce qui attend aujourd’hui : les tâches à faire, ce qui est à valider, les arrivées des sept prochains jours et les besoins signalés par l’atelier.",
+      "resume": "Ce qui attend une action aujourd’hui : à faire, à valider, et les arrivées des sept prochains jours. Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.",
       "points": [
-        "Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.",
-        "Achats : commandes en retard, prix à confirmer, brouillons à envoyer, réceptions à valider, factures sans dossier d’importation.",
-        "Alimentation au bureau : les sorties en brouillon, les retours à saisir, les besoins signalés et leur réponse."
+        "Achats, dans cet ordre : les besoins signalés par l’atelier (urgents d’abord, « Traiter » y répond), les matières en rupture ou critiques, les commandes en retard, les prix à confirmer, les commandes en brouillon à envoyer, les factures sans dossier d’importation, les réceptions importées sans facture, chaque inventaire en cours, les réclamations ouvertes, les contrôles à corriger.",
+        "« À valider » : les réceptions, ordres et opérations saisis mais pas encore validés — le stock n’a pas bougé pour eux. « Tout valider… » ouvre [Stock › À valider](/stock?onglet=a-valider).",
+        "Alimentation au bureau : les gestes du jour (envoyer aux machines, retour, ordres, métiers, déplacer un lot) et ses brouillons à valider ; ni prix ni conseil d’achat.",
+        "La direction a sa liste au [Cockpit](/cockpit)."
       ]
     },
     "administration": {
@@ -61,11 +62,24 @@
     },
     "cockpit": {
       "titre": "Cockpit",
-      "resume": "Ce qui demande une décision de la direction : à faire et à valider, matières en alerte, vue d’ensemble, évolution, opportunités d’économies.",
+      "resume": "La situation du stock et des achats, recalculée à chaque ouverture : six indicateurs, puis ce qui attend une décision, les matières en alerte, la vue d’ensemble, l’évolution et les opportunités d’économies.",
       "points": [
-        "Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur sa liste.",
-        "« Bilan du mois » imprime le mois écoulé sur le papier à en-tête.",
-        "{{sur_les_metiers}}"
+        "Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur l’écran qui le détaille. Les chiffres sont ceux du serveur : la valeur du stock est celle de la Valorisation.",
+        "{{sur_les_metiers}}",
+        "« À faire et à valider » : les commandes à approuver (« Examiner » ouvre la fiche), puis tout ce qui attend une action, chacun avec son lien ; un besoin signalé se traite sur place.",
+        "« Matières en alerte » : RUPTURE, CRITIQUE, URGENT et ATTENTION, la plus pressée d’abord ; « Préparer la commande » ouvre la préparation chez le fournisseur.",
+        "« Bilan du mois » imprime le mois choisi (le précédent par défaut) sur le papier à en-tête, dans un nouvel onglet."
+      ]
+    },
+    "commande": {
+      "titre": "Bon de commande",
+      "resume": "Un bon, du brouillon au solde : lignes et livraison, prix du fournisseur, suivi de l’expédition, réceptions, approbation, pièces jointes, historique.",
+      "points": [
+        "Un brouillon se modifie librement ; il reçoit son numéro et sa date à l’envoi.",
+        "Au-delà du seuil d’approbation, « Envoyer, ou demander l’approbation » le soumet à la direction, qui l’approuve (au montant et au cours du moment) ou le renvoie avec un motif.",
+        "Le bon fournisseur s’imprime dans un nouvel onglet, en anglais, sans aucun prix ; l’Excel porte le même contenu.",
+        "Les prix se confirment au retour du fournisseur, sur un bon parti : le cours se fige à la première confirmation.",
+        "Un bon livré en partie se solde ; un bon parti jamais livré s’annule et garde son numéro."
       ]
     },
     "commandes": {
@@ -164,6 +178,14 @@
         "Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25)."
       ]
     },
+    "nouvelle_commande": {
+      "titre": "Nouvelle commande",
+      "resume": "Chez quel fournisseur commander : la préparation s’ouvre avec les quantités que le calcul suggère.",
+      "points": [
+        "Par défaut, les fournisseurs chez qui le calcul propose quelque chose, le plus gros budget d’abord.",
+        "La case montre aussi les autres fournisseurs actifs, pour une commande hors calcul."
+      ]
+    },
     "operations": {
       "titre": "Ouvertures, transferts, ajustements",
       "resume": "Un document par geste de stock : stock d’ouverture, transfert (dont quarantaine), ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.",
@@ -179,6 +201,17 @@
       "points": [
         "Les fournisseurs sont classés par budget, les matières par urgence.",
         "« Préparer la commande » ouvre l’arbitrage ; les bons partent en brouillon, un par devise."
+      ]
+    },
+    "preparation": {
+      "titre": "Préparer une commande",
+      "resume": "La proposition du calcul chez un fournisseur, à arbitrer ligne par ligne, en kilos et dans l’unité où l’on commande (bobine, palette, fût…).",
+      "points": [
+        "Cochez les lignes à commander ; la quantité se saisit dans l’unité de commande ou en kilos, les deux restent liées.",
+        "« Arrondir au conditionnement » monte chaque ligne à l’unité entière suivante ; « Revenir à la suggestion » retrouve le calcul.",
+        "Palettes par conteneur : une aide de calcul, retenue par poste, jamais imprimée.",
+        "Les remarques au fournisseur sont imprimées sur le bon, qui est en anglais.",
+        "Un bon par devise est créé en brouillon, sans numéro : il se relit et s’envoie depuis Commandes."
       ]
     },
     "production": {
@@ -209,6 +242,29 @@
         "Le cuir, les franges et le ruban se disent en mètres par m² dans la recette."
       ]
     },
+    "reception": {
+      "titre": "Réception",
+      "resume": "Un camion reçu : ses lignes pesées, ce qui bloquerait la validation, la facture du fournisseur, les réclamations, les pièces jointes et l’historique.",
+      "points": [
+        "Un brouillon se corrige, se supprime, et se remet à jour seul si d’autres réceptions passent avant lui.",
+        "« Valider la réception » écrit les lots, les entrées en stock au prix payé et donne le numéro ; tout ce qui serait refusé est annoncé avant.",
+        "La facture se complète ou se corrige même après la validation, sans toucher au stock.",
+        "Annuler une réception validée contre-passe chaque entrée, à la même date, avec un motif."
+      ]
+    },
+    "reception_saisie": {
+      "titre": "Saisie d’une réception",
+      "resume": "Un camion à la bascule : le bon que le chauffeur apporte, puis ligne par ligne le lot, l’annonce du BL, la pesée, les bobines, le magasin et la qualité.",
+      "points": [
+        "Tapez le n° du bon que le chauffeur apporte (ou choisissez le fournisseur) : cochez le ou les bons du camion, leurs lignes restant à livrer se chargent. Une matière sans commande : « Ajouter une matière hors commande ».",
+        "Recopiez le n° du BL et, si elle est là, la facture ; elle peut aussi se compléter après la validation.",
+        "Ligne par ligne : le lot imprimé sur l’étiquette (sinon « Lot interne »), la quantité annoncée sur le BL, la quantité pesée à la bascule — c’est elle qui entre en stock — puis les palettes complètes et les bobines en plus.",
+        "Deux lots d’une même ligne de bon : « + un autre lot ». L’excédent se compte tous lots ensemble.",
+        "Une ligne absente du camion : retirez-la. Elle reste due sur la commande.",
+        "Qualité : conforme ; sous réserve — entre en quarantaine, non utilisable ; refusé — n’entre pas, le fournisseur la doit toujours (dites pourquoi dans les observations).",
+        "Enregistrer crée un brouillon (un par devise du camion, en une fois) : rien n’entre en stock. La validation, depuis la fiche, fait entrer la marchandise et donne le numéro."
+      ]
+    },
     "receptions": {
       "titre": "Réceptions",
       "resume": "La saisie d’un camion (pesées, lots, magasins), sa validation, les réclamations au fournisseur, le poids des bobines et l’archive des pesées.",
@@ -216,6 +272,15 @@
         "La pesée fait foi ; l’Annoncé BL (kg) est celui du bon de livraison.",
         "Conforme → magasin ; sous réserve → quarantaine ; refusé → n’entre pas.",
         "Un brouillon se modifie, se supprime et se remet à jour seul ; la validation fait entrer le stock."
+      ]
+    },
+    "reclamation": {
+      "titre": "Réclamation",
+      "resume": "Un défaut constaté chez un fournisseur (qualité, quantité, bobines, retard, documents) : ce qui est en cause, ce qui est demandé, la réponse et ce qui est obtenu.",
+      "points": [
+        "Sur une réception validée, la ligne en cause garde sa référence même si elle a été refusée.",
+        "Clore demande l’issue (avoir, remplacement, remise, refusée, abandonnée) ; la réponse et l’avoir obtenu se complètent encore ensuite.",
+        "Rouvrir remet la réclamation en attente du fournisseur ; le motif reste au journal."
       ]
     },
     "reglages": {
@@ -268,8 +333,12 @@
       "texte": "Sur la valeur consommée par an, en MAD : jusqu’à 80 % cumulés → A, jusqu’à 95 % → B, sinon C (réglables)."
     },
     "alerte": {
-      "grandeur": "Matières en alerte",
-      "texte": "Trois comptes nommés, servis par le serveur : « alerte rouge » = en rupture ou critiques (pastille du menu, bandeaux) ; « à commander vite » = rupture, critiques et urgentes (Ma journée) ; « en alerte » = les quatre statuts RUPTURE, CRITIQUE, URGENT, ATTENTION (onglet Matières en alerte)."
+      "grandeur": "En rupture ou critiques",
+      "texte": "L’alerte rouge : les matières au statut RUPTURE ou CRITIQUE. Un seul compte, le même partout (pastille du Stock, Ma journée, Cockpit) ; les URGENT et les ATTENTION se nomment à part. L’onglet « Matières en alerte » du Cockpit montre les quatre statuts, la plus pressée d’abord."
+    },
+    "arrivees_semaine": {
+      "grandeur": "Arrivées dans les 7 jours",
+      "texte": "Les commandes parties, ni soldées ni annulées, attendues d’hier à dans sept jours : l’ETA du transport, sinon la livraison prévue. La plus proche d’abord."
     },
     "besoin_mois": {
       "grandeur": "Besoin matière du mois",
@@ -279,9 +348,21 @@
       "grandeur": "Besoin retenu",
       "texte": "Le besoin du plan corrigé par le réel : sorties nettes des trois derniers mois clos ÷ ce que le plan et les recettes de l’époque prévoyaient (un plan changé en cours de mois compte pour ses jours), borné entre 0,5 et 1,5 ; pas de baisse pour un fil en rupture. Un fil qui en remplace un autre dans une recette prend le coefficient de l’ancien. Un fil consommé hors de toute recette se prévoit sur ce qui sort, sauf un fil sorti des recettes dans l’année, que l’atelier finit."
     },
+    "bobines_evolution": {
+      "grandeur": "Évolution du poids",
+      "texte": "Dernier poids moyen ÷ premier − 1, sur au moins deux réceptions ; au-delà de la tolérance du poids de bobine, la bobine s’alourdit ou s’allège."
+    },
+    "bobines_hors_catalogue": {
+      "grandeur": "Bobines hors catalogue",
+      "texte": "Matières (ou lignes) dont le poids moyen de la bobine s’écarte du poids du catalogue de plus de la tolérance du poids de bobine des réglages."
+    },
     "bobines_montees": {
       "grandeur": "Bobines montées",
       "texte": "Σ mètres × bobines par mètre du métier × part du fil, sur les métiers en service."
+    },
+    "bobines_suivies": {
+      "grandeur": "Poids de la bobine",
+      "texte": "Poids pesé ÷ bobines comptées (palettes × bobines par palette + bobines en plus), à chaque réception validée ; la moyenne et l’étendue sur les réceptions de la matière."
     },
     "brouillons": {
       "grandeur": "Brouillons",
@@ -298,6 +379,70 @@
     "budget_a_commander": {
       "grandeur": "Budget à commander",
       "texte": "Σ des montants à commander des matières affichées, en MAD au cours du jour : quantité à commander × prix au kilo × cours de la devise."
+    },
+    "commande_commande": {
+      "grandeur": "Commandé",
+      "texte": "Somme des kilos des lignes du bon."
+    },
+    "commande_cours": {
+      "grandeur": "Cours figé",
+      "texte": "Le cours de la devise en MAD, figé à la première confirmation des prix ; avant, le cours du jour sert aux estimations."
+    },
+    "commande_livraison": {
+      "grandeur": "Livraison prévue",
+      "texte": "L’arrivée prévue (ETA) du suivi d’expédition si elle est saisie, sinon la livraison prévue du bon (date d’envoi + délai du fournisseur si elle est vide)."
+    },
+    "commande_montant": {
+      "grandeur": "Montant du bon",
+      "texte": "Kilos × prix confirmé, et prix du catalogue pour les lignes encore à confirmer, dans la devise du bon ; l’équivalent MAD au cours figé, sinon au cours du jour."
+    },
+    "commande_recu": {
+      "grandeur": "Reçu",
+      "texte": "Pesé aux réceptions validées pour ce bon (hors refus), moins ce qui est reparti chez le fournisseur ; « livré » rapporte le reçu au commandé."
+    },
+    "commandes_en_retard": {
+      "grandeur": "Commandes en retard",
+      "texte": "Les commandes parties, ni soldées ni annulées, dont l’arrivée attendue (ETA, sinon livraison prévue, tolérance de retard comprise) est passée sans que tout soit reçu — la règle du serveur, la même que le filtre « En retard » des Commandes et le courriel du lundi."
+    },
+    "commandes_engage": {
+      "grandeur": "Montant engagé",
+      "texte": "Somme des montants estimés en MAD des bons envoyés et confirmés : prix confirmés, sinon prix du catalogue ; au cours figé, sinon au cours du jour."
+    },
+    "commandes_ouvertes": {
+      "grandeur": "Bons ouverts",
+      "texte": "Bons ni soldés ni annulés, tous onglets et quelle que soit la recherche ; le détail compte les brouillons et ceux qui attendent la direction."
+    },
+    "commandes_prix_a_confirmer": {
+      "grandeur": "Prix à confirmer",
+      "texte": "Bons partis, ni soldés ni annulés, dont au moins une ligne attend le prix du fournisseur."
+    },
+    "commandes_reste": {
+      "grandeur": "Reste à livrer (MAD)",
+      "texte": "Somme, sur les bons partis non clos, de ce qui reste à livrer × prix (confirmé, sinon catalogue), en MAD."
+    },
+    "commandes_retard": {
+      "grandeur": "En retard",
+      "texte": "Bons ouverts dont la livraison prévue (ou l’ETA) est dépassée sans être livrés en entier."
+    },
+    "controles_a_corriger": {
+      "grandeur": "Contrôles à corriger",
+      "texte": "Les contrôles de cohérence en anomalie, hors contrôles pour information. Chaque contrôle dit quoi faire et mène à l’écran où le corriger."
+    },
+    "controles_anomalies": {
+      "grandeur": "À corriger",
+      "texte": "Les contrôles non conformes, sans ceux « pour information » : c’est le nombre de la pastille du menu."
+    },
+    "controles_bloquants": {
+      "grandeur": "Bloquants",
+      "texte": "Les contrôles bloquants non conformes : tant qu’ils sonnent, le pilotage est faussé."
+    },
+    "controles_score": {
+      "grandeur": "Score des contrôles",
+      "texte": "Contrôles conformes ÷ contrôles vérifiés ; les contrôles garantis par la base (ils ne peuvent pas sonner) ne comptent pas."
+    },
+    "controles_soldes": {
+      "grandeur": "Soldes et journal",
+      "texte": "Le stock tenu lot par lot et magasin par magasin, comparé au journal des mouvements rejoué ; et les soldes négatifs."
     },
     "cout_hors_tva": {
       "grandeur": "Coût hors TVA d’une marchandise",
@@ -335,6 +480,22 @@
       "grandeur": "Écart à la recette",
       "texte": "(sorti net − prévu par la recette) ÷ prévu, sur les ordres selon recette ; le prévu est figé à la validation (recette et perte du jour). À 5 % près c’est juste ; un excès est à surveiller, un manque est critique."
     },
+    "echeancier_30_jours": {
+      "grandeur": "Dans les 30 jours",
+      "texte": "Σ des échéances non réglées d’aujourd’hui à dans trente jours."
+    },
+    "echeancier_a_dater": {
+      "grandeur": "À dater",
+      "texte": "Les factures et les frais dus sans date d’échéance : à dater sur la réception ou le dossier."
+    },
+    "echeancier_a_payer": {
+      "grandeur": "À payer",
+      "texte": "Σ des échéances connues non réglées (factures des fournisseurs et frais d’importation), en MAD au cours du jour, selon la nature, la recherche et la période."
+    },
+    "echeancier_echu": {
+      "grandeur": "Échu, non réglé",
+      "texte": "Σ des échéances passées et pas encore réglées, quelle que soit la période choisie."
+    },
     "entre_sorti_lot": {
       "grandeur": "Entré et sorti d’un lot",
       "texte": "Entré : les entrées du lot (réception, stock d’ouverture, matière retrouvée), hors transferts et annulations. Sorti : les sorties vers les machines et les retours au fournisseur, net des retours des machines."
@@ -358,6 +519,50 @@
     "fournisseur_matieres": {
       "grandeur": "Matières d’un fournisseur",
       "texte": "Les matières du catalogue qui le désignent comme fournisseur, désactivées comprises, comptées par devise de leur prix."
+    },
+    "fournisseurs_achete": {
+      "grandeur": "Acheté",
+      "texte": "Σ des bons de commande partis chez ce fournisseur, en MAD au cours de chaque bon."
+    },
+    "fournisseurs_action": {
+      "grandeur": "Action conseillée",
+      "texte": "L’action que dit le classement : fidéliser et négocier (Stratégique), maintenir (Standard), audit qualité et relance (À surveiller), chercher une autre source (À challenger)."
+    },
+    "fournisseurs_notes": {
+      "grandeur": "Fournisseurs notés",
+      "texte": "Les fournisseurs qui ont au moins une réception notée, sur tous ceux du classement ; « Stratégique » à partir du réglage « Score — Stratégique »."
+    },
+    "fournisseurs_receptions_notees": {
+      "grandeur": "Réceptions notées",
+      "texte": "Les réceptions validées qui ont une note OTIF : celles qui devaient quelque chose à un bon de commande."
+    },
+    "fournisseurs_sous_cible": {
+      "grandeur": "Sous la cible",
+      "texte": "Les fournisseurs dont l’OTIF est sous la cible du réglage « Cible OTIF »."
+    },
+    "import_achat": {
+      "grandeur": "Achat (importations)",
+      "texte": "Σ valeur de chaque marchandise au cours payé à la banque (sinon au cours du jour des réglages, marqué *) : pesée × prix × cours, en MAD. Une marchandise entre à sa pesée × son prix, pas au montant de la facture."
+    },
+    "import_charges": {
+      "grandeur": "Charges hors TVA",
+      "texte": "Σ des frais non récupérables répartis sur les marchandises (droits, fret, assurance, transitaire, port, banque…), à la valeur ou au poids selon le poste. La TVA, récupérable, n’y est pas. Les frais qu’aucune marchandise ne porte (« non répartis ») ne sont dans aucun coût : ils sont montrés à part."
+    },
+    "import_cout": {
+      "grandeur": "Coût hors TVA (coût de revient)",
+      "texte": "Achat + charges hors TVA : ce que la marchandise a coûté rendue usine. Au kilo : coût hors TVA ÷ poids (le cuir, les franges et le ruban compris, leur stock est en kilos). C’est le coût qui entre au coût moyen du stock à la clôture du dossier."
+    },
+    "import_cout_ttc": {
+      "grandeur": "Coût TTC",
+      "texte": "Coût hors TVA + TVA à l’importation (récupérable) : ce que le dossier a décaissé. TVA attendue = taux de TVA réglé × (valeur en douane + droits + TPI)."
+    },
+    "import_dossiers": {
+      "grandeur": "Dossiers d’importation",
+      "texte": "Tous les dossiers, ouverts et clos ; les dossiers annulés ne sont comptés nulle part. Un dossier = une facture = une livraison."
+    },
+    "import_poids": {
+      "grandeur": "Poids importé",
+      "texte": "Σ des kilos pesés à la réception des marchandises des dossiers (le cuir, les franges et le ruban compris). N lot(s) : les lots distincts."
     },
     "inventaire_a_recompter": {
       "grandeur": "À recompter",
@@ -407,6 +612,18 @@
       "grandeur": "Opportunité d’économies",
       "texte": "(prix actuel − prix du comparable le moins cher) × consommation annuelle, entre fils de même composition, type et titrage, payés à la même époque, au coût rendu usine."
     },
+    "opportunites_ecartees": {
+      "grandeur": "Écartées",
+      "texte": "Les comparaisons non comptées : un des deux prix n’a pas de date (prix de catalogue), ou les deux prix sont plus éloignés dans le temps que la fenêtre."
+    },
+    "opportunites_nombre": {
+      "grandeur": "Opportunités",
+      "texte": "Les matières consommées pour lesquelles une matière comparable s’achète moins cher, à la même époque (fenêtre de jours du réglage ou choisie), au coût rendu usine."
+    },
+    "opportunites_plus_forte": {
+      "grandeur": "La plus forte",
+      "texte": "L’opportunité dont l’économie par an est la plus grande : (prix actuel − prix du comparable) × consommation annuelle."
+    },
     "ordres_affiches": {
       "grandeur": "Ordres affichés",
       "texte": "Les ordres de l’onglet qui passent la recherche, la période et les filtres."
@@ -423,6 +640,22 @@
       "grandeur": "OTIF",
       "texte": "Une réception est parfaite si elle est à l’heure, complète (à la tolérance près) et conforme. À l’heure se juge sur la date promise du bon (l’ETA ne la repousse pas). Score fournisseur = OTIF × 60 + jusqu’à 20 points pour peu de retours (0 dès 5 % renvoyés) + jusqu’à 20 pour un délai court."
     },
+    "pesees_ecarts": {
+      "grandeur": "Écarts de pesée",
+      "texte": "Lignes dont la pesée s’écarte du BL (à défaut, du reste à livrer) de plus de la tolérance d’écart de pesée."
+    },
+    "pesees_lignes": {
+      "grandeur": "Lignes pesées",
+      "texte": "Lignes des réceptions non annulées (brouillons compris) qui passent la recherche et les filtres, et leurs kilos pesés."
+    },
+    "pesees_non_conformes": {
+      "grandeur": "Lignes non conformes",
+      "texte": "Lignes sous réserve ou refusées."
+    },
+    "plan_budget": {
+      "grandeur": "Budget indicatif",
+      "texte": "Somme, sur les références à commander, de la quantité à commander × prix du catalogue, convertie en MAD au cours du jour de chaque devise."
+    },
     "plan_glissant": {
       "grandeur": "Plan des douze mois à venir",
       "texte": "Σ des m² planifiés du mois en cours aux onze suivants : base mensuelle × coefficient du mois, croissance annuelle comprise, qualités en service."
@@ -431,17 +664,61 @@
       "grandeur": "Plan mensuel",
       "texte": "Σ des bases mensuelles des qualités en service : les m² d’un mois ordinaire, avant saisonnalité et croissance. Il se saisit dans la page Production."
     },
+    "plan_references": {
+      "grandeur": "Références à commander",
+      "texte": "Matières dont la quantité à commander du plan est positive ; « en alerte » : au statut Rupture, Critique, Urgent ou Attention."
+    },
+    "plan_ruptures": {
+      "grandeur": "Ruptures",
+      "texte": "Matières au statut Rupture, comptées sur toutes les matières suivies (pas seulement celles à commander) ; le détail donne les critiques, urgentes et à surveiller."
+    },
+    "plan_tier1": {
+      "grandeur": "À émettre cette semaine",
+      "texte": "Références au Tier 1 : rupture ou critique, ou classe A au-delà du seuil de montant du Tier 1. Le détail compte le Tier 2 (à émettre sous 7 jours)."
+    },
     "poids_bobine": {
       "grandeur": "Poids d’une bobine",
       "texte": "Le poids pesé sur le lot, sinon celui du catalogue ; une palette porte le nombre de bobines du catalogue."
+    },
+    "preparation_lignes": {
+      "grandeur": "Lignes retenues",
+      "texte": "Lignes cochées avec une quantité, sur toutes les lignes de la préparation (suggérées et ajoutées)."
+    },
+    "preparation_montant": {
+      "grandeur": "Montant indicatif",
+      "texte": "Kilos retenus × prix du catalogue, par devise (jamais additionnées) ; l’équivalent en MAD au cours du jour. Le fournisseur confirmera ses prix."
+    },
+    "preparation_palettes": {
+      "grandeur": "Palettes",
+      "texte": "Somme, sur les lignes retenues, des kilos ÷ contenance d’une palette au catalogue ; avec les palettes par conteneur, le nombre de conteneurs et la place restante dans le dernier."
+    },
+    "preparation_quantite": {
+      "grandeur": "Quantité totale",
+      "texte": "Somme des kilos des lignes retenues (le cuir, les franges et le ruban compris)."
     },
     "prevu_recette": {
       "grandeur": "Prévu par la recette",
       "texte": "Σ, matière par matière, kg/m² de la recette × m² tissés × (1 + taux de perte), figé à la validation de l’ordre."
     },
+    "prix_achats": {
+      "grandeur": "Achats enregistrés",
+      "texte": "Le nombre de prix payés (une ligne pesée d’une réception validée, sur son bon) et leur contre-valeur en MAD au cours du jour de la réception."
+    },
+    "prix_baisses": {
+      "grandeur": "Baisses obtenues",
+      "texte": "Les prix payés en dessous du précédent de la même matière chez le même fournisseur, dans la même devise, de plus de 0,5 %."
+    },
+    "prix_hausses": {
+      "grandeur": "Hausses de prix",
+      "texte": "Les prix payés au-dessus du précédent de la même matière chez le même fournisseur, dans la même devise, de plus de 0,5 % ; « forte » au-delà du réglage « Forte hausse de prix à partir de »."
+    },
     "prix_kilo": {
       "grandeur": "Prix au kilo",
       "texte": "Le prix de la fiche s’il est au kilo ; s’il est au mètre, prix ÷ densité (kg / ml). La valeur du stock, le coût moyen, le coût au m² et le budget d’achat le lisent au kilo."
+    },
+    "production_ordres_ecart": {
+      "grandeur": "Ordres au-delà de 5 % d’écart",
+      "texte": "Parmi les ordres qui disent leur qualité, ceux dont (sorti net − prévu par la recette) ÷ prévu dépasse 5 % (seuil fixe, celui des Sorties)."
     },
     "qualite_cout": {
       "grandeur": "Coût matière d’une qualité",
@@ -471,13 +748,77 @@
       "grandeur": "En quarantaine",
       "texte": "Les lots dont une partie est dans un magasin de quarantaine : détenue, comptée dans le stock et sa valeur, mais pas dans le disponible ; elle se libère après contrôle, ou se rend au fournisseur."
     },
+    "reception_ecarts": {
+      "grandeur": "Écarts de pesée",
+      "texte": "Lignes dont la pesée s’écarte de l’annonce du BL (à défaut, du reste à livrer quand on pèse au moins ce reste) de plus de la tolérance d’écart de pesée des réglages."
+    },
+    "reception_facture": {
+      "grandeur": "Facture",
+      "texte": "La facture du fournisseur rattachée à la réception : montant, échéance (date de facture + délai de paiement du fournisseur, sauf saisie), réglée ou non."
+    },
+    "reception_pese": {
+      "grandeur": "Pesé (entre en stock)",
+      "texte": "Somme des kilos pesés des lignes conformes et sous réserve (les lignes refusées n’entrent pas)."
+    },
+    "reception_reserve": {
+      "grandeur": "Sous réserve / refusé",
+      "texte": "Lignes sous réserve (en quarantaine, non utilisables) et lignes refusées (n’entrent pas en stock)."
+    },
     "recettes_incompletes": {
       "grandeur": "Recettes incomplètes",
       "texte": "Les qualités en service dont un rôle ne fait pas 100 % ou dont un rôle qui pèse n’a pas de matière — la même base que la nomenclature ; les arrêtées sont signalées à part."
     },
+    "reclamation_duree": {
+      "grandeur": "Durée",
+      "texte": "Jours depuis l’ouverture (jusqu’à la clôture pour une close) ; au-delà de 30 jours, une réclamation ouverte est signalée."
+    },
+    "reclamation_en_cause": {
+      "grandeur": "En cause",
+      "texte": "La quantité en cause (kg), et la réception et le lot visés."
+    },
+    "reclamation_montants": {
+      "grandeur": "Demandé / obtenu",
+      "texte": "Le montant demandé au fournisseur et celui obtenu, dans la devise de la réclamation."
+    },
+    "reclamation_motif": {
+      "grandeur": "Motif",
+      "texte": "Le motif choisi à l’ouverture, la date d’ouverture et qui l’a ouverte."
+    },
+    "reclamations_closes": {
+      "grandeur": "Réclamations closes",
+      "texte": "Réclamations closes avec leur issue (avoir, remplacement, remise, refusée, abandonnée)."
+    },
+    "reclamations_delai": {
+      "grandeur": "Délai de réponse",
+      "texte": "Moyenne, sur les réclamations closes, du nombre de jours entre l’ouverture et la clôture."
+    },
+    "reclamations_obtenu": {
+      "grandeur": "Obtenu",
+      "texte": "Somme des montants obtenus (avoirs, remises), par devise, jamais additionnées."
+    },
+    "reclamations_ouvertes": {
+      "grandeur": "Réclamations ouvertes",
+      "texte": "Réclamations sans issue ; le détail compte celles ouvertes depuis plus de 30 jours."
+    },
     "reste_lot": {
       "grandeur": "Reste d’un lot",
       "texte": "Ce que le lot porte dans tous les magasins, quarantaine comprise (le solde de son journal)."
+    },
+    "revient_cout_kg_tapis": {
+      "grandeur": "Coût / kg de tapis",
+      "texte": "Coût matière au m² ÷ poids au m² de la recette (rôles au poids) : le coût d’un kilo de tapis, pondéré par la recette. Les rôles au mètre (cuir, franges, ruban) comptent par leurs ml/m² × densité."
+    },
+    "revient_cout_m2": {
+      "grandeur": "Coût matière / m²",
+      "texte": "Σ, rôle par rôle, kg au m² du rôle × part de chaque fil × coût hors TVA au kilo de ce fil dans les dossiers. Un rôle dont une partie des fils n’a jamais été importée prend le coût connu, étendu au reste du rôle ; un rôle sans aucun fil importé est hors du coût calculé."
+    },
+    "revient_couverture": {
+      "grandeur": "Recette couverte",
+      "texte": "La part du poids au m² de la recette dont le coût est connu par des dossiers d’importation (fils importés ÷ fils de la recette, pondérés par leur poids)."
+    },
+    "revient_poids_importe": {
+      "grandeur": "Poids importé (qualité)",
+      "texte": "Σ des kilos importés des fils de la recette dans les dossiers retenus (période, statut), avec leur coût hors TVA."
     },
     "rotation": {
       "grandeur": "Rotation du stock",
@@ -486,6 +827,34 @@
     "ruptures": {
       "grandeur": "Ruptures",
       "texte": "Les matières affichées au statut RUPTURE : stock projeté à zéro ou moins."
+    },
+    "sauvegarde_conservees": {
+      "grandeur": "Sauvegardes conservées",
+      "texte": "Les fichiers de cette base dans le dossier des sauvegardes : une automatique par jour gardée 14 jours, puis la première de chaque mois gardée 12 mois ; les manuelles et « avant » ne s’effacent jamais seules."
+    },
+    "sauvegarde_copie": {
+      "grandeur": "Copie de sécurité",
+      "texte": "Chaque sauvegarde recopiée dans un second emplacement (GESTIONMPPRO_SAUVEGARDES_COPIE), vérifiée à la taille."
+    },
+    "sauvegarde_derniere": {
+      "grandeur": "Dernière sauvegarde",
+      "texte": "L’heure de la dernière sauvegarde de cette base, relue (pg_restore --list) ; en rouge si elle a plus de 26 heures ou si la sauvegarde est en défaut."
+    },
+    "serveur_base": {
+      "grandeur": "Base de données",
+      "texte": "La base PostgreSQL de ce serveur, sa version et sa taille ; en rouge si son schéma n’est pas celui qu’attend la version."
+    },
+    "serveur_connectes": {
+      "grandeur": "Connectés",
+      "texte": "Les comptes qui ont une session ouverte (non expirée)."
+    },
+    "serveur_reseau": {
+      "grandeur": "Adresse sur le réseau",
+      "texte": "L’adresse où les postes de l’usine joignent le serveur."
+    },
+    "serveur_version": {
+      "grandeur": "Version",
+      "texte": "La version de Gestion MP PRO qui répond, et le numéro du schéma de sa base."
     },
     "seuil_alerte": {
       "grandeur": "Seuil d’alerte",
@@ -546,6 +915,18 @@
     "valeur_stock": {
       "grandeur": "Valeur du stock (CMUP)",
       "texte": "Coût moyen unitaire pondéré, recalculé à chaque entrée au Coût hors TVA (frais d’importation compris quand le dossier est saisi), appliqué au stock détenu (magasins et sur les métiers, quarantaine comprise) ; à défaut d’achat, au prix du catalogue. Le Cockpit et la Valorisation disent « dont X sur les métiers »."
+    },
+    "valorisation_ecart": {
+      "grandeur": "Écart avec le catalogue",
+      "texte": "Σ (valeur au coût moyen − stock × prix du catalogue au kilo × cours du jour). Positif : le stock a coûté plus que le catalogue ne le dit (frais d’approche, hausse non reportée). Signalé au-delà de 2 % de la valeur du stock (seuil fixe de l’écran, pas un réglage)."
+    },
+    "valorisation_magasins": {
+      "grandeur": "Dans les magasins",
+      "texte": "Σ (stock courant + quarantaine) × coût moyen pondéré de chaque matière, au soir de la date choisie ; le fil sur les métiers n’y est pas."
+    },
+    "valorisation_matieres": {
+      "grandeur": "Matières en stock",
+      "texte": "Les matières qui ont du stock (magasins ou métiers) au soir de la date, sur toutes celles du catalogue."
     },
     "xyz": {
       "grandeur": "Classe XYZ",

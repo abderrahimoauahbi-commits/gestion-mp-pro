@@ -1,0 +1,76 @@
+{
+  "elements": [
+    {
+      "reference": "PP FRZ-2900 Dtex-Brown 44361-Hs",
+      "fournisseur": "HASIRCI TEXTILE",
+      "catalogue": 3.15,
+      "constate": 2.759903381642512,
+      "ecart": -0.12384019630396448,
+      "reception": "REC-2026-0270",
+      "matiere_id": 91,
+      "reception_id": 310,
+      "fournisseur_id": 1
+    },
+    {
+      "reference": "PP FRZ-2900 Dtex- Grey 8933-Hs",
+      "fournisseur": "HASIRCI TEXTILE",
+      "catalogue": 3.15,
+      "constate": 3.400892857142857,
+      "ecart": 0.07964852607709748,
+      "reception": "REC-2026-0270",
+      "matiere_id": 82,
+      "reception_id": 310,
+      "fournisseur_id": 1
+    },
+    {
+      "reference": "PES Sh-1200 Deniers- Cream Dtbc-H69-Gzm",
+      "fournisseur": "GZM TEXTIL",
+      "catalogue": 2.0,
+      "constate": 1.8416494845360825,
+      "ecart": -0.07917525773195877,
+      "reception": "REC-2026-0210",
+      "matiere_id": 36,
+      "reception_id": 250,
+      "fournisseur_id": 3
+    }
+  ],
+  "total": 12,
+  "suivant": "WzNd",
+  "code": "C30",
+  "libelle": "Poids de bobine reçu éloigné du catalogue de plus de 5 %",
+  "gravite": "information",
+  "quoi_faire": "Vérifier le poids de bobine avec le fournisseur ; si le nouveau poids est le bon, le reporter dans la fiche matière (kg / bobine).",
+  "lien": "/receptions?onglet=bobines",
+  "colonnes": [
+    {
+      "cle": "reference",
+      "libelle": "Référence",
+      "unite": "texte"
+    },
+    {
+      "cle": "fournisseur",
+      "libelle": "Fournisseur",
+      "unite": "texte"
+    },
+    {
+      "cle": "catalogue",
+      "libelle": "Catalogue (kg / bobine)",
+      "unite": "kg"
+    },
+    {
+      "cle": "constate",
+      "libelle": "Constaté (kg / bobine)",
+      "unite": "kg"
+    },
+    {
+      "cle": "ecart",
+      "libelle": "Écart (%)",
+      "unite": "%"
+    },
+    {
+      "cle": "reception",
+      "libelle": "Réception",
+      "unite": "texte"
+    }
+  ]
+}
