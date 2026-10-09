@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from gestion_mp_pro.calcul.controles import controler
+from gestion_mp_pro.calcul.pilotage import cockpit
 from gestion_mp_pro.calcul.stock import etat_stock
 from gestion_mp_pro.db import fabrique as fabrique_de_sessions
 from gestion_mp_pro.modeles import Matiere
@@ -168,3 +169,22 @@ def test_l_approbation_date_le_bon_du_jour_d_envoi_saisi(
         assert "futur" in geste(direction, b, "approuver", 422, date=j(1))["detail"]
         b = geste(direction, b, "approuver", date=j(-1))
         assert b["date_commande"] == j(-1) and b["numero"]
+
+
+def test_le_cockpit_compte_les_bons_partis_sans_prix_au_prix_du_catalogue(
+    achats: TestClient, mad: Achat
+) -> None:
+    """Hérité : test_audit2_achats::test_le_cockpit_compte_les_bons_partis_sans_prix_au_prix_du_catalogue
+    (le cockpit lu par le moteur sur ce que le chargeur rend des bons ; sa route est au lot D8)."""  # noqa: E501
+
+    def engage() -> tuple[float, float]:
+        with fabrique_de_sessions()() as s:
+            d = donnees_moteur.charger_au(s, JOUR)
+            achat = cockpit(d, JOUR, etat_stock(d, JOUR), meme_couleur=True).achats
+            return achat.montant_bc_en_cours_mad, achat.montant_bc_estime_mad
+
+    avant = engage()
+    geste(achats, bon(achats, mad, {mad.matiere("COCKPIT"): 100}), "envoyer")  # 10 MAD le kilo
+    apres = engage()
+    assert apres[0] - avant[0] == pytest.approx(1000)
+    assert apres[1] - avant[1] == pytest.approx(1000)

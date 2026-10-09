@@ -303,3 +303,16 @@ def test_la_liste_des_bons_compte_tout_en_kilos(achats: TestClient, mad: Achat) 
     recevoir(b["lignes"][0]["id"], 1000)
     b = fiche(achats, b["id"])
     assert b["recu"] == 1000 and b["part_livree"] == pytest.approx(1000 / 1300)
+
+
+def test_un_numero_n_est_pris_qu_a_l_envoi_et_sans_trou(achats: TestClient, mad: Achat) -> None:
+    """M65 : un brouillon n'a pas de numéro ; un envoi refusé n'en consomme pas ; le suivant
+    suit le dernier donné, et un brouillon supprimé ne laisse aucun trou."""
+    m = mad.matiere("M65")
+    premier = geste(achats, bon(achats, mad, {m: 10}), "envoyer")["numero"]
+    jete = bon(achats, mad, {m: 10})
+    ok(achats.delete(f"/api/commandes/{jete['id']}", params={"version": jete["version"]}), 204)
+    b = bon(achats, mad, {m: 10})
+    geste(achats, b, "envoyer", 422, date=j(1))
+    second = geste(achats, b, "envoyer")["numero"]
+    assert int(second.rsplit("-", 1)[1]) == int(premier.rsplit("-", 1)[1]) + 1
