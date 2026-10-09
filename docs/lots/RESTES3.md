@@ -27,9 +27,9 @@ MP) ; la parité unitaire le fait par `tests/moteur/jeux_outils.comme_gestion_mp
 
 ### 1.2 Stock, lots, traçabilité (S4)
 
-- **103/104** `/stock?date=` passé : `stock_machine`, `valeur_machine_mad`, `sur_les_metiers`
-  comptent le fil monté **de ce soir-là** (même chiffre que la Valorisation 210 ; avant : 0) ;
-  chaque ligne + `role_id`, `fournisseur_id` ; `EtatStock.magasin_ids` {code → id}
+- **103/104** `/stock?date=` passé : le fil monté de ce soir-là est compté — fait par le lot V2
+  (`pilotage_machine.au_soir`, gardé à la fusion) ; `test_restes3_stock` le prouve aussi (même
+  chiffre que la Valorisation). Chaque ligne + `role_id`, `fournisseur_id` ; `EtatStock.magasin_ids` {code → id}
   (`par_magasin` reste indexé par code).
 - **105, 108** `MouvementLigne.devise` : `string | null` — `null` hors direction et achats.
 - **112** `Tracabilite` + `matiere_id`, `ordre_id` ; `EtapeTracee` + `matiere_id`, `ordre_id`,

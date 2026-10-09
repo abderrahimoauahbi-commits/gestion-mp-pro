@@ -69,7 +69,8 @@ def valeurs(sql: str) -> dict[Any, Any]:
 
 
 def test_mouvements(reprise: tuple[Resultat, Path]) -> None:
-    # Prix gardé sur les entrées seulement ; cours 0 ou MAD → NULL ; quantité au gramme.
+    # Prix gardé sur les entrées seulement ; MAD → NULL ; quantité au gramme. Une entrée en
+    # devise sans cours prend le cours du jour de la reprise (lot V2 : V3, V4).
     m = {
         r[0]: r
         for r in lire(
@@ -79,7 +80,7 @@ def test_mouvements(reprise: tuple[Resultat, Path]) -> None:
     }
     assert m[4][1] == 0 and m[5][1] == 0 and m[7][1] == 0  # sortie, annulation, transfert
     assert m[2][1] == Decimal("2.500000") and m[2][2] == Decimal("9.500000")
-    assert m[3][2] is None and m[1][2] is None
+    assert m[3][2] == Decimal("11.000000") and m[1][2] is None
     assert m[2][9] == Decimal("1000.000")
     # Entrée sans document_id : sa réception retrouvée par (lot, date) ; sortie → ordre.
     assert m[2][3] == "reception" and m[2][4] == 1

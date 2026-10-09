@@ -1,0 +1,47 @@
+Gestion MP PRO — scénario de bout en bout : un mois d'usine (novembre 2026)
+Joué le 2026-10-09 14:12 · commit 5be65d1 · version complète
+Base : copie de gestion_mp_comparaison reprise par R1 (9473 car. de rapport)
+Empreintes de gestion_mp et gestion_mp_comparaison avant/après : identiques
+Serveur : http://127.0.0.1:8231 · 281 appels HTTP · durée 75.4 s
+
+✓   0 Direction, achats — comptes, réglages, cours, fiches du mois — 63 vérifications (2.1 s)
+✓   1 Direction — révise le plan d'une qualité au 10 du mois — 21 vérifications (1.0 s)
+✓   2 Achats — lit le plan d'achat, prépare le bon depuis la proposition — 58 vérifications (0.5 s)
+✓   3 Achats, direction — bon au-dessus du seuil : renvoyé, approuvé — 16 vérifications (0.5 s)
+✓   4 Achats — imprime le bon fournisseur (A4, anglais, sans prix) — 32 vérifications (0.1 s)
+✓   5 Achats, direction — prix confirmés en deux fois, cours changé — 20 vérifications (0.2 s)
+✓   6 Achats — jalons d'expédition — 11 vérifications (0.1 s)
+✓   7 Achats — un camion de deux bons en deux devises — 52 vérifications (1.0 s)
+✓   8 Achats — libère la quarantaine — 11 vérifications (0.4 s)
+✓   9 Achats — facture, dossier d'importation, frais, clôture — 51 vérifications (0.5 s)
+✓  11 Alimentation — ordre de deux qualités (FIFO, bobines, palette) — 32 vérifications (1.5 s)
+✓  10 Alimentation — monte un fil sur le métier — 13 vérifications (0.5 s)
+✓  12 Alimentation — retour des machines (bobines) — 11 vérifications (1.4 s)
+✓  13 Alimentation — sorties refusées : quarantaine, date d'avant le lot — 10 vérifications (0.5 s)
+✓  14 Achats — retour au fournisseur d'une partie d'un lot — 13 vérifications (0.8 s)
+✓  16 Achats, direction — inventaire d'un magasin avec recomptage — 16 vérifications (2.0 s)
+✓  17 Alimentation — annule un ordre qui a eu un retour — 8 vérifications (1.0 s)
+✓  15 Achats — réclamation, de l'ouverture à l'avoir — 9 vérifications (0.0 s)
+✓  18 Achats — règle des factures et des frais — 28 vérifications (0.2 s)
+✓  19 Direction — clôt la période à la fin du mois — 10 vérifications (1.0 s)
+✓  20 Direction — bilan du mois, Cockpit, photo, courriel — 31 vérifications (1.0 s)
+✓  21 Direction — contrôles — 29 vérifications (0.3 s)
+✓ 22b Administrateur — sauvegarde et restauration — 7 vérifications (2.5 s)
+✓  22 Vérification indépendante des chiffres (V1) : 0 écart — 1 vérifications (36.7 s)
+✓  23 Parité dynamique — le même mois rejoué dans Gestion MP — 108 vérifications (11.9 s)
+
+Étapes réussies : 25/25
+Valeurs vérifiées : 661 (cible ≥ 400)
+Écarts : 0
+
+Notes :
+  - Coût de revient au kilo (dossier USD) : IST-1101 34.135535 MAD/kg, IST-1102 34.135535 MAD/kg, IST-2201 36.377904 MAD/kg
+  - Brouillon de réception 316 de l'année d'essai supprimé avant la clôture.
+  - Brouillon d'ordre 320 de l'année d'essai supprimé avant la clôture.
+  - Contrôle C06 (avertissement) : 31 → 55 (24 lignes nouvelles)
+  - Contrôle C08 (avertissement) : 0 → 1 (1 lignes nouvelles)
+  - Contrôle C19 (information) : 1 → 2 (1 lignes nouvelles)
+  - Contrôle C33 (information) : 91 → 92 (1 lignes nouvelles)
+  - Contrôle C36 (avertissement) : 1 → 2 (1 lignes nouvelles)
+  - Vérificateur (V1) sur la base du scénario : Total : 161964 vérifications, 36 familles, 0 écart(s).
+  - Parité dynamique : Gestion MP c1133ba rejoué sur sa copie, 89 appels.

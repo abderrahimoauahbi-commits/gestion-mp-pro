@@ -25,9 +25,8 @@ from gestion_mp_pro.calcul.stock import LigneStock, etat_stock, fils_en_machine
 from gestion_mp_pro.calcul.valorisation import cmup_par_reference
 from gestion_mp_pro.modeles import Magasin, Matiere
 from gestion_mp_pro.modeles.recherche import normaliser
-from gestion_mp_pro.services import donnees_moteur
+from gestion_mp_pro.services import pilotage_machine
 from gestion_mp_pro.services.lots import FiltresLots, LotSolde, lister
-from gestion_mp_pro.services.pilotage_machine import avec_montage
 
 CONSEIL_D_ACHAT = (
     "quantite_a_commander", "quantite_a_commander_achat", "quantite_theorique",
@@ -88,9 +87,8 @@ def _ligne(x: LigneStock, ids: Ids, couts: dict[str, float], conseil: bool) -> d
 
 
 def etat(s: Session, jour: date, q: str = "", conseil: bool = True) -> EtatStock:
-    """Route 103 : l'état du stock au soir du `jour` ; `q` : tous les mots, sans accents. Le
-    fil monté est celui de ce soir-là (`pilotage_machine`) : même chiffre que la Valorisation."""
-    d = avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
+    """Route 103 : l'état du stock au soir du `jour` ; `q` : tous les mots, sans accents."""
+    d = pilotage_machine.au_soir(s, jour)
     lignes, couts = _lignes(d, jour)
     mots = normaliser(q).split()
     if mots:
@@ -158,7 +156,7 @@ def fiche_matiere(
     m = s.get(Matiere, matiere_id)
     if m is None:
         raise Refus.introuvable("Matière introuvable.")
-    d = avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
+    d = pilotage_machine.au_soir(s, jour)
     lignes, couts = _lignes(d, jour)
     ligne = next(x for x in lignes if x.reference == m.reference)
     ids = Ids({m.reference: (m.id, m.role_id, m.fournisseur_id)})
