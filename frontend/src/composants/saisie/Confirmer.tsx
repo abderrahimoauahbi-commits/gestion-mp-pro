@@ -3,7 +3,8 @@
  * Oui, … » là où l'on a cliqué — jamais de boîte du navigateur. La question dit l'effet
  * (« Sortir 445,4 kg de Morocco pour FB + MF, daté d'hier 03/10 ? »). Un motif se saisit dans la
  * confirmation quand il est demandé (`motif`), et « Oui » reste grisé tant qu'un motif exigé
- * manque. Pendant l'envoi, « Oui » est occupé ; un refus du serveur est dit par `Messages` et la
+ * manque ou reste plus court que `motifMin` (« un motif de 3 caractères au moins » : le serveur
+ * n'a pas à le refuser après coup, A8). Pendant l'envoi, « Oui » est occupé ; un refus du serveur est dit par `Messages` et la
  * confirmation reste ouverte. Échap revient au bouton (sans fermer la fenêtre autour).
  *
  * Le bouton de départ accepte les raisons de `Bouton` (`manque`, `blocages`, `grise`).
@@ -26,25 +27,49 @@ export interface ConfirmerProps extends Pick<
   oui: string
   onOui: (motif: string) => unknown
   motif?: 'facultatif' | 'exige'
+  /** La longueur la plus courte d'un motif exigé (celle du serveur) ; 1 par défaut. */
+  motifMin?: number
+  /** Le nom du champ du motif (« Motif du renvoi aux achats ») ; « Motif (obligatoire) » sinon. */
+  libelleMotif?: string
+  /** L'exemple écrit dans le champ du motif. */
+  exempleMotif?: string
+  /** La longueur la plus longue du motif (celle du serveur) ; 500 par défaut. */
+  motifMax?: number
   variante?: 'neutre' | 'principal' | 'danger'
   taille?: 'normal' | 'petit' | 'atelier'
   attente?: string
 }
 
+/** Le motif le plus court des routes qui en exigent un vrai (`MOTIF_MIN` du serveur : 3). */
+export const MOTIF_MIN = 3
+
+/** Ce qui manque au motif exigé : rien, « le motif », ou « un motif de N caractères au moins ». */
+export function manqueMotif(texte: string, min = 1): string[] {
+  const longueur = texte.trim().length
+  if (longueur >= Math.max(1, min)) return []
+  return min > 1 ? [`un motif de ${min} caractères au moins`] : ['le motif']
+}
+
 /** Le motif saisi dans la confirmation (obligatoire ou facultatif, dit dans son nom). */
 function ChampMotif({
-  motif,
+  props,
   valeur,
   onChange,
 }: {
-  motif: 'facultatif' | 'exige'
+  props: ConfirmerProps
   valeur: string
   onChange: (v: string) => void
 }) {
-  const nom = motif === 'exige' ? 'Motif (obligatoire)' : 'Motif (facultatif)'
+  const nom = props.libelleMotif ?? (props.motif === 'exige' ? 'Motif (obligatoire)' : 'Motif (facultatif)')
   return (
     <span className={styles.motif}>
-      <Saisie valeur={valeur} onChange={onChange} libelle={nom} placeholder={nom} max={500} />
+      <Saisie
+        valeur={valeur}
+        onChange={onChange}
+        libelle={nom}
+        placeholder={props.exempleMotif ?? nom}
+        max={props.motifMax ?? 500}
+      />
     </span>
   )
 }
@@ -94,14 +119,14 @@ export function Confirmer(props: ConfirmerProps) {
       onKeyDown={(e) => echapper(e, fermer)}
     >
       <span className={styles.question}>{question}</span>
-      {motif ? <ChampMotif motif={motif} valeur={texte} onChange={setTexte} /> : null}
+      {motif ? <ChampMotif props={props} valeur={texte} onChange={setTexte} /> : null}
       <Bouton taille={taille} onClick={fermer}>
         Non
       </Bouton>
       <Bouton
         taille={taille}
         variante={variante === 'neutre' ? 'principal' : variante}
-        manque={motif === 'exige' && !texte.trim() ? ['le motif'] : undefined}
+        manque={motif === 'exige' ? manqueMotif(texte, props.motifMin) : undefined}
         attente={attente ?? 'Envoi…'}
         onClick={async () => {
           await onOui(texte.trim())

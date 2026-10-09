@@ -27,6 +27,7 @@ from gestion_mp_pro.reprise import (
     compteurs,
     ecriture,
     pieces,
+    scission,
     vidage,
 )
 from gestion_mp_pro.reprise import journal_en_tables as jt
@@ -110,6 +111,7 @@ def construire(ctx: Contexte, j: jt.Journal, comptes_sources: dict[int, int]) ->
     activite_stock.mouvements(ctx, sortie)
     activite_importations.dossiers(ctx, j, sortie)
     activite_achats.reclamations(ctx, sortie)
+    scission.scinder(ctx, sortie)
     activite_production.signalements(ctx, comptes_sources, sortie)
     activite_production.indicateurs(ctx, sortie)
     sortie["compteur"] = compteurs.compteurs(ctx, sortie)
@@ -173,9 +175,9 @@ def ecrire(ctx: Contexte, lignes: Lignes, remplacer: bool) -> None:
             _versions(ctx, lignes[nom])
         else:
             ecriture.inserer(ctx, nom, lignes.get(nom, []))
-    ecriture.oublier(ctx, set(SOURCES.values()) - {"piece_jointe"})
+    ecriture.oublier(ctx, (set(SOURCES.values()) - {"piece_jointe"}) | {scission.TABLE_SOURCE})
     notes = [
-        (SOURCES[nom], int(v["id"]), nom, int(v["id"]), empreinte(v))
+        (_source(ctx, nom, v), int(v["id"]), nom, int(v["id"]), empreinte(v))
         for nom in ORDRE
         if nom in SOURCES and nom != "piece_jointe"
         for v in lignes.get(nom, [])
@@ -187,6 +189,13 @@ def ecrire(ctx: Contexte, lignes: Lignes, remplacer: bool) -> None:
     ecriture.noter(ctx, notes)
     for nom in ORDRE:
         ctx.compter(nom, "lues", len(lignes.get(nom, [])))
+
+
+def _source(ctx: Contexte, nom: str, v: dict[str, Any]) -> str:
+    """La table source d'une ligne écrite (une réception née d'une scission n'en a pas)."""
+    if nom == "reception" and v["id"] in ctx.scindees:
+        return scission.TABLE_SOURCE
+    return SOURCES[nom]
 
 
 def _versions(ctx: Contexte, versions: list[dict[str, Any]]) -> None:

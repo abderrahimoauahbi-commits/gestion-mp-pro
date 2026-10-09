@@ -5,10 +5,15 @@
  * l'adresse (`?onglet=`, `useOngletAdresse` de `lib/adresse.ts`) : la page le passe en `actif`.
  *
  * Clavier (motif ARIA des onglets) : ← → passent d'un onglet à l'autre, Début et Fin aux bouts.
+ *
+ * `garde` : changer d'onglet perd la saisie en cours (l'onglet la tient, la page ne la garde pas) ;
+ * tant qu'une saisie est en cours, le changement demande d'abord « Des modifications ne sont pas
+ * enregistrées. Les abandonner ? » (`proteger`, la même question que la garde de navigation).
  */
 import { useRef, type KeyboardEvent, type ReactNode } from 'react'
 
 import { nombre } from '../../lib/format'
+import { proteger } from '../coque/garde'
 import { classes } from './classes'
 import styles from './Onglets.module.css'
 
@@ -71,6 +76,7 @@ export function Onglets<T extends string>({
   onChange,
   libelle = 'Onglets',
   apres,
+  garde = false,
 }: {
   onglets: readonly Onglet<T>[]
   actif: T
@@ -78,15 +84,21 @@ export function Onglets<T extends string>({
   libelle?: string
   /** Ce qui suit la rangée à droite (une bascule, un bouton). */
   apres?: ReactNode
+  /** Changer d'onglet perd la saisie en cours : le demander d'abord. */
+  garde?: boolean
 }) {
   const rangee = useRef<HTMLDivElement>(null)
+  const changer = (cle: T) => {
+    if (garde && cle !== actif) proteger(() => onChange(cle))
+    else onChange(cle)
+  }
   const clavier = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const cible = ongletVise(e.key, i, onglets.length - 1)
     if (cible == null) return
     e.preventDefault()
     const o = onglets[cible]
     if (!o) return
-    onChange(o.cle)
+    changer(o.cle)
     rangee.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[cible]?.focus()
   }
   return (
@@ -99,7 +111,7 @@ export function Onglets<T extends string>({
               key={o.cle}
               onglet={o}
               choisi={choisi}
-              onClick={() => onChange(o.cle)}
+              onClick={() => changer(o.cle)}
               onKeyDown={(e) => clavier(e, i)}
             />
           )

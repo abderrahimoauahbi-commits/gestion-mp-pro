@@ -199,11 +199,3 @@
   padding: 0;
   list-style: none;
 }
-
-.imprimer a {
-  justify-content: center;
-  width: 100%;
-  height: auto;
-  min-height: var(--champ-atelier);
-  font-size: 15px;
-}

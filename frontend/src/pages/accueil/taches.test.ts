@@ -16,6 +16,7 @@ import reclamationsJson from './essais/reclamations.json'
 import signalementsJson from './essais/signalements.json'
 import {
   arriveesSemaine,
+  retardsDe,
   besoinsTries,
   brouillonsVisibles,
   quelques,
@@ -162,26 +163,28 @@ describe('« À valider »', () => {
   })
 })
 
-describe('Arrivées attendues dans les 7 jours', () => {
-  it('bons partis, ni soldés ni annulés, d’hier à J+7, le plus proche d’abord', () => {
+describe('Arrivées attendues dans les 7 jours, retards', () => {
+  it('les arrivées sont celles que le serveur date sous 7 jours, la plus proche d’abord', () => {
     const base = commandes.find((c) => c.parti && c.statut !== 'annulee')!
-    const bon = (id: number, prevue: string, autres: Partial<CommandeResume> = {}): CommandeResume => ({
+    const bon = (id: number, arrivee: string | null, sous7: boolean): CommandeResume => ({
       ...base,
       id,
-      date_livraison_prevue: prevue,
-      expedition: { ...base.expedition, eta: null },
-      ...autres,
+      arrivee_attendue: arrivee,
+      arrivee_sous_7_jours: sous7,
     })
     const liste = [
-      bon(1, '2026-10-12'),
-      bon(2, '2026-10-07'),
-      bon(3, '2026-10-06'),
-      bon(4, '2026-10-16'),
-      bon(5, '2026-10-15'),
-      bon(6, '2026-10-09', { statut: 'soldee' }),
-      bon(7, '2026-10-09', { parti: false }),
-      bon(8, '2026-10-30', { expedition: { ...base.expedition, eta: '2026-10-10' } }),
+      bon(1, '2026-10-12', true),
+      bon(2, '2026-10-07', true),
+      bon(3, '2026-10-06', false),
+      bon(5, '2026-10-15', true),
+      // Une date dans la semaine que le serveur n'a pas retenue (bon soldé…) : l'écran ne la reprend pas.
+      bon(6, '2026-10-09', false),
+      bon(8, '2026-10-10', true),
     ]
-    expect(arriveesSemaine(liste, '2026-10-08').map((c) => c.id)).toEqual([2, 8, 1, 5])
+    expect(arriveesSemaine(liste).map((c) => c.id)).toEqual([2, 8, 1, 5])
+  })
+
+  it('les retards sont les bons que le serveur dit en retard', () => {
+    expect(retardsDe(commandes).map((c) => c.id)).toEqual(retards.map((c) => c.id))
   })
 })

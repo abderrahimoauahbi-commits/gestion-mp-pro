@@ -3,7 +3,7 @@
  * à approuver (« Examiner » ouvre la fiche `/commandes/{id}`), puis tout ce qui attend une action,
  * chacun avec son lien ; un besoin signalé se traite sur place (`/cockpit?signalement=ID`).
  */
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 
 import { Carte } from '../../composants/mise-en-page/Carte'
 import { Note } from '../../composants/retour/Note'
@@ -119,9 +119,11 @@ export function OngletAFaire({
 }) {
   const { role } = useSession()
   const navigate = useNavigate()
+  const { pathname, search } = useLocation()
+  // La fiche, fermée, ramène ici (ECRANS-PRO : « fermer revient au Cockpit »).
   const fiche = (c: CommandeResume) => {
     const vers = siPermis(role, `/commandes/${c.id}`)
-    if (vers) navigate(vers)
+    if (vers) navigate(vers, { state: { retour: `${pathname}${search}` } })
   }
   const toutes = siPermis(role, '/commandes?onglet=a_approuver')
   return (

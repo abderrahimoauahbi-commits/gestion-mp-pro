@@ -45,13 +45,15 @@ const HISTORIQUE = [
   },
 ]
 
+// La forme de la route 111 (`LotDisponible`), dans l'ordre FIFO, hors quarantaine.
 const LOTS = Array.from({ length: 8 }, (_, i) => ({
-  id: 100 + i,
-  numero: `LOT-2026-${String(40 + i).padStart(4, '0')}`,
-  reste_kg: 120.5 + i * 37.25,
-  date_entree: ajouterJours(aujourdhui(), -60 + i * 7),
+  lot_id: 100 + i,
+  lot: `LOT-2026-${String(40 + i).padStart(4, '0')}`,
+  magasin_id: 1,
   magasin: 'Principal',
-  quarantaine: i === 3,
+  quantite: 120.5 + i * 37.25,
+  entre_le: ajouterJours(aujourdhui(), -60 + i * 7),
+  poids_bobine: 5,
 }))
 
 function repondre(chemin: string): unknown {

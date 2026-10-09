@@ -17,6 +17,7 @@ import { api } from '../../lib/api'
 import { nombre } from '../../lib/format'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
+import { statut } from '../../lib/statuts'
 import {
   changer as changerBrouillon,
   corpsComptages,
@@ -30,7 +31,7 @@ import { GestesComptage } from './GestesComptage'
 import { IndicateursComptage } from './IndicateursComptage'
 import { VoletsComptage } from './LotsACompter'
 import { LotTrouve } from './LotTrouve'
-import { statutInventaire, type InventaireFiche } from './types'
+import { type InventaireFiche } from './types'
 
 /** Les écritures de la fenêtre : enregistrer, valider (après avoir enregistré), abandonner, annuler. */
 function useGestes(fiche: InventaireFiche, brouillons: Brouillons, oublier: (envoyes: Brouillons) => void) {
@@ -93,7 +94,7 @@ function FicheComptage({ fiche, onFermer }: { fiche: InventaireFiche; onFermer: 
   const gestes = useGestes(fiche, brouillons, oublier)
   const directionOuAchats = role === 'direction' || role === 'achats'
   const saisie = fiche.statut === 'ouvert' && directionOuAchats
-  const statut = statutInventaire(fiche.statut)
+  const etat = statut('inventaire', fiche.statut)
   return (
     <Fenetre
       taille="tresLarge"
@@ -102,7 +103,7 @@ function FicheComptage({ fiche, onFermer }: { fiche: InventaireFiche; onFermer: 
       titre={
         <>
           {fiche.numero} · {fiche.libelle}{' '}
-          <Badge ton={statut.ton}>{enTeteDeFiche.badge(fiche, statut.libelle)}</Badge>
+          <Badge ton={etat.ton}>{enTeteDeFiche.badge(fiche, etat.libelle)}</Badge>
         </>
       }
       sous={enTeteDeFiche.ligne(fiche)}

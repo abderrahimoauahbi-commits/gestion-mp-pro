@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { creerClientRequetes } from '../../lib/requetes'
 import { Messages } from '../retour/Messages'
-import { PiecesJointes, refusAvantEnvoi, tailleLisible, TAILLE_MAX } from './PiecesJointes'
+import { PiecesJointes, refusAvantEnvoi, tailleLisible, TAILLE_MAX, type ModePieces } from './PiecesJointes'
 
 const PIECES = [
   { id: 5, nom: 'facture.pdf', genre: 'PDF', taille: 254_000, par: 'Karim', joint_le: '2026-10-07T14:05:00' },
@@ -25,12 +25,12 @@ function serveur() {
   return appels
 }
 
-function monter(lectureSeule = false) {
+function monter(lectureSeule = false, mode?: ModePieces) {
   render(
     <QueryClientProvider client={creerClientRequetes({ delaiRelance: 0 })}>
       <MemoryRouter>
         <Messages />
-        <PiecesJointes objet="commande" id={12} lectureSeule={lectureSeule} />
+        <PiecesJointes objet="commande" id={12} lectureSeule={lectureSeule} mode={mode} />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -86,6 +86,14 @@ describe('PiecesJointes', () => {
     monter(true)
     await screen.findByRole('link', { name: 'facture.pdf' })
     expect(screen.queryByText('Joindre un document…')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Retirer' })).toBeNull()
+  })
+
+  it('« joindre seulement » (dossier clos) : on joint, rien ne se retire', async () => {
+    serveur()
+    monter(false, 'joindre')
+    await screen.findByRole('link', { name: 'facture.pdf' })
+    expect(screen.getByText('Joindre un document…')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Retirer' })).toBeNull()
   })
 

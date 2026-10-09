@@ -97,7 +97,14 @@ def test_mouvements(reprise: tuple[Resultat, Path]) -> None:
 
 def test_lots_soldes_et_documents(reprise: tuple[Resultat, Path]) -> None:
     lots = valeurs("SELECT numero, interne FROM lot")
-    assert lots == {"L_001": False, "LOT-2026-0001": True, "J-1": False}
+    assert lots == {
+        "L_001": False,
+        "LOT-2026-0001": True,
+        "J-1": False,
+        "L-004": False,
+        "L-005": False,
+        "L-006": False,
+    }
     assert un("SELECT poids_bobine_le FROM lot WHERE id = 1") == dt.date(2026, 9, 3)
     soldes = {(a, b): q for a, b, q in lire("SELECT lot_id, magasin_id, quantite FROM solde")}
     assert soldes == {
@@ -105,6 +112,9 @@ def test_lots_soldes_et_documents(reprise: tuple[Resultat, Path]) -> None:
         (2, 1): Decimal("100.000"),
         (3, 1): Decimal("130.000"),
         (3, 2): Decimal("45.000"),
+        (4, 1): Decimal("40.000"),
+        (5, 1): Decimal("30.000"),
+        (6, 1): Decimal("20.000"),
     }
     # Brouillons numérotés : numéro retiré, gardé au compteur.
     assert un("SELECT numero FROM commande WHERE id = 3") is None
@@ -137,11 +147,12 @@ def test_achats_et_receptions(reprise: tuple[Resultat, Path]) -> None:
     assert un("SELECT montant FROM facture WHERE id = 2") is None
     r2 = lire("SELECT annulation_motif, annulee_le IS NOT NULL FROM reception WHERE id = 2")[0]
     assert r2 == ("camion refusé", True)
-    assert un("SELECT devise FROM reception WHERE id = 1") == "USD"
-    assert "lignes en EUR, USD" in reprise[0].rapport
     rl = lire("SELECT lot_interne, lot_numero FROM reception_ligne WHERE id = 2")[0]
     assert rl == (True, "")
-    assert lire("SELECT motif, issue FROM reclamation") == [("quantite_manquante", "avoir")]
+    assert lire("SELECT motif, issue FROM reclamation ORDER BY id") == [
+        ("quantite_manquante", "avoir"),
+        ("qualite", None),
+    ]
 
 
 def test_importations(reprise: tuple[Resultat, Path]) -> None:
@@ -279,10 +290,10 @@ def _outil() -> Any:
 def test_vider_l_activite_garde_les_referentiels(puis_reprendre: tuple[Resultat, Path]) -> None:
     outil = _outil()
     assert outil.main(["--base", CIBLE]) == 2  # sans confirmation, rien
-    assert un("SELECT count(*) FROM mouvement") == 11
+    assert un("SELECT count(*) FROM mouvement") == 14
     matieres = lire("SELECT * FROM matiere ORDER BY id")
     retirees = outil.vider_la_base(CIBLE, sauvegarder=False)
-    assert retirees["mouvement"] == 11 and retirees["piece_jointe"] == 1
+    assert retirees["mouvement"] == 14 and retirees["piece_jointe"] == 1
     for table in tables_d_activite():
         assert un(f"SELECT count(*) FROM {table}") == 0  # noqa: S608
     assert lire("SELECT * FROM matiere ORDER BY id") == matieres
@@ -290,7 +301,7 @@ def test_vider_l_activite_garde_les_referentiels(puis_reprendre: tuple[Resultat,
     assert un("SELECT count(*) FROM plan_version") == 2
     assert un("SELECT count(*) FROM journal WHERE action = 'activité vidée'") == 1
     prochain = un("SELECT nextval(pg_get_serial_sequence('mouvement', 'id'))")
-    assert prochain > 11  # les identifiants ne repartent pas à 1
+    assert prochain > 14  # les identifiants ne repartent pas à 1
 
 
 def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(

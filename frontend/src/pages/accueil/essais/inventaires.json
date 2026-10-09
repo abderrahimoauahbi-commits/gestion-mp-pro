@@ -36,6 +36,7 @@
     "ecart_absolu": 0.0,
     "ecart_valeur_mad": 0.0,
     "ecart_valeur_absolue_mad": 0.0,
-    "version": 1
+    "version": 1,
+    "abandon_motif": ""
   }
 ]

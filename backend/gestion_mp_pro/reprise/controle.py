@@ -101,9 +101,11 @@ def comptes(ctx: Contexte, referentiels: bool, activite: bool) -> Verdict:
     for source, cible in paires:
         n_source, n_cible = len(ctx.photo.lignes(source)), _compte(ctx, cible)
         ecartees = ctx.comptes[cible]["ecartees"] if cible in ctx.comptes else 0
-        egal = n_source - ecartees == n_cible
+        scindees = ctx.comptes[cible]["scindees"] if cible in ctx.comptes else 0
+        egal = n_source - ecartees + scindees == n_cible
         v.tenu &= egal
         note = f" (dont {ecartees} écartées, signalées)" if ecartees else ""
+        note += f" (dont {scindees} nées d'une scission, signalées)" if scindees else ""
         signe = "=" if egal else "ÉCART"
         v.lignes.append(f"{source:<20} {n_source:>7} → {cible:<20} {n_cible:>7}  {signe}{note}")
     repris = len(ctx.photo.lignes("journal"))
@@ -192,11 +194,13 @@ def soldes(ctx: Contexte) -> Verdict:
 
 
 def numeros(ctx: Contexte) -> Verdict:
-    """Mêmes numéros de documents (hors numéros retirés aux brouillons, signalés)."""
+    """Mêmes numéros de documents (hors numéros retirés aux brouillons, plus ceux des
+    réceptions scindées : signalés)."""
     v = Verdict("Mêmes numéros de documents")
     for source, cible in NUMEROTES:
         attendus = {x["numero"] for x in ctx.photo.lignes(source) if x.get("numero")}
         attendus -= set(ctx.numeros_retires.get(cible, []))
+        attendus |= set(ctx.numeros_ajoutes.get(cible, []))
         if source == "dossier":
             attendus = {n if "/" in n else f"ANC-{n}" for n in attendus}
         sql = f"SELECT numero FROM {cible} WHERE numero IS NOT NULL"  # noqa: S608

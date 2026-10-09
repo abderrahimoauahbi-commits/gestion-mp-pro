@@ -47,8 +47,18 @@ class Ligne:
     id_source: int
 
 
-COMPTES = ("lues", "creees", "mises_a_jour", "sautees", "signalees", "supprimees", "ecartees")
-"""« écartées » : lignes sources non reprises ou fusionnées (signalées), hors du compte attendu."""
+COMPTES = (
+    "lues",
+    "creees",
+    "mises_a_jour",
+    "sautees",
+    "signalees",
+    "supprimees",
+    "ecartees",
+    "scindees",
+)
+"""« écartées » : lignes sources non reprises ou fusionnées (signalées), hors du compte attendu ;
+« scindées » : lignes nées d'une scission (réception en deux devises), en plus du compte."""
 
 
 @dataclass
@@ -67,6 +77,10 @@ class Contexte:
     empreintes_activite: dict[str, Any] = field(default_factory=dict)
     numeros_retires: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
     activite_reprise: bool = False
+    scindees: dict[int, int] = field(default_factory=dict)
+    """Réception née d'une scission → réception d'origine (identifiants PRO)."""
+    numeros_ajoutes: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
+    """Numéros sans équivalent dans la source (réceptions scindées), par table PRO."""
 
     def compter(self, table: str, quoi: str, n: int = 1) -> None:
         """Ajoute `n` au compte `quoi` de la table."""

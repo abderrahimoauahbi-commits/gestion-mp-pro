@@ -10,14 +10,30 @@
   justify-content: center;
   gap: 4px;
   min-width: var(--cible-tactile);
-  min-height: 84px;
-  padding: var(--espace-3);
+  min-height: 72px;
+  padding: var(--espace-2) var(--espace-3);
   border: 1px solid var(--bord);
   border-left: var(--filet-ton) solid var(--accent);
   border-radius: var(--rayon);
   background: var(--surface);
   box-shadow: var(--ombre);
   color: var(--texte);
+}
+
+.principale {
+  grid-column: 1 / -1;
+  min-height: 60px;
+}
+
+/* L'icône à côté du titre : la tuile garde sa hauteur pour le détail. */
+.tete {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espace-2);
+}
+
+.tete svg {
+  flex: none;
 }
 
 .tuile:hover {

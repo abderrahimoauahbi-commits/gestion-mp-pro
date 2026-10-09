@@ -214,29 +214,29 @@ def _chaine_en_base(bases: pb.Bases, dossier: Path, ouverts: list[Ouvert]) -> di
 
 
 def verifier_devises(r: Resultat, gmp: list[dict[str, Any]], pro: list[dict[str, Any]]) -> None:
-    """La devise des lignes de Gestion MP (une par ligne) contre celle de l'en-tête de PRO (une
-    par réception, I35) : égales, sauf sur une réception payée en deux devises (K8b, prouvée
-    par la chaîne en base : l'en-tête de PRO y est la devise de la facture)."""
-    fiches = {x["id"]: x for x in pro}
+    """La devise de chaque ligne de Gestion MP (une par ligne) contre celle de l'en-tête de la
+    réception de PRO qui porte cette ligne (une devise par réception, I35) : égales partout,
+    réceptions payées en deux devises comprises (scindées, K8b). Une ligne d'une réception
+    lue des deux côtés mais absente de PRO est un écart à corriger."""
+    devise_de: dict[Any, str] = {}
+    for p in pro:
+        for x in p.get("lignes") or []:
+            devise_de[x["id"]] = p["devise"]
+    lues = {p["id"] for p in pro}
     for g in gmp:
-        devises = {x["devise"] for x in g["lignes"]}
-        p = fiches.get(g["id"])
+        if g["id"] not in lues:
+            continue
         for x in g["lignes"]:
             r.comparees += 1
-            if p is not None and x["devise"] != p["devise"]:
-                classe = (
-                    "K8b"
-                    if len(devises) > 1 and (g.get("facture") or {}).get("devise") == p["devise"]
-                    else None
-                )
+            if devise_de.get(x["id"]) != x["devise"]:
                 r.ecarts.append(
                     Ecart(
                         "receptions",
                         f"{g['id']} › {x['id']}",
                         "lignes/devise",
                         x["devise"],
-                        p["devise"],
-                        classe,
+                        devise_de.get(x["id"]),
+                        None,
                     )
                 )
 

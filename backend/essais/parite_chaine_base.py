@@ -56,6 +56,70 @@ def k1(c: Connection) -> dict[str, int]:
     return comptes
 
 
+def k8b(c: Connection) -> dict[str, int]:
+    """K8b : chaque réception payée en deux devises **scindée**, une par devise (R1 n° 2).
+
+    Écrit ici sans le code de la reprise : la première garde id, numéro et facture (sa devise :
+    celle de la facture, sinon la plus fréquente de ses lignes, la première à égalité) ;
+    chaque autre devise (ordre alphabétique) devient une réception `numero-2`, `-3`… sans
+    facture, d'identifiant pris après le plus grand ; ses lignes, ses entrées de stock
+    désignées (par lot) et ses réclamations de ligne la suivent."""
+    lignes = c.execute(
+        text(
+            "SELECT r.id, l.id, l.devise, l.lot_id, f.devise, fo.devise FROM reception r "
+            "JOIN reception_ligne l ON l.reception_id = r.id "
+            "LEFT JOIN facture f ON f.id = r.facture_id "
+            "JOIN fournisseur fo ON fo.id = r.fournisseur_id ORDER BY r.id, l.id"
+        )
+    ).all()
+    par_reception: dict[int, list[Any]] = {}
+    for x in lignes:
+        par_reception.setdefault(x[0], []).append(x)
+    prochain = int(c.execute(text("SELECT coalesce(max(id), 0) FROM reception")).scalar() or 0)
+    comptes = {"reception.scindee": 0, "reception_ligne.reception_id": 0}
+    for rid, xs in par_reception.items():
+        devises = [x[2] for x in xs]
+        if len(set(devises)) < 2:  # noqa: PLR2004
+            continue
+        tete = xs[0][4] or max(devises, key=lambda d: (devises.count(d), -devises.index(d)))
+        for rang, devise in enumerate(sorted(set(devises) - {tete}), start=2):
+            prochain += 1
+            _scinder(c, rid, prochain, rang, [x for x in xs if x[2] == devise])
+            comptes["reception.scindee"] += 1
+            comptes["reception_ligne.reception_id"] += sum(x[2] == devise for x in xs)
+    c.execute(
+        text("SELECT setval(pg_get_serial_sequence('reception', 'id'), max(id)) FROM reception")
+    )
+    return comptes
+
+
+def _scinder(c: Connection, rid: int, nouvelle: int, rang: int, xs: list[Any]) -> None:
+    """Une réception nouvelle (l'en-tête de `rid` sans facture) et ce qui la suit."""
+    c.execute(
+        text(
+            "INSERT INTO reception (id, numero, statut, date, fournisseur_id, numero_bl, "
+            "facture_id, observations, cree_par, cree_le, validee_par, controle_par, validee_le) "
+            "SELECT :n, numero || '-' || :rang, statut, date, fournisseur_id, numero_bl, NULL, "
+            "observations, cree_par, cree_le, validee_par, controle_par, validee_le "
+            "FROM reception WHERE id = :r"
+        ),
+        {"n": nouvelle, "rang": str(rang), "r": rid},
+    )
+    ids, lots = [x[1] for x in xs], [x[3] for x in xs if x[3] is not None]
+    p = {"n": nouvelle, "r": rid, "ids": ids, "lots": lots}
+    c.execute(text("UPDATE reception_ligne SET reception_id = :n WHERE id = ANY(:ids)"), p)
+    c.execute(
+        text(
+            "UPDATE mouvement SET document_id = :n WHERE document = 'reception' "
+            "AND document_id = :r AND lot_id = ANY(:lots)"
+        ),
+        p,
+    )
+    c.execute(
+        text("UPDATE reclamation SET reception_id = :n WHERE reception_ligne_id = ANY(:ids)"), p
+    )
+
+
 def _executer(c: Connection, nom: str, sql: str) -> dict[str, int]:
     return {nom: c.execute(text(sql)).rowcount}
 
@@ -68,14 +132,7 @@ TRADUCTIONS: dict[str, Callable[[Connection], dict[str, int]]] = {
         "UPDATE mouvement SET prix = 0 WHERE type IN ('SORTIE', 'TRANSFERT', 'RETOUR_MACHINE') "
         "AND prix <> 0",
     ),
-    "K8b": lambda c: _executer(
-        c,
-        "reception_ligne.devise",
-        "UPDATE reception_ligne l SET devise = f.devise FROM reception r JOIN facture f "
-        "ON f.id = r.facture_id WHERE r.id = l.reception_id AND l.devise <> f.devise "
-        "AND r.id IN (SELECT reception_id FROM reception_ligne GROUP BY reception_id "
-        "HAVING count(DISTINCT devise) > 1)",
-    ),
+    "K8b": k8b,
     "K8c": lambda c: _executer(
         c,
         "article.unite_achat",
@@ -109,6 +166,13 @@ TRADUCTIONS: dict[str, Callable[[Connection], dict[str, int]]] = {
         "UPDATE mouvement m SET document_id = r.id FROM reception r JOIN reception_ligne l "
         "ON l.reception_id = r.id WHERE m.document = 'reception' AND m.document_id IS NULL "
         "AND r.statut = 'validee' AND l.lot_id = m.lot_id AND r.date = m.date_effet",
+    ),
+    "K8i": lambda c: _executer(
+        c,
+        "mouvement.cours",
+        "UPDATE mouvement m SET cours = d.taux FROM devise d WHERE d.code = m.devise "
+        "AND m.devise <> 'MAD' AND m.cours = 0 AND m.prix <> 0 "
+        "AND m.type IN ('OUVERTURE', 'RECEPTION', 'RETOUR_FOURNISSEUR', 'AJUSTEMENT')",
     ),
     "K8h": lambda c: _executer(
         c,

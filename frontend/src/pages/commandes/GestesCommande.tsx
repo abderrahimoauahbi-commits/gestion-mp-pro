@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { BoutonImprimer } from '../../composants/documents/BoutonImprimer'
 import { dire } from '../../composants/retour/Messages'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Confirmer } from '../../composants/saisie/Confirmer'
+import { Confirmer, MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { DateChamp } from '../../composants/saisie/DateChamp'
 import { ExportExcel } from '../../composants/tableaux/ExportExcel'
 import { api } from '../../lib/api'
@@ -18,7 +18,6 @@ import { kg, montant } from '../../lib/format'
 import { useEcriture } from '../../lib/requetes'
 import styles from '../plan-achat/achats.module.css'
 import { useSession } from '../../lib/session'
-import { ConfirmerMotif } from './ConfirmerMotif'
 import { apresEnvoi } from './messages'
 import { raison, type CommandeFiche } from './types'
 
@@ -132,7 +131,10 @@ function Renvoyer({ c }: { c: CommandeFiche }) {
   const ecrire = useEcrireBon()
   const refus = raison(c, 'renvoyer')
   return (
-    <ConfirmerMotif
+    <Confirmer
+      motif="exige"
+      motifMin={MOTIF_MIN}
+      variante="danger"
       blocages={refus ? [refus] : undefined}
       titre={
         c.numero
@@ -141,8 +143,8 @@ function Renvoyer({ c }: { c: CommandeFiche }) {
       }
       question="Renvoyer aux achats ? Les achats liront votre motif sur le bon."
       libelleMotif="Motif du renvoi aux achats"
-      placeholder="ex. couper en deux livraisons, attendre la baisse annoncée…"
-      max={500}
+      exempleMotif="ex. couper en deux livraisons, attendre la baisse annoncée…"
+      motifMax={500}
       oui="Oui, renvoyer aux achats"
       onOui={async (motif) => {
         await ecrire.mutateAsync(() => api.post(`/commandes/${c.id}/renvoyer`, { version: c.version, motif }))
@@ -154,7 +156,7 @@ function Renvoyer({ c }: { c: CommandeFiche }) {
       }}
     >
       Renvoyer aux achats…
-    </ConfirmerMotif>
+    </Confirmer>
   )
 }
 

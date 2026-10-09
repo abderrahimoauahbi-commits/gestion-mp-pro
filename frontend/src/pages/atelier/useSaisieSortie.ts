@@ -2,28 +2,32 @@
  * La saisie d'une sortie vers les machines au téléphone (`/atelier/envoyer`) : la demande, les
  * lots, l'enregistrement. Toute la saisie est gardée sur le téléphone (`useSaisieGardee`, an. 17)
  * jusqu'à l'enregistrement ou l'abandon ; un brouillon rouvert garde la sienne sous son numéro
- * et sa version. Les disponibles sont lus **à la date de l'ordre** (an. 23).
+ * et sa version. Les disponibles sont lus **à la date de l'ordre** (an. 23). Les règles, les
+ * phrases, le corps envoyé et l'enregistrement sont ceux du moteur unique `lib/ordre.ts` (le même
+ * que le bureau) ; ce crochet ne tient que l'état du téléphone.
  */
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 
 import { saisieGardee, useSaisieGardee } from '../../composants/atelier/saisieGardee'
-import { api, messageErreur } from '../../lib/api'
+import { messageErreur } from '../../lib/api'
 import { aujourdhui } from '../../lib/heure'
 import { useLecture } from '../../lib/requetes'
 import { magasinParDefaut, useMagasins } from './commun'
 import {
+  aEnvoyer,
+  corpsOrdre,
+  demanderProposition,
   depasse,
-  kgDe,
-  lignesDuCorps,
-  priseDe,
+  enregistrerOrdre,
+  filsDe,
+  manqueBrouillon,
   priseRouverte,
-  qualitesDuCorps,
-  regrouper,
+  recalculer,
   type Fabrication,
   type Prise,
-} from './sortie'
-import type { LigneProposee, LotSolde, OrdreFiche, Proposition } from './types'
+} from '../../lib/ordre'
+import type { LigneProposee, LotSolde, OrdreFiche } from './types'
 
 export interface EtatSortie {
   id: number | null
@@ -54,8 +58,8 @@ export function etatInitial(ordre: OrdreFiche | null): EtatSortie {
     commentaire: ordre?.commentaire ?? '',
     horsRecette: ordre ? !ordre.qualites.length : false,
     fabrications: ordre?.qualites.length
-      ? ordre.qualites.map((q) => ({ qualite: q.qualite_id, m2: q.m2 }))
-      : [{ qualite: null, m2: 0 }],
+      ? ordre.qualites.map((q) => ({ qualite_id: q.qualite_id, m2: q.m2 }))
+      : [{ qualite_id: null, m2: null }],
     besoins: [],
     incompletes: [],
     blocagesServeur: [],
@@ -66,20 +70,23 @@ export function etatInitial(ordre: OrdreFiche | null): EtatSortie {
   }
 }
 
+/** La clé de la saisie gardée (« v2 » : les prises sont tenues en kilos depuis le moteur unique). */
 export const cleSaisie = (ordre: OrdreFiche | null) =>
-  ordre ? `envoyer:${ordre.id}:v${ordre.version}` : 'envoyer'
+  ordre ? `envoyer2:${ordre.id}:v${ordre.version}` : 'envoyer2'
 
 /** Le brouillon rouvert relit ce que demandent ses recettes, à sa date, sans toucher ses prises. */
 function useBesoinsRelus(e: EtatSortie, magasin: number | null, poser: (m: Partial<EtatSortie>) => void) {
   const [erreur, setErreur] = useState('')
   useEffect(() => {
     if (e.besoinsRelus || magasin == null || e.horsRecette) return
-    api
-      .post<Proposition>('/ordres/proposition', {
-        date: e.jour,
-        magasin_id: magasin,
-        qualites: qualitesDuCorps(false, e.fabrications),
-      })
+    const demande = {
+      jour: e.jour,
+      metier: null,
+      commentaire: '',
+      horsRecette: false,
+      fabrications: e.fabrications,
+    }
+    demanderProposition(demande, magasin)
       .then((r) =>
         poser({
           besoins: r.lignes,
@@ -114,15 +121,15 @@ function useCalculs(e: EtatSortie, magasin: number | null) {
     if (x) return x.magasins.find((m) => m.magasin_id === magasin)?.quantite ?? 0
     return soldes.data ? 0 : -1
   }
-  const fils = regrouper(e.besoins, e.prises)
-  const aEnvoyer = e.prises.filter((p) => p.quantite > 0)
+  const fils = filsDe(e.besoins, e.prises)
+  const envoyees = aEnvoyer(e.prises)
   return {
     dispo,
     fils,
     soldes: soldes.data ?? [],
-    aEnvoyer,
+    aEnvoyer: envoyees,
     depassements: e.prises.filter((p) => depasse(p, dispo(p))),
-    sansContenance: aEnvoyer.filter((p) => p.unite !== 'kg' && kgDe(p) === 0),
+    manqueBrouillon: manqueBrouillon(e.prises),
     totalPrevu: e.besoins.reduce((t, b) => t + b.prevu, 0),
     totalSorti: fils.reduce((t, f) => t + f.sorti, 0),
   }
@@ -132,54 +139,15 @@ function useCalculs(e: EtatSortie, magasin: number | null) {
 async function proposer(e: EtatSortie, magasin: number | null): Promise<Partial<EtatSortie>> {
   if (e.horsRecette)
     return { besoins: [], incompletes: [], blocagesServeur: [], etape: 'lots', demandeChangee: false }
-  const r = await api.post<Proposition>('/ordres/proposition', {
-    date: e.jour,
-    magasin_id: magasin,
-    metier_id: e.metier,
-    qualites: qualitesDuCorps(false, e.fabrications),
-  })
-  const deRecette = new Set([...r.lignes, ...e.besoins].map((l) => l.matiere_id))
-  const gardees = e.prises.filter((p) => !deRecette.has(p.matiere_id))
-  const proposees = r.lignes.flatMap((l) => l.lots.map((lot) => priseDe(l, lot, lot.propose)))
+  const r = await demanderProposition(e, magasin)
   return {
     besoins: r.lignes,
     incompletes: r.recettes_incompletes,
     blocagesServeur: r.blocages,
-    prises: [...proposees, ...gardees],
+    prises: recalculer(e.prises, e.besoins, r.lignes),
     etape: 'lots',
     demandeChangee: false,
     besoinsRelus: true,
-  }
-}
-
-/**
- * Enregistre le brouillon (créé ou modifié), puis le valide si demandé. Un refus à la
- * validation laisse le brouillon enregistré, et le dit.
- */
-async function enregistrerOrdre(
-  e: EtatSortie,
-  magasin: number | null,
-  valider: boolean,
-  garde: (fiche: OrdreFiche) => void,
-): Promise<OrdreFiche> {
-  const corps = {
-    date: e.jour,
-    magasin_id: magasin,
-    metier_id: e.metier,
-    commentaire: e.commentaire.trim(),
-    qualites: qualitesDuCorps(e.horsRecette, e.fabrications),
-    lignes: lignesDuCorps(e.prises),
-  }
-  const fiche =
-    e.id != null
-      ? await api.put<OrdreFiche>(`/ordres/${e.id}`, { ...corps, version: e.version })
-      : await api.post<OrdreFiche>('/ordres', corps)
-  if (!valider) return fiche
-  try {
-    return await api.post<OrdreFiche>(`/ordres/${fiche.id}/valider`, { version: fiche.version })
-  } catch (x) {
-    garde(fiche)
-    throw new Error(`${messageErreur(x)} — l’ordre est gardé en brouillon, modifiable.`, { cause: x })
   }
 }
 
@@ -213,7 +181,8 @@ export function useSaisieSortie(ordre: OrdreFiche | null) {
     enregistrer: async (valider: boolean): Promise<OrdreFiche | undefined> => {
       setErreur('')
       try {
-        const fiche = await enregistrerOrdre(e, magasin, valider, (f) =>
+        const cible = e.id != null && e.version != null ? { id: e.id, version: e.version } : null
+        const fiche = await enregistrerOrdre(cible, corpsOrdre(e, magasin, e.prises), valider, (f) =>
           poser({ id: f.id, version: f.version }),
         )
         oublier()

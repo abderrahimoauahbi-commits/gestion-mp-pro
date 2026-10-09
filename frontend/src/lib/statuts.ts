@@ -111,10 +111,12 @@ export const STATUTS = {
     a_surveiller: s('À surveiller', 'attention'),
     a_challenger: s('À challenger', 'critique'),
   },
+  /** Inventaire (`StatutInventaire`) : abandonné = ouvert puis laissé, annulé = validé puis défait. */
   inventaire: {
-    ouvert: s('Ouvert', 'attention'),
+    ouvert: s('Comptage en cours', 'attention'),
     valide: s('Validé', 'ok'),
     abandonne: s('Abandonné', 'neutre'),
+    annule: s('Annulé', 'neutre'),
   },
   dossier: {
     ouvert: s('Ouvert', 'accent'),
@@ -185,19 +187,16 @@ export function statut(famille: Famille, valeur: string | null | undefined): Sta
 export const STOCK_EN_ALERTE: readonly string[] = ['RUPTURE', 'CRITIQUE', 'URGENT', 'ATTENTION']
 
 /**
- * La clé de stock d'un libellé du moteur, même ancien (« 🔴 CRITIQUE », « ⚪ NON CONSOMMÉE ») ;
- * `null` si le texte n'en est pas un.
+ * La clé de stock d'un code du moteur (`RUPTURE`, `CRITIQUE`, `URGENT`, `ATTENTION`, `OK`,
+ * `NON_CONSOMMEE` : le serveur rend des codes depuis RESTES3) ; `null` pour toute autre valeur.
  */
-export function cleStock(texte: string | null | undefined): keyof (typeof STATUTS)['stock'] | null {
-  const t = (texte ?? '').toUpperCase()
-  if (t.includes('RUPTURE')) return 'RUPTURE'
-  if (t.includes('CRITIQUE')) return 'CRITIQUE'
-  if (t.includes('URGENT')) return 'URGENT'
-  if (t.includes('ATTENTION')) return 'ATTENTION'
-  if (t.includes('NON CONSOMM') || t.includes('NON_CONSOMM')) return 'NON_CONSOMMEE'
-  if (/\bOK\b/.test(t)) return 'OK'
-  return null
+export function cleStock(code: string | null | undefined): CleStock | null {
+  return CLES_STOCK.find((c) => c === code) ?? null
 }
+
+/** Les codes de stock du moteur, du plus pressé au moins pressé. */
+export const CLES_STOCK = ['RUPTURE', 'CRITIQUE', 'URGENT', 'ATTENTION', 'OK', 'NON_CONSOMMEE'] as const
+export type CleStock = (typeof CLES_STOCK)[number]
 
 /**
  * Le numéro d'un document, ou son état tant qu'il n'en a pas (numéro donné à l'envoi ou à la

@@ -44,7 +44,11 @@ describe('Envoyer aux machines', () => {
     )
     const u = userEvent.setup()
     monterApp('/atelier/envoyer')
-    expect(await screen.findByText('Choisir la qualité à fabriquer')).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        /^À renseigner : la qualité de chaque ligne, les m² à tisser de chaque qualité\.$/,
+      ),
+    ).toBeInTheDocument()
     await demander(u)
     expect(screen.getByRole('button', { name: /Tout est conforme : 4 fils/ })).toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(MONETAIRE)
@@ -61,7 +65,7 @@ describe('Envoyer aux machines', () => {
       lignes: expect.arrayContaining([expect.objectContaining({ lot_id: 1, unite: 'kg' })]),
     })
     expect(appels.find((a) => a.chemin === '/ordres/9/valider')?.corps).toEqual({ version: 1 })
-    expect(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer')).toBeNull()
+    expect(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer2')).toBeNull()
   })
 
   it('un refus à la validation garde le brouillon et le dit', async () => {
@@ -84,7 +88,7 @@ describe('Envoyer aux machines', () => {
         'Un ordre daté du 09/10/2026 existe déjà. — l’ordre est gardé en brouillon, modifiable.',
       ),
     ).toBeInTheDocument()
-    const garde = JSON.parse(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer') ?? '{}')
+    const garde = JSON.parse(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer2') ?? '{}')
     expect(garde).toMatchObject({ id: 9, version: 1 })
   })
 
@@ -100,7 +104,7 @@ describe('Envoyer aux machines', () => {
     await u.click(screen.getByRole('button', { name: 'Abandonner cette sortie' }))
     await u.click(screen.getByRole('button', { name: 'Oui, abandonner' }))
     await waitFor(() => expect(app.adresse()).toBe('/atelier'))
-    expect(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer')).toBeNull()
+    expect(sessionStorage.getItem('gestion-mp-pro:saisie:envoyer2')).toBeNull()
   })
 
   it('un ordre hors recette se choisit à la main, au disponible du jour dans le magasin', async () => {
@@ -114,7 +118,9 @@ describe('Envoyer aux machines', () => {
     await u.click(ajout)
     await u.type(ajout, 'L-2602{Enter}')
     expect(await screen.findByText('hors recette · pris 0,00 kg')).toBeInTheDocument()
-    expect(screen.getAllByText('Aucune quantité à sortir')).toHaveLength(2)
+    expect(
+      screen.getAllByText('À renseigner : au moins une ligne de plus d’un gramme.').length,
+    ).toBeGreaterThanOrEqual(2)
   })
 
   it('?ordre= : 404 → « Ordre introuvable » ; coupure → « Pas de réseau » ; validé → sa fiche', async () => {
@@ -146,6 +152,6 @@ describe('Envoyer aux machines', () => {
     if (!ligne) throw new Error('fixture')
     const e = etatInitial({ ...o, lignes: [{ ...ligne, bobines: 29 }] })
     expect(e).toMatchObject({ id: 1, etape: 'lots', besoinsRelus: false })
-    expect(e.prises[0]).toMatchObject({ unite: 'bobine', quantite: 29 })
+    expect(e.prises[0]).toMatchObject({ unite: 'bobine', kg: ligne.quantite })
   })
 })

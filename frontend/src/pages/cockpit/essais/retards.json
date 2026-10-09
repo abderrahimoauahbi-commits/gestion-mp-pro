@@ -51,6 +51,10 @@
     "solde_origine": null,
     "solde_par": null,
     "solde_le": null,
-    "renvoi": null
+    "renvoi": null,
+    "en_retard": true,
+    "arrivee_attendue": "2026-09-19",
+    "arrivee_sous_7_jours": false,
+    "kg_en_quarantaine": 0.0
   }
 ]

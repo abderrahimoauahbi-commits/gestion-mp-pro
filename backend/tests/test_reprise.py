@@ -104,7 +104,7 @@ def test_premiere_reprise_tous_les_controles_tenus(
     assert "NON TENU" not in r.rapport
     assert "lecture seule vérifiée : oui" in r.rapport
     assert "(identique)" in r.rapport
-    assert un("SELECT count(*) FROM mouvement") == 11
+    assert un("SELECT count(*) FROM mouvement") == 14
     assert un("SELECT statut FROM reprise_execution ORDER BY id DESC LIMIT 1") == "reussie"
 
 
@@ -150,7 +150,7 @@ def test_rejouee_apres_des_gestes_dans_gestion_mp(bases: None, dossiers: tuple[P
         DELETE FROM recette WHERE id = 2;
         INSERT INTO mouvement (id, date_effet, date_saisie, type, article_id, lot_id, magasin_id,
           quantite, document, document_id, document_numero, ordre_id, auteur)
-          VALUES (12, '2026-09-15', '2026-09-15 08:00', 'SORTIE', 1, 1, 1, -10, 'sortie', 1,
+          VALUES (15, '2026-09-15', '2026-09-15 08:00', 'SORTIE', 1, 1, 1, -10, 'sortie', 1,
                   'OF-2026-0001', 1, 'Youssef');
         UPDATE solde SET quantite = 800 WHERE lot_id = 1 AND magasin_id = 1;
         INSERT INTO journal (id, quand, utilisateur, role, action, objet, objet_id, detail)
@@ -161,7 +161,7 @@ def test_rejouee_apres_des_gestes_dans_gestion_mp(bases: None, dossiers: tuple[P
     assert r.reussie, r.rapport
     assert un("SELECT designation FROM matiere WHERE id = 1") == "Poil rouge vif"
     assert un("SELECT count(*) FROM recette") == 1
-    assert un("SELECT count(*) FROM mouvement") == 12
+    assert un("SELECT count(*) FROM mouvement") == 15
     assert un("SELECT quantite FROM solde WHERE lot_id = 1 AND magasin_id = 1") == Decimal(
         "800.000"
     )
@@ -214,7 +214,7 @@ def test_garde_fous(bases: None, dossiers: tuple[Path, Path]) -> None:
     assert reprendre(dossiers, mode=ModeReprise.referentiels).reussie
     assert un("SELECT count(*) FROM mouvement") == 0
     assert reprendre(dossiers, mode=ModeReprise.activite).reussie
-    assert un("SELECT count(*) FROM mouvement") == 11
+    assert un("SELECT count(*) FROM mouvement") == 14
 
 
 def test_comptes_et_codes(bases: None, dossiers: tuple[Path, Path]) -> None:

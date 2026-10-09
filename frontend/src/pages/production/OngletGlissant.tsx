@@ -8,6 +8,7 @@ import { Link } from 'react-router'
 import { Bascule, useVueAdresse } from '../../composants/mise-en-page/Bascule'
 import { Carte } from '../../composants/mise-en-page/Carte'
 import { Barres } from '../../composants/graphiques/Barres'
+import type { Serie } from '../../composants/graphiques/echelle'
 import { Note } from '../../composants/retour/Note'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
@@ -127,24 +128,39 @@ function sousGlissant(plan: PlanProduction, horsPlan: number): string {
   return `Base mensuelle × coefficient du mois${croissance}, arrondi au m² ; la matière nécessaire suit les recettes, perte de ${nombre(plan.taux_perte * 100, 1)} % comprise.${caches}${horsDuPlan}`
 }
 
+/** Les qualités les plus planifiées, une série chacune ; les autres en une série « Autres ». */
+export const SERIES_MAX = 7
+
+/** Les séries du graphique : sept qualités empilées (les plus grosses) et « Autres » (gris). */
+export function seriesGlissant(plan: PlanProduction, lignes: readonly QualitePlan[]): Serie[] {
+  const parVolume = [...lignes].sort((a, b) => b.total_glissant - a.total_glissant)
+  const tetes = parVolume.slice(0, SERIES_MAX)
+  const reste = parVolume.slice(SERIES_MAX)
+  const series: Serie[] = tetes.map((q) => ({ nom: q.code, unite: 'm²', valeurs: [...q.glissant] }))
+  if (reste.length)
+    series.push({
+      nom: 'Autres',
+      unite: 'm²',
+      couleur: 'var(--graphe-axe)',
+      valeurs: plan.mois.map((_, i) => somme(reste.map((x) => x.glissant[i] ?? 0))),
+    })
+  series.push({
+    nom: 'Matière nécessaire',
+    unite: 'kg',
+    couleur: 'var(--ton-accent)',
+    valeurs: plan.mois.map((_, i) => somme(lignes.map((x) => (x.glissant[i] ?? 0) * x.kg_m2))),
+  })
+  return series
+}
+
 function Graphique({ plan, lignes }: { plan: PlanProduction; lignes: readonly QualitePlan[] }) {
   return (
     <div className={styles.graphique}>
       <Barres
         libelle="Plan glissant"
+        empiler
         etiquettes={plan.mois.map((m) => moisCourt(m))}
-        series={[
-          {
-            nom: 'Plan',
-            unite: 'm²',
-            valeurs: plan.mois.map((_, i) => somme(lignes.map((x) => x.glissant[i] ?? 0))),
-          },
-          {
-            nom: 'Matière nécessaire',
-            unite: 'kg',
-            valeurs: plan.mois.map((_, i) => somme(lignes.map((x) => (x.glissant[i] ?? 0) * x.kg_m2))),
-          },
-        ]}
+        series={seriesGlissant(plan, lignes)}
       />
     </div>
   )

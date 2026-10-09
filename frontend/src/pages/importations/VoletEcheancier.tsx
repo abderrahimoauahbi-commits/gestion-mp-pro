@@ -1,8 +1,8 @@
 /**
  * Fiche dossier › Échéancier (ECRANS-PRO 5.10) : ce que le dossier engage à payer, mois par mois
  * (« Sans échéance » à la fin), factures de marchandise et frais, dans l'ordre du serveur (échéance
- * puis quoi). Chaque mois dit ce qui reste à payer, devise par devise (jamais additionnées). Une
- * facture dont toute la marchandise a été détachée reste, « marchandise détachée » (anomalie 5.19).
+ * puis quoi), une ligne de groupe par mois qui dit ce qui y reste à payer, devise par devise
+ * (jamais additionnées). Une facture dont toute la marchandise a été détachée reste, « marchandise détachée » (anomalie 5.19).
  * Le règlement se saisit dans Analyse › Échéancier.
  */
 import { Link } from 'react-router'
@@ -34,26 +34,37 @@ function resteAPayer(lignes: readonly Echeance[]): string {
 interface LigneGroupe {
   e: Echeance
   rang: number
-  /** Sur la première ligne de son mois : le mois et ce qui reste à payer. */
-  groupe: { libelle: string; reste: string; sans: boolean } | null
 }
 
-function grouper(echeancier: readonly Echeance[]): LigneGroupe[] {
+/** Dans l'ordre du serveur, par mois (« Sans échéance » à la fin). */
+function ordonner(echeancier: readonly Echeance[]): LigneGroupe[] {
   const ordre = [...echeancier].sort(
     (a, b) => Number(!a.echeance) - Number(!b.echeance) || (a.echeance ?? '').localeCompare(b.echeance ?? ''),
   )
-  return ordre.map((e, rang) => {
-    const m = moisDe(e)
-    const premier = rang === 0 || moisDe(ordre[rang - 1] ?? e) !== m
-    const memes = ordre.filter((x) => moisDe(x) === m)
-    return {
-      e,
-      rang,
-      groupe: premier
-        ? { libelle: m ? mois(m) : 'Sans échéance', reste: resteAPayer(memes), sans: !m }
-        : null,
-    }
-  })
+  return ordre.map((e, rang) => ({ e, rang }))
+}
+
+/** L'en-tête d'un mois : son nom, ce qui y reste à payer par devise ; sans échéance, où la saisir. */
+function EnteteMois({
+  m,
+  lignes,
+  versFrais,
+}: {
+  m: string
+  lignes: readonly LigneGroupe[]
+  versFrais: () => void
+}) {
+  return (
+    <span className={styles.enteteMois}>
+      <strong>{m ? mois(m) : 'Sans échéance'}</strong>
+      <span className={styles.note}>{resteAPayer(lignes.map((l) => l.e))}</span>
+      {m ? null : (
+        <Bouton taille="petit" variante="fantome" onClick={versFrais}>
+          la saisir sur le frais
+        </Bouton>
+      )}
+    </span>
+  )
 }
 
 const ECHEANCE: Colonne<LigneGroupe> = {
@@ -146,35 +157,7 @@ const REGLEMENT: Colonne<LigneGroupe> = {
     ),
 }
 
-function colonnes(versFrais: () => void): Colonne<LigneGroupe>[] {
-  return [
-    {
-      cle: 'mois',
-      titre: 'Mois',
-      triable: false,
-      valeur: (l) => l.groupe?.libelle ?? '',
-      rendu: (l) =>
-        l.groupe ? (
-          <span className={styles.valeur}>
-            <strong>{l.groupe.libelle}</strong>
-            <span className={styles.note}>{l.groupe.reste}</span>
-            {l.groupe.sans ? (
-              <Bouton taille="petit" variante="fantome" onClick={versFrais}>
-                la saisir sur le frais
-              </Bouton>
-            ) : null}
-          </span>
-        ) : null,
-    },
-    ECHEANCE,
-    NATURE,
-    QUOI,
-    TIERS,
-    PIECE,
-    MONTANT,
-    REGLEMENT,
-  ]
-}
+const COLONNES: Colonne<LigneGroupe>[] = [ECHEANCE, NATURE, QUOI, TIERS, PIECE, MONTANT, REGLEMENT]
 
 export function VoletEcheancier({ d, versFrais }: { d: DossierFiche; versFrais: () => void }) {
   if (!d.echeancier.length) {
@@ -183,8 +166,12 @@ export function VoletEcheancier({ d, versFrais }: { d: DossierFiche; versFrais: 
   return (
     <DataTable
       libelle="Échéancier du dossier : les devises ne s’additionnent pas"
-      lignes={grouper(d.echeancier)}
-      colonnes={colonnes(versFrais)}
+      lignes={ordonner(d.echeancier)}
+      colonnes={COLONNES}
+      groupe={{
+        cle: (l) => moisDe(l.e),
+        entete: (m, lignes) => <EnteteMois m={m} lignes={lignes} versFrais={versFrais} />,
+      }}
       cle={(l) => l.rang}
       recherche={false}
       hauteur="fenetre"

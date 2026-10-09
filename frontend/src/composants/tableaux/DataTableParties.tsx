@@ -1,10 +1,16 @@
 /** Les parties du `DataTable` : en-tête triable, corps (lignes cliquables, cellules-liens), pied de totaux. */
-import type { KeyboardEvent, ReactNode } from 'react'
+import { Fragment, type KeyboardEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 
 import { classes } from '../mise-en-page/classes'
 import { contenu, piedDeColonne, type Colonne } from './colonnes'
 import styles from './DataTable.module.css'
+
+/** Des lignes de groupe : la clé d'une ligne ; l'en-tête d'un groupe (ses lignes retenues). */
+export interface Groupe<T> {
+  cle: (ligne: T) => string
+  entete: (cle: string, lignes: readonly T[]) => ReactNode
+}
 
 export interface Tri {
   cle: string
@@ -81,36 +87,75 @@ function Cellule<T>({ c, ligne }: { c: Colonne<T>; ligne: T }) {
   )
 }
 
+/** La ligne d'en-tête d'un groupe, sur toute la largeur. */
+function LigneGroupe({ largeur, children }: { largeur: number; children: ReactNode }) {
+  return (
+    <tr className={styles.groupe}>
+      <th scope="rowgroup" colSpan={largeur}>
+        {children}
+      </th>
+    </tr>
+  )
+}
+
+/** Une ligne de données (cliquable, marquée). */
+function Ligne<T>(props: {
+  l: T
+  visibles: readonly Colonne<T>[]
+  cliquable?: (l: T) => void
+  marquee?: (l: T) => boolean
+}) {
+  const { l, visibles, cliquable, marquee } = props
+  return (
+    <tr
+      className={classes(cliquable && styles.cliquable, marquee?.(l) && styles.marquee)}
+      tabIndex={cliquable ? 0 : undefined}
+      onClick={cliquable ? () => cliquable(l) : undefined}
+      onKeyDown={
+        cliquable
+          ? (e) => {
+              if (e.key === 'Enter' && e.target === e.currentTarget) cliquable(l)
+            }
+          : undefined
+      }
+    >
+      {visibles.map((c) => (
+        <Cellule key={c.cle} c={c} ligne={l} />
+      ))}
+    </tr>
+  )
+}
+
 export function Corps<T>(props: {
   colonnes: readonly Colonne<T>[]
   lignes: readonly T[]
   cle: (l: T) => string | number
   cliquable?: (l: T) => void
   marquee?: (l: T) => boolean
+  groupe?: Groupe<T>
 }) {
-  const { colonnes, lignes, cle, cliquable, marquee } = props
+  const { colonnes, lignes, cle, groupe } = props
   const visibles = colonnes.filter((c) => !c.cache)
   return (
     <tbody>
-      {lignes.map((l) => (
-        <tr
-          key={cle(l)}
-          className={classes(cliquable && styles.cliquable, marquee?.(l) && styles.marquee)}
-          tabIndex={cliquable ? 0 : undefined}
-          onClick={cliquable ? () => cliquable(l) : undefined}
-          onKeyDown={
-            cliquable
-              ? (e) => {
-                  if (e.key === 'Enter' && e.target === e.currentTarget) cliquable(l)
-                }
-              : undefined
-          }
-        >
-          {visibles.map((c) => (
-            <Cellule key={c.cle} c={c} ligne={l} />
-          ))}
-        </tr>
-      ))}
+      {lignes.map((l, i) => {
+        const g = groupe?.cle(l)
+        const precedente = i > 0 ? lignes[i - 1] : undefined
+        const debut = groupe && g != null && (precedente === undefined || groupe.cle(precedente) !== g)
+        return (
+          <Fragment key={cle(l)}>
+            {debut ? (
+              <LigneGroupe largeur={visibles.length}>
+                {groupe.entete(
+                  g,
+                  lignes.filter((x) => groupe.cle(x) === g),
+                )}
+              </LigneGroupe>
+            ) : null}
+            <Ligne l={l} visibles={visibles} cliquable={props.cliquable} marquee={props.marquee} />
+          </Fragment>
+        )
+      })}
     </tbody>
   )
 }

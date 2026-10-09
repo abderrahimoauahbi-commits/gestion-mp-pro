@@ -38,7 +38,10 @@ describe('Trouver un lot et sa fiche', () => {
     fauxServeur(reponsesAtelier('alimentation'))
     monterApp('/atelier/lots/1')
     expect(await screen.findByRole('heading', { name: 'Lot L-2601' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'OF-2026-0001' })).toHaveAttribute('href', '/atelier/ordres/1')
+    for (const lien of screen.getAllByRole('link', { name: 'OF-2026-0001' }))
+      expect(lien).toHaveAttribute('href', '/atelier/ordres/1')
+    // Un retour des machines, dans ce qu'il a vécu, mène à sa fiche d'opération.
+    expect(screen.getByRole('link', { name: 'RET-2026-0001' })).toHaveAttribute('href', '/operations/2')
     expect(screen.getByRole('link', { name: /Imprimer l’étiquette/ })).toHaveAttribute(
       'href',
       '/api/documents/etiquettes?lots=1',

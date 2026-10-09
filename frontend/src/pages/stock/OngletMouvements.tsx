@@ -60,7 +60,8 @@ const PRIX: Colonne<MouvementLigne>[] = [
     droite: true,
     triable: false,
     valeur: (m) => m.prix ?? null,
-    rendu: (m) => (m.prix ? prixUnite(m.prix, m.devise, 'kg') : <span className={styles.nul}>{VIDE}</span>),
+    rendu: (m) =>
+      m.prix && m.devise ? prixUnite(m.prix, m.devise, 'kg') : <span className={styles.nul}>{VIDE}</span>,
   },
   {
     cle: 'valeur',

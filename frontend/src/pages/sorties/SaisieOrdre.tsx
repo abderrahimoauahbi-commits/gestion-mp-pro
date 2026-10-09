@@ -31,7 +31,7 @@ import {
   type QualiteResume,
 } from './donnees'
 import { LignesSaisie } from './LignesSaisie'
-import { aEnvoyer } from './ordre'
+import { aEnvoyer } from '../../lib/ordre'
 import { useSaisieOrdre, type SaisieOrdre as Saisie_ } from './useSaisieOrdre'
 
 /** La borne basse de la date : lendemain de la clôture, et pas avant le dernier ordre validé. */
@@ -79,7 +79,7 @@ function Demande({ s, sauf }: { s: Saisie_; sauf: number | null }) {
           placeholder="—"
         />
       </Champ>
-      <Champ libelle="Commentaire">
+      <Champ libelle="Observations (facultatif)">
         <Saisie
           valeur={s.commentaire}
           onChange={s.setCommentaire}

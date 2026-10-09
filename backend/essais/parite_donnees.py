@@ -11,11 +11,11 @@ d'excuses :
 | ORDRE | ordre de lecture des recettes | même multiensemble, autre ordre |
 | K1 | arrondi à l'échelle de la colonne (MODELE-DONNEES § 10.2) | Dpro = arrondi(D0, échelle) |
 | K8a | prix des sorties, transferts, retours machine à 0 (R1 n° 1) | type de sortie et Dpro = 0 |
-| K8b | devise d'en-tête, réception en deux devises (R1 n° 2) | bi-devise, devise de la facture |
+| K8b | réception en deux devises scindée (R1 n° 2) | `D0s` : dépôt de Gestion MP, copie scindée |
 | K8c | unité d'achat sans contenance → kg (R1 n° 3) | contenance 0 et unité vide |
 | K8d | brouillon numéroté : numéro retiré (R1 n° 4) | statut Brouillon et « brouillon n° id » |
 | K8e | ordre validé sans date : fin de son jour (R1 n° 5) | `None` → jour T23:59:59.999999 |
-| K8i | entrée en devise sans cours : cours figé à la reprise (R1, V3/V4) | 0 → taux |
+| K8i | entrée en devise sans cours : cours du jour figé (V2) | entrée, cours 0, Dpro = cours D0 |
 | P17 | méthode de calcul : la seule « corrigée » | `methode = corrigee` absent de PRO |
 
 `chaine()` rend les jeux intermédiaires D0 → D1 → … → Dpro (chaque traduction ajoutée à la
@@ -30,23 +30,21 @@ import copy
 import json
 import re
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from sqlalchemy import create_engine, text
-
 Chemin = tuple[str | int, ...]
-ORDRE_DES_CLASSES = ("ORDRE", "K1", "K8a", "K8b", "K8c", "K8d", "K8e", "K8i", "P17")
+ORDRE_DES_CLASSES = ("K8b", "ORDRE", "K1", "K8a", "K8c", "K8d", "K8e", "K8i", "P17")
 TITRES = {
     "ORDRE": "ordre de lecture des recettes (même contenu)",
     "K1": "arrondi à l'échelle des colonnes (MODELE-DONNEES § 10.2)",
     "K8a": "prix des sorties, transferts et retours machine non repris (R1 n° 1)",
-    "K8b": "devise d'en-tête des réceptions payées en deux devises (R1 n° 2)",
+    "K8b": "réception payée en deux devises scindée, une par devise (R1 n° 2)",
     "K8c": "unité d'achat sans contenance lue au kilo (R1 n° 3)",
     "K8d": "brouillon numéroté : numéro retiré (R1 n° 4)",
     "K8e": "ordre validé sans date : fin de son jour (R1 n° 5)",
-    "K8i": "entrée en devise sans cours : cours du jour de la reprise figé (R1, V3/V4)",
+    "K8i": "entrée en devise sans cours : cours du jour de la reprise figé (V2)",
     "P17": "méthode de calcul « corrigée » seule (P17)",
 }
 ECHELLES: dict[str, int] = {
@@ -82,35 +80,18 @@ def texte(chemin: Chemin) -> str:
 
 @dataclass
 class Contexte:
-    """Ce que les règles lisent dans la copie de Gestion MP (lecture seule)."""
+    """Ce que les règles lisent de Gestion MP."""
 
-    bidevises: dict[tuple[str, str], tuple[set[str], str]] = field(default_factory=dict)
-    """(date, n° de bon) d'une réception en deux devises → (ses devises, devise de sa facture)."""
-    taux: dict[str, float] = field(default_factory=dict)
-    """Le cours du jour de chaque devise dans la copie (celui que la reprise fige, K8i)."""
+    d0_scinde: dict[str, Any] | None = None
+    """K8b : les `Donnees` du dépôt de Gestion MP relues sur une copie où chaque réception
+    payée en deux devises est scindée (`parite_chaine_base.k8b`) ; `None` : pas de K8b."""
+    scindees: int = 0
+    """Réceptions nées de la scission dans cette copie."""
 
 
-def lire_contexte(adresse: str) -> Contexte:
-    """Les réceptions payées en deux devises, relues dans la copie (transaction lecture seule)."""
-    requete = text(
-        "SELECT r.date::text, coalesce(c.numero, r.numero, ''), f.devise, l.devise "
-        "FROM reception r JOIN reception_ligne l ON l.reception_id = r.id "
-        "LEFT JOIN facture f ON f.id = r.facture_id "
-        "LEFT JOIN commande_ligne cl ON cl.id = l.commande_ligne_id "
-        "LEFT JOIN commande c ON c.id = cl.commande_id "
-        "WHERE r.id IN (SELECT reception_id FROM reception_ligne GROUP BY reception_id "
-        "HAVING count(DISTINCT devise) > 1)"
-    )
-    options = {"options": "-c default_transaction_read_only=on"}
-    moteur = create_engine(adresse, connect_args=options)
-    ctx = Contexte()
-    with moteur.connect() as c:
-        for jour, bon, devise_facture, devise in c.execute(requete):
-            devises, _ = ctx.bidevises.get((jour, bon), (set(), devise_facture))
-            ctx.bidevises[(jour, bon)] = (devises | {devise}, devise_facture)
-        ctx.taux = {code: float(t) for code, t in c.execute(text("SELECT code, taux FROM devise"))}
-    moteur.dispose()
-    return ctx
+def lire_contexte(d0_scinde: dict[str, Any] | None = None, scindees: int = 0) -> Contexte:
+    """Le contexte des règles (K8b : les données de la copie scindée)."""
+    return Contexte(d0_scinde=d0_scinde, scindees=scindees)
 
 
 @dataclass(frozen=True)
@@ -153,10 +134,10 @@ def _k8(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> st
         return (
             "K8a" if d0["mouvements"][chemin[1]]["type"] in SORTIES_SANS_PRIX and b == 0 else None
         )
-    if m == "historique_prix/*/devise":
-        x = d0["historique_prix"][chemin[1]]
-        devises, devise_facture = ctx.bidevises.get((x["date_bc"], x["numero_bc"]), (set(), ""))
-        return "K8b" if a in devises and b == devise_facture and a != b else None
+    if m == "mouvements/*/cours" and a == 0:
+        x = d0["mouvements"][chemin[1]]
+        jour = d0["parametres"]["cours"].get(x["devise"])
+        return "K8i" if x["devise"] != "MAD" and x["prix_unite"] and b == jour else None
     if m == "articles/*/unite_commande":
         return "K8c" if d0["articles"][chemin[1]]["contenance_commande"] == 0 and b == "" else None
     if m == "receptions/*/numero":
@@ -167,14 +148,6 @@ def _k8(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> st
     return None
 
 
-def _k8i(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> bool:
-    """K8i : entrée en devise sans cours → cours du jour de la reprise figé (R1, V3/V4)."""
-    if motif(chemin) != "mouvements/*/cours" or a not in (0, 0.0, None):
-        return False
-    x = d0["mouvements"][chemin[1]]
-    return bool(x["devise"] != "MAD" and x["prix_unite"] and b == ctx.taux.get(x["devise"]))
-
-
 def classer(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> str | None:
     """La traduction qui explique une différence de donnée, ou `None` (à corriger)."""
     if isinstance(a, list) and isinstance(b, list):
@@ -183,8 +156,6 @@ def classer(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -
         return "K1"
     if chemin == ("parametres", "methode") and a == "corrigee" and b is _ABSENT:
         return "P17"
-    if _k8i(chemin, a, b, d0, ctx):
-        return "K8i"
     return _k8(chemin, a, b, d0, ctx)
 
 
@@ -214,8 +185,17 @@ def _feuilles(a: Any, b: Any, chemin: Chemin) -> Iterator[tuple[Chemin, Any, Any
 
 
 def ecarts(d0: dict[str, Any], dpro: dict[str, Any], ctx: Contexte) -> list[Ecart]:
-    """Toutes les différences de données, chacune classée."""
-    return [Ecart(c, a, b, classer(c, a, b, d0, ctx)) for c, a, b in _feuilles(d0, dpro, ())]
+    """Toutes les différences de données, chacune classée.
+
+    K8b d'abord : ce qui sépare `D0` de `D0s` (le dépôt de Gestion MP lui-même, sur la copie
+    scindée) est la scission ; le reste se compare de `D0s` à `Dpro`, chemins de `D0s`."""
+    base, sortie = d0, []
+    if ctx.d0_scinde is not None:
+        base = ctx.d0_scinde
+        sortie = [Ecart(c, a, b, "K8b") for c, a, b in _feuilles(d0, base, ())]
+    return sortie + [
+        Ecart(c, a, b, classer(c, a, b, base, ctx)) for c, a, b in _feuilles(base, dpro, ())
+    ]
 
 
 def _poser(donnees: dict[str, Any], chemin: Chemin, valeur: Any) -> None:

@@ -42,6 +42,17 @@ describe('Accueil de l’atelier', () => {
     expect(await screen.findByText(/1 ordre\(s\) validé\(s\), 100\skg sortis net\./)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Ordres.*1 brouillon\(s\) à finir/ })).toBeInTheDocument()
     expect(screen.getAllByRole('link')).toHaveLength(7 + 4)
+    // À 360 × 640, les sept tuiles tiennent : le geste principal sur toute la largeur, les six
+    // autres par deux, chaque détail sur deux lignes au plus (≈ 34 signes dans une demi-largeur).
+    const tuiles = within(screen.getByRole('navigation', { name: 'Gestes de l’atelier' })).getAllByRole(
+      'link',
+    )
+    expect(tuiles).toHaveLength(7)
+    expect(tuiles[0]).toHaveClass('principale')
+    for (const t of tuiles.slice(1)) {
+      const detail = t.querySelector('span:last-child')?.textContent ?? ''
+      expect(detail.length, detail).toBeLessThanOrEqual(34)
+    }
     expect(document.body.textContent).not.toMatch(MONETAIRE)
     await userEvent.setup().click(screen.getByRole('button', { name: 'Se déconnecter' }))
     expect(screen.getByText('Se déconnecter (Ahmed) ?')).toBeInTheDocument()
@@ -76,8 +87,8 @@ describe('Accueil de l’atelier', () => {
       reponse: '',
     })
     const page = { elements: [s(3, null), s(3, '2026-10-08'), s(4, null)], total: 3, suivant: null }
-    expect(compteSignalements(page, 3)).toBe('1 en attente · 1 réponse(s) des achats')
-    expect(compteSignalements(undefined, 3)).toBe('Un fil qui manque, une palette qui finit.')
+    expect(compteSignalements(page, 3)).toBe('1 en attente · 1 réponse(s)')
+    expect(compteSignalements(undefined, 3)).toBe('Fil qui manque, palette qui finit.')
     expect(astuce(false)).toMatch(/crée un raccourci vers Gestion MP/)
   })
 })
@@ -135,6 +146,19 @@ describe('Ordres de l’atelier', () => {
       retours: [{ id: 3, numero: 'RET-2026-0001', date: '', quantite: 1 }],
     }
     expect(questionAnnuler(o)).toMatch(/^Annuler tout l’ordre et ses retours \(RET-2026-0001\) \?/)
+  })
+
+  it('les retours d’un ordre mènent à leur fiche d’opération', async () => {
+    const o = {
+      ...donnees().ORDRE_VALIDE,
+      retours: [{ id: 3, numero: 'RET-2026-0001', date: '2026-10-08', quantite: 1 }],
+    }
+    fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres/1': { corps: o } }))
+    monterApp('/atelier/ordres/1')
+    expect(await screen.findByRole('link', { name: 'RET-2026-0001' })).toHaveAttribute(
+      'href',
+      '/operations/3',
+    )
   })
 
   it('un brouillon : valider, modifier (rouvre ce brouillon), supprimer avec sa version', async () => {
