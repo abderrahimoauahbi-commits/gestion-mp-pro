@@ -33,6 +33,7 @@ def _c(titre_: str, cle: str, format_: str = "", *, monetaire: bool = False) -> 
     """Une colonne qui lit une clé (dict) ou un attribut (objet)."""
 
     def lire(x: Any) -> object:
+        """La valeur de la colonne dans une ligne (dict ou objet)."""
         return x.get(cle) if isinstance(x, dict) else getattr(x, cle)
 
     return Colonne(titre_, lire, format_, monetaire=monetaire)
@@ -51,6 +52,7 @@ def _detail(c: Controle) -> Feuille:
     """Une feuille par contrôle en anomalie : toutes ses lignes, colonnes libellées."""
 
     def colonne(x: ColonneControle) -> Colonne:
+        """La colonne du classeur d'une colonne du détail."""
         return _c(x.libelle, x.cle, FORMAT_DE_L_UNITE.get(x.unite, ""), monetaire=x.unite == "MAD")
 
     return Feuille(

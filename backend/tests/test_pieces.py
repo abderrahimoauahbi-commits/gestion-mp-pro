@@ -176,7 +176,7 @@ def test_piece_disparue_410_retiree_404_objet_inconnu_404(
 def test_documents_du_dossier(achats: TestClient, alimentation: TestClient) -> None:
     """Hérité : test_importations::test_documents_du_dossier (laissé par D7) — la DUM d'un vrai
     dossier se joint, se relit, se retire ; la fiche du dossier compte ses pièces."""
-    i = imp.Import.nouveau(cours="10")
+    i = imp.Import.nouveau(code="USD")
     i.recevoir(achats, "DOC-D8", [("FIL", "DOC-1", 10, 2.0)])
     d = imp.ouvrir(achats, i.f("DOC-D8"), local_confirme=True)
     p = ok(deposer(achats, "dossier", d["id"], "DUM-2026-118.pdf", PDF, "application/pdf"), 201)

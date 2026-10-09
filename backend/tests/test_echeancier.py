@@ -181,7 +181,7 @@ def test_echeanciers_regle_estime_et_clos_a_dater(achats: TestClient) -> None:
     """Hérité : test_importations_second_audit::test_echeanciers_regle_estime_et_clos_a_dater
     (partie « échéancier général », laissée par D7) — un frais non réglé d'un dossier **clos**,
     sans échéance, reste « à dater » : clore fige le coût, pas le paiement du transitaire."""
-    i = imp.Import.nouveau(cours="10")
+    i = imp.Import.nouveau(code="USD")
     i.recevoir(achats, "A2-ECH", [("FIL", "A2F-10", 50, 2.0)])
     d = imp.ouvrir(achats, i.f("A2-ECH"), local_confirme=True)
     d = imp.frais(achats, d, "TRANSIT", 700, prestataire="TRANSIT OUBLIÉ D8")

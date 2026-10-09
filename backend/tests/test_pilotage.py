@@ -222,3 +222,24 @@ def test_la_valorisation_s_exporte_a_une_fin_de_mois(usine: Usine) -> None:
     assert "au 30/09/2026" in str(feuille["A1"].value)
     lignes = [x for x in feuille.iter_rows(values_only=True) if x and x[0] == "FIN DE MOIS"]
     assert lignes and lignes[0][5] == 10
+
+
+VUES = (
+    "/api/cockpit", "/api/valorisation", "/api/opportunites", "/api/controles",
+    "/api/controles/C07", "/api/prix/historique", "/api/prix/matrice",
+    "/api/fournisseurs/performance", "/api/echeancier", "/api/indicateurs/historique",
+    "/api/bilan?mois=2026-10",
+)  # fmt: skip
+
+
+def test_les_vues_de_pilotage_repondent(usine: Usine) -> None:
+    """Hérité : test_parcours::test_les_vues_de_pilotage_repondent — chaque vue répond à la
+    direction et aux achats, jamais à l'alimentation ni à l'administrateur."""
+    u = usine
+    x = u.ouvrir(u.matiere(), 100, 10, le=jour(-5))
+    u.sortir(x, 10)
+    for url in VUES:
+        for client in (u.direction, u.achats):
+            assert client.get(url).status_code == 200, url
+        for client in (u.alimentation, u.administrateur):
+            assert client.get(url).status_code == 403, url

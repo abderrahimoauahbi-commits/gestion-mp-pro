@@ -101,6 +101,7 @@ def _index(s: Session) -> Index:
     def par(
         modele: type[Ordre] | type[Commande] | type[Reception] | type[Dossier],
     ) -> dict[str, int]:
+        """Numéro → id des documents numérotés de ce modèle."""
         requete = select(modele.numero, modele.id).where(modele.numero.is_not(None))
         return {str(n): i for n, i in s.execute(requete)}
 

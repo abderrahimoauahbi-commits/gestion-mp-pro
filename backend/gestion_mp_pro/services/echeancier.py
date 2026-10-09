@@ -203,6 +203,7 @@ def calculer(s: Session, f: Filtres) -> Echeancier:
     echues = [x for x in toutes if x.en_retard and _garde(x, f)]
 
     def rendre(liste: list[suivi.Echeance]) -> list[dict[str, Any]]:
+        """Les lignes gardées par les filtres, avec version et fiches."""
         return [
             {**asdict(x), "version": p.versions[(x.objet, x.id)], **p.liens[(x.objet, x.id)]}
             for x in liste
