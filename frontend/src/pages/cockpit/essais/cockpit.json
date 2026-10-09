@@ -1,0 +1,225 @@
+{
+  "date_reference": "2026-10-09",
+  "kpi": [
+    {
+      "cle": "valeur",
+      "libelle": "Valeur du stock",
+      "valeur": 67039.0,
+      "unite": "MAD",
+      "detail": "8 matière(s) · dont 420 MAD sur les métiers",
+      "formule": "Σ (magasins, quarantaine comprise, + sur les métiers) × coût moyen pondéré (sinon prix du catalogue × cours) — la valeur de la Valorisation",
+      "lien": "/analyse?onglet=valorisation",
+      "ton": "neutre"
+    },
+    {
+      "cle": "couverture",
+      "libelle": "Couverture pondérée",
+      "valeur": 55.66845357485826,
+      "unite": "j",
+      "detail": "pondérée par la valeur",
+      "formule": "Σ stock projeté positif × prix × cours ÷ consommation valorisée par jour (consommation mensuelle × prix × cours ÷ 30)",
+      "lien": "/stock",
+      "ton": "neutre"
+    },
+    {
+      "cle": "a_commander",
+      "libelle": "À commander",
+      "valeur": 37989.59548387097,
+      "unite": "MAD",
+      "detail": "selon le plan d'achat",
+      "formule": "Σ des montants à commander du plan d'achat (MAD, cours du jour)",
+      "lien": "/plan-achat",
+      "ton": "attention"
+    },
+    {
+      "cle": "commande",
+      "libelle": "Commandé",
+      "valeur": 2.0,
+      "unite": "bons",
+      "detail": "en cours · 43 200 MAD · 1 en retard",
+      "formule": "Bons partis, ni soldés ni annulés, qui attendent encore de la marchandise ; reste à livrer au prix confirmé (sinon catalogue), au cours figé (sinon du jour)",
+      "lien": "/commandes?onglet=confirmee",
+      "ton": "urgent"
+    },
+    {
+      "cle": "rotation",
+      "libelle": "Rotation du stock",
+      "valeur": 2.617536194283498,
+      "unite": "×",
+      "detail": "par an (consommation réelle) · cycle de trésorerie 199 j",
+      "formule": "Coût de la consommation des 12 derniers mois clos ÷ valeur du stock au coût moyen ; sans historique : coût matière du plan ÷ stock au catalogue. Cycle de trésorerie = DIO + DSO − DPO",
+      "lien": "/analyse?onglet=valorisation",
+      "ton": "neutre"
+    },
+    {
+      "cle": "controles",
+      "libelle": "Contrôles",
+      "valeur": 0.8518518518518519,
+      "unite": "fraction",
+      "detail": "23 / 27 · 3 à corriger",
+      "formule": "Contrôles conformes ÷ contrôles vérifiés (ceux que la base ou la saisie garantit ne comptent pas)",
+      "lien": "/analyse?onglet=controles",
+      "ton": "attention"
+    }
+  ],
+  "stock": {
+    "valeur_mad": 67039.0,
+    "valeur_machine_mad": 420.0,
+    "nb_references": 8,
+    "nb_detenues": 8,
+    "nb_sur_metiers": 1,
+    "couverture_ponderee_jours": 55.66845357485826,
+    "ruptures": 2,
+    "critiques": 1,
+    "urgents": 0,
+    "attentions": 0,
+    "ok": 4,
+    "sans_consommation": 1,
+    "valeur_magasins_mad": 66619.0,
+    "kg_machine": 15.0
+  },
+  "achats": {
+    "bc_actifs": 2,
+    "montant_bc_en_cours_mad": 43200.0,
+    "montant_bc_estime_mad": 39600.0,
+    "fournisseurs_actifs": 4,
+    "budget_a_commander_mad": 37989.59548387097,
+    "en_retard": 1
+  },
+  "finance": {
+    "cout_matiere_annuel_mad": 396219.08160000003,
+    "cout_matiere_mensuel_mad": 33018.2568,
+    "rotation_stock": 2.617536194283498,
+    "dio_jours": 139.44410808803048,
+    "cout_rotation_annuel_mad": 175477.00892857142,
+    "base_rotation": "consommation",
+    "dso_jours": 60.0,
+    "dpo_jours": 0.0,
+    "ccc_jours": 199.44410808803048
+  },
+  "abc": {
+    "A": 3,
+    "B": 1,
+    "C": 4
+  },
+  "dormant": {
+    "nb_references": 0,
+    "valeur_mad": 0.0,
+    "part_valeur": 0.0,
+    "seuil_jours": 180.0
+  },
+  "sourcing": {
+    "mono_source": 0,
+    "multi_source": 0
+  },
+  "economies": {
+    "total_mad": 24675.840000000004,
+    "nb_opportunites": 1,
+    "top": [
+      {
+        "reference": "PP FRZ-2900 Rouge",
+        "nature": "",
+        "titrage": "",
+        "fournisseur_actuel": "Filature Atlas",
+        "prix_actuel_mad": 28.0,
+        "prix_minimum_mad": 22.0,
+        "fournisseur_alternatif": "Tissages Fès",
+        "conso_annuelle": 4112.64,
+        "economie_mad": 24675.840000000004,
+        "composition": "PP",
+        "type_fil": "FRISE",
+        "couleur": "ROUGE",
+        "reference_alternative": "PP FRZ-2900 Rouge (Fès)",
+        "couleur_alternative": "ROUGE",
+        "origine_prix": "payé",
+        "origine_prix_minimum": "payé",
+        "ecart": 0.21428571428571427,
+        "date_prix": "2026-09-09",
+        "date_prix_minimum": "2026-09-14",
+        "ecart_jours": 5,
+        "base_prix": "prix facture",
+        "base_prix_minimum": "prix facture",
+        "matiere_id": 1,
+        "matiere_alternative_id": 8
+      }
+    ]
+  },
+  "nb_alertes": 3,
+  "alerte_rouge": 3,
+  "alertes": [
+    {
+      "reference": "COTON CHAINE 12/6",
+      "nature": "",
+      "designation": "",
+      "fournisseur": "Tissages Fès",
+      "stock": -312.61870967741936,
+      "conso_mensuelle": 168.3,
+      "couverture_jours": -55.72526019205336,
+      "delai_jours": 60.0,
+      "quantite_a_commander": 649.2187096774194,
+      "statut": "⚫ RUPTURE",
+      "statut_couverture": "⚫ RUPTURE",
+      "action": "📝 Créer BC - Tissages Fès",
+      "titrage": "",
+      "kg_par_ml": 0.0,
+      "stock_machine": 0.0,
+      "matiere_id": 4,
+      "fournisseur_id": 3
+    },
+    {
+      "reference": "JUTE TRAME 4 Ply",
+      "nature": "",
+      "designation": "",
+      "fournisseur": "Tissages Fès",
+      "stock": -53.729677419354914,
+      "conso_mensuelle": 239.70000000000002,
+      "couverture_jours": -6.724615446727774,
+      "delai_jours": 60.0,
+      "quantite_a_commander": 33.12967741935495,
+      "statut": "⚫ RUPTURE",
+      "statut_couverture": "⚫ RUPTURE",
+      "action": "📝 Créer BC - Tissages Fès",
+      "titrage": "",
+      "kg_par_ml": 0.0,
+      "stock_machine": 0.0,
+      "matiere_id": 3,
+      "fournisseur_id": 3
+    },
+    {
+      "reference": "PP FRZ-2900 Bleu",
+      "nature": "",
+      "designation": "",
+      "fournisseur": "Filature Atlas",
+      "stock": 68.23870967741937,
+      "conso_mensuelle": 306.0,
+      "couverture_jours": 6.690069576217585,
+      "delai_jours": 45.0,
+      "quantite_a_commander": 600.0,
+      "statut": "🔴 CRITIQUE",
+      "statut_couverture": "🔴 CRITIQUE",
+      "action": "📝 Créer BC - Filature Atlas",
+      "titrage": "",
+      "kg_par_ml": 0.0,
+      "stock_machine": 0.0,
+      "matiere_id": 2,
+      "fournisseur_id": 1
+    }
+  ],
+  "devises": [
+    {
+      "devise": "MAD",
+      "references": 3,
+      "montant_mad": 37989.59548387097,
+      "part": 1.0
+    }
+  ],
+  "controles": {
+    "total": 27,
+    "conformes": 23,
+    "garantis": 11,
+    "anomalies": 4,
+    "a_corriger": 3,
+    "bloquants": 0,
+    "score": 0.8518518518518519
+  }
+}

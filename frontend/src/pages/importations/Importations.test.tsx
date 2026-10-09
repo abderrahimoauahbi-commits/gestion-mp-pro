@@ -62,8 +62,13 @@ describe('Importations › listes', () => {
     const app = monterApp('/importations?q=FA')
     await userEvent.click(await screen.findByText(d.fiche.numero, { selector: 'strong' }))
     await waitFor(() => expect(app.adresse()).toBe(`/dossiers/${d.fiche.id}`))
-    expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    await userEvent.click(within(screen.getByRole('dialog')).getAllByRole('button', { name: 'Fermer' })[1]!)
+    // La fenêtre peut être rendue deux fois (fiche relue) : attendre la version stable.
+    const fermer = await waitFor(() => {
+      const boutons = within(screen.getByRole('dialog')).getAllByRole('button', { name: 'Fermer' })
+      expect(boutons[1]).toBeInTheDocument()
+      return boutons[1]!
+    })
+    await userEvent.click(fermer)
     await waitFor(() => expect(app.adresse()).toBe('/importations?q=FA'))
   })
 })

@@ -8,7 +8,6 @@ import { useState } from 'react'
 import { api } from '../../lib/api'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import type { Schema } from '../../lib/types'
-import type { SignalementCreation } from '../../lib/types-provisoires'
 import { Fenetre } from '../mise-en-page/Fenetre'
 import { Grille } from '../mise-en-page/Grille'
 import { Erreur } from '../retour/Erreur'
@@ -19,6 +18,7 @@ import { Segments } from '../saisie/Segments'
 import { SelecteurMatiere, type MatiereChoix } from '../saisie/SelecteurMatiere'
 import { Zone } from '../saisie/Zone'
 
+type SignalementCreation = Schema<'SignalementCreation'>
 type Urgence = SignalementCreation['urgence']
 type MatiereResume = Schema<'MatiereResume'>
 

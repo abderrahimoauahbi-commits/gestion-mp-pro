@@ -1,25 +1,13 @@
 /**
  * La performance des fournisseurs (route 215, `GET /fournisseurs/performance`, lot D8) : OTIF et
- * score, rapprochés de la fiche **par identifiant** (P7-25, H-31). Tant que la route n'est pas
- * publiée, sa forme est celle de Gestion MP (PROVISOIRE : à remplacer par
- * `Schema<'PerformanceFournisseurs'>`), et une lecture refusée laisse « — » sans bloquer l'écran.
+ * score, rapprochés de la fiche **par identifiant** (P7-25, H-31). Une lecture refusée laisse « — »
+ * sans bloquer l'écran.
  */
 import { useLecture } from '../../lib/requetes'
+import type { Schema } from '../../lib/types'
 
-export interface ScoreFournisseur {
-  fournisseur_id?: number | null
-  fournisseur: string
-  receptions: number
-  otif: number | null
-  score: number | null
-  classement: string
-  action: string
-}
-
-export interface Performance {
-  cible_otif: number
-  lignes: ScoreFournisseur[]
-}
+export type ScoreFournisseur = Schema<'ScoreFournisseur'>
+export type Performance = Schema<'PerformanceFournisseurs'>
 
 export function usePerformance() {
   return useLecture<Performance>('/fournisseurs/performance', undefined, { staleTime: 60_000 })

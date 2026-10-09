@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "numero": "INV-2026-0001",
+    "libelle": "Comptage de l'atelier",
+    "statut": "ouvert",
+    "date": "2026-10-09",
+    "magasin_id": 3,
+    "magasin": "ATELIER",
+    "tolerance": 0.02,
+    "perimetre": "Tout le stock",
+    "criteres": {
+      "matieres": [],
+      "roles": [],
+      "compositions": [],
+      "classes_abc": []
+    },
+    "nb_matieres_suspendues": 7,
+    "cree_par": "Direction",
+    "cree_le": "2026-10-09T11:08:21.931239Z",
+    "valide_par": "",
+    "valide_le": null,
+    "abandonne_par": "",
+    "abandonne_le": null,
+    "annule_par": "",
+    "annule_le": null,
+    "annulation_motif": "",
+    "nb_lignes": 1,
+    "nb_comptees": 0,
+    "hors_tolerance": 0,
+    "sans_justification": 0,
+    "a_recompter": 0,
+    "recomptees": 0,
+    "recomptes_meme_personne": 0,
+    "ecart_total": 0.0,
+    "ecart_absolu": 0.0,
+    "ecart_valeur_mad": 0.0,
+    "ecart_valeur_absolue_mad": 0.0,
+    "version": 1
+  }
+]
