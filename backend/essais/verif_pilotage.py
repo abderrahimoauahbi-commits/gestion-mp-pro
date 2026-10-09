@@ -22,7 +22,7 @@ from verif_valeur import journal_valorise
 
 NOM_KG = "Bilan du mois : kilos recomptés, équation fermée"
 NOM_MAD = "Bilan du mois : dirhams = Valorisation et journal valorisé, équation fermée"
-NOM_ACT = "Bilan du mois : m², bons émis, réceptions, OTIF"
+NOM_ACT = "Bilan du mois : m², bons émis, réceptions, OTIF, ruptures"
 NOM_COCKPIT = "Cockpit = écran Stock, Commandes, Valorisation (comptes, montants, ratios)"
 STATUTS = {
     "ruptures": "RUPTURE",
@@ -192,7 +192,8 @@ def _bilan_mad(
 def _bilan_activite(
     a: Acces, r: Releve, b: dict[str, Any], mois: tuple[date, date], perf: list[dict[str, Any]]
 ) -> None:
-    """m² fabriqués, bons émis, réceptions validées, OTIF du mois."""
+    """m² fabriqués, bons émis, réceptions validées, OTIF du mois ; ruptures et critiques au
+    soir du dernier jour = l'écran Stock à cette date."""
     debut, fin = mois
     m = debut.strftime("%Y-%m")
     (m2,) = a.sql(
@@ -225,6 +226,15 @@ def _bilan_activite(
         f"écran {b['receptions']}, recompté {recues}",
     )
     r.juger(NOM_ACT, f"{m} (réceptions notées)", b["receptions_notees"] == len(notes))
+    statuts = [x["statut"] or "" for x in a.get("/stock", date=fin.isoformat())["lignes"]]
+    for champ, mot in (("ruptures", "RUPTURE"), ("critiques", "CRITIQUE")):
+        n = sum(mot in x for x in statuts)
+        r.juger(
+            NOM_ACT,
+            f"{m} ({champ} au soir du {fin})",
+            b[champ] == n,
+            f"écran {b[champ]}, écran Stock {n}",
+        )
     otif = sum(notes) / len(notes) if notes else None
     r.juger(
         NOM_ACT,

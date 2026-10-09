@@ -15,6 +15,7 @@ import http.cookiejar
 import json
 import os
 import secrets
+import shutil
 import socket
 import subprocess
 import sys
@@ -149,9 +150,11 @@ class Serveur:
         )
         commande = [sys.executable, "-m", "uvicorn", "gestion_mp_pro.main:app"]
         commande += ["--host", "127.0.0.1", "--port", str(self.port), "--no-access-log"]
-        self.processus = subprocess.Popen(  # noqa: S603 (programme et arguments fixes)
-            commande, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
-        )
+        self.journal = Path(self.dossier) / "serveur.log"
+        with self.journal.open("wb") as sortie:  # un fichier : un tube plein bloquerait le serveur
+            self.processus = subprocess.Popen(  # noqa: S603 (programme et arguments fixes)
+                commande, env=env, stdout=subprocess.DEVNULL, stderr=sortie
+            )
         self.adresse = f"http://127.0.0.1:{self.port}"
         self._attendre()
 
@@ -160,7 +163,8 @@ class Serveur:
         fin = time.monotonic() + 60
         while time.monotonic() < fin:
             if self.processus.poll() is not None:
-                erreur = self.processus.stderr.read().decode() if self.processus.stderr else ""
+                erreur = self.journal.read_text(encoding="utf-8", errors="replace")
+                self.arreter()
                 raise RuntimeError(f"Le serveur PRO s'est arrêté au démarrage :\n{erreur[-2000:]}")
             try:
                 urllib.request.urlopen(self.adresse + "/api/sante", timeout=2).read()  # noqa: S310
@@ -171,7 +175,7 @@ class Serveur:
         raise RuntimeError("Le serveur PRO n'a pas répondu en 60 s.")
 
     def arreter(self) -> None:
-        """Arrête le serveur (et attend sa fin)."""
+        """Arrête le serveur (et attend sa fin), puis efface son dossier temporaire."""
         if self.processus.poll() is None:
             self.processus.terminate()
             try:
@@ -179,6 +183,7 @@ class Serveur:
             except subprocess.TimeoutExpired:
                 self.processus.kill()
                 self.processus.wait()
+        shutil.rmtree(self.dossier, ignore_errors=True)
 
 
 def _port_libre() -> int:
