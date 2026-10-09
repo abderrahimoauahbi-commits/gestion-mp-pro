@@ -126,7 +126,9 @@ def statut_parti(c: Commande) -> StatutCommande:
 
 
 def charger(s: Session, cid: int, *, verrou: bool = False) -> Bon:
-    """Le bon (404 « Commande introuvable. »), verrouillé pour un geste."""
+    """Le bon (404 « Commande introuvable. »), verrouillé pour un geste, relu en base (ce qui
+    est en attente dans la session est d'abord écrit : la relecture ne l'efface pas)."""
+    s.flush()
     requete = (
         select(Commande)
         .where(Commande.id == cid)
