@@ -17,9 +17,6 @@ import type {
 
 export const useCockpit = () => useLecture<Cockpit>('/cockpit', undefined, { refetchInterval: 180_000 })
 export const useCommandesToutes = (lire = true) => useLecture<CommandeResume[]>(lire ? '/commandes' : null)
-/** Les bons en retard, selon la règle unique du serveur (`?filtre=retard`, P1-11). */
-export const useRetards = (lire = true) =>
-  useLecture<CommandeResume[]>(lire ? '/commandes' : null, { filtre: 'retard' })
 export const useBrouillons = () => useLecture<Brouillons>('/brouillons')
 export const useAttente = (lire = true) => useLecture<EnAttente>(lire ? '/dossiers/a-rattacher' : null)
 /** Les besoins signalés en attente, le plus récent d'abord (route 221). */

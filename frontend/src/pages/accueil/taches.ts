@@ -5,15 +5,14 @@
  * n'est un lien que si le rôle peut l'ouvrir (`permis`).
  *
  * Les comptes viennent du serveur : alerte rouge et urgentes du Cockpit (H-07 : « N en rupture ou
- * critiques » partout, les urgentes nommées à part), retards de `GET /commandes?filtre=retard`
+ * critiques » partout, les urgentes nommées à part), retards (`en_retard` du serveur)
  * (P1-11), contrôles à corriger (`a_corriger`, E-08). L'écran ne recompte rien d'autre que la
  * longueur des listes reçues.
  */
 import { date, nombre } from '../../lib/format'
 import { permis } from '../../lib/droits'
-import { ajouterJours } from '../../lib/heure'
 import type { Role } from '../../lib/types'
-import { estClos, ongletDe, prixAConfirmer } from '../commandes/liste'
+import { ongletDe, prixAConfirmer } from '../commandes/liste'
 import type {
   Brouillon,
   Brouillons,
@@ -257,19 +256,18 @@ export function tachesAValider(role: Role, lignes: readonly Brouillon[]): Tache[
 }
 
 /** La date d'arrivée attendue : l'ETA, sinon la livraison prévue. */
-export const arriveeDe = (c: CommandeResume) => c.expedition.eta ?? c.date_livraison_prevue ?? ''
+/** L'arrivée attendue d'un bon (ETA, sinon promesse), telle que le serveur la date. */
+export const arriveeDe = (c: CommandeResume) => c.arrivee_attendue ?? ''
 
 /**
- * Les bons partis, ni soldés ni annulés, attendus d'hier à J+7 (ETA, sinon livraison prévue), le
- * plus proche d'abord : c'est lui qu'on prépare au quai.
+ * Les bons attendus d'hier à J+7 (`arrivee_sous_7_jours`, règle du serveur : partis, ni soldés ni
+ * annulés), le plus proche d'abord : c'est lui qu'on prépare au quai.
  */
-export function arriveesSemaine(commandes: readonly CommandeResume[], aujourdhui: string): CommandeResume[] {
-  const debut = ajouterJours(aujourdhui, -1)
-  const fin = ajouterJours(aujourdhui, 7)
+export function arriveesSemaine(commandes: readonly CommandeResume[]): CommandeResume[] {
   return commandes
-    .filter((c) => {
-      const a = arriveeDe(c)
-      return c.parti && !estClos(c) && a !== '' && a >= debut && a <= fin
-    })
+    .filter((c) => c.arrivee_sous_7_jours)
     .sort((a, b) => arriveeDe(a).localeCompare(arriveeDe(b)) || a.id - b.id)
 }
+
+/** Les bons en retard (`en_retard`, la règle de `?filtre=retard`, P1-11). */
+export const retardsDe = (commandes: readonly CommandeResume[]) => commandes.filter((c) => c.en_retard)
