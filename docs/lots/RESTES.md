@@ -40,3 +40,8 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D7 | R1 | Preuves de reprise du domaine 8 : `test_la_reprise_relie_les_dossiers_a_leur_facture`, `test_les_morceaux_d_un_ancien_eclatement_redeviennent_une_piece`. |
 | D7 | docs | Écarts de D7 (docs/lots/D7.md § 4) : 188 `{factures, sans_facture, locaux}` ; 189 enrichie ; `commentaire` (ECRANS-PRO : `observations`) ; 192 sans `reception_ligne_ids` (rattacher par facture seulement) ; 200–204, 206 précisés ; dossiers annulés, jamais supprimés ; REGLES X-IMP-17 sans objet. |
 | D7 | F1 | Pastille « factures sans dossier » si l'écran en a besoin (à déclarer). |
+| F2 | F2/F3 (unification) | Deux moteurs de saisie d'ordre : `pages/sorties/ordre.ts` + `useSaisieOrdre.ts` (F2) et `pages/atelier/sortie.ts` (F3), mêmes règles et textes : n'en garder qu'un (ECRANS-PRO le veut unique). |
+| F2 | E1 | `Bascule` déborde de sa carte sur téléphone ; `Barres` ne sait pas empiler (plan glissant côte à côte au lieu d'« empilées »). |
+| F2 | S4 | `LigneStock` sans id de rôle ni de fournisseur ; `par_magasin` indexé par code ; `Tracabilite` sans ids ni comparaison par matière ; `EtapeTracee.document` sans id (pas de lien). |
+| F2 | S3 | `statut`, `statut_couverture`, `action` du moteur portent encore des émojis (l'écran les traduit par `cleStock`) : rendre des codes. |
+| F2 | F6 | Déclarer l'adresse d'écran `/operations/:id` (numéros de transferts et retours en liens). |
