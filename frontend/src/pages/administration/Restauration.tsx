@@ -1,19 +1,17 @@
 /**
- * Restaurer une sauvegarde (route 45) : après « Oui, continuer… » sur la ligne, une fenêtre de
- * lecture longue en deux temps — ce qui va disparaître et la case « J'ai compris : la base va
- * revenir en arrière. », puis le mot RESTAURER et le motif. Le serveur répond 202 dès que l'état
+ * Restaurer une sauvegarde (route 45) : après « Oui, continuer… » sur la ligne, une
+ * `FenetreConfirmation` en deux étapes — ce qui va disparaître et la case « J'ai compris : la base
+ * va revenir en arrière. », puis le mot RESTAURER et le motif (3 caractères au moins). Le serveur répond 202 dès que l'état
  * actuel est sauvegardé ; la fenêtre suit alors `/api/sante` → `taches.restauration`
  * (« en cours », puis « ok » ou « échec : … ») et ne se ferme pas pendant l'opération.
  */
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 
-import { Fenetre } from '../../composants/mise-en-page/Fenetre'
+import { FenetreConfirmation } from '../../composants/mise-en-page/FenetreConfirmation'
 import { Chargement } from '../../composants/retour/Chargement'
 import { Note } from '../../composants/retour/Note'
-import { Bouton } from '../../composants/saisie/Bouton'
-import { Champ } from '../../composants/saisie/Champ'
-import { Saisie } from '../../composants/saisie/Saisie'
+import { MOTIF_MIN } from '../../composants/saisie/Confirmer'
 import { api } from '../../lib/api'
 import { horodatage } from '../../lib/format'
 import type { Schema } from '../../lib/types'
@@ -26,7 +24,7 @@ export const MOT = 'RESTAURER'
 /** Le temps entre deux lectures de la santé pendant la restauration. */
 export const PAS_DE_SUIVI = 1500
 
-type Etape = 'lecture' | 'mot' | 'suivi' | 'faite' | 'echec'
+type Etape = 'confirmation' | 'suivi' | 'faite' | 'echec'
 
 const etatRestauration = async () => (await api.get<Sante>('/sante')).taches?.restauration
 
@@ -68,16 +66,8 @@ function useSuivi(
   }, [actif, avant])
 }
 
-function Lecture({
-  f,
-  onSuite,
-  onFermer,
-}: {
-  f: FichierSauvegarde
-  onSuite: () => void
-  onFermer: () => void
-}) {
-  const [compris, setCompris] = useState(false)
+/** La lecture de la première étape : ce qui va disparaître. */
+function Lecture({ f }: { f: FichierSauvegarde }) {
   return (
     <>
       <Note ton="critique">
@@ -89,78 +79,25 @@ function Lecture({
         <li>Prévenir les autres utilisateurs : ce qu’ils sont en train de saisir sera perdu.</li>
         <li>L’opération peut prendre quelques minutes ; ne pas fermer la fenêtre.</li>
       </ul>
-      <label className={styles.case}>
-        <input type="checkbox" checked={compris} onChange={(e) => setCompris(e.target.checked)} />
-        J’ai compris : la base va revenir en arrière.
-      </label>
-      <div className={styles.rangee}>
-        <span className={styles.pousse} />
-        <Bouton onClick={onFermer}>Annuler</Bouton>
-        <Bouton
-          variante="danger"
-          grise={compris ? undefined : 'Cocher « J’ai compris » d’abord.'}
-          onClick={onSuite}
-        >
-          Continuer
-        </Bouton>
-      </div>
     </>
   )
 }
 
-function Mot({
-  f,
-  onLancee,
-  onFermer,
-}: {
-  f: FichierSauvegarde
-  onLancee: (avant: string | undefined) => void
-  onFermer: () => void
-}) {
-  const [mot, setMot] = useState('')
-  const [motif, setMotif] = useState('')
-  const manque = [
-    ...(mot.trim().toUpperCase() === MOT ? [] : [`le mot ${MOT}`]),
-    ...(motif.trim().length >= 3 ? [] : ['le motif (3 caractères au moins)']),
-  ]
-  return (
-    <>
-      <p>
-        Dernière confirmation : taper <strong>{MOT}</strong> pour remplacer la base par la sauvegarde du{' '}
-        {horodatage(f.quand)}.
-      </p>
-      <Champ libelle={`Taper ${MOT}`} obligatoire>
-        <Saisie valeur={mot} max={20} onChange={setMot} autoFocus />
-      </Champ>
-      <Champ libelle="Motif" aide="écrit au journal des actions" obligatoire>
-        <Saisie valeur={motif} max={300} onChange={setMotif} />
-      </Champ>
-      <div className={styles.rangee}>
-        <span className={styles.pousse} />
-        <Bouton onClick={onFermer}>Annuler</Bouton>
-        <Bouton
-          variante="danger"
-          manque={manque}
-          attente="Restauration en cours…"
-          onClick={async () => {
-            const avant = await etatRestauration().catch(() => undefined)
-            await api.post(`/sauvegardes/${encodeURIComponent(f.nom)}/restaurer`, {
-              confirmation: mot.trim(),
-              motif: motif.trim(),
-            })
-            onLancee(avant)
-          }}
-        >
-          Restaurer maintenant
-        </Bouton>
-      </div>
-    </>
-  )
+/** Ce que la fenêtre montre une fois la restauration lancée : le suivi, puis l'issue. */
+function Issue({ etape, f, texte }: { etape: Etape; f: FichierSauvegarde; texte: string }) {
+  if (etape === 'suivi') return <Chargement quoi="la restauration (ne pas fermer la fenêtre)" />
+  if (etape === 'faite')
+    return (
+      <Note ton="ok">
+        {`La base est revenue à l’état du ${horodatage(f.quand)}. Les autres postes doivent rouvrir leur écran ; si la session est perdue, se reconnecter.`}
+      </Note>
+    )
+  return <Note ton="critique">{`La restauration a échoué : ${texte.replace(/^échec : /, '')}`}</Note>
 }
 
 export function FenetreRestauration({ f, onFermer }: { f: FichierSauvegarde; onFermer: () => void }) {
   const client = useQueryClient()
-  const [etape, setEtape] = useState<Etape>('lecture')
+  const [etape, setEtape] = useState<Etape>('confirmation')
   const [avant, setAvant] = useState<string | undefined>(undefined)
   const [texte, setTexte] = useState('')
   useSuivi(etape === 'suivi', avant, (fin, lu) => {
@@ -168,40 +105,39 @@ export function FenetreRestauration({ f, onFermer }: { f: FichierSauvegarde; onF
     setEtape(fin)
     if (fin === 'faite') void client.invalidateQueries()
   })
-  const occupe = etape === 'suivi'
   return (
-    <Fenetre
+    <FenetreConfirmation
       titre={`Restaurer la sauvegarde du ${horodatage(f.quand)}`}
-      onFermer={occupe ? () => undefined : onFermer}
-    >
-      {etape === 'lecture' ? <Lecture f={f} onSuite={() => setEtape('mot')} onFermer={onFermer} /> : null}
-      {etape === 'mot' ? (
-        <Mot
-          f={f}
-          onFermer={onFermer}
-          onLancee={(a) => {
-            setAvant(a)
-            setEtape('suivi')
-          }}
-        />
-      ) : null}
-      {etape === 'suivi' ? <Chargement quoi="la restauration (ne pas fermer la fenêtre)" /> : null}
-      {etape === 'faite' ? (
-        <Note ton="ok">
-          {`La base est revenue à l’état du ${horodatage(f.quand)}. Les autres postes doivent rouvrir leur écran ; si la session est perdue, se reconnecter.`}
-        </Note>
-      ) : null}
-      {etape === 'echec' ? (
-        <Note ton="critique">{`La restauration a échoué : ${texte.replace(/^échec : /, '')}`}</Note>
-      ) : null}
-      {etape === 'faite' || etape === 'echec' ? (
-        <div className={styles.rangee}>
-          <span className={styles.pousse} />
-          <Bouton variante="principal" onClick={onFermer}>
-            Fermer
-          </Bouton>
-        </div>
-      ) : null}
-    </Fenetre>
+      etapes={[{ texte: <Lecture f={f} />, caseJaiCompris: 'J’ai compris : la base va revenir en arrière.' }]}
+      texte={
+        <p>
+          Dernière confirmation : taper <strong>{MOT}</strong> pour remplacer la base par la sauvegarde du{' '}
+          {horodatage(f.quand)}.
+        </p>
+      }
+      mot={MOT}
+      motif="exige"
+      motifMin={MOTIF_MIN}
+      motifMax={300}
+      aideMotif="écrit au journal des actions"
+      oui="Restaurer maintenant"
+      variante="danger"
+      fermerApres={false}
+      onOui={async (motif, mot) => {
+        const lu = await etatRestauration().catch(() => undefined)
+        await api.post(`/sauvegardes/${encodeURIComponent(f.nom)}/restaurer`, {
+          confirmation: mot ?? '',
+          motif,
+        })
+        setAvant(lu)
+        setEtape('suivi')
+      }}
+      issue={
+        etape === 'confirmation'
+          ? null
+          : { corps: <Issue etape={etape} f={f} texte={texte} />, fermable: etape !== 'suivi' }
+      }
+      onFermer={onFermer}
+    />
   )
 }
