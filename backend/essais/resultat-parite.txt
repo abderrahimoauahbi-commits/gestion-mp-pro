@@ -1,27 +1,18 @@
-[Lot K8B — réception bi-devise scindée] Cette passe (PRO 2b6c34c, lot-K8B avant le merge de
-main) PROUVE le lot : K8b est réécrite en « réception scindée » (K8b 277 expliqués) et le
-total « À CORRIGER » est 0. Après `git merge main`, un nouveau tirage donne 27 111 écarts,
-TOUS dus au changement de forme des codes du stock livré par RESTES3 (emoji « 🟡 ATTENTION »
-→ code « ATTENTION », + role_id/fournisseur_id ; cockpit, stock, plan d'achat, pilotage),
-documenté RESTES3.md §1.1 comme travail de R2/C1 — AUCUN ne touche la devise ni la scission.
-La réconciliation de cette forme n'appartient pas au lot K8B (hors des fichiers cités) ; à
-router vers C1. Voir le rapport du lot et docs/lots/R1.md.
-
 PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
-le 2026-10-09 14:32 · Gestion MP d10180e · PRO 2b6c34c
-source : gestion_mp_comparaison (copie : gestion_mp_pro_k8b_source_essai) → PRO gestion_mp_pro_k8b_cible_essai
+le 2026-10-09 21:04 · Gestion MP d10180e · PRO cc70748
+source : gestion_mp_comparaison (copie : gestion_mp_pro_parite_source_essai) → PRO gestion_mp_pro_parite_cible_essai
 empreinte gestion_mp : af08c36c24e20ffc… avant, après : identique
 empreinte gestion_mp_comparaison : 9e5934b0a949e0ed… avant, après : identique
 
 CONTRÔLE D'IMPORT (REPRISE R1)
 ------------------------------
   REPRISE DE GESTION MP DANS GESTION MP PRO
-  source : gestion_mp_pro_k8b_source_essai (erp_fil) — lecture seule vérifiée : oui
-  cible  : gestion_mp_pro_k8b_cible_essai — mode tout
+  source : gestion_mp_pro_parite_source_essai (erp_fil) — lecture seule vérifiée : oui
+  cible  : gestion_mp_pro_parite_cible_essai — mode tout
   empreinte de la source avant : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4
   empreinte de la source après : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4 (identique)
   activité : reprise
-  durée : 4.6 s
+  durée : 4.5 s
   
   CONTRÔLES
   [tenu] Comptes de lignes par table (source → cible)
@@ -170,6 +161,7 @@ STATIQUE : LES DEUX MOTEURS À 19 DATES
 --------------------------------------
   dates : 2025-10-31, 2025-11-30, 2025-12-31, 2026-01-31, 2026-02-28, 2026-03-31, 2026-04-30, 2026-05-31, 2026-06-30, 2026-07-31, 2026-08-31, 2026-09-30, 2026-10-08, 2025-11-15, 2026-01-15, 2026-03-15, 2026-05-15, 2026-07-15, 2026-09-15
   moteur PRO = moteur de Gestion MP sur les mêmes données (égalité exacte) : 0 écart(s)
+  codes du stock de PRO ramenés aux libellés de Gestion MP (forme RESTES3) : 8816 valeurs
   PRO contre Gestion MP — section : comparées | expliquées par classe (ampleur max) | à corriger
   a_la_date                                      29376 | K8b 10 (4) | 0
   aberrantes                                       133 | — | 0
@@ -251,8 +243,8 @@ PAR L'API : 155 PAIRES DE ROUTES (DIRECTION)
   stock                                         200960 | — | 0
   valorisation                                   34880 | K1 2002 (0.409) | 0
   échéancier                                      8068 | K1 35 (0.144) | 0
-  valeurs traduites (formes déclarées) : 38788 (saisi_le 10438, cours 9674, document 8586, confirme_par 1604, (vue de l'élément) 1508, statut_reception 1508, cree_le 967, type 672, second_par 360, cree_par 342, livraison 330, approuvee_par 330…)
-  champs ajoutés par PRO (excusés) : 1117
+  valeurs traduites (formes déclarées) : 48087 (saisi_le 10438, cours 9674, codes du stock 9299, document 8586, confirme_par 1604, (vue de l'élément) 1508, statut_reception 1508, cree_le 967, type 672, second_par 360, cree_par 342, livraison 330…)
+  champs ajoutés par PRO (excusés) : 1183
   réciproque — champs de Gestion MP rendus ailleurs par PRO (14) :
     besoins.plan : m² du plan par qualité : PRO les rend dans `/production/plan` (`qualites[].glissant`), comparés par la route « production (plan) »
     controles.colonnes : libellés des colonnes de tous les contrôles : PRO les rend dans chaque contrôle (`controles[].colonnes`, {cle, libelle, unite}), D8 § 4
@@ -277,8 +269,8 @@ PAR L'API : ÉCRANS DE L'ALIMENTATION
   alimentation : lots                            13440 | — | 0
   alimentation : ordres                           5120 | K1 52 (0.00239) | 0
   alimentation : stock                            9180 | — | 0
-  valeurs traduites (formes déclarées) : 1153 (type 672, cree_le 320, action 124, valide_par 13, cree_par 12, valide_le 12…)
-  champs ajoutés par PRO (excusés) : 27
+  valeurs traduites (formes déclarées) : 1401 (type 672, cree_le 320, codes du stock 248, action 124, valide_par 13, cree_par 12, valide_le 12…)
+  champs ajoutés par PRO (excusés) : 31
   réciproque — champs de Gestion MP rendus ailleurs par PRO (8) :
     alimentation : ordres.fabrications : comparé par la direction (« ordres »)
     alimentation : ordres.lignes : comparé par la direction (« ordres »)
