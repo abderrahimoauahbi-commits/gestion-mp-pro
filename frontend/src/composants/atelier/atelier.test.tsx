@@ -32,6 +32,7 @@ const CIBLES: [string, string][] = [
   ['atelier/Tuile.module.css', '.tuile'],
   ['saisie/Segments.module.css', '.tactile .segment'],
   ['saisie/Bouton.module.css', '.atelier'],
+  ['documents/BoutonImprimer.module.css', '.atelier'],
 ]
 
 describe('Cibles tactiles de l’atelier', () => {

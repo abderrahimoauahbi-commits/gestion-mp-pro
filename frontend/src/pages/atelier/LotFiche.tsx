@@ -143,14 +143,13 @@ export default function LotFiche() {
                   Déplacer ce lot
                 </Bouton>
               )}
-              <div className={styles.imprimer}>
-                <BoutonImprimer
-                  route="/documents/etiquettes"
-                  parametres={{ lots: l.lot_id }}
-                  libelle="Imprimer l’étiquette"
-                  titre="L’étiquette 100 × 70 mm s’ouvre dans un nouvel onglet, prête à imprimer"
-                />
-              </div>
+              <BoutonImprimer
+                taille="atelier"
+                route="/documents/etiquettes"
+                parametres={{ lots: l.lot_id }}
+                libelle="Imprimer l’étiquette"
+                titre="L’étiquette 100 × 70 mm s’ouvre dans un nouvel onglet, prête à imprimer"
+              />
             </div>
             <Mouvements l={l} />
             <NoteAtelier>{`${nombre(l.mouvements.length)} mouvement(s) en tout.`}</NoteAtelier>

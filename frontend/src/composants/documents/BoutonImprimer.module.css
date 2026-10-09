@@ -18,3 +18,13 @@
   background: var(--surface-2);
   text-decoration: none;
 }
+
+/* À l'atelier : toute la largeur, une cible tactile de 46 px. */
+.atelier {
+  justify-content: center;
+  width: 100%;
+  min-width: var(--cible-tactile);
+  height: auto;
+  min-height: var(--champ-atelier);
+  font-size: var(--texte-atelier);
+}
