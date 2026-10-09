@@ -1,0 +1,84 @@
+/* Feuille de style commune des documents imprimés (lot D9) : A4, tailles en points et en
+   millimètres, impression sans coque. Le format de page (@page) est posé par le gabarit. */
+:root {
+  --encre: #1d2733;
+  --gris: #5b6675;
+  --trait: #d9dee5;
+  --fond: #f3f5f8;
+  --accent: #1f5fa8;
+  --rouge-societe: #d40000;
+  --alerte: #8a3b00;
+  --fond-alerte: #fff4e5;
+  --largeur-page: 210mm;
+  --hauteur-page: 297mm;
+  --marges: 12mm 13mm 10mm;
+  --place-du-pied: 18mm;
+}
+body.paysage {
+  --largeur-page: 297mm;
+  --hauteur-page: 210mm;
+}
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font: 10pt/1.45 Arial, Helvetica, sans-serif; color: var(--encre); margin: 0; background: #e8ecf0; }
+
+/* Ce qui ne s'imprime jamais : la barre « Imprimer », les avertissements. */
+.barre { position: sticky; top: 0; z-index: 1; display: flex; justify-content: center; gap: 4mm;
+  padding: 10px; background: var(--encre); }
+.barre button { font: 600 10pt system-ui, sans-serif; padding: 8px 18px; border: 0; border-radius: 6px;
+  background: #fff; color: var(--encre); cursor: pointer; }
+.avertissement { width: var(--largeur-page); max-width: calc(100% - 20px); margin: 14px auto 0;
+  color: var(--alerte); background: var(--fond-alerte); padding: 10px 14px; border-radius: 6px; font-size: 10pt; }
+
+/* La feuille à l'écran : la taille du papier, ses marges, une ombre. */
+.page { background: #fff; width: var(--largeur-page); min-height: var(--hauteur-page); margin: 20px auto 40px;
+  padding: var(--marges); box-shadow: 0 2px 14px rgba(0, 0, 0, .14); display: flex; flex-direction: column; }
+.mise-en-page { width: 100%; border-collapse: collapse; flex: 1; }
+.mise-en-page > tbody > tr > td, .mise-en-page > tfoot > tr > td { padding: 0; border: 0; vertical-align: top; }
+.place-du-pied { display: none; }
+
+/* Le papier à en-tête de l'usine (décision A22) : Times, raison sociale rouge, grande initiale. */
+.entete-societe { text-align: center; font-family: "Times New Roman", Times, serif; padding-bottom: 3mm;
+  border-bottom: .5pt solid var(--trait); }
+.entete-societe .nom { font-size: 19pt; color: var(--rouge-societe); letter-spacing: .02em; line-height: 1.2; }
+.entete-societe .nom::first-letter { font-size: 28pt; }
+.entete-societe .secteur { font-size: 10.5pt; font-style: italic; }
+.entete-societe .ligne { font-size: 10pt; }
+.pied-societe { margin-top: 6mm; padding-top: 2mm; border-top: .5pt solid var(--trait);
+  font: 8.5pt/1.55 "Times New Roman", Times, serif; color: var(--encre); background: #fff; }
+.pied-societe div { white-space: pre-wrap; }
+
+/* Les éléments communs des documents. */
+h1 { font-size: 15pt; margin: 6mm 0 2mm; }
+h2 { font-size: 7.5pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gris); margin: 5mm 0 1.5mm; }
+.sous-titre { color: var(--gris); font-size: 9.5pt; margin: 0 0 4mm; }
+.cadre { border: .75pt solid var(--trait); border-radius: 2mm; padding: 3mm 4mm; font-size: 9.5pt; }
+.note { margin-top: 5mm; padding: 3mm 4mm; background: var(--fond); border-radius: 2mm; font-size: 9.5pt; }
+.lib { color: var(--gris); margin-right: 2mm; }
+table.donnees { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+table.donnees thead { display: table-header-group; }
+table.donnees th { background: var(--fond); font-size: 7.5pt; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--gris); text-align: left; padding: 2.2mm 2.5mm;
+  border-bottom: .75pt solid var(--trait); }
+table.donnees td { padding: 2mm 2.5mm; border-bottom: .5pt solid var(--trait); vertical-align: top; }
+table.donnees tr { break-inside: avoid; page-break-inside: avoid; }
+table.donnees tfoot td { padding: 2.5mm; font-weight: 700; font-size: 10pt; border-top: 1.2pt solid var(--encre); border-bottom: 0; }
+.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.n { text-align: right; }
+.vide { color: var(--gris); font-style: italic; }
+.saut { break-after: page; page-break-after: always; }
+
+@media (max-width: 820px) {
+  .page, .avertissement { width: auto; min-height: 0; margin: 10px; }
+}
+
+/* À l'impression : ni fond, ni ombre, ni barre ; le pied du papier en bas de chaque feuille
+   (une place lui est gardée sur chaque feuille par le pied du tableau de mise en page). */
+@media print {
+  body { background: #fff; }
+  .ecran-seulement { display: none !important; }
+  .page { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; display: block; }
+  .page + .page { break-before: page; page-break-before: always; }
+  .place-du-pied { display: block; height: var(--place-du-pied); }
+  .pied-societe { position: fixed; bottom: 0; left: 0; right: 0; margin: 0; }
+}

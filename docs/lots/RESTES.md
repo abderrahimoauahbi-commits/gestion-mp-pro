@@ -18,6 +18,12 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D1 | D9 | Les classeurs des référentiels passent par `exports/referentiels.classeur` en attendant `exports/classeur.py`. |
 | D1 | docs | Schémas enrichis (routes 24, 26, 27, 28, 34, 38, 42, 57, 62, 64, 70–71, 77, 79–80 : voir docs/lots/D1.md § 4) ; ECRANS-PRO P7 « Désactiver » à corps partiel contre API-PRO § 1.24 (fiche entière, suivi) ; `?version=` facultatif sur les suppressions 41, 63, 68, 74. |
 | D1 | tous | `test_catalogue_api.py` (OpenAPI = API-PRO) n'existe pas encore : à écrire avant la recette (V5). |
+| R1 | Mohamed (à la livraison) | 4 réceptions de Gestion MP payées en deux devises (LOMAT, USD et EUR) : reprises en une réception (devise de la facture en en-tête, prix des lignes intacts), signalé. À proposer : garder ou scinder. |
+| R1 | docs | MODELE-DONNEES § 10 : `--date-limite` non fait ; options `--cible`, `--pieces-source`, `--rapport`, `--genre` ; correspondances des tables enfants par parent ; le vidage garde les fichiers des pièces jointes. |
+| R1 | D10 | `reprise/sauvegarde.py` est un `pg_dump` minimal : le remplacer par le service de sauvegarde de D10. |
+| D9 | docs | API-PRO 114 « HTML A4 » : fait en étiquettes 100 × 70 mm, une par page (comme Gestion MP et ECRANS-PRO). ECRANS-PRO 4.29 : le bon fournisseur est en anglais jusque dans l'en-tête (« HEAD OFFICE », « BANKS », décision du 8 octobre) — corriger le document. |
+| D9 | X1 | Caddy ne doit pas remplacer la CSP posée par l'application (le bouton « Imprimer » est autorisé par son empreinte sha256). |
+| D9 | S4 | Étiquettes (`lots_lecture.etiquettes`) : kilos selon la règle § 9.3 (espace insécable, décimales) ; champ « ≈ N bobines » manquant. |
 | D10 | S1 | `GenreSauvegarde` : ajouter `avant_vidage` et `avant_mise_a_jour` (décision X2) ; le registre les ignore en attendant (`services/sauvegarde_registre.GENRES_DU_REGISTRE`). |
 | D10 | S0 | `tests/conftest.py` : `GESTIONMPPRO_SAUVEGARDES` et `GESTIONMPPRO_PIECES` vers un dossier temporaire pour toute la séance (G-03). Code `sauvegarde_impossible` (503) ajouté à `api/erreurs.py`. |
 | D10 | S2 | G-13 : `services.appareils.acces()` garde `:8050` derrière HTTPS ; reprendre `services.serveur.adresse_de()` (schéma et port de la requête). |

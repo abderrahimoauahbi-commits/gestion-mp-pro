@@ -1,0 +1,448 @@
+RÉSULTAT DE LA REPRISE (lot R1) — 2026-10-09 08:39 — branche lot-R1 de1118e
+Sources lues en lecture seule par pg_dump, copiées dans des bases *_essai ; la reprise lit les copies.
+Empreinte de gestion_mp avant : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe
+Empreinte de gestion_mp_comparaison avant : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86
+
+================================================================================
+1. gestion_mp (production : référentiels réels, une commande) → base PRO neuve, --mode tout
+================================================================================
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_source_essai (gestion_mp) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_essai — mode tout
+empreinte de la source avant : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe
+empreinte de la source après : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe (identique)
+activité : reprise
+durée : 0.5 s
+
+CONTRÔLES
+[tenu] Comptes de lignes par table (source → cible)
+    article                  124 → matiere                  124  =
+    fournisseur               12 → fournisseur               12  =
+    composition                7 → composition                7  =
+    type_fil                   9 → type_fil                   9  =
+    titrage                   28 → titrage                   28  =
+    couleur                   34 → couleur                   34  =
+    role_nomenclature          8 → role_nomenclature          8  =
+    code_douanier              0 → code_douanier              0  =
+    poste_frais               11 → poste_frais               11  =
+    devise                     3 → devise                     3  =
+    magasin                    3 → magasin                    3  =
+    metier                     4 → metier                     4  =
+    fil_monte                  0 → montage                    0  =
+    qualite                   18 → qualite                   18  =
+    qualite_poids            118 → qualite_poids            118  =
+    qualite_saison           216 → qualite_saison           216  =
+    recette                  319 → recette                  319  =
+    recette_version           18 → recette_version           18  =
+    lot                        0 → lot                        0  =
+    mouvement                  0 → mouvement                  0  =
+    solde                      0 → solde                      0  =
+    commande                   1 → commande                   1  =
+    commande_ligne            24 → commande_ligne            24  =
+    facture                    0 → facture                    0  =
+    reception                  0 → reception                  0  =
+    reception_ligne            0 → reception_ligne            0  =
+    bon_sortie                 0 → ordre                      0  =
+    bon_fabrication            0 → ordre_qualite              0  =
+    bon_ligne                  0 → ordre_ligne                0  =
+    operation                  0 → operation                  0  =
+    operation_ligne            0 → operation_ligne            0  =
+    inventaire                 0 → inventaire                 0  =
+    inventaire_ligne           0 → inventaire_ligne           0  =
+    dossier                    0 → dossier                    0  =
+    dossier_ligne              0 → dossier_ligne              0  =
+    dossier_charge             0 → dossier_frais              0  =
+    dossier_charge_part        0 → dossier_frais_part         0  =
+    reclamation                0 → reclamation                0  =
+    signalement                0 → signalement                0  =
+    indicateur_jour            2 → indicateur_jour            2  =
+    journal                   16 → journal (repris)          16  =
+[tenu] Mêmes recettes et plans versionnés
+    recettes : 319 source, 319 cible, différentes 0
+    versions de recette : 319 lignes source, absentes en cible 0
+    versions du plan : 0 attendues (journal), 0 en cible
+[tenu] Σ quantités et Σ quantité × prix (entrées) par matière
+    0 matières ; écart max 0.00e+2 kg, 0.00e+2 en valeur ; hors de l'arrondi déclaré : 0
+[tenu] Soldes = journal
+    soldes ≠ Σ mouvements en cible : 0 ; écart max au solde source : 0.00e+2 kg
+[tenu] Mêmes numéros de documents
+    commande         1 numéros ; manquants 0, en plus 0
+    reception        0 numéros ; manquants 0, en plus 0
+    ordre            0 numéros ; manquants 0, en plus 0
+    operation        0 numéros ; manquants 0, en plus 0
+    inventaire       0 numéros ; manquants 0, en plus 0
+    dossier          0 numéros ; manquants 0, en plus 0
+    reclamation      0 numéros ; manquants 0, en plus 0
+    facture          0 numéros ; manquants 0, en plus 0
+    lot              0 numéros ; manquants 0
+
+LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+    commande                       1       1       0       0       0       0       0
+    commande_decision              1       1       0       0       0       0       0
+    commande_ligne                24      24       0       0       0       0       0
+    commande_version               1       1       0       0       0       0       0
+    commande_version_ligne         0      24       0       0       0       0       0
+    composition                    7       7       0       0       0       0       0
+    compteur                       1       1       0       0       0       0       0
+    couleur                       34      34       0       0       0       0       0
+    devise                         3       0       2       1       0       0       0
+    fournisseur                   12      12       0       0       0       0       0
+    indicateur_jour                2       2       0       0       0       0       0
+    journal                       16      16       0       0       0       0       0
+    magasin                        3       1       2       0       0       0       0
+    matiere                      124     124       0       0       1       0       0
+    metier                         4       4       0       0       0       0       0
+    metier_etage                   0      28       0       0       0       0       0
+    parametre                     57       0      57       0       0       0       0
+    poste_frais                   11       0       0      11       0       0       0
+    qualite                       18      18       0       0       0       0       0
+    qualite_poids                118     118       0       0       0       0       0
+    qualite_saison               216     216       0       0       0       0       0
+    recette                      319     319       0       0       0       0       0
+    recette_version               18      18       0       0       0       0       0
+    recette_version_ligne          0     319       0       0       0       0       0
+    recette_version_poids          0     118       0       0       0       0       0
+    role_nomenclature              8       0       0       8       0       0       0
+    titrage                       28      28       0       0       0       0       0
+    type_fil                       9       9       0       0       0       0       0
+    utilisateur                    2       2       0       0       0       0       0
+
+ARRONDIS À L'ÉCHELLE DES COLONNES (K1)
+    commande.montant_approuve : 1 valeurs arrondies, écart max 2.00e-3
+    commande_ligne.contenance : 6 valeurs arrondies, écart max 1.00e-13
+    commande_version.montant_reference : 1 valeurs arrondies, écart max 4.00e-3
+    commande_version_ligne.contenance : 6 valeurs arrondies, écart max 1.00e-13
+    indicateur_jour.a_commander_mad : 2 valeurs arrondies, écart max 1.60e-3
+    indicateur_jour.commandes_en_cours_mad : 1 valeurs arrondies, écart max 2.00e-3
+    indicateur_jour.couverture_jours : 1 valeurs arrondies, écart max 2.42e-3
+
+SIGNALEMENTS (1)
+    matiere PP FRZ-2900 Dtex-Gold 3423-Hs : contenance d'achat nulle (Palette) : achat au kg
+
+(code de sortie 0, 0 s mur, pg_dump avant reprise compris)
+
+================================================================================
+2. gestion_mp rejouée sans changement (rien ne doit être créé)
+================================================================================
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_source_essai (gestion_mp) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_essai — mode tout
+empreinte de la source avant : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe
+empreinte de la source après : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe (identique)
+activité : inchangée ou non demandée
+durée : 0.4 s
+
+LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+    commande                       1       0       0       1       0       0       0
+    commande_decision              1       0       0       1       0       0       0
+    commande_ligne                24       0       0      24       0       0       0
+    commande_version               1       0       0       1       0       0       0
+    composition                    7       0       0       7       0       0       0
+    compteur                       1       0       0       1       0       0       0
+    couleur                       34       0       0      34       0       0       0
+    devise                         3       0       0       3       0       0       0
+    fournisseur                   12       0       0      12       0       0       0
+    indicateur_jour                2       0       0       2       0       0       0
+    journal                        0       0       0      16       0       0       0
+    magasin                        3       0       0       3       0       0       0
+    matiere                      124       0       0     124       1       0       0
+    metier                         4       0       0       4       0       0       0
+    parametre                     57       0       0      57       0       0       0
+    poste_frais                   11       0       0      11       0       0       0
+    qualite                       18       0       0      18       0       0       0
+    qualite_poids                118       0       0     118       0       0       0
+    qualite_saison               216       0       0     216       0       0       0
+    recette                      319       0       0     319       0       0       0
+    recette_version                0       0       0      18       0       0       0
+    role_nomenclature              8       0       0       8       0       0       0
+    titrage                       28       0       0      28       0       0       0
+    type_fil                       9       0       0       9       0       0       0
+    utilisateur                    1       0       0       1       0       0       0
+
+
+================================================================================
+3. gestion_mp_comparaison (année d'essai de l'ERP Fil) → base PRO neuve, --mode tout
+================================================================================
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_comparaison_essai (erp_fil) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_cc_essai — mode tout
+empreinte de la source avant : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86
+empreinte de la source après : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86 (identique)
+activité : reprise
+durée : 4.5 s
+
+CONTRÔLES
+[tenu] Comptes de lignes par table (source → cible)
+    article                  124 → matiere                  124  =
+    fournisseur               12 → fournisseur               12  =
+    composition                7 → composition                7  =
+    type_fil                   9 → type_fil                   9  =
+    titrage                   28 → titrage                   28  =
+    couleur                   34 → couleur                   34  =
+    role_nomenclature          8 → role_nomenclature          8  =
+    code_douanier              0 → code_douanier              0  =
+    poste_frais               11 → poste_frais               11  =
+    devise                     3 → devise                     3  =
+    magasin                    3 → magasin                    3  =
+    metier                     4 → metier                     4  =
+    fil_monte                  0 → montage                    0  =
+    qualite                   18 → qualite                   18  =
+    qualite_poids            118 → qualite_poids            118  =
+    qualite_saison           216 → qualite_saison           216  =
+    recette                  319 → recette                  319  =
+    recette_version           18 → recette_version           18  =
+    lot                     1684 → lot                     1684  =
+    mouvement              10438 → mouvement              10438  =
+    solde                   1594 → solde                   1594  =
+    commande                 330 → commande                 330  =
+    commande_ligne          1604 → commande_ligne          1604  =
+    facture                  316 → facture                  316  =
+    reception                317 → reception                317  =
+    reception_ligne         1508 → reception_ligne         1508  =
+    bon_sortie               320 → ordre                    320  =
+    bon_fabrication          315 → ordre_qualite            315  =
+    bon_ligne               8532 → ordre_ligne             8532  =
+    operation                  0 → operation                  0  =
+    operation_ligne            0 → operation_ligne            0  =
+    inventaire                12 → inventaire                12  =
+    inventaire_ligne         360 → inventaire_ligne         360  =
+    dossier                   90 → dossier                   90  =
+    dossier_ligne            984 → dossier_ligne            984  =
+    dossier_charge           508 → dossier_frais            508  =
+    dossier_charge_part        0 → dossier_frais_part         0  =
+    reclamation                0 → reclamation                0  =
+    signalement                0 → signalement                0  =
+    indicateur_jour            0 → indicateur_jour            0  =
+    journal                 3823 → journal (repris)        3823  =
+[tenu] Mêmes recettes et plans versionnés
+    recettes : 319 source, 319 cible, différentes 0
+    versions de recette : 319 lignes source, absentes en cible 0
+    versions du plan : 0 attendues (journal), 0 en cible
+[tenu] Σ quantités et Σ quantité × prix (entrées) par matière
+    124 matières ; écart max 4.07e-11 kg, 3.38e-12 en valeur ; hors de l'arrondi déclaré : 0
+[tenu] Soldes = journal
+    soldes ≠ Σ mouvements en cible : 0 ; écart max au solde source : 0.00e-1 kg
+[tenu] Mêmes numéros de documents
+    commande       330 numéros ; manquants 0, en plus 0
+    reception      316 numéros ; manquants 0, en plus 0
+    ordre          319 numéros ; manquants 0, en plus 0
+    operation        0 numéros ; manquants 0, en plus 0
+    inventaire      12 numéros ; manquants 0, en plus 0
+    dossier         90 numéros ; manquants 0, en plus 0
+    reclamation      0 numéros ; manquants 0, en plus 0
+    facture        316 numéros ; manquants 0, en plus 0
+    lot           1566 numéros ; manquants 0
+
+LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+    commande                     330     330       0       0       0       0       0
+    commande_ligne              1604    1604       0       0       1       0       0
+    composition                    7       7       0       0       0       0       0
+    compteur                      10      10       0       0       0       0       0
+    couleur                       34      34       0       0       0       0       0
+    devise                         3       0       2       1       0       0       0
+    dossier                       90      90       0       0       0       0       0
+    dossier_frais                508     508       0       0       0       0       0
+    dossier_ligne                984     984       0       0       0       0       0
+    facture                      316     316       0       0       0       0       0
+    fournisseur                   12      12       0       0       0       0       0
+    inventaire                    12      12       0       0       0       0       0
+    inventaire_ligne             360     360       0       0       0       0       0
+    inventaire_matiere           360     360       0       0       0       0       0
+    journal                     3823    3823       0       0       0       0       0
+    lot                         1684    1684       0       0     117       0       0
+    magasin                        3       1       2       0       0       0       0
+    matiere                      124     124       0       0       1       0       0
+    metier                         4       4       0       0       0       0       0
+    metier_etage                   0      28       0       0       0       0       0
+    mouvement                  10438   10438       0       0       0       0       0
+    ordre                        320     320       0       0     320       0       0
+    ordre_ligne                 8532    8532       0       0       0       0       0
+    ordre_qualite                315     315       0       0       0       0       0
+    parametre                     56       0      56       0       0       0       0
+    poste_frais                   11       0       0      11       0       0       0
+    qualite                       18      18       0       0       0       0       0
+    qualite_poids                118     118       0       0       0       0       0
+    qualite_saison               216     216       0       0       0       0       0
+    reception                    317     317       0       0       5       0       0
+    reception_ligne             1508    1508       0       0       0       0       0
+    recette                      319     319       0       0       0       0       0
+    recette_version               18      18       0       0       0       0       0
+    recette_version_ligne          0     319       0       0       0       0       0
+    recette_version_poids          0     118       0       0       0       0       0
+    role_nomenclature              8       0       0       8       0       0       0
+    solde                       1594    1594       0       0       0       0       0
+    titrage                       28      28       0       0       0       0       0
+    type_fil                       9       9       0       0       0       0       0
+    utilisateur                    7       7       0       0       0       0       0
+
+ARRONDIS À L'ÉCHELLE DES COLONNES (K1)
+    commande_ligne.contenance : 106 valeurs arrondies, écart max 1.00e-13
+    commande_ligne.quantite : 104 valeurs arrondies, écart max 1.00e-12
+    dossier_ligne.valeur_devise : 946 valeurs arrondies, écart max 5.00e-3
+    facture.montant : 312 valeurs arrondies, écart max 5.00e-3
+    inventaire_ligne.theorique : 239 valeurs arrondies, écart max 4.50e-11
+    lot.poids_bobine : 653 valeurs arrondies, écart max 5.00e-7
+    mouvement.quantite : 198 valeurs arrondies, écart max 3.78e-11
+    ordre_ligne.quantite : 85 valeurs arrondies, écart max 1.00e-13
+    ordre_qualite.m2 : 314 valeurs arrondies, écart max 5.00e-4
+    reception_ligne.quantite_attendue : 7 valeurs arrondies, écart max 1.00e-13
+
+SIGNALEMENTS (12)
+    commande_ligne * : 1604 prix confirmés sans date : date du bon
+    lot * : 117 numéros de lot avec des blancs : blancs → « _ »
+    matiere PP FRZ-2900 Dtex-Gold 3423-Hs : contenance d'achat nulle (Palette) : achat au kg
+    mouvement * : 8747 prix de sorties, transferts ou retours machine non repris (valorisés au coût moyen)
+    ordre * : 319 ordres validés sans date : fin de leur jour
+    ordre 320 : brouillon numéroté OF-2026-0224 : numéro retiré (gardé au compteur)
+    reception 316 : brouillon numéroté REC-2026-0276 : numéro retiré (gardé au compteur)
+    reception 141 : lignes en EUR, USD : devise de l'en-tête EUR, prix des lignes gardés
+    reception (3) : lignes en EUR, USD : devise de l'en-tête USD, prix des lignes gardés — 153, 175, 283
+    utilisateur mohamed : graphies Mohamed, MOHAMED → un même compte
+
+(code de sortie 0, 5 s mur, pg_dump avant reprise compris)
+
+================================================================================
+4. gestion_mp_comparaison rejouée sans changement
+================================================================================
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_comparaison_essai (erp_fil) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_cc_essai — mode tout
+empreinte de la source avant : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86
+empreinte de la source après : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86 (identique)
+activité : inchangée ou non demandée
+durée : 2.0 s
+
+LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+    commande                     330       0       0     330       0       0       0
+    commande_ligne              1604       0       0    1604       1       0       0
+    composition                    7       0       0       7       0       0       0
+    compteur                      10       0       0      10       0       0       0
+    couleur                       34       0       0      34       0       0       0
+    devise                         3       0       0       3       0       0       0
+    dossier                       90       0       0      90       0       0       0
+    dossier_frais                508       0       0     508       0       0       0
+    dossier_ligne                984       0       0     984       0       0       0
+    facture                      316       0       0     316       0       0       0
+    fournisseur                   12       0       0      12       0       0       0
+    inventaire                    12       0       0      12       0       0       0
+    inventaire_ligne             360       0       0     360       0       0       0
+    inventaire_matiere           360       0       0     360       0       0       0
+    journal                        0       0       0    3823       0       0       0
+    lot                         1684       0       0    1684     117       0       0
+    magasin                        3       0       0       3       0       0       0
+    matiere                      124       0       0     124       1       0       0
+    metier                         4       0       0       4       0       0       0
+    mouvement                  10438       0       0   10438       0       0       0
+    ordre                        320       0       0     320     320       0       0
+    ordre_ligne                 8532       0       0    8532       0       0       0
+    ordre_qualite                315       0       0     315       0       0       0
+    parametre                     56       0       0      56       0       0       0
+    poste_frais                   11       0       0      11       0       0       0
+    qualite                       18       0       0      18       0       0       0
+    qualite_poids                118       0       0     118       0       0       0
+    qualite_saison               216       0       0     216       0       0       0
+    reception                    317       0       0     317       5       0       0
+    reception_ligne             1508       0       0    1508       0       0       0
+    recette                      319       0       0     319       0       0       0
+    recette_version                0       0       0      18       0       0       0
+    role_nomenclature              8       0       0       8       0       0       0
+    solde                       1594       0       0    1594       0       0       0
+    titrage                       28       0       0      28       0       0       0
+    type_fil                       9       0       0       9       0       0       0
+
+
+================================================================================
+5. Moteur PRO (chargeur S4) sur la base reprise = moteur de Gestion MP sur la copie source : etat_stock, 70 colonnes par matière
+================================================================================
+2026-10-09 références 124 124 manquantes set()
+2026-06-30 références 124 124 manquantes set()
+2026-03-31 références 124 124 manquantes set()
+2025-12-31 références 124 124 manquantes set()
+écarts 0
+
+================================================================================
+6. Gestes dans Gestion MP (copie) puis reprise rejouée : activité remplacée, référentiels mis à jour
+================================================================================
+Gestes : désignation d'une matière changée ; une ligne de recette retirée ; un bon confirmé soldé (journal « commande soldée … tout reçu ») ; une connexion au journal.
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_comparaison_essai (erp_fil) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_cc_essai — mode tout
+empreinte de la source avant : dd0d2ccfced1eee276f36ddb89b15d4d5a80ab6a9e27b388a32ed37c49ee9bf4
+empreinte de la source après : dd0d2ccfced1eee276f36ddb89b15d4d5a80ab6a9e27b388a32ed37c49ee9bf4 (identique)
+activité : reprise
+durée : 4.3 s
+
+[tenu] Comptes de lignes par table (source → cible)
+[tenu] Mêmes recettes et plans versionnés
+[tenu] Σ quantités et Σ quantité × prix (entrées) par matière
+[tenu] Soldes = journal
+[tenu] Mêmes numéros de documents
+LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+    commande                     330     330       0       0       0     330       0
+    commande_ligne              1604    1604       0       0       1    1604       0
+    composition                    7       0       0       7       0       0       0
+    compteur                      10      10       0       0       0      10       0
+    couleur                       34       0       0      34       0       0       0
+    devise                         3       0       0       3       0       0       0
+    dossier                       90      90       0       0       0      90       0
+    dossier_frais                508     508       0       0       0     508       0
+    dossier_ligne                984     984       0       0       0     984       0
+    facture                      316     316       0       0       0     316       0
+    fournisseur                   12       0       0      12       0       0       0
+    inventaire                    12      12       0       0       0      12       0
+    inventaire_ligne             360     360       0       0       0     360       0
+    inventaire_matiere           360     360       0       0       0     360       0
+    journal                        2       2       0    3823       0       0       0
+    lot                         1684    1684       0       0     117    1684       0
+    magasin                        3       0       0       3       0       0       0
+    matiere                      124       0       1     123       1       0       0
+    metier                         4       0       0       4       0       0       0
+    mouvement                  10438   10438       0       0       0   10438       0
+    ordre                        320     320       0       0     320     320       0
+    ordre_ligne                 8532    8532       0       0       0    8532       0
+    ordre_qualite                315     315       0       0       0     315       0
+    parametre                     56       0       0      56       0       0       0
+    poste_frais                   11       0       0      11       0       0       0
+    qualite                       18       0       0      18       0       0       0
+    qualite_poids                118       0       0     118       0       0       0
+    qualite_saison               216       0       0     216       0       0       0
+    reception                    317     317       0       0       5     317       0
+    reception_ligne             1508    1508       0       0       0    1508       0
+    recette                      318      18       0     300       0      19       0
+    recette_version                0       0       0      18       0       0       0
+    role_nomenclature              8       0       0       8       0       0       0
+    solde                       1594    1594       0       0       0    1594       0
+    titrage                       28       0       0      28       0       0       0
+    type_fil                       9       0       0       9       0       0       0
+
+
+================================================================================
+7. Geste saisi dans PRO (observation d'un bon) puis reprise : refus sans --remplacer-activite
+================================================================================
+Reprise refusée : La base cible contient une activité qui ne vient pas de la dernière reprise (saisie dans PRO, ou reprise d'une autre source) : rien n'est fait. Relancer avec --remplacer-activite pour la remplacer (une sauvegarde est faite avant).
+(code de sortie 2, 2 s mur, pg_dump avant reprise compris)
+
+================================================================================
+8. La même avec --remplacer-activite : activité remplacée (sauvegarde avant reprise faite)
+================================================================================
+REPRISE DE GESTION MP DANS GESTION MP PRO
+source : gestion_mp_pro_r1_comparaison_essai (erp_fil) — lecture seule vérifiée : oui
+cible  : gestion_mp_pro_r1_cc_essai — mode tout --remplacer-activite
+empreinte de la source avant : dd0d2ccfced1eee276f36ddb89b15d4d5a80ab6a9e27b388a32ed37c49ee9bf4
+empreinte de la source après : dd0d2ccfced1eee276f36ddb89b15d4d5a80ab6a9e27b388a32ed37c49ee9bf4 (identique)
+activité : reprise
+durée : 4.4 s
+
+[tenu] Comptes de lignes par table (source → cible)
+[tenu] Mêmes recettes et plans versionnés
+[tenu] Σ quantités et Σ quantité × prix (entrées) par matière
+[tenu] Soldes = journal
+[tenu] Mêmes numéros de documents
+observations du bon 1 après : «  »
+
+================================================================================
+9. Aucune écriture dans les bases de Gestion MP
+================================================================================
+Empreinte de gestion_mp après : 0422115583d67e6bd4a3766c69d25a73230250ad182dde0e982fc054b73aedfe
+Empreinte de gestion_mp_comparaison après : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86
+Sauvegardes « avant reprise » écrites : 5 (cible comparaison), 2 (cible production)
