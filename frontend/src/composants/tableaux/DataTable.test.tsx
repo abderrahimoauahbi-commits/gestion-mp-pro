@@ -269,3 +269,35 @@ describe('DataTable — lignes et vides', () => {
     expect(screen.getByRole('button', { name: 'Charger les 500 suivants' })).toBeInTheDocument()
   })
 })
+
+describe('DataTable — vide filtré et lignes de groupe', () => {
+  it('une recherche qui ne trouve rien dit le texte de la page (videFiltre)', async () => {
+    monter({
+      videFiltre: 'Aucun lot ne correspond : la recherche porte sur le n°, la matière, le fournisseur.',
+    })
+    await userEvent.type(screen.getByRole('searchbox'), 'introuvable')
+    expect(
+      screen.getByText('Aucun lot ne correspond : la recherche porte sur le n°, la matière, le fournisseur.'),
+    ).toBeInTheDocument()
+  })
+
+  it('une ligne d’en-tête avant chaque suite de lignes de même clé, avec les lignes du groupe', () => {
+    monter({
+      filtres: [],
+      groupe: {
+        cle: (l) => l.fournisseur,
+        entete: (cle, lignes) => `${cle} : ${lignes.length} lot(s)`,
+      },
+      triInitial: { cle: 'fournisseur', sens: 1 },
+    })
+    const table = screen.getByRole('table', { name: 'Lots' })
+    const entetes = within(table)
+      .getAllByRole('rowheader')
+      .map((c) => c.textContent)
+    const fournisseurs = [...new Set(LOTS.map((l) => l.fournisseur))].sort()
+    expect(entetes).toEqual(
+      fournisseurs.map((f) => `${f} : ${LOTS.filter((l) => l.fournisseur === f).length} lot(s)`),
+    )
+    expect(within(table).getAllByRole('rowheader')[0]).toHaveAttribute('colspan', String(COLONNES.length))
+  })
+})

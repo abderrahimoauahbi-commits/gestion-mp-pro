@@ -136,6 +136,11 @@ export function ListeDossiers(p: ListeDossiersProps) {
           placeholder="Numéro, libellé, facture, réception, famille de fil (« frisé 2900 »)…"
           pied={<Pied lignes={p.lignes} etat={p.etat} statut={p.statut} />}
           exporter={{ route: '/export/dossiers', parametres: { statut: p.statut } }}
+          videFiltre={
+            p.etat.recherche.valeur.trim()
+              ? 'Aucun dossier ne correspond à la recherche.'
+              : 'Aucun dossier ne correspond à ces filtres.'
+          }
           vide={
             p.chargement
               ? 'Chargement des dossiers…'

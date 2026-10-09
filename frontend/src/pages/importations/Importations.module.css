@@ -224,3 +224,11 @@
   display: block;
   min-width: 170px;
 }
+
+/* L'en-tête d'un mois de l'échéancier : le mois, ce qui reste à payer, où saisir l'échéance. */
+.enteteMois {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espace-3);
+}
