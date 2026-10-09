@@ -118,6 +118,13 @@ def _entetes(premiere: tuple[Any, ...]) -> dict[str, int]:
     return index
 
 
+def _fr(x: float) -> str:
+    """« 10 000 000 », « 2,5 » : un nombre à la française."""
+    if x == int(x):
+        return f"{int(x):,}".replace(",", " ")
+    return f"{x:g}".replace(".", ",")
+
+
 def _vide(v: object) -> bool:
     """Une case vide (rien, ou des espaces)."""
     return v is None or (isinstance(v, str) and not v.strip())
@@ -134,7 +141,7 @@ def _nombre(libelle: str, champ: str, v: object, erreurs: list[str]) -> Decimal 
         return None
     bas, haut = BORNES[champ]
     if not bas <= x <= haut:
-        erreurs.append(f"{libelle} : entre {bas:g} et {haut:g} — reçu {x:g}")
+        erreurs.append(f"{libelle} : entre {_fr(bas)} et {_fr(haut)} — reçu {_fr(x)}")
         return None
     return Decimal(str(x))
 
@@ -198,6 +205,7 @@ def _lire_ligne(
 
 NOUVELLE: dict[str, Any] = {
     "designation": "",
+    "role_id": None,
     "composition_id": None,
     "type_fil_id": None,
     "titrage_id": None,
