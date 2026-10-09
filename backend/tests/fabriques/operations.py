@@ -19,7 +19,7 @@ from fabriques.stock import JOUR, entree, lot, magasin, unique, utilisateur
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gestion_mp_pro.modeles import Lot, Magasin, Matiere, Motif, Ordre
+from gestion_mp_pro.modeles import Lot, Magasin, Matiere, Motif, Ordre, Solde
 from gestion_mp_pro.modeles.enums import (
     DocumentMouvement,
     Role,
@@ -62,7 +62,12 @@ def ordre_valide(
     s: Session, sorties: list[tuple[Lot, float]], le: date = JOUR, g: Magasin | None = None
 ) -> Ordre:
     """Un ordre validé et ses sorties vers les machines (comme le ferait le lot D6)."""
-    g = g or magasin(s)
+    if g is None:  # le magasin où le premier lot a du stock
+        g = s.scalars(
+            select(Magasin)
+            .join(Solde, Solde.magasin_id == Magasin.id)
+            .where(Solde.lot_id == sorties[0][0].id, Solde.quantite > 0)
+        ).first() or magasin(s)
     o = Ordre(
         numero=unique("OF"), statut=StatutOrdre.valide, date=le, magasin_id=g.id,
         valide_le=horloge.maintenant(),
@@ -115,7 +120,7 @@ class Monde:
 
 
 def monde(s: Session, le: date = JOUR, courant: Magasin | None = None) -> Monde:
-    """Le décor : E POIL BLEU (2 kg la bobine, 50 bobines la palette), E TRAME, E FRANGE (au
+    """Le décor, dans deux magasins à lui (courant et quarantaine) : E POIL BLEU (2 kg la bobine, 50 bobines la palette), E TRAME, E FRANGE (au
     mètre), entrés la veille de `le` à 20, 22, 8, 1 et 20 MAD/kg."""
     f = ref.fournisseur(s=s)
     a1 = s.get_one(
@@ -130,7 +135,9 @@ def monde(s: Session, le: date = JOUR, courant: Magasin | None = None) -> Monde:
     )
     a2 = s.get_one(Matiere, ref.matiere(unique("E TRAME"), role="Trame", fournisseur_id=f, s=s))
     a3 = s.get_one(Matiere, ref.matiere(unique("E FRANGE"), role="Franges", fournisseur_id=f, s=s))
-    m = Monde(a1, a2, a3, courant or magasin(s), quarantaine(s), f)
+    propre_courant = courant or s.get_one(Magasin, ref.magasin(s=s))
+    propre_quarantaine = s.get_one(Magasin, ref.magasin(type=TypeMagasin.quarantaine, s=s))
+    m = Monde(a1, a2, a3, propre_courant, propre_quarantaine, f)
     veille = le - timedelta(days=1)
     for numero, mat, g, q, prix in (
         ("E-L1", a1, m.courant, 500, 20), ("E-L2", a1, m.courant, 300, 22),
