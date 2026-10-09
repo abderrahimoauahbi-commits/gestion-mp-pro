@@ -1,10 +1,10 @@
-Coexistence Gestion MP (8030) / Gestion MP PRO (8050, base gestion_mp_pro) — 2026-10-09 11:11
+Coexistence Gestion MP (8030) / Gestion MP PRO (8050, base gestion_mp_pro) — 2026-10-09 11:18
 
 0. Gestion MP en service avant l'épreuve
   ok  Gestion MP répond sur 8030 (processus 36178, version c1133ba)
 
 Démarrage de PRO par son raccourci (navigateur remplacé par un écho ; variables GESTION_MP_* hostiles)
-  ok  le raccourci a démarré PRO (processus 63160) puis ouvert ouvrir http://localhost:8050
+  ok  le raccourci a démarré PRO (processus 75929) puis ouvert ouvrir http://localhost:8050
   ok  second double-clic : il ouvre seulement, même processus
 
 1. Dossier du projet : /Users/mohamed/gestion-mp / /Users/mohamed/gestion-mp-pro
@@ -84,10 +84,10 @@ Démarrage de PRO par son raccourci (navigateur remplacé par un écho ; variabl
   ok  manifestes de noms différents (« Gestion MP — matières premières » / « Gestion MP PRO — matières premières »), autre origine (port)
 
 16. Arrêter PRO n'arrête pas Gestion MP (et inversement)
-  ok  ce qu'arreter.sh de PRO arrêterait (63160 ) : ni le processus de Gestion MP, ni rien d'autre que gestion_mp_pro.main
+  ok  ce qu'arreter.sh de PRO arrêterait (75929 ) : ni le processus de Gestion MP, ni rien d'autre que gestion_mp_pro.main
   ok  PRO arrêté : port 8050 rendu
   ok  Gestion MP répond après l'arrêt de PRO, même processus, même version
   ok  arreter.sh de Gestion MP vise son port (8030) seul : il ne peut atteindre PRO
-  ok  Gestion MP lu 27 fois pendant le démarrage, le travail et l'arrêt de PRO : 0 sans réponse
+  ok  Gestion MP lu 14 fois pendant le démarrage, le travail et l'arrêt de PRO : 0 sans réponse
 
 Coexistence : 54 vérification(s) tenue(s), 0 en défaut.
