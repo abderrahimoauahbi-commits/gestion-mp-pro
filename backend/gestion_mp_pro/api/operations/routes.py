@@ -28,7 +28,8 @@ from gestion_mp_pro.api.operations.schemas import (
     SelectionBrouillons,
 )
 from gestion_mp_pro.exports import operations as classeur
-from gestion_mp_pro.exports.stock import nom_de_fichier
+from gestion_mp_pro.exports.classeur import REPONSES_XLSX
+from gestion_mp_pro.exports.classeur import reponse as reponse_xlsx
 from gestion_mp_pro.modeles.enums import StatutDocument, TypeOperation
 from gestion_mp_pro.securite import C, QuiDep, droit
 from gestion_mp_pro.services import brouillons, horloge
@@ -38,7 +39,6 @@ from gestion_mp_pro.services.operations.lecture import FiltresOperations, Operat
 
 routeur = nouveau_routeur("operations")
 
-XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 Q = Annotated[str, Query(max_length=200, description="mots, sans accents")]
 
 
@@ -220,14 +220,13 @@ def tout_valider(e: SelectionBrouillons, qui: QuiDep, s: SessionDep) -> Resultat
     response_class=Response,
     dependencies=[droit(*C)],
     summary="Le classeur des opérations (sans prix pour l'alimentation ; ses types seulement).",
-    responses={**reponses(401, 403, 422), 200: {"content": {XLSX: {}}}},
+    responses={**reponses(401, 403, 422), **REPONSES_XLSX},
 )
 def exporter(f: FiltresDep, qui: QuiDep, s: SessionDep) -> Response:
-    """Route 241."""
+    """Route 241 : mêmes filtres que la liste (115)."""
     permis = tuple(droits.types_permis(qui.role))
     lues = service.toutes(s, FiltresOperations(f.type, f.statut, f.q, permis), qui.role)
-    contenu = classeur.operations(lues, qui.voit_prix)
-    nom = nom_de_fichier("operations", horloge.aujourd_hui())
-    return Response(
-        contenu, media_type=XLSX, headers={"Content-Disposition": f'attachment; filename="{nom}"'}
-    )
+    jour = horloge.aujourd_hui()
+    criteres = [("type", f.type.value if f.type else ""), ("état", f.statut or ""), ("mots", f.q)]
+    contenu = classeur.operations(lues, qui.voit_prix, jour, criteres)
+    return reponse_xlsx(contenu, "operations", jour)

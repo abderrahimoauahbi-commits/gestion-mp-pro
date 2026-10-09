@@ -170,7 +170,8 @@ def test_classeur_des_operations(m: Monde, achats: TestClient, alimentation: Tes
         assert r.status_code == 200 and r.headers["content-type"].startswith("application/vnd")
         ws = load_workbook(BytesIO(r.content)).active
         assert ws is not None
-        return list(ws.iter_rows(values_only=True))
+        rangs = list(ws.iter_rows(values_only=True))
+        return rangs[next(i for i, x in enumerate(rangs) if x[0] == "Numéro") :]
 
     entete, *rangs = feuille(achats)
     assert "Prix / kg" in entete and len(rangs) == 1 and rangs[0][entete.index("Lot")] == "XLS-1"
