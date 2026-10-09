@@ -231,11 +231,11 @@ def lister(s: Session, f: FiltresOrdres) -> list[OrdreLu]:
     ]  # fmt: skip
     ctx = contexte(s, ordres)
     mots = normaliser(f.q).split()
-    gardes = [
-        (o, x)
-        for o in ordres
-        if all(m in _texte(x := lire_un(s, o, ctx, avec_blocages=False)) for m in mots)
-    ]
+    gardes = []
+    for o in ordres:
+        x = lire_un(s, o, ctx, avec_blocages=False)
+        if all(m in _texte(x) for m in mots):
+            gardes.append((o, x))
     for o, x in gardes:
         x.blocages = blocages.blocages(s, o, ctx.dernier)
     return [x for _, x in gardes]

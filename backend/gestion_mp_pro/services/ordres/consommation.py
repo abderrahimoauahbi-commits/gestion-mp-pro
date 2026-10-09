@@ -49,6 +49,7 @@ def taux_perte_au(s: Session, actuel: float) -> Callable[[datetime], float]:
         return lambda _instant: actuel
 
     def lu(texte: str | None, defaut: float) -> float:
+        """Une valeur du réglage, ou `defaut` si elle est vide ou illisible."""
         try:
             return float(texte) if texte else defaut
         except ValueError:
@@ -57,6 +58,7 @@ def taux_perte_au(s: Session, actuel: float) -> Callable[[datetime], float]:
     premier = lu(changements[0][1], actuel)
 
     def au(instant: datetime) -> float:
+        """Le taux en vigueur à `instant`."""
         valeur = premier
         for quand, _avant, apres in changements:
             if quand is not None and quand > instant:
