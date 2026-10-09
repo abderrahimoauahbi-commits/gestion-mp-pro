@@ -52,3 +52,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F4 | D3 | `/export/plan-achat` ignore les filtres liés de l'écran ; la fiche ne dit pas pourquoi la date promise est figée. |
 | F4 | E1 | `Confirmer` : longueur minimale du motif (F4 a écrit `ConfirmerMotif` en attendant). |
 | F4 | F4 | Remplacer le `Paiement` provisoire de `receptions/Reglement.tsx` par `Schema<'Paiement'>` (types régénérés après le lot NOMS). |
+| X2 | docs | ARCHITECTURE § 13.2 et critères X2 : `installer.sh` n'installe le LaunchAgent qu'avec `--demarrage-automatique` (décision : réglage du Mac laissé à Mohamed). |
+| X2 | S0 | Cibles Makefile `poste-installer` et `coexistence`. |
+| X2 | C1 | « Administration › Reprise » (routes 243–244) attendue par le poste : à faire dans C1. |
