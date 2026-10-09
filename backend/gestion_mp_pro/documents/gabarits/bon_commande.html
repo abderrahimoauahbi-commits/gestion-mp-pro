@@ -1,0 +1,56 @@
+{#- Le bon de commande fournisseur (route 164, lot D3) : A4, EN ANGLAIS, SANS AUCUN PRIX,
+MONTANT NI DEVISE (décision A22 de Mohamed), sur le papier à en-tête de l'usine (lot D9).
+Données : `bon` (services/bon_fournisseur.BonFournisseur). Tailles en points. -#}
+{% extends "_papier_a_en_tete.html" %}
+{% block en_tete_non_regle %}La raison sociale de l'usine n'est pas réglée (Réglages › Paramètres › Société) : elle manque en tête du bon.{% endblock %}
+{% block style %}
+.bon-titre { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm;
+  margin-top: 6mm; padding-bottom: 3mm; border-bottom: 1.5pt solid var(--accent); }
+.bon-titre .mot { font-size: 8pt; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.bon-titre .numero { font-size: 17pt; font-weight: 700; line-height: 1.2; }
+.bon-titre dl { display: grid; grid-template-columns: auto auto; gap: 1pt 5mm; margin: 0; font-size: 9.5pt; }
+.bon-titre dt { color: var(--gris); }
+.bon-titre dd { margin: 0; font-weight: 700; }
+.cadres { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 6mm 0; }
+.cadre .nom { font-size: 11pt; font-weight: 700; margin-bottom: .5mm; }
+.ref { font-weight: 700; }
+.des { color: var(--gris); font-size: 8.5pt; }
+.remarques p { margin: 0; white-space: pre-line; }
+.confirmation { margin: 5mm 0 0; font-size: 9.5pt; }
+.signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 9mm; font-size: 9pt; }
+.signatures div { border-top: .75pt solid var(--trait); padding-top: 2mm; min-height: 24mm; color: var(--gris); }
+.brouillon { position: relative; }
+.brouillon::before { content: "DRAFT"; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 96pt; font-weight: 800; color: rgba(212, 0, 0, .10); letter-spacing: .1em; pointer-events: none; z-index: 0; }
+{% endblock %}
+{% block contenu %}
+<div class="{{ 'brouillon' if bon.brouillon else 'parti' }}">
+<header class="bon-titre">
+  <div><div class="mot">Purchase order</div><div class="numero">{{ bon.titre }}</div></div>
+  <dl><dt>Date</dt><dd>{{ bon.date }}</dd><dt>Expected delivery</dt><dd>{{ bon.livraison }}</dd></dl>
+</header>
+<div class="cadres">
+  <section class="cadre"><h2>Supplier</h2><div class="nom">{{ bon.fournisseur }}</div>
+    {% for libelle, valeur in bon.fournisseur_lignes %}<div><span class="lib">{{ libelle }}</span>{{ valeur }}</div>{% endfor %}
+  </section>
+  <section class="cadre"><h2>Deliver to</h2>
+    {% for libelle, valeur in bon.livrer_a %}<div><span class="lib">{{ libelle }}</span>{{ valeur }}</div>{% endfor %}
+  </section>
+</div>
+<table class="donnees">
+  <thead><tr>{% for c in bon.colonnes %}<th{% if loop.index > 4 %} class="n"{% endif %}>{{ c }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for x in bon.lignes %}
+    <tr><td>{{ x.rang }}</td><td class="ref">{{ x.reference }}</td><td class="des">{{ x.designation }}</td>
+      <td>{{ x.conditionnement }}</td><td class="n">{{ x.unites_texte }}</td><td class="n"><b>{{ x.kg_texte }}</b></td>
+      {% if bon.avec_metres %}<td class="n">{{ x.metres_texte }}</td>{% endif %}</tr>
+  {% endfor %}
+  </tbody>
+  <tfoot><tr><td colspan="5">Total ordered</td><td class="n">{{ bon.total_texte }}</td>{% if bon.avec_metres %}<td></td>{% endif %}</tr></tfoot>
+</table>
+{% if bon.remarques %}<section class="note remarques"><h2>Remarks</h2><p>{{ bon.remarques }}</p></section>{% endif %}
+<p class="confirmation">{{ confirmation }}</p>
+<div class="signatures"><div>For {{ societe.nom or "the buyer" }}<br>{{ signature_acheteur }}</div>
+<div>{{ signature_fournisseur[0] }}<br>{{ signature_fournisseur[1] }}</div></div>
+</div>
+{% endblock %}

@@ -138,7 +138,7 @@ puis 4 qui ferment des colonnes que ce document décrivait en texte (`TypeMotif`
 | `StatutInventaire` | `ouvert`, `valide`, `abandonne`, `annule` | `inventaire.statut` | `abandonne` ajouté (l'abandon supprimait la ligne et trouait la série INV) ; `annule` = validé puis défait par contre-passation (étape 17 de Gestion MP corrigé) |
 | `CritereInventaire` | `matiere`, `role`, `composition`, `classe_abc` | `inventaire_critere.genre` | paramètres d'ouverture non gardés |
 | `StatutDossier` | `ouvert`, `clos`, `annule` | `dossier.statut` | `annule` ajouté (la suppression trouait la série DOS) |
-| `OrigineCours` | `bon`, `banque`, `clos_au_jour`, `saisi`, `reprise` | `dossier_ligne.cours_origine` | texte du commentaire |
+| `OrigineCours` | `bon`, `banque`, `clos_au_jour`, `periode_close` (0004 : cours du jour figé par la clôture d'une période ou gardé au changement d'un cours, E-02), `saisi`, `reprise` | `dossier_ligne.cours_origine` | texte du commentaire |
 | `CleRepartition` | `valeur`, `poids` | `poste_frais.cle` | texte libre sans CHECK |
 | `NatureFrais` | `droits`, `tpi`, `tva`, `fret`, `assurance`, `autre` | `poste_frais.nature` | codes en dur dans le moteur (`DD`, `TPI`, `TVA`, `FRET`, `ASSUR`) |
 | `OriginePart` | `changement_cle`, `reprise` | `dossier_frais_part.origine` | — |
@@ -153,7 +153,7 @@ puis 4 qui ferment des colonnes que ce document décrivait en texte (`TypeMotif`
 | `TonNotification` | `info`, `succes`, `alerte`, `danger` | `notification.ton` | — (nouveau) |
 | `StatutCourriel` | `en_attente`, `envoye`, `abandonne` | `courriel.statut` | — (nouveau) |
 | `GenreCourriel` | `lundi`, `alerte` | `courriel.genre` | — |
-| `GenreSauvegarde` | `quotidienne`, `manuelle`, `avant_restauration`, `avant_reprise`, `reference_vide` | `sauvegarde.genre` | nom du fichier |
+| `GenreSauvegarde` | `quotidienne`, `manuelle`, `avant_restauration`, `avant_reprise`, `avant_vidage`, `avant_mise_a_jour` (ces deux : 0004, décision X2), `reference_vide` ; seules les quotidiennes sont purgées | `sauvegarde.genre` | nom du fichier |
 | `ObjetJournal` | liste fermée des objets (§ 3.1.5), dont `lot` (le commentaire de la fiche de lot a un historique) et `systeme` (défaut) | `journal.objet` | texte |
 | `TypeMotif` | les 5 valeurs de `TypeOperation` + `inventaire` | `motif.type_operation` | listes en dur (`api/operations.py`) |
 | `SourceReprise` | `gestion_mp`, `erp_fil` | `reprise_correspondance.source`, `reprise_execution.source` | — (nouveau) |
@@ -388,6 +388,7 @@ Clé technique ajoutée ; le `code` reste unique et renommable sans cascade.
 | lineaire | BOOLEAN | | false | CK `ck_role_nomenclature_lineaire_de_base` : `NOT lineaire OR de_base` | ml/m² × densité | lineaire |
 | de_base | BOOLEAN | | false | | les 8 rôles semés : ni renommés ni supprimés | nouveau (constante `ROLES` du moteur) |
 | ordre | INTEGER | | 0 | CK `>= 0` | | ordre |
+| version | INTEGER | | 1 | | verrou optimiste (route 59 : 409 si périmée) ; révision 0004 | nouveau |
 
 Le moteur lit `lineaire` dans les données (DECISIONS § 16.5) ; le service refuse toujours de le changer.
 
@@ -955,7 +956,11 @@ Retirer = `retiree_le` (le fichier reste, la ligne aussi : plus d'orphelin, inco
 PK `(source SourceReprise, table_source VARCHAR(40), id_source BIGINT)` · `table_cible VARCHAR(40)` ·
 `id_cible BIGINT` (journal et mouvements ont des identifiants `BIGINT`) · IX `(table_cible, id_cible)` · `empreinte CHAR(64)`
 (empreinte de la ligne source) · `repris_le`. Rend la reprise **rejouable** et **idempotente** (§ 10) :
-une ligne déjà reprise et inchangée est sautée ; changée, elle est signalée (jamais écrasée sans `--mettre-a-jour`).
+une ligne déjà reprise et inchangée est sautée ; changée dans la source, elle est mise à jour si PRO ne l'a pas
+changée, sinon gardée et signalée (jamais écrasée sans `--mettre-a-jour`). L'empreinte est celle de la ligne
+source **normalisée** (valeurs écrites). Tables enfants (recette, poids, saisons, fils montés) : une correspondance
+par **parent** (`table_source` = table PRO, `id_source` = id du parent, empreinte de l'ensemble) ; journal rangé
+en tables : `table_source` = `journal:plan`, `journal:plan_initial`, `journal:montage`.
 `source` ∈ `gestion_mp`, `erp_fil` (`SourceReprise`).
 
 #### 3.10.2 `reprise_execution` (nouveau)
@@ -1193,6 +1198,10 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
 - `0003_tolerance_tva_import` : le réglage `toler_tva_import` (défaut 0,05, bornes 0–1 ; C29 et fiche du dossier),
   ajouté à Gestion MP corrigé après S1 — clé dans `CLES_REGLAGES`, CHECK `ck_parametre_cle_connue`
   remplacé (`DROP`/`ADD`), semence `ON CONFLICT DO NOTHING` ; 57 réglages ensuite. Le retour arrière efface la clé et son historique.
+- `0004_versions_et_genres` (lots D1 et D10) : `role_nomenclature.version` (défaut 1) ; `OrigineCours` +
+  `periode_close` ; `GenreSauvegarde` + `avant_vidage`, `avant_mise_a_jour` (CHECK `…_enum` remplacés).
+  Le retour arrière range `periode_close` en `saisi` et retire du registre les sauvegardes des deux genres
+  (leurs fichiers restent : le disque fait foi).
 - Les révisions suivantes : une par changement, avec `upgrade()` et `downgrade()`, numérotées à la suite
   (numéro réservé auprès du coordinateur), relues après autogénération : autogenerate ne voit ni les
   CHECK modifiés ni les déclencheurs (à écrire à la main) ; pas de `%` dans le texte d'un CHECK (utiliser `~`).
@@ -1209,7 +1218,11 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
 ## 10. Reprise depuis la base `gestion_mp` (lecture seule)
 
 Module `backend/gestion_mp_pro/reprise/` ; commande `python -m gestion_mp_pro.reprise
---source postgresql+psycopg:///gestion_mp --mode referentiels|activite|tout [--date-limite AAAA-MM-JJ] [--mettre-a-jour] [--essai]`.
+--source postgresql+psycopg:///gestion_mp --mode referentiels|activite|tout [--remplacer-activite] [--mettre-a-jour] [--essai]
+[--cible URL] [--pieces-source DOSSIER] [--rapport FICHIER] [--genre gestion_mp|erp_fil]`.
+`--date-limite` n'est **pas** fait (lot R1) : reprendre une activité tronquée casserait soldes et documents.
+`outils/vider_activite.py` sauvegarde d'abord (`avant_vidage`), retire de la table les pièces jointes
+des documents mais **garde leurs fichiers**, puis sauvegarde la base vide (`reference_vide`).
 
 ### 10.1 Garde-fous
 
@@ -1287,7 +1300,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | | Gestion MP | PRO |
 |---|---|---|
 | Tables | 49 | **71** (70 tables métier et techniques + `alembic_version`) |
-| Colonnes | 405 | **684** (hors `alembic_version`) |
+| Colonnes | 405 | **685** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
 | Clés étrangères | 73 | **171**, dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
 | CHECK | 39 | **291** : 176 nommés à la main, 41 `…_enum`, 74 `…_nombre` (refus de NaN) |
@@ -1297,7 +1310,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | Réglages semés | 56 (Gestion MP corrigé) | **57** (0002 : 56, avec `seuil_bc_urgent` ; 0003 : `toler_tva_import`) |
 | Données métier rangées dans du texte ou du JSON | 17 (§ 4) | 0 |
 
-Ces chiffres sont ceux de la base migrée (`0001` + `0002`) ; `outils/schema_contre_modele.py`
+Ces chiffres sont ceux de la base migrée (`0001` à `0004`) ; `outils/schema_contre_modele.py`
 compare tables et colonnes de la base à ce document.
 
 Liste des 71 tables : utilisateur, session, tentative, appareil, journal, parametre,

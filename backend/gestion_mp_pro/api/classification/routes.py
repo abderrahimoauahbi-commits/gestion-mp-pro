@@ -42,6 +42,7 @@ def _role(r: RoleNomenclature, matieres: int = 0, qualites: int = 0) -> RoleFich
         lineaire=r.lineaire,
         de_base=r.de_base,
         ordre=r.ordre,
+        version=r.version,
         nb_matieres=matieres,
         nb_qualites=qualites,
     )
@@ -93,7 +94,7 @@ def ajouter_role(corps: RoleCreation, qui: QuiDep, s: SessionDep) -> RoleFiche:
 )
 def modifier_role(ident: int, corps: RoleModification, qui: QuiDep, s: SessionDep) -> RoleFiche:
     """Route 59."""
-    return _role(cla.modifier_role(s, qui, ident, corps.code, corps.ordre))
+    return _role(cla.modifier_role(s, qui, ident, corps.code, corps.ordre, version=corps.version))
 
 
 @routeur.delete(

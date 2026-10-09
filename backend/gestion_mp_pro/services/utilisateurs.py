@@ -182,7 +182,9 @@ def modifier(s: Session, qui: Acteur, ident: int, m: Modification) -> FicheCompt
         if m.code:
             u.empreinte_code, u.code_change_le = hacher(m.code), horloge.maintenant()
         geste.detail = f"{u.nom} ({libelle_role(voulu)})" + (" ; nouveau code" if m.code else "")
-    if m.code or change_de_role or desactive:
+    if desactive:
+        sessions.expirer_sessions(s, u.id)
+    elif m.code or change_de_role:
         sessions.fermer_sessions(s, u.id, sauf=qui.session if u.id == qui.id else None)
     if m.code:
         sessions.noter_succes(u.identifiant)

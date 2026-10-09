@@ -161,6 +161,21 @@ def fermer_sessions(s: Session, utilisateur_id: int, sauf: str | None = None) ->
     return int(getattr(s.execute(requete), "rowcount", 0) or 0)
 
 
+def expirer_sessions(s: Session, utilisateur_id: int) -> int:
+    """Ferme les sessions d'un compte qu'on désactive en les gardant **expirées** jusqu'à la purge
+    (7 jours) : la requête suivante de l'une d'elles dit pourquoi elle est refusée (401
+    `compte_inactif`, H-09) au lieu de « Connectez-vous pour continuer. ». Rend leur nombre."""
+    resultat = s.execute(
+        update(SessionOuverte)
+        .where(
+            SessionOuverte.utilisateur_id == utilisateur_id,
+            SessionOuverte.expire_le > horloge.maintenant(),
+        )
+        .values(expire_le=horloge.maintenant())
+    )
+    return int(getattr(resultat, "rowcount", 0) or 0)
+
+
 def fermer_sessions_appareil(s: Session, appareil_id: int) -> int:
     """Ferme toutes les sessions ouvertes depuis un appareil (révocation)."""
     resultat = s.execute(delete(SessionOuverte).where(SessionOuverte.appareil_id == appareil_id))
@@ -176,13 +191,16 @@ class SessionValide:
 
 
 def session_valide(s: Session, jeton: str | None) -> SessionValide:
-    """La session du jeton : 401 si absente ou expirée, 401 « plus actif » si le compte l'est."""
+    """La session du jeton : 401 si absente ou expirée ; 401 « plus actif » si le compte l'est,
+    même quand la désactivation a fermé la session (gardée expirée : H-09)."""
     ouverte = s.get(SessionOuverte, empreinte(jeton)) if jeton else None
-    if ouverte is None or ouverte.expire_le <= horloge.maintenant():
+    if ouverte is None:
         raise Refus.non_connecte(MESSAGE_NON_CONNECTE)
     u = s.get(Utilisateur, ouverte.utilisateur_id)
     if u is None or not u.actif or u.historique:
         raise Refus.non_connecte(MESSAGE_INACTIF, code="compte_inactif")
+    if ouverte.expire_le <= horloge.maintenant():
+        raise Refus.non_connecte(MESSAGE_NON_CONNECTE)
     noter_activite(ouverte, u)
     return SessionValide(ouverte, u)
 

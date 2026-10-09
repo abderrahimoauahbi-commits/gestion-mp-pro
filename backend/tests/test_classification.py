@@ -127,7 +127,9 @@ def test_les_roles_se_tiennent_par_la_direction(direction: TestClient, achats: T
     )
     assert direction.post("/api/classification/roles", json={"code": "cuir"}).status_code == 409
     poil = role_id("Poil")
-    renomme = direction.put(f"/api/classification/roles/{poil}", json={"code": "Poils", "ordre": 0})
+    lu_poil = next(x for x in ok(direction.get("/api/classification"))["roles"] if x["id"] == poil)
+    corps_poil = {"code": "Poils", "ordre": 0, "version": lu_poil["version"]}
+    renomme = direction.put(f"/api/classification/roles/{poil}", json=corps_poil)
     assert renomme.json()["detail"] == "« Poil » est un rôle de base du calcul : il garde son nom."
     supprime = direction.delete(f"/api/classification/roles/{poil}")
     assert (
@@ -154,10 +156,31 @@ def test_un_role_aux_poids_nuls_se_renomme_et_se_supprime(direction: TestClient)
         s.add(QualitePoids(qualite_id=q, role_id=r["id"], poids=Decimal(0)))
     nouveau = f"{code}-bis"
     lu = ok(
-        direction.put(f"/api/classification/roles/{r['id']}", json={"code": nouveau, "ordre": 3})
+        direction.put(
+            f"/api/classification/roles/{r['id']}",
+            json={"code": nouveau, "ordre": 3, "version": r["version"]},
+        )
     )
-    assert (lu["code"], lu["ordre"], lu["nb_qualites"]) == (nouveau, 3, 0)
+    assert (lu["code"], lu["ordre"], lu["nb_qualites"], lu["version"]) == (nouveau, 3, 0, 2)
     assert direction.delete(f"/api/classification/roles/{r['id']}").status_code == 204
     with sessions()() as s:
         assert s.get(RoleNomenclature, r["id"]) is None
         assert s.scalars(select(QualitePoids).where(QualitePoids.role_id == r["id"])).all() == []
+
+
+def test_un_role_modifie_entre_temps_est_refuse(direction: TestClient) -> None:
+    """Route 59 (révision 0004) : la version lue est contrôlée ; périmée → 409 qui nomme
+    l'auteur, et rien n'est écrit."""
+    code = unique("Chenille")
+    r = ok(direction.post("/api/classification/roles", json={"code": code}), 201)
+    assert r["version"] == 1
+    url = f"/api/classification/roles/{r['id']}"
+    ok(direction.put(url, json={"code": code, "ordre": 5, "version": 1}))
+    perime = direction.put(url, json={"code": f"{code}-x", "ordre": 6, "version": 1})
+    assert perime.status_code == 409 and perime.json()["code"] == "conflit_version"
+    assert perime.json()["detail"].startswith("Ce rôle a été modifié entre-temps par ")
+    sans = direction.put(url, json={"code": code, "ordre": 6})
+    assert sans.status_code == 422
+    with sessions()() as s:
+        lu = s.get(RoleNomenclature, r["id"])
+        assert lu is not None and (lu.code, lu.ordre, lu.version) == (code, 5, 2)

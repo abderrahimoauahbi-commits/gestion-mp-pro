@@ -12,6 +12,7 @@ import textwrap
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 
 from fabriques.moteur import batir
@@ -33,6 +34,7 @@ from gestion_mp_pro.db import fabrique, moteur
 from gestion_mp_pro.modeles import (
     Commande,
     CommandeLigne,
+    Devise,
     Lot,
     Parametre,
     Reception,
@@ -129,6 +131,24 @@ def test_le_cache_ne_relit_que_si_quelque_chose_a_change(s: Session) -> None:
         relu = donnees_moteur.charger(s)
         assert relu is not precedent
         precedent = relu
+
+
+def test_un_reglage_change_se_voit_a_horloge_figee(s: Session) -> None:
+    """Deux changements d'un réglage (ou d'un cours) à la même heure — horloge figée des essais,
+    ou deux écritures dans la même microseconde — ne laissent pas le cache ancien : la
+    signature compte les `version` des réglages et des devises, pas seulement `modifie_le`."""
+    assert horloge.est_figee()
+    donnees_moteur.invalider()
+    for valeur in ("45", "50", "55"):
+        p = s.get_one(Parametre, "seuil_critique")
+        p.valeur = valeur
+        s.flush()
+        assert donnees_moteur.charger(s).parametres.seuil_critique == float(valeur)
+    for cours in ("11", "12"):
+        d = s.get_one(Devise, "USD")
+        d.cours = Decimal(cours)
+        s.flush()
+        assert donnees_moteur.charger(s).parametres.cours["USD"] == float(cours)
 
 
 SCRIPT = textwrap.dedent(
