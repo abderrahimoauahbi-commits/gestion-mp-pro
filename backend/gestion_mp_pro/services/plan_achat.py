@@ -20,10 +20,16 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul import modele as c
+from gestion_mp_pro.calcul.besoins import besoins_mensuels
+from gestion_mp_pro.calcul.controles import controler
+from gestion_mp_pro.calcul.controles.base import Controle
+from gestion_mp_pro.calcul.outils import mois_du_plan
+from gestion_mp_pro.calcul.plan_achat import PlanAchat
 from gestion_mp_pro.calcul.plan_achat import plan_achat as calculer_plan
 from gestion_mp_pro.calcul.stock import LigneStock, etat_stock
 from gestion_mp_pro.modeles import Commande, Fournisseur, Matiere
-from gestion_mp_pro.services import donnees_moteur
+from gestion_mp_pro.modeles.recherche import normaliser
+from gestion_mp_pro.services import donnees_moteur, horloge
 
 
 @dataclass
@@ -174,4 +180,72 @@ def preparation(s: Session, fournisseur_id: int, jour: date) -> Preparation:
         )
     return Preparation(
         f.id, f.nom, f.pays, f.contact, f.email, d.delai_fournisseur(f.nom), f.devise, jour, lignes
+    )
+
+
+# ── Classeurs : la liste affichée (242), le pilotage complet (151) ─────────────
+
+
+ONGLETS_PLAN = ("fournisseurs", "references")
+CHAMPS_FOURNISSEUR = ("fournisseur", "pays", "contact", "urgence")
+CHAMPS_REFERENCE = ("reference", "nature", "designation", "fournisseur", "statut", "tier",
+                    "risque", "action")  # fmt: skip
+
+
+def _cherche(valeurs: list[object], mots: list[str]) -> bool:
+    """Tous les mots, sans accents, quelque part dans la ligne (la recherche de l'écran)."""
+    texte = normaliser(" ".join(str(v) for v in valeurs if v))
+    return all(m in texte for m in mots)
+
+
+def filtrer(p: Plan, onglet: str, q: str) -> list[dict[str, Any]]:
+    """Les lignes de l'onglet affiché, cherchées comme à l'écran (ECRANS-PRO § 4.2, 4.3)."""
+    if onglet not in ONGLETS_PLAN:
+        raise Refus.saisie(
+            f"Onglet inconnu : « {onglet} » (fournisseurs ou references).",
+            code="valeur_inconnue",
+            champs={"onglet": "inconnu"},
+        )
+    mots = normaliser(q).split()
+    if onglet == "fournisseurs":
+        return [
+            g
+            for g in p.fournisseurs
+            if _cherche([*(g[k] for k in CHAMPS_FOURNISSEUR), *g["devises"]], mots)
+        ]
+    return [
+        x
+        for x in p.lignes
+        if _cherche([*(x[k] for k in CHAMPS_REFERENCE), f"classe {x['classe_abc']}"], mots)
+    ]
+
+
+@dataclass
+class Pilotage:
+    """Le classeur de pilotage : stock, plan d'achat, fournisseurs, besoins, contrôles."""
+
+    jour: date
+    stock: list[LigneStock]
+    plan: PlanAchat
+    besoins: dict[str, list[float]]
+    mois: list[date]
+    controles: list[Controle]
+    magasins: list[str]
+    articles: dict[str, c.Article]
+
+
+def pilotage(s: Session, jour: date) -> Pilotage:
+    """Route 151 : les mêmes chiffres que les écrans, au même instant."""
+    complet = donnees_moteur.charger(s)
+    d = donnees_moteur.charger_au(s, jour)
+    stock = etat_stock(d, jour)
+    return Pilotage(
+        jour=jour,
+        stock=stock,
+        plan=calculer_plan(d, stock),
+        besoins=besoins_mensuels(d, jour),
+        mois=mois_du_plan(jour),
+        controles=controler(d, stock, jour, complet=complet, aujourdhui=horloge.aujourd_hui()),
+        magasins=[g.code for g in d.magasins if g.actif],
+        articles={a.reference: a for a in d.articles},
     )

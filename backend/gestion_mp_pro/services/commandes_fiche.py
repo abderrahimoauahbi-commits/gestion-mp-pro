@@ -11,11 +11,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from gestion_mp_pro.api.erreurs import Refus
+from gestion_mp_pro.calcul.achats import echeance_commande
 from gestion_mp_pro.modeles import Commande, CommandeVersion, Matiere
 from gestion_mp_pro.modeles.enums import StatutCommande
 from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import commandes_gestes as gestes
-from gestion_mp_pro.services import reglages
+from gestion_mp_pro.services import horloge, reglages
 from gestion_mp_pro.services.commandes_lecture import (
     LIBELLES_LIVRAISON,
     LIBELLES_STATUT,
@@ -264,8 +265,18 @@ def _texte(r: CommandeResume, c: Commande, ctx: Lecture) -> str:
     return normaliser(" ".join(morceaux))
 
 
-def liste(s: Session, f: FiltresCommandes) -> list[CommandeResume]:
-    """Route 152 : les bons du plus récent au plus ancien, filtrés au serveur."""
+@dataclass
+class BonDetaille:
+    """Un bon de la liste, avec ses lignes et son retard (classeur des bons, route 166)."""
+
+    resume: CommandeResume
+    lignes: list[LigneLue]
+    retard_jours: int | None
+
+
+def detailler(s: Session, f: FiltresCommandes) -> list[BonDetaille]:
+    """Les bons filtrés comme l'écran, du plus récent au plus ancien, avec leurs lignes ; un bon
+    en retard dit de combien de jours, depuis son échéance (ETA, promesse, sinon date + délai)."""
     if f.statut and f.statut not in ONGLETS:
         raise Refus.saisie(
             f"Statut inconnu : « {f.statut} ».",
@@ -282,13 +293,25 @@ def liste(s: Session, f: FiltresCommandes) -> list[CommandeResume]:
     mots = normaliser(f.q).split()
     resultat = []
     for c in commandes:
-        r = resume(c, ctx)
-        if f.retard and not (c.numero and c.statut not in CLOS and r.livraison in EN_RETARD):
+        lues = lignes(c, ctx)
+        r = resume(c, ctx, lues)
+        en_retard = bool(c.numero) and c.statut not in CLOS and r.livraison in EN_RETARD
+        if (f.retard and not en_retard) or (mots and not all(m in _texte(r, c, ctx) for m in mots)):
             continue
-        if mots and not all(m in _texte(r, c, ctx) for m in mots):
-            continue
-        resultat.append(r)
+        resultat.append(BonDetaille(r, lues, _retard(c, ctx) if en_retard else None))
     return resultat
+
+
+def _retard(c: Commande, ctx: Lecture) -> int | None:
+    """Les jours de retard d'un bon en retard (la règle de la liste, du courriel et de C06)."""
+    delai = ctx.fournisseurs[c.fournisseur_id].delai_jours
+    prevue = echeance_commande(c.eta, c.date_livraison_prevue, c.date_commande, delai)
+    return (horloge.aujourd_hui() - prevue).days if prevue else None
+
+
+def liste(s: Session, f: FiltresCommandes) -> list[CommandeResume]:
+    """Route 152 : les bons du plus récent au plus ancien, filtrés au serveur."""
+    return [x.resume for x in detailler(s, f)]
 
 
 def _version_partie(s: Session, cid: int) -> VersionPartie | None:

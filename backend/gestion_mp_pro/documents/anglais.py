@@ -1,16 +1,16 @@
-"""Le bon fournisseur parle anglais (décision de Mohamed, DECISIONS A22) : nombres, dates,
-conditionnements (`gestion_mp/api/achats.py` : `nombre_en`, `date_en`, `conditionnement_en`).
+"""Le bon fournisseur parle anglais (décision de Mohamed, DECISIONS A22) : les conditionnements
+de la fiche matière, traduits (`gestion_mp/api/achats.py` : `CONDITIONNEMENTS_EN`,
+`conditionnement_en`). Nombres et dates en anglais : `documents/format.py` (lot D9), jamais
+redoublés ici.
 
-Fonctions pures, sans base : le HTML (`documents/bon_commande.py`) et le classeur
-(`exports/bon_fournisseur.py`) les partagent, pour dire exactement la même chose.
+Fonctions pures, sans base : le HTML et le classeur du bon les partagent.
 """
 
 from __future__ import annotations
 
-from datetime import date
 from decimal import Decimal
 
-MOIS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+from gestion_mp_pro.documents.format import nombre
 
 CONDITIONNEMENTS = {
     "palette": "Pallet",
@@ -32,17 +32,9 @@ AU_POIDS = ("kg", "ml")
 """Une ligne commandée au poids (le bon compte en kilos, le cuir et le ruban compris)."""
 
 
-def nombre_en(x: float | Decimal, decimales: int = 1) -> str:
-    """« 1,234.5 » : l'écriture anglaise, zéros inutiles retirés (« 1,120 », « 2.5 »)."""
-    texte = f"{float(x):,.{decimales}f}"
-    if "." in texte:
-        texte = texte.rstrip("0").rstrip(".")
-    return "0" if texte in ("-0", "") else texte
-
-
-def date_en(jour: date) -> str:
-    """« 08 Oct 2026 » : sans ambiguïté entre l'ordre européen et l'ordre américain."""
-    return f"{jour.day:02d} {MOIS[jour.month - 1]} {jour.year}"
+def nombre_en(x: float | Decimal, decimales_max: int = 3) -> str:
+    """« 1,120 », « 2.5 » : l'écriture anglaise de `format.nombre`, zéros inutiles retirés."""
+    return nombre(x, 0, decimales_max, langue="en")
 
 
 def au_poids(unite: str, contenance: float | Decimal) -> bool:
@@ -57,4 +49,4 @@ def conditionnement_en(unite: str, contenance: float | Decimal) -> str:
     nom = CONDITIONNEMENTS.get(unite.strip().lower(), unite.strip())
     if not contenance or float(contenance) == 1:
         return nom
-    return f"{nom} of {nombre_en(contenance, 3)} kg"
+    return f"{nom} of {nombre_en(contenance)} kg"

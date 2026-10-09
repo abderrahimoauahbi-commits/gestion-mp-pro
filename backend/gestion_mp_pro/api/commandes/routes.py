@@ -9,12 +9,9 @@ document imprimable (164) et les classeurs (165, 166) sont dans `routes_document
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Annotated
-
-from fastapi import Query
 
 from gestion_mp_pro.api.commandes import routes_documents  # noqa: F401 — routes 164–166
-from gestion_mp_pro.api.commandes.routeur import routeur
+from gestion_mp_pro.api.commandes.routeur import FiltresDep, routeur
 from gestion_mp_pro.api.commandes.schemas import (
     CommandeCreation,
     CommandeFiche,
@@ -32,7 +29,7 @@ from gestion_mp_pro.api.dependances import SessionDep, VersionDep
 from gestion_mp_pro.api.erreurs import reponses
 from gestion_mp_pro.securite import A, D, QuiDep, droit
 from gestion_mp_pro.services import approbation, commandes, commandes_suivi, contexte
-from gestion_mp_pro.services.commandes_fiche import FiltresCommandes, fiche, liste
+from gestion_mp_pro.services.commandes_fiche import fiche, liste
 from gestion_mp_pro.services.commandes_saisie import LigneSaisie
 
 __all__ = ["routeur"]
@@ -62,15 +59,8 @@ def _lignes(lignes: list[LigneCommandeEntree]) -> list[LigneSaisie]:
     summary="Les bons de commande, du plus récent au plus ancien, filtrés au serveur.",
     responses=reponses(401, 403, 422),
 )
-def lister(
-    s: SessionDep,
-    statut: Annotated[str, Query(max_length=20, description="statut, ou « clos »")] = "",
-    filtre: Annotated[str, Query(pattern="^(retard)?$", description="« retard »")] = "",
-    fournisseur: Annotated[int | None, Query(ge=1)] = None,
-    q: Annotated[str, Query(max_length=200, description="mots, sans accents")] = "",
-) -> list[CommandeResume]:
+def lister(f: FiltresDep, s: SessionDep) -> list[CommandeResume]:
     """Route 152."""
-    f = FiltresCommandes(statut, filtre == "retard", fournisseur, q)
     return [CommandeResume.model_validate(asdict(r)) for r in liste(s, f)]
 
 

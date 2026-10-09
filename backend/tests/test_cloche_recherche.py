@@ -148,11 +148,11 @@ def test_contexte_en_un_appel(
     try:
         d = direction.get("/api/contexte").json()
         assert (
-            d["compteurs"] == {"essai": 3}
+            d["compteurs"]["essai"] == 3  # les domaines déclarent les leurs (D3 : a_approuver)
             and d["alerte_serveur"] == "Sauvegarde du jour en défaut."
         )
         a = alimentation.get("/api/contexte").json()
-        assert a["compteurs"] == {} and a["alerte_serveur"] is None
+        assert "essai" not in a["compteurs"] and a["alerte_serveur"] is None
     finally:
         contexte.COMPTEURS.pop("essai")
         contexte.ALERTES_SERVEUR.pop()
