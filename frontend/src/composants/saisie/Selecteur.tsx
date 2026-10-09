@@ -3,6 +3,9 @@
  * MP, P4) : recherche multi-mots sans accents, y compris sur des champs cachés (`recherche`) ;
  * clavier ↑ ↓ Entrée (Entrée choisit aussi un résultat unique), Échap ferme la liste sans
  * fermer la fenêtre qui la contient ; « Rien ne correspond. » Motif ARIA « combobox ».
+ *
+ * La liste s'ouvre à la frappe, à ↓ (ou ↑) et au clic, jamais au seul focus : le premier champ
+ * d'une fiche, qui reçoit le focus à l'ouverture, ne déplie pas sa liste sur le reste.
  */
 import {
   useId,
@@ -54,6 +57,10 @@ function useListe<K extends string | number>(props: SelecteurProps<K>) {
   const [q, setQ] = useState('')
   const [actif, setActif] = useState(0)
   const trouvees = useMemo(() => filtrerOptions(props.options, q), [props.options, q])
+  const ouvrir = () => {
+    setOuvert(true)
+    setActif(0)
+  }
   const choisir = (o: OptionSelecteur<K> | null) => {
     props.onChange(o ? o.id : null, o ?? undefined)
     setOuvert(false)
@@ -62,7 +69,7 @@ function useListe<K extends string | number>(props: SelecteurProps<K>) {
   const clavier = (e: KeyboardEvent<HTMLInputElement>, montrees: number) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
-      setOuvert(true)
+      if (!ouvert) return ouvrir()
       setActif((a) => Math.max(0, Math.min(montrees - 1, a + (e.key === 'ArrowDown' ? 1 : -1))))
     } else if (e.key === 'Enter' && ouvert) {
       const o = trouvees.length === 1 ? trouvees[0] : trouvees[actif]
@@ -77,11 +84,9 @@ function useListe<K extends string | number>(props: SelecteurProps<K>) {
     }
   }
   const evenements = (montrees: number) => ({
-    onFocus: () => {
-      setOuvert(true)
-      setActif(0)
+    onClick: () => {
+      if (!ouvert) ouvrir()
     },
-    onClick: () => setOuvert(true),
     onBlur: () => setOuvert(false),
     onChange: (e: ChangeEvent<HTMLInputElement>) => {
       setQ(e.target.value)

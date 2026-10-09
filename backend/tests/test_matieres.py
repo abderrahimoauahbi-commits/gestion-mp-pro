@@ -72,6 +72,16 @@ def test_une_matiere_en_service_a_un_fournisseur(achats: TestClient) -> None:
     )
 
 
+def test_une_fiche_creee_dit_qui_et_quand(achats: TestClient) -> None:
+    """Une matière et un fournisseur créés portent l'auteur et l'heure de leur création
+    (`modifie_par` sans `modifie_le` : reste F7)."""
+    m = ok(achats.post("/api/matieres", json=nouvelle()), 201)
+    fiche = ok(achats.get(f"/api/matieres/{m['id']}"))
+    assert fiche["modifie_par"] and fiche["modifie_le"]
+    f = ok(achats.post("/api/fournisseurs", json={"nom": unique("Q")}), 201)
+    assert ok(achats.get(f"/api/fournisseurs/{f['id']}"))["modifie_le"]
+
+
 def test_matiere_conditionnement_et_version(achats: TestClient) -> None:
     """Hérité : test_referentiels_complets::test_matiere_conditionnement_et_historique."""
     m = ok(achats.post("/api/matieres", json=nouvelle(poids_bobine=2, bobines_palette=100)), 201)

@@ -31,6 +31,8 @@ export interface CompteurProps {
   min?: number
   max?: number
   decimales?: number
+  /** L'unité écrite à droite quand ce ne sont pas des kilos (« m² », « m », « % »). */
+  uniteDite?: string
 }
 
 const ABREGES: Record<Unite, string> = { kg: 'kg', bobine: 'bob.', palette: 'pal.' }
@@ -70,6 +72,7 @@ export function Compteur({
   min = 0,
   max,
   decimales,
+  uniteDite,
 }: CompteurProps) {
   const id = useId()
   const frappe = useFrappeNombre(valeur, onChange)
@@ -104,7 +107,7 @@ export function Compteur({
           raison={max != null && v >= max ? `Déjà au maximum (${nombre(max, 0, 3)}).` : undefined}
           onClick={() => changer(1)}
         />
-        <span className={styles.unite}>{ABREGES[unite]}</span>
+        <span className={styles.unite}>{uniteDite ?? ABREGES[unite]}</span>
       </div>
       {message ? (
         <span id={id} className={styles.message}>

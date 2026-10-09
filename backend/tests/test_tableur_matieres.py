@@ -101,6 +101,7 @@ def test_modele_puis_import_apercu_egal_application(achats: TestClient) -> None:
     with sessions()() as s:
         nouvelle = s.scalars(select(Matiere).where(Matiere.reference == nom)).one()
         assert nouvelle.fournisseur_id == f_nom and nouvelle.devise == "MAD"
+        assert nouvelle.modifie_par_id is not None and nouvelle.modifie_le is not None
         actions = s.scalars(
             select(Journal.action).where(Journal.objet_id == m, Journal.objet == "matiere")
         ).all()

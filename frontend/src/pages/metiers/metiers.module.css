@@ -1,0 +1,97 @@
+/* Métiers à tisser au bureau : tableau des fils montés groupé par étage. Jetons seulement. */
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--taille-tableau);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--bord-fort);
+  background: var(--surface-2);
+  color: var(--texte-2);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--bord);
+  vertical-align: middle;
+}
+
+.droite {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.etage td {
+  background: var(--surface-3);
+  font-weight: 600;
+}
+
+.tropLarge td {
+  background: var(--ton-critique-clair);
+}
+
+.pied td {
+  border-top: 1px solid var(--bord-fort);
+  font-weight: 700;
+}
+
+.filAlerte td:first-child {
+  box-shadow: inset 3px 0 0 var(--ton-critique);
+}
+
+.note {
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.etroit {
+  width: 110px;
+}
+
+.ajout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espace-3);
+  margin-top: var(--espace-3);
+}
+
+.ajout > * {
+  flex: 1 1 260px;
+}
+
+.code {
+  font-weight: 700;
+}
+
+.eteint {
+  color: var(--texte-3);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pied2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.pousse {
+  flex: 1;
+}

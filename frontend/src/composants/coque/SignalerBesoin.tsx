@@ -7,7 +7,8 @@ import { useState } from 'react'
 
 import { api } from '../../lib/api'
 import { useEcriture, useLecture } from '../../lib/requetes'
-import type { MatiereResumee, SignalementCreation } from '../../lib/types-provisoires'
+import type { Schema } from '../../lib/types'
+import type { SignalementCreation } from '../../lib/types-provisoires'
 import { Fenetre } from '../mise-en-page/Fenetre'
 import { Grille } from '../mise-en-page/Grille'
 import { Erreur } from '../retour/Erreur'
@@ -19,9 +20,16 @@ import { SelecteurMatiere, type MatiereChoix } from '../saisie/SelecteurMatiere'
 import { Zone } from '../saisie/Zone'
 
 type Urgence = SignalementCreation['urgence']
+type MatiereResume = Schema<'MatiereResume'>
+
+/** Ce que la fenêtre lit d'une matière de `GET /matieres` (route 70). */
+type MatiereLue = Pick<
+  MatiereResume,
+  'id' | 'reference' | 'designation' | 'composition' | 'type_fil' | 'titrage' | 'couleur' | 'fournisseur'
+>
 
 /** Ce que le sélecteur de matière lit d'une matière. */
-export function versChoix(m: MatiereResumee): MatiereChoix {
+export function versChoix(m: MatiereLue): MatiereChoix {
   return {
     id: m.id,
     reference: m.reference,
@@ -40,7 +48,7 @@ export function manqueSignalement(texte: string): string[] {
 }
 
 export function SignalerBesoin({ onFermer }: { onFermer: () => void }) {
-  const matieres = useLecture<MatiereResumee[]>('/matieres', { actif: true })
+  const matieres = useLecture<MatiereResume[]>('/matieres', { actif: true })
   const [matiere, setMatiere] = useState<number | null>(null)
   const [texte, setTexte] = useState('')
   const [urgence, setUrgence] = useState<Urgence>('normale')

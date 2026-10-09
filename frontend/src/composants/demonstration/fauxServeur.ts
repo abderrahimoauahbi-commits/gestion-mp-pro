@@ -22,21 +22,26 @@ const PIECES = [
 
 const HISTORIQUE = [
   {
-    id: 2,
-    quand: '2026-10-08T09:12:00',
-    par: 'Karim',
-    action: 'Bon modifié',
-    changements: [
-      { libelle: 'Livraison prévue', avant: '2026-10-20', apres: '2026-10-25' },
-      { libelle: 'Quantité (kg)', avant: 5029.5, apres: 6000 },
-    ],
-  },
-  {
     id: 1,
     quand: '2026-10-07T16:40:00',
-    par: 'Mohamed',
-    action: 'Bon envoyé',
+    utilisateur: 'MAZARI',
+    role: 'direction',
+    action: 'envoi du bon',
+    numero: 'BC-2026-0012',
     detail: 'BC-2026-0012 envoyé à HASIRCI.',
+    avant: { statut: 'approuve' },
+    apres: { statut: 'envoye' },
+  },
+  {
+    id: 2,
+    quand: '2026-10-08T09:12:00',
+    utilisateur: 'Karim BENALI',
+    role: 'achats',
+    action: 'modification du bon',
+    numero: 'BC-2026-0012',
+    detail: '',
+    avant: { date_livraison_prevue: '2026-10-20', observations: '' },
+    apres: { date_livraison_prevue: '2026-10-25', observations: 'Urgent' },
   },
 ]
 

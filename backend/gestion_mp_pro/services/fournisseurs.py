@@ -221,7 +221,7 @@ def creer(s: Session, qui: audit.Qui, champs: dict[str, Any]) -> Fournisseur:
     """Un fournisseur nouveau (route 66)."""
     donnees = _donnees(s, champs, None)
     _nom_libre(s, donnees["nom"], None)
-    f = Fournisseur(**donnees, modifie_par_id=qui.id)
+    f = Fournisseur(**donnees, modifie_par_id=qui.id, modifie_le=horloge.maintenant())
     s.add(f)
     audit.creation(s, qui, "création fournisseur", f, detail=f.nom)
     return f
