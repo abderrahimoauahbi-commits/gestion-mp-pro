@@ -224,6 +224,8 @@ GET;/api/reclamations/{rid};401;ok;ok;403;403
 PUT;/api/reclamations/{rid};401;ok;ok;403;403
 POST;/api/reclamations/{rid}/clore;401;ok;ok;403;403
 POST;/api/reclamations/{rid}/rouvrir;401;ok;ok;403;403
+GET;/api/reprise;401;ok;403;403;ok
+POST;/api/reprise;401;ok;403;403;403
 GET;/api/sante;ok;ok;ok;ok;ok
 GET;/api/sauvegardes;401;ok;403;403;ok
 POST;/api/sauvegardes;401;ok;403;403;ok

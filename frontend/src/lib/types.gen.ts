@@ -4065,6 +4065,30 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/reprise': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état du miroir de Gestion MP : dernières reprises, signature, à jour, activité.
+     * @description Route 243.
+     */
+    get: operations['lire_miroir_api_reprise_get']
+    put?: never
+    /**
+     * Rafraîchir le miroir : reprise de Gestion MP (sauvegarde « avant reprise » d'abord).
+     * @description Route 244 : 202, puis la reprise en tâche de fond (après le commit de la requête).
+     */
+    post: operations['rafraichir_miroir_api_reprise_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/documents/etiquettes': {
     parameters: {
       query?: never
@@ -6536,6 +6560,52 @@ export interface components {
       version: string
     }
     /**
+     * EtatMiroir
+     * @description Route 243 : l'état du miroir de Gestion MP.
+     */
+    EtatMiroir: {
+      /**
+       * Base
+       * @description base de PRO (cible)
+       */
+      base: string
+      /**
+       * Base Source
+       * @description base de Gestion MP (lue seulement)
+       */
+      base_source: string
+      /**
+       * Signature Source
+       * @description signature actuelle de la source
+       */
+      signature_source: string | null
+      /** Source Lisible */
+      source_lisible: boolean
+      /**
+       * Message Source
+       * @description pourquoi la source ne se lit pas (sinon vide)
+       */
+      message_source: string
+      /**
+       * A Jour
+       * @description source inchangée depuis la dernière reprise réussie
+       */
+      a_jour: boolean
+      /**
+       * Activite Propre
+       * @description activité saisie dans PRO (pas écrite par la dernière reprise)
+       */
+      activite_propre: boolean
+      /** En Cours */
+      en_cours: boolean
+      derniere_reussie: components['schemas']['ExecutionMiroir'] | null
+      /**
+       * Executions
+       * @description les 10 dernières exécutions
+       */
+      executions: components['schemas']['ExecutionMiroir'][]
+    }
+    /**
      * EtatRestauration
      * @description Route 45 (202) : la restauration a commencé ; l'écran suit `/api/sante`.
      */
@@ -6713,6 +6783,82 @@ export interface components {
       alourdies: number
       /** Allegees */
       allegees: number
+    }
+    /**
+     * ExecutionMiroir
+     * @description Une exécution de la reprise (la plus récente d'abord).
+     */
+    ExecutionMiroir: {
+      /** Id */
+      id: number
+      /**
+       * Debut
+       * Format: date-time
+       */
+      debut: string
+      /** Fin */
+      fin: string | null
+      /**
+       * Statut
+       * @description en_cours, reussie, echouee
+       */
+      statut: string
+      /**
+       * Mode
+       * @description referentiels, activite, tout
+       */
+      mode: string
+      /** Base Source */
+      base_source: string
+      /**
+       * Empreinte Source
+       * @description signature de la source relevée
+       */
+      empreinte_source: string | null
+      /** Duree S */
+      duree_s: number | null
+      /**
+       * Creees
+       * @description lignes créées, toutes tables
+       */
+      creees: number
+      /**
+       * Tables
+       * @description par table : lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees
+       */
+      tables: {
+        [key: string]: {
+          [key: string]: number
+        }
+      }
+      /**
+       * Rapport
+       * @description rapport de contrôle (direction seulement)
+       */
+      rapport: string | null
+    }
+    /**
+     * ExecutionReprise
+     * @description Route 244 (202) : la reprise a commencé ; l'écran suit son issue par la route 243.
+     */
+    ExecutionReprise: {
+      /**
+       * Etat
+       * @default en_cours
+       * @constant
+       */
+      etat: 'en_cours'
+      /**
+       * Debut
+       * Format: date-time
+       */
+      debut: string
+      /** Mode */
+      mode: string
+      /** Remplacer Activite */
+      remplacer_activite: boolean
+      /** Message */
+      message: string
     }
     /**
      * ExpeditionEntree
@@ -10270,6 +10416,12 @@ export interface components {
       montage?: components['schemas']['ResultatMontage'] | null
     }
     /**
+     * ModeReprise
+     * @description Ce qu'une exécution de la reprise a repris.
+     * @enum {string}
+     */
+    ModeReprise: 'referentiels' | 'activite' | 'tout'
+    /**
      * Moi
      * @description Route 12 : le compte connecté, ce qu'il voit et ses droits fins.
      */
@@ -12860,6 +13012,22 @@ export interface components {
       version: number
       /** Motif */
       motif: string
+    }
+    /**
+     * RepriseDemandee
+     * @description Route 244 : rafraîchir le miroir. `remplacer_activite` exige `confirmation` = REMPLACER
+     *     (casse indifférente) ; sans lui, une activité saisie dans PRO fait refuser (409).
+     */
+    RepriseDemandee: {
+      /** @default tout */
+      mode: components['schemas']['ModeReprise']
+      /**
+       * Remplacer Activite
+       * @default false
+       */
+      remplacer_activite: boolean
+      /** Confirmation */
+      confirmation?: string | null
     }
     /**
      * ReseauServeur
@@ -27758,6 +27926,113 @@ export interface operations {
         }
         content: {
           'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_miroir_api_reprise_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatMiroir']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  rafraichir_miroir_api_reprise_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RepriseDemandee']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ExecutionReprise']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Service indisponible */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
         }
       }
     }
