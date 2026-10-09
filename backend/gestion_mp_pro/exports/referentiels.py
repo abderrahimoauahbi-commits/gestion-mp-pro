@@ -1,76 +1,55 @@
 """Classeurs des référentiels : matières, fiches fournisseurs, modèle du tableur (69, 78, 81).
 
-Conventions de Gestion MP (R-REF-96) : une feuille titrée, « {titre} — exporté le JJ/MM/AAAA »
-en tête, les intitulés en gras, les nombres en vrais nombres avec leur format, la ligne d'en-tête
-figée et filtrable. Ces classeurs sont lus par la direction et les achats (prix compris) ; la
-route les refuse à l'alimentation. Le modèle du tableur est le catalogue actuel, relu tel quel
-par `services/tableur_matieres` (colonnes de `services/tableur_referentiels`).
+Conventions communes (`exports/classeur.py`, R-REF-96) : une feuille titrée, « {titre} — exporté
+le JJ/MM/AAAA » en tête, les intitulés en gras, les nombres en vrais nombres avec leur format, la
+ligne d'en-tête figée et filtrable, `=` gardé en texte. Ces classeurs sont lus par la direction
+et les achats (prix compris) ; la route les refuse à l'alimentation. Le modèle du tableur est le
+catalogue actuel, relu tel quel par `services/tableur_matieres` (colonnes de
+`services/tableur_referentiels`).
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from decimal import Decimal
-from enum import Enum
-from io import BytesIO
 from typing import Any
 
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from openpyxl.utils import get_column_letter
-
+from gestion_mp_pro.exports import classeur as conventions
 from gestion_mp_pro.services import horloge
 from gestion_mp_pro.services.fournisseurs import Usages, est_local
 from gestion_mp_pro.services.matieres_lecture import Ligne
 from gestion_mp_pro.services.tableur_referentiels import COLONNES, SE_COMMANDE, VERSION, VIDER
 
-TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+TYPE_XLSX = conventions.TYPE_XLSX
 ENTIER, KG, PRIX = "#,##0", "#,##0.0", "#,##0.000"
 
 Colonne = tuple[str, str | None]
 
 
-def _valeur(x: Any) -> Any:
-    """Un `Decimal` devient un nombre Excel, une énumération sa valeur ; le reste tel quel."""
-    if isinstance(x, Decimal):
-        return float(x)
-    return x.value if isinstance(x, Enum) else x
+def _lire(rang: int) -> Any:
+    """La valeur de la colonne `rang` d'une rangée."""
+    return lambda rangee: rangee[rang]
 
 
 def classeur(
     titre: str, colonnes: Sequence[Colonne], lignes: Sequence[Sequence[Any]], *, entete: bool = True
 ) -> bytes:
-    """Un classeur d'une feuille : titre daté (si `entete`), intitulés, lignes."""
-    wb = Workbook()
-    f = wb.active
-    f.title = titre[:31]
-    debut = 1
-    if entete:
-        f.append([f"{titre} — exporté le {horloge.aujourd_hui():%d/%m/%Y}"])
-        f["A1"].font = Font(bold=True, size=12)
-        f.append([])
-        debut = 3
-    f.append([c for c, _ in colonnes])
-    for cellule in f[debut]:
-        cellule.font = Font(bold=True)
-    for ligne in lignes:
-        f.append([_valeur(x) for x in ligne])
-    for i, (nom, format_) in enumerate(colonnes, start=1):
-        lettre = get_column_letter(i)
-        f.column_dimensions[lettre].width = max(10, min(40, len(nom) + 2))
-        if format_:
-            for (cellule,) in f.iter_rows(min_row=debut + 1, min_col=i, max_col=i):
-                cellule.number_format = format_
-    f.freeze_panes = f.cell(row=debut + 1, column=1)
-    f.auto_filter.ref = f"A{debut}:{get_column_letter(len(colonnes))}{max(debut, f.max_row)}"
-    tampon = BytesIO()
-    wb.save(tampon)
-    return tampon.getvalue()
+    """Un classeur d'une feuille aux conventions communes (`exports/classeur.py`) : titre
+    « … — exporté le JJ/MM/AAAA » (si `entete`), intitulés, lignes. Lu par D et A seulement."""
+    feuille = conventions.Feuille(
+        titre,
+        [
+            conventions.Colonne(nom, _lire(i), format_ or "")
+            for i, (nom, format_) in enumerate(colonnes)
+        ],
+        lignes,
+        [conventions.exporte_le(titre, horloge.aujourd_hui())] if entete else [],
+    )
+    return conventions.classeur([feuille], voit_prix=True)
 
 
 def nom_de_fichier(nom: str) -> str:
     """« matieres-2026-10-08.xlsx »."""
-    return f"{nom}-{horloge.aujourd_hui():%Y-%m-%d}.xlsx"
+    return conventions.nom_de_fichier(nom, horloge.aujourd_hui())
 
 
 def matieres(lignes: Sequence[Ligne]) -> bytes:
