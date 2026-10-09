@@ -4,9 +4,9 @@
     {
       "cle": "valeur",
       "libelle": "Valeur du stock",
-      "valeur": 61619.0,
+      "valeur": 67039.0,
       "unite": "MAD",
-      "detail": "7 matière(s)",
+      "detail": "8 matière(s) · dont 420 MAD sur les métiers",
       "formule": "Σ (magasins, quarantaine comprise, + sur les métiers) × coût moyen pondéré (sinon prix du catalogue × cours) — la valeur de la Valorisation",
       "lien": "/analyse?onglet=valorisation",
       "ton": "neutre"
@@ -14,7 +14,7 @@
     {
       "cle": "couverture",
       "libelle": "Couverture pondérée",
-      "valeur": 50.74390528677299,
+      "valeur": 55.66845357485826,
       "unite": "j",
       "detail": "pondérée par la valeur",
       "formule": "Σ stock projeté positif × prix × cours ÷ consommation valorisée par jour (consommation mensuelle × prix × cours ÷ 30)",
@@ -44,9 +44,9 @@
     {
       "cle": "rotation",
       "libelle": "Rotation du stock",
-      "valeur": 2.847774370382048,
+      "valeur": 2.617536194283498,
       "unite": "×",
-      "detail": "par an (consommation réelle) · cycle de trésorerie 188 j",
+      "detail": "par an (consommation réelle) · cycle de trésorerie 199 j",
       "formule": "Coût de la consommation des 12 derniers mois clos ÷ valeur du stock au coût moyen ; sans historique : coût matière du plan ÷ stock au catalogue. Cycle de trésorerie = DIO + DSO − DPO",
       "lien": "/analyse?onglet=valorisation",
       "ton": "neutre"
@@ -63,20 +63,20 @@
     }
   ],
   "stock": {
-    "valeur_mad": 61619.0,
-    "valeur_machine_mad": 0.0,
-    "nb_references": 7,
-    "nb_detenues": 7,
-    "nb_sur_metiers": 0,
-    "couverture_ponderee_jours": 50.74390528677299,
+    "valeur_mad": 67039.0,
+    "valeur_machine_mad": 420.0,
+    "nb_references": 8,
+    "nb_detenues": 8,
+    "nb_sur_metiers": 1,
+    "couverture_ponderee_jours": 55.66845357485826,
     "ruptures": 2,
     "critiques": 1,
     "urgents": 0,
     "attentions": 0,
     "ok": 4,
-    "sans_consommation": 0,
-    "valeur_magasins_mad": 61619.0,
-    "kg_machine": 0.0
+    "sans_consommation": 1,
+    "valeur_magasins_mad": 66619.0,
+    "kg_machine": 15.0
   },
   "achats": {
     "bc_actifs": 2,
@@ -89,18 +89,18 @@
   "finance": {
     "cout_matiere_annuel_mad": 396219.08160000003,
     "cout_matiere_mensuel_mad": 33018.2568,
-    "rotation_stock": 2.847774370382048,
-    "dio_jours": 128.17026650571083,
+    "rotation_stock": 2.617536194283498,
+    "dio_jours": 139.44410808803048,
     "cout_rotation_annuel_mad": 175477.00892857142,
     "base_rotation": "consommation",
     "dso_jours": 60.0,
     "dpo_jours": 0.0,
-    "ccc_jours": 188.17026650571083
+    "ccc_jours": 199.44410808803048
   },
   "abc": {
     "A": 3,
     "B": 1,
-    "C": 3
+    "C": 4
   },
   "dormant": {
     "nb_references": 0,
@@ -113,9 +113,36 @@
     "multi_source": 0
   },
   "economies": {
-    "total_mad": 0.0,
-    "nb_opportunites": 0,
-    "top": []
+    "total_mad": 24675.840000000004,
+    "nb_opportunites": 1,
+    "top": [
+      {
+        "reference": "PP FRZ-2900 Rouge",
+        "nature": "",
+        "titrage": "",
+        "fournisseur_actuel": "Filature Atlas",
+        "prix_actuel_mad": 28.0,
+        "prix_minimum_mad": 22.0,
+        "fournisseur_alternatif": "Tissages Fès",
+        "conso_annuelle": 4112.64,
+        "economie_mad": 24675.840000000004,
+        "composition": "PP",
+        "type_fil": "FRISE",
+        "couleur": "ROUGE",
+        "reference_alternative": "PP FRZ-2900 Rouge (Fès)",
+        "couleur_alternative": "ROUGE",
+        "origine_prix": "payé",
+        "origine_prix_minimum": "payé",
+        "ecart": 0.21428571428571427,
+        "date_prix": "2026-09-09",
+        "date_prix_minimum": "2026-09-14",
+        "ecart_jours": 5,
+        "base_prix": "prix facture",
+        "base_prix_minimum": "prix facture",
+        "matiere_id": 1,
+        "matiere_alternative_id": 8
+      }
+    ]
   },
   "nb_alertes": 3,
   "alerte_rouge": 3,

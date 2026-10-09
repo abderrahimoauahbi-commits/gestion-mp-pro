@@ -66,7 +66,7 @@ const COLONNES: Colonne<CommandeResume>[] = [
       return (
         <span className={styles.double}>
           {montant(estime ? c.montant_estime : c.montant, c.devise)}
-          {estime ? <small>estimé, prix du catalogue</small> : null}
+          {estime ? <small>estimé (catalogue)</small> : null}
         </span>
       )
     },
@@ -127,7 +127,7 @@ export function OngletAFaire({
   return (
     <>
       <BandeauAlerte cockpit={cockpit} />
-      <div className={styles.deux}>
+      <div className={`${styles.deux} ${styles.large}`}>
         <Carte
           titre={`Commandes à approuver (${nombre(approuver.length)})`}
           actions={toutes ? <Link to={toutes}>Toutes les commandes →</Link> : null}

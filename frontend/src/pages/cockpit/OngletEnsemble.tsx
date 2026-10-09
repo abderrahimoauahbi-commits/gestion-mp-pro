@@ -7,7 +7,7 @@
 import { Link } from 'react-router'
 
 import { Carte } from '../../composants/mise-en-page/Carte'
-import { Definitions } from '../../composants/mise-en-page/Definitions'
+import { Cadre } from '../../composants/tableaux/Cadre'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import { jours, montant, nombre, part } from '../../lib/format'
@@ -129,14 +129,29 @@ function lignesFinance(c: Cockpit): [string, string][] {
   ]
 }
 
+/** Des phrases courtes, chacune avec son sujet en gras (comme Gestion MP). */
+function Lignes({ lignes }: { lignes: readonly [string, string][] }) {
+  return (
+    <ul className={styles.phrases}>
+      {lignes.map(([sujet, texte]) => (
+        <li key={sujet}>
+          <strong>{sujet}</strong> : {texte}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function OngletEnsemble({ cockpit }: { cockpit: Cockpit }) {
   const { role } = useSession()
   const plan = siPermis(role, '/plan-achat')
   return (
     <div className={styles.deux}>
       <Carte titre="Les matières par statut" actions={<Link to="/stock">Stock →</Link>}>
-        <Repartition cockpit={cockpit} />
-        <Definitions colonnes={1} items={lignesStock(cockpit)} />
+        <Cadre>
+          <Repartition cockpit={cockpit} />
+          <Lignes lignes={lignesStock(cockpit)} />
+        </Cadre>
       </Carte>
       <Carte
         titre="Le budget à commander, par devise"
@@ -151,7 +166,9 @@ export function OngletEnsemble({ cockpit }: { cockpit: Cockpit }) {
           libelle="Le budget à commander, par devise"
           vide="Rien à commander."
         />
-        <Definitions colonnes={1} items={lignesFinance(cockpit)} />
+        <Cadre>
+          <Lignes lignes={lignesFinance(cockpit)} />
+        </Cadre>
       </Carte>
     </div>
   )

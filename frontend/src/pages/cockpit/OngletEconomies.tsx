@@ -23,30 +23,34 @@ const base = (b: string, jour: string | null) => (jour ? `${b} du ${date(jour)}`
 const COLONNES: Colonne<Opportunite>[] = [
   {
     cle: 'reference',
-    titre: 'Référence · fournisseur actuel',
+    titre: 'Référence · fournisseur',
     rendu: (o) => <Double haut={o.reference} bas={o.fournisseur_actuel} />,
     recherche: (o) => [o.fournisseur_actuel],
   },
   {
     cle: 'composition',
-    titre: 'Composition × titrage',
+    titre: 'Composition',
+    aide: 'Composition · type · titrage',
     valeur: (o) =>
       [o.composition || o.nature, o.type_fil, o.titrage].filter((v) => v != null && v !== '').join(' · '),
   },
   {
     cle: 'prix_actuel_mad',
-    titre: 'Prix actuel (MAD / kg)',
+    titre: 'Prix (MAD/kg)',
+    aide: 'Prix actuel au kilo, coût rendu usine',
     droite: true,
     rendu: (o) => <Double haut={prix(o.prix_actuel_mad)} bas={base(o.base_prix, o.date_prix)} />,
   },
   {
     cle: 'reference_alternative',
-    titre: 'Comparable moins cher · chez',
+    titre: 'Comparable · chez',
+    aide: 'Comparable moins cher, et son fournisseur',
     rendu: (o) => <Double haut={o.reference_alternative || '—'} bas={o.fournisseur_alternatif} />,
   },
   {
     cle: 'prix_minimum_mad',
-    titre: 'Son prix (MAD / kg)',
+    titre: 'Son prix',
+    aide: 'Prix du comparable (MAD/kg), coût rendu usine',
     droite: true,
     rendu: (o) => (
       <Double haut={prix(o.prix_minimum_mad)} bas={base(o.base_prix_minimum, o.date_prix_minimum)} />
@@ -58,10 +62,10 @@ const COLONNES: Colonne<Opportunite>[] = [
     droite: true,
     rendu: (o) => <Badge ton="attention">−{part(o.ecart)}</Badge>,
   },
-  { cle: 'conso_annuelle', titre: 'Conso / an (kg)', droite: true, rendu: (o) => nombre(o.conso_annuelle) },
+  { cle: 'conso_annuelle', titre: 'Conso/an (kg)', droite: true, rendu: (o) => nombre(o.conso_annuelle) },
   {
     cle: 'economie_mad',
-    titre: 'Économie / an',
+    titre: 'Économie/an',
     droite: true,
     unite: 'MAD',
     total: true,

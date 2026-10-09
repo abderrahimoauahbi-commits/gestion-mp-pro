@@ -57,15 +57,22 @@ const COLONNES: Colonne<Photo>[] = [
   { cle: 'jour', titre: 'Jour', rendu: (p) => date(p.jour) },
   {
     cle: 'valeur_stock_mad',
-    titre: 'Valeur du stock',
+    titre: 'Valeur',
+    aide: 'Valeur du stock (magasins et sur les métiers, au coût moyen)',
     droite: true,
     unite: 'MAD',
     rendu: (p) => montant(p.valeur_stock_mad, 'MAD'),
   },
-  { cle: 'couverture_jours', titre: 'Couverture', droite: true, rendu: (p) => jours(p.couverture_jours) },
+  {
+    cle: 'couverture_jours',
+    titre: 'Couv.',
+    aide: 'Couverture pondérée par la valeur',
+    droite: true,
+    rendu: (p) => jours(p.couverture_jours),
+  },
   {
     cle: 'alertes',
-    titre: 'Rupt. · crit. · urg.',
+    titre: 'R · C · U',
     aide: 'Matières en RUPTURE, CRITIQUE, URGENT ce jour-là',
     droite: true,
     valeur: (p) => `${p.ruptures} · ${p.critiques} · ${p.urgents}`,
@@ -73,7 +80,8 @@ const COLONNES: Colonne<Photo>[] = [
   },
   {
     cle: 'a_commander_mad',
-    titre: 'À commander',
+    titre: 'À cmd.',
+    aide: 'À commander selon le plan d’achat',
     droite: true,
     unite: 'MAD',
     rendu: (p) => montant(p.a_commander_mad, 'MAD'),
@@ -125,9 +133,9 @@ export function OngletEvolution() {
   if (lues.isError) return <Erreur erreur={lues.error} onReessayer={() => void lues.refetch()} />
   const photos = lues.data
   return (
-    <div className={styles.deux}>
+    <div className={`${styles.deux} ${styles.etroit}`}>
       <Carte
-        titre={<Bascule<Vue> vues={VUES} valeur={vue} onChange={choisir} libelle="Vue de l’évolution" />}
+        titre="Les indicateurs jour après jour"
         actions={
           direction ? (
             <Bouton
@@ -140,6 +148,9 @@ export function OngletEvolution() {
           ) : null
         }
       >
+        <div className={styles.aGauche}>
+          <Bascule<Vue> vues={VUES} valeur={vue} onChange={choisir} libelle="Vue de l’évolution" />
+        </div>
         <Graphique photos={photos} vue={vue} direction={direction} />
       </Carte>
       <Carte titre={`Les photos, la plus récente d’abord (${nombre(photos.length)})`} serre>

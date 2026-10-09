@@ -1,6 +1,7 @@
 /* Cockpit (lot F1) : seulement des jetons (stylelint). */
 
 .deux {
+  position: relative; /* le texte masqué d'un bouton reste dans la page qui défile (téléphone) */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--espace-3);
@@ -103,4 +104,35 @@ a.ligneBarre:hover {
 .valeurBarre {
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+.large {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.etroit {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+}
+
+@media (width <= 900px) {
+  .large,
+  .etroit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.phrases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-1);
+  margin: var(--espace-3) 0 0;
+  padding-left: var(--espace-4);
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.aGauche {
+  align-self: flex-start;
+  max-width: 100%;
+  overflow-x: auto;
 }
