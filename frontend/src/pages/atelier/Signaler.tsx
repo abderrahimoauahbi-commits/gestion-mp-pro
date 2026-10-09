@@ -21,11 +21,10 @@ import { api } from '../../lib/api'
 import { horodatage, date } from '../../lib/format'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
-import type { SignalementCreation } from '../../lib/types-provisoires'
 import { attente, Fiche, NoteAtelier } from './briques'
 import styles from './atelier.module.css'
 import { ChargerSuivants } from './Ordres'
-import type { MatiereResume, PageSignalements, SignalementFiche } from './types'
+import type { MatiereResume, PageSignalements, SignalementCreation, SignalementFiche } from './types'
 
 const PAGE_SIGNALEMENTS = 40
 
@@ -94,7 +93,7 @@ export default function Signaler() {
         <SelecteurMatiere
           libelle="Matière (facultatif)"
           matieres={(matieres.data ?? []).map(versChoix)}
-          valeur={s.matiere_id}
+          valeur={s.matiere_id ?? null}
           onChange={(id) => poser({ matiere_id: id })}
         />
         <Champ libelle="Quel besoin ?" obligatoire>

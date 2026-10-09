@@ -67,9 +67,13 @@ describe('Accueil de l’atelier', () => {
       par_id,
       par: '',
       matiere_id: null,
+      reference: '',
       texte: 'x',
-      urgence: 'normale' as const,
+      urgence: 'normale',
+      traite: traite_le !== null,
+      traite_par: '',
       traite_le,
+      reponse: '',
     })
     const page = { elements: [s(3, null), s(3, '2026-10-08'), s(4, null)], total: 3, suivant: null }
     expect(compteSignalements(page, 3)).toBe('1 en attente · 1 réponse(s) des achats')

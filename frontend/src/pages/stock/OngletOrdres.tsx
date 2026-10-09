@@ -28,7 +28,7 @@ import type { Suivi } from './donnees'
 import { Periode } from './Periode'
 import styles from './stock.module.css'
 
-type Consommation = Schema<'ConsommationOrdre'>
+type Consommation = Schema<'gestion_mp_pro__api__ordres__schemas__ConsommationOrdre'>
 
 /** La période de l'onglet (`?debut=&fin=`, distincte de celle des mouvements). */
 export const CLES_ORDRES = ['debut', 'fin'] as const

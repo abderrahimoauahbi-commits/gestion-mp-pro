@@ -15,7 +15,7 @@ import type { Suivi } from './donnees'
 import styles from './stock.module.css'
 import type { EtapeTracee, Tracabilite } from './types'
 
-type Consommation = Schema<'ConsommationOrdre'>
+type Consommation = Schema<'gestion_mp_pro__api__ordres__schemas__ConsommationOrdre'>
 
 function Lien({ texte, titre, onClick }: { texte: string; titre: string; onClick: () => void }) {
   return (

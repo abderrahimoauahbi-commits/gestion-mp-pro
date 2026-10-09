@@ -25,7 +25,7 @@ import styles from './stock.module.css'
 import { ParMatiere, PasDuSuivi } from './TracabiliteVues'
 import type { Tracabilite as Trace } from './types'
 
-type Consommation = Schema<'ConsommationOrdre'>
+type Consommation = Schema<'gestion_mp_pro__api__ordres__schemas__ConsommationOrdre'>
 
 /** Une étape du chemin parcouru : le suivi et son nom (« lot L-12 », « ordre OF-2026-0004 »). */
 export interface Etape {
