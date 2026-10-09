@@ -79,7 +79,7 @@ def donnees_scindees(bases: pb.Bases, dossier: Path) -> pd.Contexte:
     """K8b : le dépôt de Gestion MP relu sur une copie où la scission est refaite."""
     adresse = pb.url(f"{bases.prefixe}_scindee_essai")
     try:
-        pb.copier(bases.copie, adresse)
+        pb.copier(bases.copie.rsplit("/", 1)[-1], adresse)
         comptes = pcb.traduire(adresse, "K8b")
         (dossier / "scindee").mkdir(parents=True, exist_ok=True)
         d0s = st.donnees_gestion_mp(adresse, dossier / "scindee")["donnees"]
