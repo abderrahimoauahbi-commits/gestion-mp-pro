@@ -14,11 +14,12 @@ from typing import Annotated, Literal
 
 from fastapi import Depends, Query, Response
 
-from gestion_mp_pro.api.communs import ValidationVersion, nouveau_routeur
-from gestion_mp_pro.api.dependances import SessionDep, VersionDep
+from gestion_mp_pro.api.communs import ValidationVersion, encoder_curseur, nouveau_routeur
+from gestion_mp_pro.api.dependances import PaginationDep, SessionDep, VersionDep
 from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.api.ordres.schemas import (
     AnnulationOrdre,
+    ApercuOrdres,
     ConsommationOrdre,
     DemandeProposition,
     LotSorti,
@@ -26,6 +27,7 @@ from gestion_mp_pro.api.ordres.schemas import (
     OrdreFiche,
     OrdreModification,
     OrdreResume,
+    PageOrdres,
     Proposition,
 )
 from gestion_mp_pro.exports import ordres as classeur
@@ -79,6 +81,19 @@ def filtres(
 FiltresDep = Annotated[service.FiltresOrdres, Depends(filtres)]
 
 
+def _curseur(pagination: PaginationDep) -> tuple[dt.date, int] | None:
+    """La clé (date, n° d'entrée) du dernier ordre rendu (curseur de pagination)."""
+    if not pagination.apres:
+        return None
+    try:
+        jour, ident = pagination.apres
+        return dt.date.fromisoformat(str(jour)), int(str(ident))
+    except (ValueError, TypeError) as exc:
+        raise Refus.saisie(
+            "Curseur de pagination illisible : recharger la liste.", code="curseur_invalide"
+        ) from exc
+
+
 @routeur.post(
     "/ordres/proposition",
     response_model=Proposition,
@@ -99,14 +114,44 @@ def proposer(e: DemandeProposition, s: SessionDep) -> Proposition:
 
 @routeur.get(
     "/ordres",
-    response_model=list[OrdreResume],
+    response_model=PageOrdres,
     dependencies=[droit(*C)],
-    summary="Les ordres filtrés, le plus récent d'abord : sorti net, écart, retours, lots.",
+    summary="Les ordres filtrés, le plus récent d'abord, par pages : sorti net, écart, retours.",
     responses=reponses(401, 403, 422),
 )
-def lister(f: FiltresDep, s: SessionDep) -> list[OrdreResume]:
-    """Route 135."""
-    return [OrdreResume.model_validate(asdict(x)) for x in service.lister(s, f)]
+def lister(f: FiltresDep, pagination: PaginationDep, s: SessionDep) -> PageOrdres:
+    """Route 135 (filtres et recherche poussés en SQL ; curseur date puis n° d'entrée)."""
+    page = service.lister(s, f, _curseur(pagination), pagination.limite)
+    suivant = encoder_curseur(list(page.dernier)) if page.dernier is not None else None
+    return PageOrdres(
+        elements=[OrdreResume.model_validate(asdict(x)) for x in page.elements],
+        total=page.total,
+        suivant=suivant,
+    )
+
+
+@routeur.get(
+    "/ordres/apercu",
+    response_model=ApercuOrdres,
+    dependencies=[droit(*C)],
+    summary="Comptes par onglet, agrégats des indicateurs et options des filtres de la liste.",
+    responses=reponses(401, 403, 422),
+)
+def apercu(f: FiltresDep, s: SessionDep) -> ApercuOrdres:
+    """Route 135bis : nourrit les onglets, les indicateurs et les filtres liés des Sorties."""
+    return ApercuOrdres.model_validate(asdict(service.apercu(s, f)))
+
+
+@routeur.get(
+    "/ordres/ouverts",
+    response_model=list[OrdreResume],
+    dependencies=[droit(*C)],
+    summary="La liste entière d'un statut (plafonnée) : l'atelier et la saisie la filtrent.",
+    responses=reponses(401, 403, 422),
+)
+def ouverts(f: FiltresDep, s: SessionDep) -> list[OrdreResume]:
+    """Route 135ter : accès borné « tous les ordres » (téléphone, retours) ; non paginé."""
+    return [OrdreResume.model_validate(asdict(x)) for x in service.ouverts(s, f)]
 
 
 @routeur.get(
@@ -234,4 +279,4 @@ def exporter(
     if vue == "consommation":
         lues = service.consommation_des_ordres(s, f.du, f.au, f.qualite_id)
         return reponse(classeur.consommation(lues, f, jour), "consommation-ordres", jour)
-    return reponse(classeur.ordres(service.lister(s, f), f, jour), "ordres", jour)
+    return reponse(classeur.ordres(service.toutes(s, f), f, jour), "ordres", jour)

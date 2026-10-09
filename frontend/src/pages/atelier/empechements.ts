@@ -14,7 +14,7 @@ import type { SaisieSortie } from './useSaisieSortie'
 
 export function useEmpechements(s: SaisieSortie): string[] {
   const { contexte } = useSession()
-  const ordres = useLecture<OrdreResume[]>('/ordres')
+  const ordres = useLecture<OrdreResume[]>('/ordres/ouverts')
   const magasins = useMagasins()
   const nom = magasins.data?.find((m) => m.id === s.magasin)?.nom ?? ''
   const matieres = s.e.prises.map((p) => ({ id: p.matiere_id, reference: p.reference }))

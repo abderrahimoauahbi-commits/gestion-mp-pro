@@ -81,7 +81,7 @@ export function ChargerSuivants({
 }
 
 export default function Ordres() {
-  const ordres = useLecture<OrdreResume[]>('/ordres')
+  const ordres = useLecture<OrdreResume[]>('/ordres/ouverts')
   const [nb, setNb] = useState(PAGE_ATELIER)
   const enAttente = attente([ordres], 'les ordres')
   const liste = trierOrdres(ordres.data ?? [])

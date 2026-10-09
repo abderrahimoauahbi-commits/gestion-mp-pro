@@ -37,7 +37,24 @@ afterEach(() => vi.unstubAllGlobals())
 function servir(role: Role) {
   return fauxServeur({
     ...reponsesConnecte(role),
-    'GET /ordres': { corps: ordres },
+    'GET /ordres': { corps: { elements: ordres, total: ordres.length, suivant: null } },
+    'GET /ordres/ouverts': { corps: ordres },
+    'GET /ordres/apercu': {
+      corps: {
+        brouillon: 2,
+        valide: 5,
+        annule: 0,
+        net: 0,
+        revenu: 0,
+        prevu: 0,
+        sorti: 0,
+        brouillons_periode: 2,
+        brouillons_bloques: 1,
+        qualites: [],
+        metiers: [],
+        magasins: [],
+      },
+    },
     'GET /ordres/7': { corps: valide },
     'GET /ordres/5': { corps: brouillon },
     'GET /ordres/6': { corps: bloque },

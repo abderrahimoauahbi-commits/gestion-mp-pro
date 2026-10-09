@@ -60,7 +60,7 @@ def _ordres(a: Acces, r: Releve) -> None:
     m2 = somme_par(a.sql("SELECT ordre_id, m2 FROM ordre_qualite"))
     lignes = somme_par(a.sql("SELECT ordre_id, quantite FROM ordre_ligne"))
     figes = {o for (o,) in a.sql("SELECT id FROM ordre WHERE prevu_fige")}
-    for o in a.get("/ordres"):
+    for o in a.get("/ordres", limite=5000)["elements"]:
         oid, sujet = o["id"], o["numero"] or f"brouillon {o['id']}"
         net = sorti.get(oid, 0.0) - revenu.get(oid, 0.0)
         if o["statut"] == "brouillon":

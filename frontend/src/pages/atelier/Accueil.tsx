@@ -35,7 +35,7 @@ export function astuce(securise = window.isSecureContext): string {
 
 function Resume({ nom }: { nom: string }) {
   const jour = aujourdhui()
-  const ordres = useLecture<OrdreResume[]>('/ordres', { statut: 'valide', du: jour, au: jour })
+  const ordres = useLecture<OrdreResume[]>('/ordres/ouverts', { statut: 'valide', du: jour, au: jour })
   const enAttente = attente([ordres], 'les sorties du jour')
   if (enAttente) return enAttente
   const liste = ordres.data ?? []
@@ -49,7 +49,7 @@ function Resume({ nom }: { nom: string }) {
 }
 
 function TuilesAtelier({ moi }: { moi: number }) {
-  const brouillons = useLecture<OrdreResume[]>('/ordres', { statut: 'brouillon' })
+  const brouillons = useLecture<OrdreResume[]>('/ordres/ouverts', { statut: 'brouillon' })
   const signalements = useLecture<PageSignalements>(
     '/signalements',
     { mes: true },

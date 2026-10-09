@@ -6,7 +6,7 @@ Brouillon (corrigeable, supprimable, sans numéro, sans effet sur le stock) → 
 contrôles communs), `saisie` (remplir un brouillon), `proposition` (FIFO à la date), `prevu`
 (nomenclature, prévu figé), `blocages` (ce qui empêcherait de valider), `gestes` (créer…
 annuler), `brouillon` (« À valider »), `consommation` (sorti net, retours, lots sortis, route
-143), `lecture` (fiche, liste).
+143), `lecture` (fiche), `liste` (liste paginée 135, aperçu, accès borné, classeur).
 """
 
 from __future__ import annotations
@@ -26,22 +26,35 @@ from gestion_mp_pro.services.ordres.gestes import (
     supprimer,
     valider,
 )
-from gestion_mp_pro.services.ordres.lecture import FiltresOrdres, OrdreLu, fiche, lister
+from gestion_mp_pro.services.ordres.lecture import FiltresOrdres, OrdreLu, fiche
+from gestion_mp_pro.services.ordres.liste import (
+    ApercuOrdres,
+    OptionOrdres,
+    PageOrdres,
+    apercu,
+    lister,
+    ouverts,
+    toutes,
+)
 from gestion_mp_pro.services.ordres.proposition import Demande, Proposition, proposer
 from gestion_mp_pro.services.ordres.saisie import SaisieLigne, SaisieOrdre, SaisieQualite
 
 __all__ = [
     "GENRE_BROUILLON",
+    "ApercuOrdres",
     "ConsommationLue",
     "Demande",
     "FiltresOrdres",
     "LotSorti",
+    "OptionOrdres",
     "OrdreLu",
+    "PageOrdres",
     "Proposition",
     "SaisieLigne",
     "SaisieOrdre",
     "SaisieQualite",
     "annuler",
+    "apercu",
     "charger",
     "consommation_des_ordres",
     "creer",
@@ -49,7 +62,9 @@ __all__ = [
     "lister",
     "lots_sortis",
     "modifier",
+    "ouverts",
     "proposer",
     "supprimer",
+    "toutes",
     "valider",
 ]

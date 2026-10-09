@@ -30,7 +30,7 @@ describe('Accueil de l’atelier', () => {
     const jour = aujourdhui()
     fauxServeur(
       reponsesAtelier('alimentation', {
-        'GET /ordres': (_c, url) => ({
+        'GET /ordres/ouverts': (_c, url) => ({
           corps:
             url.searchParams.get('statut') === 'brouillon'
               ? [ordre({ id: 5, statut: 'brouillon', numero: null })]
@@ -61,7 +61,7 @@ describe('Accueil de l’atelier', () => {
   it('« Pas de réseau » au lieu de compteurs à zéro', async () => {
     fauxServeur(
       reponsesAtelier('alimentation', {
-        'GET /ordres': () => {
+        'GET /ordres/ouverts': () => {
           throw new TypeError('Failed to fetch')
         },
       }),
@@ -112,7 +112,7 @@ describe('Ordres de l’atelier', () => {
 
   it('au-delà de 50, « charger les suivants » dit combien il en reste', async () => {
     const beaucoup = Array.from({ length: 60 }, (_, i) => ordre({ id: 100 + i, numero: `OF-${i}` }))
-    fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres': { corps: beaucoup } }))
+    fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres/ouverts': { corps: beaucoup } }))
     monterApp('/atelier/ordres')
     expect(await screen.findAllByRole('listitem')).toHaveLength(PAGE_ATELIER)
     await userEvent.setup().click(screen.getByRole('button', { name: '50 sur 60 — charger les suivants' }))

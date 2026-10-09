@@ -31,8 +31,8 @@ export function piedRetour(montres: number, total: number, cherche: boolean): st
 function ChoixOrdre() {
   const [q, setQ] = useState('')
   const mots = useDiffere(q.trim())
-  const tous = useLecture<OrdreResume[]>('/ordres', { statut: 'valide' })
-  const trouves = useLecture<OrdreResume[]>(mots ? '/ordres' : null, { statut: 'valide', q: mots })
+  const tous = useLecture<OrdreResume[]>('/ordres/ouverts', { statut: 'valide' })
+  const trouves = useLecture<OrdreResume[]>(mots ? '/ordres/ouverts' : null, { statut: 'valide', q: mots })
   const [nb, setNb] = useState(0)
   const lecture = mots ? trouves : tous
   const liste = trierOrdres(lecture.data ?? [])

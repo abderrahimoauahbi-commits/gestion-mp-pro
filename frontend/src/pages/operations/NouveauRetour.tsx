@@ -17,7 +17,7 @@ type OrdreLu = Schema<'OrdreResume'>
 
 export function NouveauRetour({ onFermer }: { onFermer: () => void }) {
   const navigate = useNavigate()
-  const ordres = useLecture<OrdreLu[]>('/ordres', { statut: 'valide' })
+  const ordres = useLecture<OrdreLu[]>('/ordres/ouverts', { statut: 'valide' })
   return (
     <Fenetre
       titre="Nouveau retour des machines"

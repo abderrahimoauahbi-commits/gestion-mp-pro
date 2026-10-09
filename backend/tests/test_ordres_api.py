@@ -77,7 +77,7 @@ def test_parcours_d_un_ordre_par_l_api(a: Atelier, alimentation: TestClient) -> 
     assert o["numero"].startswith("OF-2026-") and o["message"].startswith(f"Ordre {o['numero']}")
     assert o["prevu"] == pytest.approx(40 * 1.5 * 1.02) and o["net"] == 60
     assert {x["reference"] for x in o["par_matiere"]} == {a.m.a1.reference, a.m.a2.reference}
-    liste = _ok(alimentation.get("/api/ordres", params={"q": o["numero"]}))
+    liste = _ok(alimentation.get("/api/ordres", params={"q": o["numero"]}))["elements"]
     assert [x["id"] for x in liste] == [o["id"]] and "lignes" not in liste[0]
     sortis = _ok(alimentation.get(f"/api/ordres/{o['id']}/lots-sortis"))
     assert sorted(x["sorti_net"] for x in sortis) == [20, 40]

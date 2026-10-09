@@ -107,10 +107,10 @@ def test_le_metier_d_un_ordre_se_lit_code_et_nom(usine: Usine) -> None:
     o = u.s.get(Ordre, u.ordre("OF-METIER"))
     assert o is not None
     o.metier_id = metier.id
-    (lu,) = [x for x in u.get(u.achats, "/api/ordres") if x["id"] == o.id]
+    (lu,) = [x for x in u.get(u.achats, "/api/ordres")["elements"] if x["id"] == o.id]
     assert lu["metier"] == f"{metier.code} · Jacquard du fond"
     metier.nom = ""
-    (lu,) = [x for x in u.get(u.achats, "/api/ordres") if x["id"] == o.id]
+    (lu,) = [x for x in u.get(u.achats, "/api/ordres")["elements"] if x["id"] == o.id]
     assert lu["metier"] == metier.code
 
 

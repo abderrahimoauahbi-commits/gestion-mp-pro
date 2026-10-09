@@ -2301,8 +2301,8 @@ export interface paths {
       cookie?: never
     }
     /**
-     * Les ordres filtrés, le plus récent d'abord : sorti net, écart, retours, lots.
-     * @description Route 135.
+     * Les ordres filtrés, le plus récent d'abord, par pages : sorti net, écart, retours.
+     * @description Route 135 (filtres et recherche poussés en SQL ; curseur date puis n° d'entrée).
      */
     get: operations['lister_api_ordres_get']
     put?: never
@@ -2311,6 +2311,46 @@ export interface paths {
      * @description Route 137.
      */
     post: operations['creer_api_ordres_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Comptes par onglet, agrégats des indicateurs et options des filtres de la liste.
+     * @description Route 135bis : nourrit les onglets, les indicateurs et les filtres liés des Sorties.
+     */
+    get: operations['apercu_api_ordres_apercu_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/ouverts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La liste entière d'un statut (plafonnée) : l'atelier et la saisie la filtrent.
+     * @description Route 135ter : accès borné « tous les ordres » (téléphone, retours) ; non paginé.
+     */
+    get: operations['ouverts_api_ordres_ouverts_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -4410,6 +4450,40 @@ export interface components {
        * @description à renvoyer avec l'application
        */
       empreinte_apercu: string
+    }
+    /**
+     * ApercuOrdres
+     * @description Route 135bis : ce que l'écran Sorties calculait sur la liste entière.
+     *
+     *     Comptes par onglet (sur la période), agrégats du moteur des indicateurs (sorti net, revenu,
+     *     prévu et sorti des ordres selon recette, pour l'écart), brouillons de la période et combien
+     *     seraient refusés, options des filtres liés (qualité, métier, magasin).
+     */
+    ApercuOrdres: {
+      /** Brouillon */
+      brouillon: number
+      /** Valide */
+      valide: number
+      /** Annule */
+      annule: number
+      /** Net */
+      net: number
+      /** Revenu */
+      revenu: number
+      /** Prevu */
+      prevu: number
+      /** Sorti */
+      sorti: number
+      /** Brouillons Periode */
+      brouillons_periode: number
+      /** Brouillons Bloques */
+      brouillons_bloques: number
+      /** Qualites */
+      qualites: components['schemas']['OptionOrdres'][]
+      /** Metiers */
+      metiers: components['schemas']['OptionOrdres'][]
+      /** Magasins */
+      magasins: components['schemas']['OptionOrdres'][]
     }
     /**
      * ApercuReceptions
@@ -11091,6 +11165,16 @@ export interface components {
       lignes: components['schemas']['OpportuniteLigne'][]
     }
     /**
+     * OptionOrdres
+     * @description Une option d'un filtre lié de la liste : code envoyé à la route, libellé affiché.
+     */
+    OptionOrdres: {
+      /** Valeur */
+      valeur: string
+      /** Libelle */
+      libelle: string
+    }
+    /**
      * OrdreCreation
      * @description Route 137 : un brouillon ; sans qualité, l'ordre est « hors recette ».
      */
@@ -11408,6 +11492,24 @@ export interface components {
     PageOperations: {
       /** Elements */
       elements: components['schemas']['OperationFiche'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /**
+     * PageOrdres
+     * @description Route 135 : une page d'ordres, le plus récent d'abord (aucun total propre à ajouter).
+     */
+    PageOrdres: {
+      /** Elements */
+      elements: components['schemas']['OrdreResume'][]
       /**
        * Total
        * @description nombre total d'éléments qui passent les filtres
@@ -21808,6 +21910,9 @@ export interface operations {
         metier?: number | null
         magasin?: number | null
         qualite?: number | null
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
       }
       header?: never
       path?: never
@@ -21821,7 +21926,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OrdreResume'][]
+          'application/json': components['schemas']['PageOrdres']
         }
       }
       /** @description Non connecté */
@@ -21904,6 +22009,118 @@ export interface operations {
       }
       /** @description Conflit ou état */
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_api_ordres_apercu_get: {
+    parameters: {
+      query?: {
+        statut?: components['schemas']['StatutOrdre'] | null
+        /** @description mots, sans accents */
+        q?: string
+        du?: string | null
+        au?: string | null
+        metier?: number | null
+        magasin?: number | null
+        qualite?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuOrdres']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ouverts_api_ordres_ouverts_get: {
+    parameters: {
+      query?: {
+        statut?: components['schemas']['StatutOrdre'] | null
+        /** @description mots, sans accents */
+        q?: string
+        du?: string | null
+        au?: string | null
+        metier?: number | null
+        magasin?: number | null
+        qualite?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
         headers: {
           [name: string]: unknown
         }

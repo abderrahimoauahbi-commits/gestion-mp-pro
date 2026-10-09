@@ -169,7 +169,9 @@ POST;/api/operations/{ident}/valider;401;ok;ok;ok;403
 GET;/api/opportunites;401;ok;ok;403;403
 GET;/api/ordres;401;ok;ok;ok;403
 POST;/api/ordres;401;ok;403;ok;403
+GET;/api/ordres/apercu;401;ok;ok;ok;403
 GET;/api/ordres/consommation;401;ok;ok;ok;403
+GET;/api/ordres/ouverts;401;ok;ok;ok;403
 POST;/api/ordres/proposition;401;ok;ok;ok;403
 DELETE;/api/ordres/{ident};401;ok;403;ok;403
 GET;/api/ordres/{ident};401;ok;ok;ok;403

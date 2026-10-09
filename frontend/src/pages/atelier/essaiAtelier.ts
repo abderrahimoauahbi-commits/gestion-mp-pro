@@ -55,7 +55,7 @@ export function reponsesAtelier(role: Role, autres: Record<string, Reponse> = {}
     'GET /metiers': { corps: d.METIERS },
     'GET /metiers/1': { corps: d.METIERS.find((m) => m.id === 1) },
     'GET /montage/matieres': { corps: d.MATIERES_MONTAGE },
-    'GET /ordres': (_c, url) => ({
+    'GET /ordres/ouverts': (_c, url) => ({
       corps: url.searchParams.get('statut') === 'brouillon' ? [brouillon] : [d.ORDRE_VALIDE, brouillon],
     }),
     'GET /ordres/1': { corps: d.ORDRE_VALIDE },

@@ -105,7 +105,7 @@ def etape_sortie(m: Monde) -> None:
     jour = m.jour("ordres").isoformat()
     m.avant["valo_23"] = valorisation(m)
     _proposition(m, jour)
-    existants = atl.get("/ordres")
+    existants = atl.get("/ordres/ouverts")
     r = _ordre(
         m,
         jour,

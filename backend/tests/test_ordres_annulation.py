@@ -98,7 +98,7 @@ def test_un_ordre_repris_s_annule_avec_ses_retours_sans_document(s: Session) -> 
     lu = ordres.fiche(s, o.id)
     assert lu.revenu == Decimal("52.5") and lu.net == pytest.approx(400 - 52.5)
     assert lu.retours and "ERP Fil" in lu.retours[0].numero
-    liste = ordres.lister(s, ordres.FiltresOrdres(q=o.numero or ""))
+    liste = ordres.toutes(s, ordres.FiltresOrdres(q=o.numero or ""))
     assert [x.revenu for x in liste] == [Decimal("52.5")]
     o, phrase = ordres.annuler(s, qui, o.id, o.version)
     assert "repris de l'ERP Fil" in phrase

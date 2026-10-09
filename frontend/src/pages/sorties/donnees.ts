@@ -2,11 +2,15 @@
  * Les formes et les lectures des ordres de fabrication (routes 134–144 du lot D6), lues dans
  * l'OpenAPI ; une clé par route.
  */
+import { keepPreviousData } from '@tanstack/react-query'
+
 import { useLecture } from '../../lib/requetes'
 import type { Schema } from '../../lib/types'
 
 export type OrdreResume = Schema<'OrdreResume'>
 export type OrdreFiche = Schema<'OrdreFiche'>
+export type ApercuOrdres = Schema<'ApercuOrdres'>
+export type OptionOrdres = Schema<'OptionOrdres'>
 export type LigneOrdre = Schema<'LigneOrdre'>
 export type ParMatiere = Schema<'ParMatiere'>
 export type Proposition = Schema<'Proposition'>
@@ -17,7 +21,17 @@ export type QualiteResume = Schema<'QualiteResume'>
 export type Metier = Schema<'MetierFiche'>
 export type StatutOrdre = OrdreResume['statut']
 
-export const useOrdres = () => useLecture<OrdreResume[]>('/ordres')
+/**
+ * La liste **entière** des ordres (plafonnée au serveur) pour la saisie, qui n'en lit que la date
+ * du dernier ordre (`dernierOrdre`) ; l'écran Sorties, lui, pagine `/ordres` (`useListePaginee`).
+ */
+export const useOrdres = () => useLecture<OrdreResume[]>('/ordres/ouverts')
+
+type Params = Record<string, string | number | boolean | null | undefined>
+
+/** L'aperçu de la liste des ordres (comptes d'onglet, agrégats, options des filtres liés). */
+export const useApercuOrdres = (params: Params) =>
+  useLecture<ApercuOrdres>('/ordres/apercu', params, { placeholderData: keepPreviousData })
 
 export const useOrdre = (id: number | null) => useLecture<OrdreFiche>(id == null ? null : `/ordres/${id}`)
 

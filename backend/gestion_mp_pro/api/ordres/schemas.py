@@ -12,7 +12,7 @@ import datetime as dt
 
 from pydantic import Field
 
-from gestion_mp_pro.api.communs import Entree, Nombre, Sortie
+from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.modeles import longueurs as L
 from gestion_mp_pro.modeles.enums import StatutOrdre
 from gestion_mp_pro.services.conversions import Unite
@@ -201,6 +201,38 @@ class OrdreResume(Sortie):
     lots: list[str]
     matieres: list[str]
     blocages: list[str]
+
+
+class PageOrdres(Page[OrdreResume]):
+    """Route 135 : une page d'ordres, le plus récent d'abord (aucun total propre à ajouter)."""
+
+
+class OptionOrdres(Sortie):
+    """Une option d'un filtre lié de la liste : code envoyé à la route, libellé affiché."""
+
+    valeur: str
+    libelle: str
+
+
+class ApercuOrdres(Sortie):
+    """Route 135bis : ce que l'écran Sorties calculait sur la liste entière.
+
+    Comptes par onglet (sur la période), agrégats du moteur des indicateurs (sorti net, revenu,
+    prévu et sorti des ordres selon recette, pour l'écart), brouillons de la période et combien
+    seraient refusés, options des filtres liés (qualité, métier, magasin)."""
+
+    brouillon: int
+    valide: int
+    annule: int
+    net: float
+    revenu: float
+    prevu: float
+    sorti: float
+    brouillons_periode: int
+    brouillons_bloques: int
+    qualites: list[OptionOrdres]
+    metiers: list[OptionOrdres]
+    magasins: list[OptionOrdres]
 
 
 class OrdreFiche(OrdreResume):

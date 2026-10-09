@@ -1,10 +1,9 @@
-"""La fiche et la liste des ordres (REGLES P81, P82 ; API-PRO 135, 136).
+"""La fiche d'un ordre et de quoi la lire (REGLES P81, P82 ; API-PRO 136).
 
 Un ordre lu dit ses qualités et ses m², ses lignes (kilos, et ce qui se compte en bobines), ce
 qui en est revenu, son prévu par la recette perte comprise, son sorti net et son écart (les
 chiffres du moteur, `consommation`), et, pour un brouillon, ce qui empêcherait de le valider.
-La liste se filtre au serveur (statut, dates, métier, magasin, qualité, mots sans accents dans
-le numéro, les qualités, les matières, les lots, le métier, le magasin et le commentaire).
+La liste (135) et son aperçu, qui réutilisent `contexte` et `lire_un`, sont dans `liste.py`.
 """
 
 from __future__ import annotations
@@ -14,12 +13,11 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from gestion_mp_pro.calcul.production import OrdreAjuste
 from gestion_mp_pro.modeles import Lot, Magasin, Metier, Ordre, OrdreLigne, Qualite, Utilisateur
 from gestion_mp_pro.modeles.enums import StatutOrdre
-from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import conversions, lots_lecture
 from gestion_mp_pro.services.ordres import blocages, consommation, prevu, regles
 from gestion_mp_pro.services.ordres.consommation import ParMatiere, Retour
@@ -198,7 +196,7 @@ def fiche(s: Session, ident: int) -> OrdreLu:
 
 @dataclass(frozen=True)
 class FiltresOrdres:
-    """Les filtres de la liste (135) et de son classeur (144)."""
+    """Les filtres de la liste (135), de son aperçu (135bis) et de son classeur (144)."""
 
     statut: StatutOrdre | None = None
     q: str = ""
@@ -207,43 +205,3 @@ class FiltresOrdres:
     metier_id: int | None = None
     magasin_id: int | None = None
     qualite_id: int | None = None
-
-
-def _texte(x: OrdreLu) -> str:
-    """Ce que la recherche lit d'un ordre, sans accents."""
-    mots = [x.numero or "brouillon", x.metier, x.magasin, x.commentaire, *x.lots, *x.matieres]
-    mots += [f"{q.qualite} {q.nom}" for q in x.qualites]
-    return normaliser(" ".join(mots))
-
-
-def lister(s: Session, f: FiltresOrdres) -> list[OrdreLu]:
-    """Route 135 : les ordres filtrés, le plus récent d'abord (date, puis numéro d'entrée)."""
-    requete = (
-        select(Ordre)
-        .options(selectinload(Ordre.qualites), selectinload(Ordre.lignes))
-        .order_by(Ordre.date.desc(), Ordre.id.desc())
-    )
-    if f.statut is not None:
-        requete = requete.where(Ordre.statut == f.statut)
-    if f.du is not None:
-        requete = requete.where(Ordre.date >= f.du)
-    if f.au is not None:
-        requete = requete.where(Ordre.date <= f.au)
-    if f.metier_id is not None:
-        requete = requete.where(Ordre.metier_id == f.metier_id)
-    if f.magasin_id is not None:
-        requete = requete.where(Ordre.magasin_id == f.magasin_id)
-    ordres = [
-        o for o in s.scalars(requete)
-        if f.qualite_id is None or any(q.qualite_id == f.qualite_id for q in o.qualites)
-    ]  # fmt: skip
-    ctx = contexte(s, ordres)
-    mots = normaliser(f.q).split()
-    gardes = []
-    for o in ordres:
-        x = lire_un(s, o, ctx, avec_blocages=False)
-        if all(m in _texte(x) for m in mots):
-            gardes.append((o, x))
-    for o, x in gardes:
-        x.blocages = blocages.blocages(s, o, ctx.dernier)
-    return [x for _, x in gardes]
