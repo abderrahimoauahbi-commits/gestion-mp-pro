@@ -14,7 +14,7 @@ from pydantic import Field
 
 from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.api.pilotage.schemas import du_moteur
-from gestion_mp_pro.calcul.production import ConsommationOrdre as _ConsommationOrdre
+from gestion_mp_pro.calcul.production import OrdreAjuste, ReferenceAjustee
 from gestion_mp_pro.calcul.suivi import Echeance
 from gestion_mp_pro.calcul.suivi_bilan import BilanMois as _BilanMois
 from gestion_mp_pro.modeles import longueurs as L
@@ -137,10 +137,18 @@ class IndicateurJour(Sortie):
 
 # ── Bilan du mois (233) ───────────────────────────────────────────────────────────────
 
-# Nom propre au bilan : la dataclass du moteur porterait sinon le nom `ConsommationOrdre`, déjà
+# Noms propres au bilan : la dataclass du moteur porterait sinon le nom `ConsommationOrdre`, déjà
 # pris par le schéma de la route 143, et la génération des types de l'écran renommerait l'un.
+# Le prévu perte comprise, le taux appliqué et la densité des fils (`OrdreAjuste`), comme
+# Gestion MP les rend (parité R2, réciproque).
+ReferenceOrdreBilan = du_moteur(
+    ReferenceAjustee, "ReferenceOrdreBilan", "Un fil d'un ordre : prévu perte comprise, densité."
+)
 EcartOrdreBilan = du_moteur(
-    _ConsommationOrdre, "EcartOrdreBilan", "Un ordre du mois et son écart au prévu (bilan)."
+    OrdreAjuste,
+    "EcartOrdreBilan",
+    "Un ordre du mois et son écart au prévu (bilan), tel que l'écran Sorties le lit.",
+    references=(list[ReferenceOrdreBilan], ...),  # type: ignore[valid-type]
 )
 
 BilanMois = du_moteur(
