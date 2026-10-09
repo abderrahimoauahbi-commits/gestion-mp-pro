@@ -20,7 +20,7 @@ import { permis } from '../../lib/droits'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
 import { attente, Fiche, LienBouton, Ligne, NoteAtelier } from './briques'
-import { dateLisible, estIntrouvable, qte, useNomMetier } from './commun'
+import { dateLisible, estIntrouvable, qte } from './commun'
 import styles from './atelier.module.css'
 import type { OrdreFiche } from './types'
 
@@ -51,7 +51,6 @@ export function questionAnnuler(o: OrdreFiche): string {
 }
 
 function Identite({ o }: { o: OrdreFiche }) {
-  const nomMetier = useNomMetier()
   const par = [`créé par ${o.cree_par} le ${horodatage(o.cree_le)}`]
   if (o.valide_par) par.push(`validé par ${o.valide_par} le ${horodatage(o.valide_le)}`)
   if (o.annule_par) par.push(`annulé par ${o.annule_par} le ${horodatage(o.annule_le)}`)
@@ -62,7 +61,7 @@ function Identite({ o }: { o: OrdreFiche }) {
       </Ligne>
       <Ligne libelle="Date">{dateLisible(o.date)}</Ligne>
       <Ligne libelle="Magasin">{o.magasin}</Ligne>
-      {o.metier_id ? <Ligne libelle="Métier">{nomMetier(o.metier_id, o.metier)}</Ligne> : null}
+      {o.metier_id ? <Ligne libelle="Métier">{o.metier}</Ligne> : null}
       {o.qualites.length ? (
         o.qualites.map((q) => (
           <Ligne key={q.qualite_id} libelle={`${q.qualite} — ${q.nom}`}>
@@ -147,11 +146,10 @@ function GestesBrouillon({ o, ou }: { o: OrdreFiche; ou: string }) {
 }
 
 function Gestes({ o }: { o: OrdreFiche }) {
-  const nomMetier = useNomMetier()
   const annuler = useEcriture((motif: string) =>
     api.post<OrdreFiche>(`/ordres/${o.id}/annuler`, { version: o.version, motif }),
   )
-  const ou = [dateLisible(o.date), o.magasin, nomMetier(o.metier_id, o.metier)].filter(Boolean).join(' · ')
+  const ou = [dateLisible(o.date), o.magasin, o.metier].filter(Boolean).join(' · ')
   if (o.statut === 'brouillon') return <GestesBrouillon o={o} ou={ou} />
   if (o.statut !== 'valide') return null
   return (

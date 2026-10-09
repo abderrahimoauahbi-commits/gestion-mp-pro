@@ -12,7 +12,7 @@ import { Vide } from '../../composants/retour/Vide'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { useLecture } from '../../lib/requetes'
 import { attente, EcranEnAttente, Fiche, LienBouton, Ligne } from './briques'
-import { estIntrouvable, qte, useNomMetier } from './commun'
+import { estIntrouvable, qte } from './commun'
 import styles from './atelier.module.css'
 import { EnvoyerDemande } from './EnvoyerDemande'
 import { EnvoyerLots } from './EnvoyerLots'
@@ -62,7 +62,6 @@ function SaisieTelephone({ ordre }: { ordre: OrdreFiche | null }) {
 
 function SortieEnregistree({ ordre }: { ordre: OrdreFiche }) {
   const naviguer = useNavigate()
-  const nomMetier = useNomMetier()
   const valide = ordre.statut === 'valide'
   return (
     <EcranAtelier titre="Sortie enregistrée" retour="/atelier">
@@ -71,7 +70,7 @@ function SortieEnregistree({ ordre }: { ordre: OrdreFiche }) {
           {qte(ordre.total)}
         </Ligne>
         <Ligne libelle="Magasin">{ordre.magasin}</Ligne>
-        {ordre.metier_id ? <Ligne libelle="Métier">{nomMetier(ordre.metier_id, ordre.metier)}</Ligne> : null}
+        {ordre.metier_id ? <Ligne libelle="Métier">{ordre.metier}</Ligne> : null}
       </Fiche>
       <div className={styles.gestes}>
         <Bouton taille="atelier" variante="principal" bloc onClick={() => naviguer('/atelier/envoyer')}>
