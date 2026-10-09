@@ -5,10 +5,1144 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>
+export interface paths {
+  '/api/sante': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Santé du serveur pour la surveillance (public, sans donnée métier).
+     * @description Route 1 : la base répond-elle, le schéma est-il à jour, quelle version est servie.
+     */
+    get: operations['sante_api_sante_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/etat': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Installé ou non, raison sociale, version (public, pour l'écran de connexion).
+     * @description Route 2 : seul `installe=false` mène à l'installation (K23).
+     */
+    get: operations['etat_api_etat_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/contexte': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le démarrage de l'écran en un appel : compte, menu, heure, période, inventaires.
+     * @description Route 3 : le menu est dérivé de la matrice des droits (domaines lus ou écrits).
+     */
+    get: operations['contexte_api_contexte_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/acces': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les adresses du serveur pour un téléphone, celle du QR, et l'alerte localhost.
+     * @description Route 5 (ouverte aussi à l'administrateur, API-PRO § 1.24).
+     */
+    get: operations['acces_api_acces_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/acces/qr': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le QR (SVG) d'une adresse d'accès (par défaut celle du QR).
+     * @description Route 6 : une adresse donnée commence par http:// ou https:// (KR35).
+     */
+    get: operations['acces_qr_api_acces_qr_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/visages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les noms à toucher pour se connecter (poste local ou appareil enrôlé seulement).
+     * @description Route 8 : ailleurs, liste vide (on tape son identifiant, P1-26).
+     */
+    get: operations['visages_api_visages_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/installation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Crée le premier compte, celui de la direction (une seule fois).
+     * @description Route 9 : la session s'ouvre aussitôt (cookie).
+     */
+    post: operations['installation_api_installation_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/connexion': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Se connecter : nom touché ou identifiant, puis code.
+     * @description Route 10 : essai compté avant la vérification ; 5 échecs, puis il faut patienter.
+     */
+    post: operations['connexion_api_connexion_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/deconnexion': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Se déconnecter : la session est fermée et son cookie effacé.
+     * @description Route 11 (exige l'en-tête de l'écran, contrairement à Gestion MP).
+     */
+    post: operations['deconnexion_api_deconnexion_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/moi': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le compte connecté, ce qu'il voit et ses droits fins.
+     * @description Route 12.
+     */
+    get: operations['moi_api_moi_get']
+    /**
+     * Modifier son courriel.
+     * @description Route 13.
+     */
+    put: operations['modifier_moi_api_moi_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/moi/code': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Changer son code : les autres sessions se ferment.
+     * @description Route 14 : un mauvais code actuel compte comme un échec de connexion (F-03).
+     */
+    put: operations['changer_mon_code_api_moi_code_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/utilisateurs': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tous les comptes, triés par nom.
+     * @description Route 15.
+     */
+    get: operations['lister_utilisateurs_api_utilisateurs_get']
+    put?: never
+    /**
+     * Créer un compte (son code suit la règle de son rôle).
+     * @description Route 16.
+     */
+    post: operations['creer_utilisateur_api_utilisateurs_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/utilisateurs/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier un compte (fiche entière) ; désactiver ferme ses sessions.
+     * @description Route 17 : un changement de rôle peut exiger un nouveau code (`code`).
+     */
+    put: operations['modifier_utilisateur_api_utilisateurs__ident__put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/utilisateurs/{ident}/code': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Remettre le code d'un compte : ses sessions se ferment.
+     * @description Route 18.
+     */
+    post: operations['remettre_code_api_utilisateurs__ident__code_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/appareils': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les appareils enrôlés (ou à enrôler) et leurs sessions.
+     * @description Route 19.
+     */
+    get: operations['lister_appareils_api_appareils_get']
+    put?: never
+    /**
+     * Créer un appareil et son QR d'enrôlement (15 minutes, usage unique).
+     * @description Route 20 : le QR porte l'adresse publique (ou l'adresse réseau détectée).
+     */
+    post: operations['creer_appareil_api_appareils_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/appareils/enroler': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enrôler l'appareil qui présente le jeton du QR (cookie d'appareil, 400 jours).
+     * @description Route 22 (publique : le jeton à usage unique fait foi).
+     */
+    post: operations['enroler_api_appareils_enroler_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/appareils/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Retirer un appareil : ses sessions se ferment.
+     * @description Route 21.
+     */
+    delete: operations['retirer_appareil_api_appareils__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/journal': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le journal des actions, filtré, les plus récentes d'abord.
+     * @description Route 49 : qui a fait quoi, sur quoi, et quand (avant/après).
+     */
+    get: operations['lire_api_journal_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/journal/valeurs': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les personnes, actions et objets que proposent les filtres du journal.
+     * @description Route 50.
+     */
+    get: operations['valeurs_api_journal_valeurs_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/historique/{objet}/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'historique d'une fiche (avant/après), pour qui peut lire la fiche.
+     * @description Route 51 : prix retirés pour les rôles qui ne les voient pas (filtre de la route).
+     */
+    get: operations['historique_api_historique__objet___ident__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/notifications': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Sa cloche : les notifications de son rôle et à son nom, les plus récentes d'abord.
+     * @description Route 53 : `non_lues` compte les non lues, quel que soit le filtre.
+     */
+    get: operations['lister_api_notifications_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/notifications/{ident}/lue': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Marquer une notification comme lue.
+     * @description Route 54.
+     */
+    post: operations['marquer_lue_api_notifications__ident__lue_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/notifications/lues': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Tout marquer comme lu.
+     * @description Route 55.
+     */
+    post: operations['tout_marquer_lu_api_notifications_lues_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/recherche': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La recherche globale de l'en-tête (tous les mots, sans accents), filtrée par rôle.
+     * @description Route 56 : matières, lots, ordres, qualités ; et pour D, A commandes, réceptions,
+     *     dossiers, fournisseurs.
+     */
+    get: operations['rechercher_api_recherche_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+}
 export type webhooks = Record<string, never>
 export interface components {
-  schemas: never
+  schemas: {
+    /**
+     * Acces
+     * @description Route 5 `GET /acces` : adresses du serveur, celle du QR, alerte si elle est locale.
+     */
+    Acces: {
+      /** Adresses */
+      adresses: components['schemas']['AdresseAcces'][]
+      /** Adresse Publique */
+      adresse_publique: string
+      /** Adresse Qr */
+      adresse_qr: string
+      /** Alerte Localhost */
+      alerte_localhost: string | null
+    }
+    /**
+     * AdresseAcces
+     * @description Une adresse par laquelle un téléphone joint le serveur.
+     */
+    AdresseAcces: {
+      /** Libelle */
+      libelle: string
+      /** Adresse */
+      adresse: string
+    }
+    /**
+     * AppareilCreation
+     * @description Route 20 : le nom de l'appareil à enrôler.
+     */
+    AppareilCreation: {
+      /** Nom */
+      nom: string
+    }
+    /**
+     * AppareilFiche
+     * @description Route 19 : un appareil (téléphone de l'atelier).
+     */
+    AppareilFiche: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Actif */
+      actif: boolean
+      /** Enrole */
+      enrole: boolean
+      /** Enrole Le */
+      enrole_le: string | null
+      /** Enrolement Expire Le */
+      enrolement_expire_le: string | null
+      /** Vu Le */
+      vu_le: string | null
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Cree Par */
+      cree_par: string
+      /** Sessions Ouvertes */
+      sessions_ouvertes: number
+    }
+    /**
+     * ChangementCode
+     * @description Route 14 : son code (l'actuel, puis le nouveau).
+     */
+    ChangementCode: {
+      /** Ancien */
+      ancien: string
+      /** Nouveau */
+      nouveau: string
+    }
+    /**
+     * Connexion
+     * @description Route 10 : le nom touché (`compte`, poste local ou appareil enrôlé) ou l'identifiant.
+     */
+    Connexion: {
+      /**
+       * Compte
+       * @description id d'un visage
+       */
+      compte?: number | null
+      /**
+       * Identifiant
+       * @default
+       */
+      identifiant: string
+      /** Code */
+      code: string
+    }
+    /**
+     * Contexte
+     * @description Route 3 `GET /contexte` : le démarrage de l'écran en un appel.
+     */
+    Contexte: {
+      moi: components['schemas']['Moi']
+      /** Menu */
+      menu: components['schemas']['DomainePermis'][]
+      /**
+       * Heure Serveur
+       * Format: date-time
+       */
+      heure_serveur: string
+      /** Societe */
+      societe: string
+      /** Date Cloture */
+      date_cloture: string | null
+      /** Inventaires Ouverts */
+      inventaires_ouverts: components['schemas']['InventaireOuvert'][]
+      /** Roles Au Metre */
+      roles_au_metre: string[]
+      /** Base Essai */
+      base_essai: boolean
+      /** Compteurs */
+      compteurs: {
+        [key: string]: number
+      }
+      /**
+       * Alerte Serveur
+       * @description direction et administrateur
+       */
+      alerte_serveur?: string | null
+    }
+    /**
+     * DomainePermis
+     * @description Un domaine de l'API où le rôle lit ou écrit (dérivé de la matrice des droits).
+     */
+    DomainePermis: {
+      /** Domaine */
+      domaine: string
+      /** Lecture */
+      lecture: boolean
+      /** Ecriture */
+      ecriture: boolean
+    }
+    /**
+     * Enrolement
+     * @description Route 20 : le lien à usage unique (15 minutes) et son QR.
+     */
+    Enrolement: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Lien */
+      lien: string
+      /** Qr Svg */
+      qr_svg: string
+      /**
+       * Expire Le
+       * Format: date-time
+       */
+      expire_le: string
+    }
+    /**
+     * EnrolementEntree
+     * @description Route 22 : le jeton lu dans le QR.
+     */
+    EnrolementEntree: {
+      /** Jeton */
+      jeton: string
+    }
+    /**
+     * ErreurReponse
+     * @description Corps d'un refus, tel qu'il figure dans l'OpenAPI.
+     */
+    ErreurReponse: {
+      /** Detail */
+      detail: string
+      /** Code */
+      code: string
+      /** Champs */
+      champs?: {
+        [key: string]: string
+      } | null
+    }
+    /**
+     * EtatInstallation
+     * @description Route 2 `GET /etat` (public) : ce que l'écran de connexion a besoin de savoir (K23).
+     */
+    EtatInstallation: {
+      /** Installe */
+      installe: boolean
+      /** Societe */
+      societe: string
+      /** Version */
+      version: string
+    }
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components['schemas']['ValidationError'][]
+    }
+    /**
+     * Installation
+     * @description Route 9 : le premier compte, celui de la direction.
+     */
+    Installation: {
+      /**
+       * Societe
+       * @default
+       */
+      societe: string
+      /** Identifiant */
+      identifiant: string
+      /** Nom */
+      nom: string
+      /** Code */
+      code: string
+    }
+    /**
+     * InventaireOuvert
+     * @description Un inventaire ouvert : il suspend son magasin (tous si `null`) pour ses matières.
+     */
+    InventaireOuvert: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin */
+      magasin: string | null
+      /** Matieres */
+      matieres: number[]
+    }
+    /**
+     * LigneHistorique
+     * @description Route 51 : un geste sur une fiche, avec les champs changés.
+     */
+    LigneHistorique: {
+      /** Id */
+      id: number
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Utilisateur */
+      utilisateur: string
+      /** Role */
+      role: string
+      /** Action */
+      action: string
+      /** Numero */
+      numero: string
+      /** Detail */
+      detail: string
+      /** Avant */
+      avant: {
+        [key: string]: unknown
+      } | null
+      /** Apres */
+      apres: {
+        [key: string]: unknown
+      } | null
+    }
+    /**
+     * LigneJournal
+     * @description Une ligne du journal des actions.
+     */
+    LigneJournal: {
+      /** Id */
+      id: number
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Utilisateur */
+      utilisateur: string
+      /** Utilisateur Id */
+      utilisateur_id: number | null
+      /** Role */
+      role: string
+      /** Action */
+      action: string
+      /** Objet */
+      objet: string
+      /** Objet Id */
+      objet_id: number | null
+      /** Numero */
+      numero: string
+      /** Detail */
+      detail: string
+      /** Avant */
+      avant: {
+        [key: string]: unknown
+      } | null
+      /** Apres */
+      apres: {
+        [key: string]: unknown
+      } | null
+    }
+    /**
+     * Moi
+     * @description Route 12 : le compte connecté, ce qu'il voit et ses droits fins.
+     */
+    Moi: {
+      /** Id */
+      id: number
+      /** Identifiant */
+      identifiant: string
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string
+      /** Role Libelle */
+      role_libelle: string
+      /** Email */
+      email: string
+      /** Voit Prix */
+      voit_prix: boolean
+      /**
+       * Droits
+       * @description gestes permis (droits fins, securite.GESTES)
+       */
+      droits: string[]
+      /** Vu Le */
+      vu_le: string | null
+      /** Version */
+      version: number
+    }
+    /**
+     * MoiModification
+     * @description Route 13 : son courriel.
+     */
+    MoiModification: {
+      /**
+       * Email
+       * @default
+       */
+      email: string
+      /** Version */
+      version: number
+    }
+    /**
+     * Notification
+     * @description Une notification de la cloche ; `lien` ouvre le document (adresse stable).
+     */
+    Notification: {
+      /** Id */
+      id: number
+      /** Texte */
+      texte: string
+      /** Lien */
+      lien: string
+      /** Ton */
+      ton: string
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Lue */
+      lue: boolean
+      /** Objet */
+      objet: string
+      /** Objet Id */
+      objet_id: number | null
+    }
+    /**
+     * NouveauCode
+     * @description Route 18 : le code remis par la direction ou l'administrateur.
+     */
+    NouveauCode: {
+      /** Code */
+      code: string
+    }
+    /**
+     * ObjetJournal
+     * @description Table visée par une ligne du journal (liste fermée ; `lot` ajouté, décision S1).
+     * @enum {string}
+     */
+    ObjetJournal:
+      | 'utilisateur'
+      | 'appareil'
+      | 'parametre'
+      | 'devise'
+      | 'sauvegarde'
+      | 'composition'
+      | 'type_fil'
+      | 'titrage'
+      | 'couleur'
+      | 'role_nomenclature'
+      | 'fournisseur'
+      | 'matiere'
+      | 'code_douanier'
+      | 'poste_frais'
+      | 'qualite'
+      | 'magasin'
+      | 'metier'
+      | 'lot'
+      | 'commande'
+      | 'reception'
+      | 'facture'
+      | 'ordre'
+      | 'operation'
+      | 'inventaire'
+      | 'dossier'
+      | 'dossier_frais'
+      | 'reclamation'
+      | 'signalement'
+      | 'piece_jointe'
+      | 'periode'
+      | 'reprise'
+      | 'systeme'
+    /**
+     * PageJournal
+     * @description Route 49 : une page du journal, les plus récentes d'abord.
+     */
+    PageJournal: {
+      /** Elements */
+      elements: components['schemas']['LigneJournal'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /**
+     * PageNotifications
+     * @description Route 53 : une page de la cloche et le nombre de non lues (pastille).
+     */
+    PageNotifications: {
+      /** Elements */
+      elements: components['schemas']['Notification'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+      /** Non Lues */
+      non_lues: number
+    }
+    /**
+     * PersonneJournal
+     * @description Une personne citée par le journal (par son compte).
+     */
+    PersonneJournal: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+    }
+    /**
+     * ResultatRecherche
+     * @description Route 56 : un résultat de la recherche globale (jamais de prix).
+     */
+    ResultatRecherche: {
+      /** Genre */
+      genre: string
+      /** Id */
+      id: number
+      /** Titre */
+      titre: string
+      /** Sous Titre */
+      sous_titre: string
+      /** Lien */
+      lien: string
+    }
+    /**
+     * Sante
+     * @description Route 1 `GET /sante` (public, sans donnée métier) : ce que la surveillance lit.
+     *
+     *     Première forme posée par S0 (`etat`, `version`, `base_ms`) ; S1 remplit `schema` et
+     *     `schema_attendu`, D10 la sauvegarde, les tâches et les courriels (API-PRO § 1.1).
+     */
+    Sante: {
+      /**
+       * Etat
+       * @enum {string}
+       */
+      etat: 'ok' | 'degrade'
+      /**
+       * Version
+       * @description version servie : contenu de VERSION (copie figée)
+       */
+      version: string
+      /**
+       * Schema
+       * @description révision Alembic
+       */
+      schema?: string | null
+      /** Schema Attendu */
+      schema_attendu?: string | null
+      /**
+       * Base Ms
+       * @description temps de réponse de la base
+       */
+      base_ms?: number | null
+      /** Sauvegarde Age H */
+      sauvegarde_age_h?: number | null
+      /**
+       * Sauvegarde Alerte
+       * @default
+       */
+      sauvegarde_alerte: string
+      /** Taches */
+      taches?: {
+        [key: string]: string
+      }
+      /**
+       * Courriels En Attente
+       * @default 0
+       */
+      courriels_en_attente: number
+    }
+    /**
+     * UtilisateurCreation
+     * @description Route 16 : un nouveau compte.
+     */
+    UtilisateurCreation: {
+      /** Identifiant */
+      identifiant: string
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string
+      /**
+       * Email
+       * @default
+       */
+      email: string
+      /** Code */
+      code: string
+    }
+    /**
+     * UtilisateurFiche
+     * @description Routes 15–17 : un compte tel que l'administration le montre.
+     */
+    UtilisateurFiche: {
+      /** Id */
+      id: number
+      /** Identifiant */
+      identifiant: string
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string | null
+      /** Role Libelle */
+      role_libelle: string
+      /** Email */
+      email: string
+      /** Actif */
+      actif: boolean
+      /** Historique */
+      historique: boolean
+      /** Vu Le */
+      vu_le: string | null
+      /** Code Change Le */
+      code_change_le: string | null
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Version */
+      version: number
+      /** Sessions Ouvertes */
+      sessions_ouvertes: number
+    }
+    /**
+     * UtilisateurModification
+     * @description Route 17 : la fiche entière (désactiver compris) ; `code` exigé si le rôle le demande.
+     */
+    UtilisateurModification: {
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string
+      /**
+       * Email
+       * @default
+       */
+      email: string
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /** Code */
+      code?: string | null
+    }
+    /**
+     * ValeursJournal
+     * @description Route 50 : ce que les filtres du journal proposent.
+     */
+    ValeursJournal: {
+      /** Utilisateurs */
+      utilisateurs: components['schemas']['PersonneJournal'][]
+      /** Actions */
+      actions: string[]
+      /** Objets */
+      objets: string[]
+    }
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[]
+      /** Message */
+      msg: string
+      /** Error Type */
+      type: string
+      /** Input */
+      input?: unknown
+      /** Context */
+      ctx?: Record<string, never>
+    }
+    /**
+     * Visage
+     * @description Un nom à toucher à la connexion (sans identifiant : le compte se désigne par `id`).
+     */
+    Visage: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string
+      /** Role Libelle */
+      role_libelle: string
+      /**
+       * Longueur Code
+       * @description 4 pour l'alimentation (le code part au 4ᵉ chiffre), sinon null
+       */
+      longueur_code: number | null
+    }
+  }
   responses: never
   parameters: never
   requestBodies: never
@@ -16,4 +1150,1203 @@ export interface components {
   pathItems: never
 }
 export type $defs = Record<string, never>
-export type operations = Record<string, never>
+export interface operations {
+  sante_api_sante_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Sante']
+        }
+      }
+    }
+  }
+  etat_api_etat_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatInstallation']
+        }
+      }
+    }
+  }
+  contexte_api_contexte_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Contexte']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  acces_api_acces_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Acces']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  acces_qr_api_acces_qr_get: {
+    parameters: {
+      query?: {
+        adresse?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'image/svg+xml': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  visages_api_visages_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Visage'][]
+        }
+      }
+    }
+  }
+  installation_api_installation_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Installation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Moi']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  connexion_api_connexion_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Connexion']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Moi']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Trop d'essais */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  deconnexion_api_deconnexion_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  moi_api_moi_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Moi']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_moi_api_moi_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MoiModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Moi']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  changer_mon_code_api_moi_code_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChangementCode']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Trop d'essais */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_utilisateurs_api_utilisateurs_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UtilisateurFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_utilisateur_api_utilisateurs_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UtilisateurCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UtilisateurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_utilisateur_api_utilisateurs__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UtilisateurModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UtilisateurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  remettre_code_api_utilisateurs__ident__code_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NouveauCode']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_appareils_api_appareils_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['AppareilFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_appareil_api_appareils_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AppareilCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Enrolement']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  enroler_api_appareils_enroler_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EnrolementEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  retirer_appareil_api_appareils__ident__delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  lire_api_journal_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string
+        /** @description id du compte */
+        utilisateur?: number | null
+        action?: string
+        objet?: components['schemas']['ObjetJournal'] | null
+        objet_id?: number | null
+        du?: string | null
+        au?: string | null
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageJournal']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  valeurs_api_journal_valeurs_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValeursJournal']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  historique_api_historique__objet___ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        objet: components['schemas']['ObjetJournal']
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LigneHistorique'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_notifications_get: {
+    parameters: {
+      query?: {
+        non_lues?: boolean
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageNotifications']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  marquer_lue_api_notifications__ident__lue_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  tout_marquer_lu_api_notifications_lues_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  rechercher_api_recherche_get: {
+    parameters: {
+      query: {
+        q: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ResultatRecherche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+}

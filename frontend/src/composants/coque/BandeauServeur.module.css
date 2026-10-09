@@ -1,0 +1,30 @@
+.bandeau {
+  display: flex;
+  flex-direction: column;
+}
+
+.phrase {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  margin: 0;
+  padding: 6px var(--espace-5);
+  border-bottom: 1px solid var(--bord);
+  font-weight: 600;
+}
+
+.critique {
+  background: var(--ton-critique-clair);
+  color: var(--ton-critique);
+}
+
+.info {
+  background: var(--ton-accent-clair);
+  color: var(--ton-accent);
+}
+
+@media print {
+  .bandeau {
+    display: none;
+  }
+}

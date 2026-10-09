@@ -1,0 +1,19 @@
+.resume {
+  margin: 0 0 var(--espace-3);
+  font-size: 15px;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  margin: 0 0 var(--espace-4);
+  padding-left: var(--espace-5);
+}
+
+.suite {
+  margin: 0;
+  padding-top: var(--espace-3);
+  border-top: 1px solid var(--bord);
+  color: var(--texte-2);
+}

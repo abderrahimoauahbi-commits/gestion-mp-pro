@@ -1,0 +1,132 @@
+.cloche {
+  position: relative;
+}
+
+.bouton {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: var(--rayon);
+  background: none;
+  color: var(--texte-2);
+}
+
+.bouton:hover {
+  background: var(--survol);
+  color: var(--texte);
+}
+
+.compte {
+  position: absolute;
+  top: 3px;
+  right: 1px;
+  min-width: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--ton-critique);
+  color: var(--sur-ton);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+}
+
+.panneau {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: var(--plan-fenetre);
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 2 * var(--espace-3)));
+  max-height: min(480px, 75vh);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre-haute);
+}
+
+.tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2);
+  padding: var(--espace-2) var(--espace-3);
+  border-bottom: 1px solid var(--bord);
+}
+
+.toutLu {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: var(--taille-petite);
+  font-weight: 600;
+}
+
+.vide {
+  margin: 0;
+  padding: var(--espace-3);
+  color: var(--texte-3);
+}
+
+.liste {
+  margin: 0;
+  padding: var(--espace-1);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ligne {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espace-2);
+  width: 100%;
+  padding: var(--espace-2);
+  border: 0;
+  border-radius: var(--rayon-petit);
+  background: none;
+  text-align: left;
+}
+
+.ligne:hover {
+  background: var(--survol);
+}
+
+.nonLue {
+  background: var(--accent-clair);
+}
+
+.texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.quand {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.info {
+  color: var(--ton-accent);
+}
+
+.succes {
+  color: var(--ton-ok);
+}
+
+.alerte {
+  color: var(--ton-attention);
+}
+
+.danger {
+  color: var(--ton-critique);
+}
+
+.ligne .texte {
+  color: var(--texte);
+}

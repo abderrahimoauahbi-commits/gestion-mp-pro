@@ -1,0 +1,147 @@
+/* Hauteurs lues par l'essai « le menu tient en 1366 × 768 » (BarreLaterale.test.tsx). */
+.barre {
+  --hauteur-lien: 28px;
+  --hauteur-groupe: 22px;
+  --marge-groupes: 6px;
+
+  display: flex;
+  flex-direction: column;
+  width: var(--barre);
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--bord);
+}
+
+.marque {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--espace-2);
+  height: var(--entete);
+  padding: 0 var(--espace-4);
+  border-bottom: 1px solid var(--bord);
+  color: var(--marque);
+}
+
+.nom {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.nom strong {
+  font-size: 15px;
+}
+
+.nom span {
+  overflow: hidden;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupes {
+  flex: 1;
+  min-height: 0;
+  padding: var(--marge-groupes) var(--espace-2);
+  overflow-y: auto;
+}
+
+.groupe ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.titreGroupe {
+  height: var(--hauteur-groupe);
+  margin: 0;
+  padding: 8px var(--espace-2) 0;
+  color: var(--texte-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 14px;
+  text-transform: uppercase;
+}
+
+.lien {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  height: var(--hauteur-lien);
+  padding: 0 var(--espace-2);
+  border-left: 3px solid transparent;
+  border-radius: var(--rayon-petit);
+  color: var(--texte-2);
+  font-size: 13px;
+}
+
+.lien:hover {
+  background: var(--survol);
+  color: var(--texte);
+  text-decoration: none;
+}
+
+.actif {
+  border-left-color: var(--accent);
+  background: var(--accent-clair);
+  color: var(--accent-fonce);
+  font-weight: 600;
+}
+
+.libelle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voile {
+  display: none;
+}
+
+.repliee {
+  display: none;
+}
+
+/* Sous 1080 px : un tiroir par-dessus la page, ouvert par le bouton de la barre du haut. */
+@media (width < 1080px) {
+  .barre {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--plan-fenetre);
+    width: min(290px, 85vw);
+    box-shadow: var(--ombre-haute);
+    transform: translateX(-105%);
+    transition: transform 0.15s ease;
+  }
+
+  .repliee {
+    display: flex;
+  }
+
+  .ouverte {
+    transform: none;
+  }
+
+  .voile {
+    position: fixed;
+    inset: 0;
+    z-index: var(--plan-fenetre);
+    display: block;
+    background: var(--voile);
+  }
+}
+
+@media print {
+  .barre {
+    display: none;
+  }
+}
