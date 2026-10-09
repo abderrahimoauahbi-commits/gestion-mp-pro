@@ -70,7 +70,7 @@ def lister(
 
 
 @routeur.get(
-    "/fournisseurs/{ident}",
+    "/fournisseurs/{ident:int}",
     response_model=FournisseurFiche,
     dependencies=[droit(D, A)],
     summary="La fiche d'un fournisseur.",
@@ -97,7 +97,7 @@ def creer(corps: FournisseurCreation, qui: QuiDep, s: SessionDep) -> Fournisseur
 
 
 @routeur.put(
-    "/fournisseurs/{ident}",
+    "/fournisseurs/{ident:int}",
     response_model=FournisseurFiche,
     dependencies=[droit(D, A)],
     summary="Modifier un fournisseur (la fiche entière, à sa version lue).",
@@ -112,7 +112,7 @@ def modifier(
 
 
 @routeur.delete(
-    "/fournisseurs/{ident}",
+    "/fournisseurs/{ident:int}",
     dependencies=[droit(D, A)],
     summary="Supprimer un fournisseur sans aucune trace (sinon le désactiver).",
     responses=reponses(401, 403, 404, 409, 422),
