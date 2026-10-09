@@ -38,10 +38,11 @@ def filtres_dossiers(
     statut: Annotated[str, Query(pattern="^(ouvert|clos|annule)?$")] = "",
     q: Annotated[str, TEXTE] = "",
     fournisseur: Annotated[int | None, Query(ge=1)] = None,
+    verifier: Annotated[str, Query(pattern="^(oui|non)?$")] = "",
 ) -> FiltresDossiers:
-    """`?statut=&q=&fournisseur=` (route 187 et son classeur 205) ; sans statut : ouverts et
-    clos."""
-    return FiltresDossiers(statut, q, fournisseur)
+    """`?statut=&q=&fournisseur=&verifier=` (route 187, aperçu 250, classeur 205) ; sans statut :
+    ouverts et clos ; `verifier=oui|non` : les dossiers à vérifier (ou sans alerte)."""
+    return FiltresDossiers(statut, q, fournisseur, verifier)
 
 
 def filtres_analyse(

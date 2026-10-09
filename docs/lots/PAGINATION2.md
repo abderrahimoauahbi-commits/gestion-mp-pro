@@ -60,6 +60,11 @@ aperçu ; filtres liés et recherche au serveur). Les essais existants de la lis
 
 ## 2. Reste à faire : `/ordres` (135), `/commandes` (152), `/dossiers` (187)
 
+> **Suite (lot PAGINATION3)** : `/ordres` (135) et `/dossiers` (187) sont **paginés** —
+> voir `PAGINATION3.md`. `/commandes` (152) reste non paginé : sa recherche porte sur l'état de
+> livraison **calculé par le moteur**, impossible à reproduire en SQL sans réécrire le calcul
+> (`PAGINATION3.md § 3`).
+
 Le patron de `receptions` se reprend tel quel (`filtrer` SQL + curseur + `apercu`), mais chacune
 a un verrou spécifique, hors du périmètre tenable d'une seule passe sûre :
 

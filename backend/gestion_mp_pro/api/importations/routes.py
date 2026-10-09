@@ -10,32 +10,72 @@ les gestes sur la marchandise, les frais et la vie du dossier dans `routes_geste
 from __future__ import annotations
 
 from dataclasses import asdict
+from datetime import date
 
 from fastapi import Query
 
-from gestion_mp_pro.api.dependances import SessionDep
-from gestion_mp_pro.api.erreurs import reponses
+from gestion_mp_pro.api.communs import encoder_curseur
+from gestion_mp_pro.api.dependances import PaginationDep, SessionDep
+from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.api.importations import routes_analyse, routes_gestes  # noqa: F401
 from gestion_mp_pro.api.importations.routeur import GESTE, FiltresDossiersDep, fiche_relue, routeur
 from gestion_mp_pro.api.importations.schemas import DossierCreation, DossierModification
-from gestion_mp_pro.api.importations.schemas_fiche import DossierFiche, DossierResume, EnAttente
+from gestion_mp_pro.api.importations.schemas_fiche import (
+    ApercuDossiers,
+    DossierFiche,
+    DossierResume,
+    EnAttente,
+    PageDossiers,
+)
 from gestion_mp_pro.securite import A, D, QuiDep, droit
-from gestion_mp_pro.services.importations import attente, etats, ouverture
-from gestion_mp_pro.services.importations.lecture import lister
+from gestion_mp_pro.services.importations import attente, etats, lecture, ouverture
 
 __all__ = ["routeur"]
 
 
+def _curseur(pagination: PaginationDep) -> tuple[date | None, int] | None:
+    """La clé (date d'arrivée, id) du dernier dossier rendu (curseur de pagination)."""
+    if not pagination.apres:
+        return None
+    try:
+        jour, ident = pagination.apres
+        return (date.fromisoformat(str(jour)) if jour is not None else None), int(str(ident))
+    except (ValueError, TypeError) as exc:
+        raise Refus.saisie(
+            "Curseur de pagination illisible : recharger la liste.", code="curseur_invalide"
+        ) from exc
+
+
 @routeur.get(
     "/dossiers",
-    response_model=list[DossierResume],
+    response_model=PageDossiers,
     dependencies=[droit(D, A)],
-    summary="Les dossiers d'importation, le plus récemment arrivé d'abord, avec leurs totaux.",
+    summary="Les dossiers d'importation, le plus récemment arrivé d'abord, par pages.",
     responses=reponses(401, 403, 422),
 )
-def lister_dossiers(f: FiltresDossiersDep, s: SessionDep) -> list[DossierResume]:
-    """Route 187."""
-    return [DossierResume.model_validate(asdict(r)) for r in lister(s, f)]
+def lister_dossiers(
+    f: FiltresDossiersDep, pagination: PaginationDep, s: SessionDep
+) -> PageDossiers:
+    """Route 187 (filtres et recherche poussés en SQL ; curseur date d'arrivée puis id)."""
+    page = lecture.lister(s, f, _curseur(pagination), pagination.limite)
+    suivant = encoder_curseur(list(page.dernier)) if page.dernier is not None else None
+    return PageDossiers(
+        elements=[DossierResume.model_validate(asdict(r)) for r in page.elements],
+        total=page.total,
+        suivant=suivant,
+    )
+
+
+@routeur.get(
+    "/dossiers/apercu",
+    response_model=ApercuDossiers,
+    dependencies=[droit(D, A)],
+    summary="Comptes par statut, totaux (indicateurs, pied), frais non répartis et fournisseurs.",
+    responses=reponses(401, 403, 422),
+)
+def apercu_dossiers(f: FiltresDossiersDep, s: SessionDep) -> ApercuDossiers:
+    """Route 250 : nourrit les indicateurs, les onglets, le pied et la vue « non répartis »."""
+    return ApercuDossiers.model_validate(asdict(lecture.apercu(s, f)))
 
 
 @routeur.get(

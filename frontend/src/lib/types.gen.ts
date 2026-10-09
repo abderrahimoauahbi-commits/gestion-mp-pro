@@ -3557,8 +3557,8 @@ export interface paths {
       cookie?: never
     }
     /**
-     * Les dossiers d'importation, le plus récemment arrivé d'abord, avec leurs totaux.
-     * @description Route 187.
+     * Les dossiers d'importation, le plus récemment arrivé d'abord, par pages.
+     * @description Route 187 (filtres et recherche poussés en SQL ; curseur date d'arrivée puis id).
      */
     get: operations['lister_dossiers_api_dossiers_get']
     put?: never
@@ -3567,6 +3567,26 @@ export interface paths {
      * @description Route 190.
      */
     post: operations['creer_api_dossiers_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/dossiers/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Comptes par statut, totaux (indicateurs, pied), frais non répartis et fournisseurs.
+     * @description Route 250 : nourrit les indicateurs, les onglets, le pied et la vue « non répartis ».
+     */
+    get: operations['apercu_dossiers_api_dossiers_apercu_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -4429,6 +4449,45 @@ export interface components {
       illisibles: string[]
     }
     /**
+     * ApercuDossiers
+     * @description Route 250 : comptes par statut, totaux (indicateurs et pied), dossiers aux frais non
+     *     répartis et fournisseurs du filtre lié, sur le périmètre demandé (statut, recherche).
+     */
+    ApercuDossiers: {
+      /** Ouvert */
+      ouvert: number
+      /** Clos */
+      clos: number
+      /** Annule */
+      annule: number
+      /** Nombre */
+      nombre: number
+      /** Poids */
+      poids: number
+      /** Marchandise Mad */
+      marchandise_mad: number
+      /** Charges Mad */
+      charges_mad: number
+      /** Revient Mad */
+      revient_mad: number
+      /** Decaisse Mad */
+      decaisse_mad: number
+      /** Non Repartis */
+      non_repartis: components['schemas']['ApercuNonReparti'][]
+      /** Fournisseurs */
+      fournisseurs: components['schemas']['ApercuFournisseurDossier'][]
+    }
+    /**
+     * ApercuFournisseurDossier
+     * @description Un fournisseur proposé par le filtre lié de la liste des dossiers.
+     */
+    ApercuFournisseurDossier: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+    }
+    /**
      * ApercuImport
      * @description L'aperçu du tableur (route 79) : ce qui serait écrit, et ce qui ne va pas.
      */
@@ -4450,6 +4509,18 @@ export interface components {
        * @description à renvoyer avec l'application
        */
       empreinte_apercu: string
+    }
+    /**
+     * ApercuNonReparti
+     * @description Un dossier à frais non répartis (dans aucun coût), cité à part dans l'aperçu (I15).
+     */
+    ApercuNonReparti: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+      /** Montant */
+      montant: number
     }
     /**
      * ApercuOrdres
@@ -11425,6 +11496,24 @@ export interface components {
       lien: string
       /** Colonnes */
       colonnes: components['schemas']['ColonneControle'][]
+    }
+    /**
+     * PageDossiers
+     * @description Route 187 : une page de dossiers, le plus récemment arrivé d'abord.
+     */
+    PageDossiers: {
+      /** Elements */
+      elements: components['schemas']['DossierResume'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
     }
     /**
      * PageJournal
@@ -25426,6 +25515,7 @@ export interface operations {
         /** @description mots, sans accents */
         q?: string
         fournisseur?: number | null
+        verifier?: string
       }
       header?: never
       path?: never
@@ -26627,6 +26717,10 @@ export interface operations {
         /** @description mots, sans accents */
         q?: string
         fournisseur?: number | null
+        verifier?: string
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
       }
       header?: never
       path?: never
@@ -26640,7 +26734,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['DossierResume'][]
+          'application/json': components['schemas']['PageDossiers']
         }
       }
       /** @description Non connecté */
@@ -26723,6 +26817,59 @@ export interface operations {
       }
       /** @description Conflit ou état */
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_dossiers_api_dossiers_apercu_get: {
+    parameters: {
+      query?: {
+        statut?: string
+        /** @description mots, sans accents */
+        q?: string
+        fournisseur?: number | null
+        verifier?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuDossiers']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
         headers: {
           [name: string]: unknown
         }

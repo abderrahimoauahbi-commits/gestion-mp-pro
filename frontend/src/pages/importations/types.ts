@@ -7,6 +7,7 @@ import type { Schema } from '../../lib/types'
 
 export type DossierResume = Schema<'DossierResume'>
 export type DossierFiche = Schema<'DossierFiche'>
+export type ApercuDossiers = Schema<'ApercuDossiers'>
 export type LigneDossier = Schema<'LigneDossier'>
 export type FraisDossier = Schema<'FraisDossier'>
 export type Echeance = Schema<'Echeance'>

@@ -103,8 +103,8 @@ def test_un_dossier_s_annule_et_garde_son_numero(achats: TestClient) -> None:
     nouveau = ouvrir(achats, imp.f("DB-NUM"))
     assert nouveau["numero"] != d["numero"] and nouveau["nb_lignes"] == 1
     assert int(nouveau["numero"].split("/")[0]) > int(d["numero"].split("/")[0])
-    assert d["id"] not in {x["id"] for x in ok(achats.get("/api/dossiers"))}
-    annules = ok(achats.get("/api/dossiers", params={"statut": "annule"}))
+    assert d["id"] not in {x["id"] for x in ok(achats.get("/api/dossiers"))["elements"]}
+    annules = ok(achats.get("/api/dossiers", params={"statut": "annule"}))["elements"]
     assert next(x for x in annules if x["id"] == d["id"])["numero"] == d["numero"]
     analyse = ok(achats.get("/api/analyse/revient", params={"q": d["numero"]}))
     assert d["numero"] not in analyse["ids_dossiers"]

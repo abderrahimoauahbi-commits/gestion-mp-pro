@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from gestion_mp_pro.api.communs import Nombre, Sortie
+from gestion_mp_pro.api.communs import Nombre, Page, Sortie
 
 
 class FactureDossier(Sortie):
@@ -321,3 +321,39 @@ class EnAttente(Sortie):
     factures: list[FactureARattacher]
     sans_facture: list[ReceptionSansFacture]
     locaux: Locaux
+
+
+class PageDossiers(Page[DossierResume]):
+    """Route 187 : une page de dossiers, le plus récemment arrivé d'abord."""
+
+
+class ApercuNonReparti(Sortie):
+    """Un dossier à frais non répartis (dans aucun coût), cité à part dans l'aperçu (I15)."""
+
+    id: int
+    numero: str
+    montant: Nombre
+
+
+class ApercuFournisseurDossier(Sortie):
+    """Un fournisseur proposé par le filtre lié de la liste des dossiers."""
+
+    id: int
+    nom: str
+
+
+class ApercuDossiers(Sortie):
+    """Route 250 : comptes par statut, totaux (indicateurs et pied), dossiers aux frais non
+    répartis et fournisseurs du filtre lié, sur le périmètre demandé (statut, recherche)."""
+
+    ouvert: int
+    clos: int
+    annule: int
+    nombre: int
+    poids: Nombre
+    marchandise_mad: Nombre
+    charges_mad: Nombre
+    revient_mad: Nombre
+    decaisse_mad: Nombre
+    non_repartis: list[ApercuNonReparti]
+    fournisseurs: list[ApercuFournisseurDossier]

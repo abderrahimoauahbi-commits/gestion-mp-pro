@@ -91,9 +91,30 @@ def sans_accents_sql(colonne: Colonne) -> ColumnElement[str]:
     return func.translate(func.lower(colonne), ACCENTUES, SANS_ACCENT)
 
 
+def compacter_sql(colonne: ColumnElement[str]) -> ColumnElement[str]:
+    """La colonne sans accents, sans blancs ni ponctuation (comme `compacter`, côté base)."""
+    return func.regexp_replace(colonne, "[^0-9a-z]+", "", "g")
+
+
 def conditions(colonne: Colonne, q: str) -> list[ColumnElement[bool]]:
     """Un `LIKE '%mot%'` par mot (tous exigés) ; `colonne` déjà normalisée."""
     return [colonne.like(f"%{echapper(m)}%", escape="\\") for m in mots(q)]
+
+
+def conditions_tolerantes(colonne: Colonne, q: str) -> list[ColumnElement[bool]]:
+    """Comme `conditions`, mais chaque mot est trouvé soit dans la colonne, soit à la ponctuation
+    près (« FA-2026/117 » trouve « FA-2026-117 »), à l'identique de `trouve`. `colonne` est le texte
+    brut (la normalisation est faite ici)."""
+    sans = sans_accents_sql(colonne)
+    serre = compacter_sql(sans)
+    conds: list[ColumnElement[bool]] = []
+    for m in mots(q):
+        plein = sans.like(f"%{echapper(m)}%", escape="\\")
+        compact = compacter(m)
+        conds.append(
+            plein if not compact else (plein | serre.like(f"%{echapper(compact)}%", escape="\\"))
+        )
+    return conds
 
 
 @dataclass(frozen=True)

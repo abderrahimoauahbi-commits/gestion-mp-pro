@@ -54,6 +54,7 @@ GET;/api/donnees/{table};401;ok;403;403;403
 GET;/api/dossiers;401;ok;ok;403;403
 POST;/api/dossiers;401;ok;ok;403;403
 GET;/api/dossiers/a-rattacher;401;ok;ok;403;403
+GET;/api/dossiers/apercu;401;ok;ok;403;403
 GET;/api/dossiers/{did};401;ok;ok;403;403
 PUT;/api/dossiers/{did};401;ok;ok;403;403
 POST;/api/dossiers/{did}/annuler;401;ok;ok;403;403

@@ -118,7 +118,7 @@ def test_frais_sans_marchandise_a_part_partout(achats: TestClient) -> None:
     assert d["charges_mad"] == 0 and d["revient_mad"] == 0
     assert d["charges_non_reparties_mad"] == pytest.approx(6_547_654)
     assert "frais non répartis" in d["a_verifier"]
-    liste = ok(achats.get("/api/dossiers"))
+    liste = ok(achats.get("/api/dossiers", params={"limite": 5000}))["elements"]
     r = ok(achats.get("/api/analyse/revient"))
     assert r["total_charges_mad"] == pytest.approx(sum(x["charges_mad"] for x in liste))
     assert {"dossier": d["numero"], "montant": pytest.approx(6_547_654)} in r[

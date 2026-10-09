@@ -39,7 +39,7 @@ def verifier(a: Acces, r: Releve, dates: list[date]) -> None:
         "FROM dossier_frais f JOIN poste_frais p ON p.id = f.poste_id"
     )
     reglages = dict(a.sql("SELECT cle, valeur FROM parametre"))
-    for d in a.get("/dossiers"):
+    for d in a.get("/dossiers", limite=5000)["elements"]:
         if d["statut"] == "annule":
             continue
         dossier = lignes.get(d["id"], [])
@@ -152,7 +152,7 @@ def _ecarts_de_facture(a: Acces, r: Releve) -> None:
             "ON d.id = l.dossier_id JOIN facture f ON f.id = d.facture_id WHERE l.devise = f.devise"
         )
     )
-    for d in a.get("/dossiers"):
+    for d in a.get("/dossiers", limite=5000)["elements"]:
         e = d.get("ecart_facture")
         if d["statut"] == "annule" or not e:
             continue

@@ -160,7 +160,8 @@ describe('Fiche dossier › frais', () => {
     const d = donnees()
     const { appels } = ouvrir(d, 'frais', { [`POST /dossiers/${d.fiche.id}/frais`]: { corps: d.fiche } })
     const ajouter = await screen.findByRole('button', { name: 'Ajouter' })
-    expect(ajouter.dataset.raison).toBe('À renseigner : Montant.')
+    // Le poste se choisit d'office dès que les postes sont chargés : on attend cet état.
+    await waitFor(() => expect(ajouter.dataset.raison).toBe('À renseigner : Montant.'))
     const ajout = screen.getByLabelText('Ajouter un frais')
     await userEvent.type(within(ajout).getByPlaceholderText('avoir : négatif'), '-150')
     expect(screen.getByRole('tab', { name: /Frais/ }).textContent).toContain('•')
