@@ -221,13 +221,8 @@ function colonnes(x: Contexte): Colonne<LigneForme>[] {
   return [...colonnes1(x), ...colonnes2(x), ...colonnes3(x), ...colonnes4(x)]
 }
 
-/** Pourquoi la date promise ne se change plus, ou `''`. */
-export function dateFigee(c: CommandeFiche): string {
-  if (c.confirme_le) return 'figée avec les prix : une nouvelle date va dans l’ETA (Suivi de l’expédition)'
-  if (c.parti && c.date_livraison_prevue && c.date_livraison_prevue < aujourdhui())
-    return 'date promise passée : elle ne se repousse plus ; noter la nouvelle date dans l’ETA'
-  return ''
-}
+/** Pourquoi la date promise ne se change plus (la phrase du serveur, `promesse_figee`), ou `''`. */
+export const dateFigee = (c: CommandeFiche): string => c.promesse_figee ?? ''
 
 function EnTeteLignes({ x, ajoutables }: { x: Contexte; ajoutables: readonly Matiere[] }) {
   const { c, f } = x
@@ -300,7 +295,7 @@ function NoteFigee({ c }: { c: CommandeFiche }) {
 /** La part du bon reçue sous réserve, en quarantaine : comptée reçue ici, attendue ailleurs. */
 function NoteReserve({ c }: { c: CommandeFiche }) {
   if (c.statut === 'soldee' || c.statut === 'annulee') return null
-  const kg = c.lignes.reduce((t, l) => t + l.en_quarantaine, 0)
+  const kg = c.kg_en_quarantaine
   if (kg <= 0) return null
   const texte = texteReserve(kg)
   return (

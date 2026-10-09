@@ -156,6 +156,14 @@ describe('Commandes', () => {
     expect(within(fenetre).getByText(/ses lignes sont figées/)).toBeInTheDocument()
   })
 
+  it('date promise figée : le champ est grisé et dit la phrase du serveur (promesse_figee)', async () => {
+    const phrase = 'figée avec les prix : une nouvelle date va dans l’ETA (Suivi de l’expédition)'
+    serveur('achats', brouillon({ parti: true, promesse_figee: phrase }))
+    monterApp('/commandes/9')
+    const fenetre = await screen.findByRole('dialog')
+    expect(await within(fenetre).findByText(phrase)).toBeInTheDocument()
+  })
+
   it('reçu sous réserve : la ligne et la fiche disent la part en quarantaine, attendue jusqu’à sa libération', async () => {
     serveur('achats', ficheEssai())
     monterApp('/commandes/3')
