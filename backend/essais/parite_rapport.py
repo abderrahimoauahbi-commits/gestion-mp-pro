@@ -29,13 +29,17 @@ CORRECTIONS = {
     "K7": "Fil monté compté à toute date (décision de Mohamed, U8 ; D8) — preuve : copie montée, "
           "Gestion MP rejoué avec le montage connu aux dates passées redonne ce que PRO change.",
     "K8a": "Prix des sorties, transferts, retours machine non repris (R1 n° 1).",
-    "K8b": "Réception payée en deux devises : devise de l'en-tête (R1 n° 2 ; Mohamed tranche).",
+    "K8b": "Réception payée en deux devises scindée, une réception par devise (R1 n° 2, lot "
+           "K8B) — preuve : le dépôt et les routes de Gestion MP relus sur sa copie scindée "
+           "(même découpe, mêmes identifiants) redonnent PRO ; stocks et valeurs MAD inchangés.",
     "K8c": "Unité d'achat sans contenance lue au kilo (R1 n° 3).",
     "K8d": "Brouillon numéroté : numéro retiré, gardé au compteur (R1 n° 4).",
     "K8e": "Ordre validé sans date : fin de son jour (R1 n° 5).",
     "K8f": "Numéro de lot à blancs : blancs → « _ » (R1 n° 8).",
     "K8g": "Entrée de réception de l'ERP Fil : sa réception retrouvée par (lot, date) (R1 n° 7).",
     "K8h": "Prix confirmé sans date : date de création du bon (R1).",
+    "K8i": "Entrée en devise sans cours : cours du jour de la reprise figé (V2, V3/V4) — même "
+           "cours que celui du jour de Gestion MP : aucun calcul ne change.",
     "K9": "Prix connus à la date : à une date passée, opportunités et économies du Cockpit ne "
           "lisent que les réceptions jusqu'à cette date (D8 n° 6) — preuve : la route de Gestion "
           "MP rejouée avec ses coûts rendus bornés à la date redonne la valeur de PRO.",

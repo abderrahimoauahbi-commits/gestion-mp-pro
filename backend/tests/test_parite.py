@@ -90,6 +90,29 @@ def test_une_difference_hors_regle_reste_a_corriger() -> None:
     assert pd.arrondi(2.0005, 3) == 2.001 and pd.arrondi(4070.2295999999997, 2) == 4070.23
 
 
+def test_k8b_la_scission_vient_du_depot_de_gestion_mp_et_k8i_du_cours_du_jour() -> None:
+    """K8b : ce qui sépare D0 de D0s (dépôt de Gestion MP sur sa copie scindée) est la scission,
+    le reste se compare de D0s à PRO ; K8i : cours 0 d'une entrée en devise → cours du jour."""
+    d0 = {
+        "receptions": [{"numero": "REC-1", "lignes": [{"devise": "USD"}, {"devise": "EUR"}]}],
+        "mouvements": [{"type": "RECEPTION", "devise": "USD", "prix_unite": 2.0, "cours": 0.0}],
+        "parametres": {"cours": {"USD": 9.5}},
+    }
+    d0s = {**d0, "receptions": [{"numero": "REC-1", "lignes": [{"devise": "USD"}]},
+                                {"numero": "REC-1-2", "lignes": [{"devise": "EUR"}]}]}  # fmt: skip
+    pro = {**d0s, "mouvements": [{**d0["mouvements"][0], "cours": 9.5}]}
+    ecarts = pd.ecarts(d0, pro, pd.lire_contexte(d0s, 1))
+    assert {(pd.motif(e.chemin), e.classe) for e in ecarts} == {
+        ("receptions", "K8b"),
+        ("mouvements/*/cours", "K8i"),
+    }
+    assert pd.chaine(d0, ecarts)[-1][1] == pro
+    faux = {**pro, "mouvements": [{**d0["mouvements"][0], "cours": 9.6}]}
+    assert [e.classe for e in pd.ecarts(d0, faux, pd.lire_contexte(d0s, 1))] == ["K8b", None]
+    sans_scission = pd.ecarts(d0, pro, pd.Contexte())
+    assert ("receptions", None) in {(pd.motif(e.chemin), e.classe) for e in sans_scission}
+
+
 # ── Comparaison et explication ────────────────────────────────────────────────────────
 
 
