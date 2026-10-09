@@ -1,7 +1,7 @@
-"""Routes du domaine « Journal et historique » (API-PRO § 1.5, routes 49–51).
+"""Routes du domaine « Journal et historique » (API-PRO § 1.5, routes 49–52).
 
-La route 52 (`GET /export/journal`, classeur) appartient au lot D9 (`exports/journal.py`) : elle
-se branche ici avec les mêmes filtres (`FiltreJournal`).
+La route 52 (`GET /export/journal`, classeur, lot D9 : `exports/journal.py`) prend les mêmes
+filtres que la route 49 (`FiltresDep`) : le classeur est la liste de l'écran.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Annotated
 
-from fastapi import Depends, Query
+from fastapi import Depends, Query, Response
 
 from gestion_mp_pro.api.communs import encoder_curseur, nouveau_routeur
 from gestion_mp_pro.api.dependances import PaginationDep, SessionDep
@@ -21,9 +21,11 @@ from gestion_mp_pro.api.journal.schemas import (
     PersonneJournal,
     ValeursJournal,
 )
+from gestion_mp_pro.exports import classeur
+from gestion_mp_pro.exports import journal as classeur_journal
 from gestion_mp_pro.modeles.enums import ObjetJournal
 from gestion_mp_pro.securite import TOUS, D, QuiDep, T, droit
-from gestion_mp_pro.services import journal
+from gestion_mp_pro.services import horloge, journal
 
 routeur = nouveau_routeur("journal")
 
@@ -81,6 +83,21 @@ def lire(f: FiltresDep, pagination: PaginationDep, s: SessionDep) -> PageJournal
     return PageJournal(
         elements=[LigneJournal.de(j) for j in page.lignes], total=page.total, suivant=suivant
     )
+
+
+@routeur.get(
+    "/export/journal",
+    dependencies=[droit(D, T)],
+    summary="Le journal des actions en classeur, avec les filtres de l'écran.",
+    responses={**reponses(401, 403, 422), **classeur.REPONSES_XLSX},
+    response_class=Response,
+)
+def exporter(f: FiltresDep, qui: QuiDep, s: SessionDep) -> Response:
+    """Route 52 : les lignes de la route 49 (mêmes filtres), sans prix pour l'administrateur."""
+    page = journal.lire_journal(s, f, None, classeur_journal.LIMITE)
+    jour = horloge.aujourd_hui()
+    contenu = classeur_journal.journal(page.lignes, page.total, f, qui.voit_prix, jour)
+    return classeur.reponse(contenu, "journal-des-actions", jour)
 
 
 @routeur.get(

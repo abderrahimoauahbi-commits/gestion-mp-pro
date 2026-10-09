@@ -24,8 +24,10 @@ GET;/api/devises;401;ok;ok;403;403
 POST;/api/devises;401;ok;ok;403;403
 PUT;/api/devises/{code};401;ok;ok;403;403
 GET;/api/devises/{code}/cours;401;ok;ok;403;403
+GET;/api/documents/etiquettes;401;ok;ok;ok;403
 GET;/api/etat;ok;ok;ok;ok;ok
 GET;/api/export/fournisseurs/fiches;401;ok;ok;403;403
+GET;/api/export/journal;401;ok;403;403;ok
 GET;/api/export/lots;401;ok;ok;ok;403
 GET;/api/export/matieres;401;ok;ok;403;403
 GET;/api/export/mouvements;401;ok;ok;ok;403
