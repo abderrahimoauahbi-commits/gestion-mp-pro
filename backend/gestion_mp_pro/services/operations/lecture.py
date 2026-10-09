@@ -197,6 +197,7 @@ def _lue(
     """Une opération lue."""
 
     def nom(genre: str, ident: int | None) -> str:
+        """Le nom cité (personne, ordre, fournisseur, code du motif)."""
         return noms.get((genre, ident), "") if ident is not None else ""
 
     peut, raison = droit_d_agir(o, role, ctx)
@@ -266,6 +267,7 @@ def _texte(magasin_source: type[Magasin], magasin_arrivee: type[Magasin]) -> Col
                 " ",
             )
         )
+        .select_from(OperationLigne)
         .join(Matiere, Matiere.id == OperationLigne.matiere_id)
         .join(magasin_source, magasin_source.id == OperationLigne.magasin_id)
         .outerjoin(magasin_arrivee, magasin_arrivee.id == OperationLigne.magasin_destination_id)
@@ -274,6 +276,7 @@ def _texte(magasin_source: type[Magasin], magasin_arrivee: type[Magasin]) -> Col
     )  # fmt: skip
 
     def voisin(colonne: Any, cle: Any, ident: Any) -> Any:
+        """Une colonne d'une fiche voisine (sous-requête)."""
         return select(colonne).where(cle == ident).scalar_subquery()
 
     texte = func.concat_ws(

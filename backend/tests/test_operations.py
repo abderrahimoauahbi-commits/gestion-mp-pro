@@ -8,8 +8,9 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
+from fabriques import stock as fabriques_stock
 from fabriques.operations import Monde, acteur, ligne, monde, motif, ordre_valide, saisie
-from fabriques.stock import JOUR, autre_magasin, jour, s, vider  # noqa: F401
+from fabriques.stock import JOUR, autre_magasin, jour
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,6 +19,9 @@ from gestion_mp_pro.modeles import Lot, Mouvement, Solde
 from gestion_mp_pro.modeles.enums import Role, StatutDocument
 from gestion_mp_pro.services import operations as ops
 from gestion_mp_pro.services.operations import gestes, lecture
+
+s = fabriques_stock.s
+"""La session de l'essai, annulée à la fin (fixture du lot S4)."""
 
 
 def _solde(s: Session, lot: Lot, magasin_id: int) -> Decimal:
@@ -39,8 +43,13 @@ def _refus(fonction: object, *args: object, **kw: object) -> Refus:
 def _liberation(s: Session, m: Monde, q: float = 100, nom_motif: str = "Libération de quarantaine"):
     return saisie(
         "transfert",
-        ligne(m.a1.id, m.quarantaine.id, q, lot_id=m.lots["E-Q1"].id,
-              magasin_destination_id=m.courant.id),  # fmt: skip
+        ligne(
+            m.a1.id,
+            m.quarantaine.id,
+            q,
+            lot_id=m.lots["E-Q1"].id,
+            magasin_destination_id=m.courant.id,
+        ),  # fmt: skip
         motif_id=motif(s, "transfert", nom_motif),
         commentaire="contrôle conforme",
     )
@@ -67,8 +76,13 @@ def test_quarantaine_liberee_par_les_achats_seulement(s: Session) -> None:
 def _mise_en_quarantaine(s: Session, m: Monde, q: float, commentaire: str = "fil taché"):
     return saisie(
         "transfert",
-        ligne(m.a1.id, m.courant.id, q, lot_id=m.lots["E-L1"].id,
-              magasin_destination_id=m.quarantaine.id),  # fmt: skip
+        ligne(
+            m.a1.id,
+            m.courant.id,
+            q,
+            lot_id=m.lots["E-L1"].id,
+            magasin_destination_id=m.quarantaine.id,
+        ),  # fmt: skip
         motif_id=motif(s, "transfert", "Mise en quarantaine"),
         commentaire=commentaire,
     )
@@ -228,8 +242,8 @@ def test_ouverture_devise_inconnue_et_un_seul_total(s: Session) -> None:
     422 ; 130 + 13 → 143 ; le lot est créé à la validation, le lot interne numéroté alors."""
     m = monde(s)
     achats = acteur(s)
-    r = _refus(ops.creer, s, achats, saisie("ouverture", ligne(m.a2.id, m.courant.id, 5,
-                                            lot_numero="O-1", prix=Decimal(2), devise="XXX")))  # fmt: skip
+    x = ligne(m.a2.id, m.courant.id, 5, lot_numero="O-1", prix=Decimal(2), devise="XXX")
+    r = _refus(ops.creer, s, achats, saisie("ouverture", x))
     assert r.http == 422 and "devise inconnue (« XXX »)" in r.detail
     e = saisie(
         "ouverture",
@@ -252,7 +266,11 @@ def test_valider_une_operation_annulee_et_annuler_deux_fois(s: Session) -> None:
     achats = acteur(s)
     o = ops.creer(s, achats, _mise_en_quarantaine(s, m, 1), valider=True)
     o = ops.annuler(s, achats, o.id, o.version, motif="erreur de lot")
-    assert (o.statut, o.annulee_par_id, o.annulation_motif) == ("annulee", achats.id, "erreur de lot")
+    assert (o.statut, o.annulee_par_id, o.annulation_motif) == (
+        "annulee",
+        achats.id,
+        "erreur de lot",
+    )
     r = _refus(ops.valider, s, achats, o.id, o.version)
     assert (r.http, r.detail) == (409, "Cette opération est annulée : elle ne se valide plus.")
     r = _refus(ops.annuler, s, achats, o.id, o.version)

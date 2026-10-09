@@ -5,6 +5,8 @@ GET;/api/appareils;401;ok;403;403;ok
 POST;/api/appareils;401;ok;403;403;ok
 POST;/api/appareils/enroler;ok;ok;ok;ok;ok
 DELETE;/api/appareils/{ident};401;ok;403;403;ok
+GET;/api/brouillons;401;ok;ok;ok;403
+POST;/api/brouillons/valider;401;ok;ok;ok;403
 GET;/api/classification;401;ok;ok;ok;403
 POST;/api/classification/roles;401;ok;403;403;403
 DELETE;/api/classification/roles/{ident};401;ok;403;403;403
@@ -29,6 +31,7 @@ GET;/api/export/fournisseurs/fiches;401;ok;ok;403;403
 GET;/api/export/lots;401;ok;ok;ok;403
 GET;/api/export/matieres;401;ok;ok;403;403
 GET;/api/export/mouvements;401;ok;ok;ok;403
+GET;/api/export/operations;401;ok;ok;ok;403
 GET;/api/fournisseurs;401;ok;ok;ok;403
 POST;/api/fournisseurs;401;ok;ok;403;403
 DELETE;/api/fournisseurs/{ident};401;ok;ok;403;403
@@ -65,6 +68,13 @@ GET;/api/mouvements;401;ok;ok;ok;403
 GET;/api/notifications;401;ok;ok;ok;ok
 POST;/api/notifications/lues;401;ok;ok;ok;ok
 POST;/api/notifications/{ident}/lue;401;ok;ok;ok;ok
+GET;/api/operations;401;ok;ok;ok;403
+POST;/api/operations;401;ok;ok;ok;403
+DELETE;/api/operations/{ident};401;ok;ok;ok;403
+GET;/api/operations/{ident};401;ok;ok;ok;403
+PUT;/api/operations/{ident};401;ok;ok;ok;403
+POST;/api/operations/{ident}/annuler;401;ok;ok;ok;403
+POST;/api/operations/{ident}/valider;401;ok;ok;ok;403
 GET;/api/parametres;401;ok;ok;403;ok
 PUT;/api/parametres;401;ok;403;403;ok
 GET;/api/parametres/historique;401;ok;403;403;ok
