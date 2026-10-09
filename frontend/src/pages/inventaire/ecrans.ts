@@ -1,7 +1,7 @@
 /**
  * Écrans du domaine « Inventaire » (lot F6), rassemblés par `routes.ts` : la liste et ses deux
  * fenêtres à adresse stable, `/inventaires/nouveau` (ouvrir) et `/inventaires/:id` (comptage,
- * volets `?onglet=lots|pieces`). Les trois chemins mènent à la même page (la liste dessous).
+ * volets `?onglet=lots|pieces|historique`). Les trois chemins mènent à la même page (la liste dessous).
  */
 import type { Ecran } from '../../routes'
 
@@ -41,6 +41,7 @@ export const ecrans: readonly Ecran[] = [
     onglets: [
       { cle: 'lots', libelle: 'Lots à compter' },
       { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
     ],
     page,
   },

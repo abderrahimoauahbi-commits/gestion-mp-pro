@@ -195,6 +195,23 @@ describe('Inventaire : le comptage', () => {
   })
 })
 
+describe('Inventaire : les volets de la fiche', () => {
+  it('pièces jointes et historique dans l’adresse de la fiche', async () => {
+    const appels = serveur('achats', ficheEssai(), {
+      'GET /historique/inventaire/7': { corps: [] },
+      'GET /pieces': { corps: [] },
+    })
+    const app = monterApp('/inventaires/7')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Historique' }))
+    await waitFor(() => expect(app.adresse()).toBe('/inventaires/7?onglet=historique'))
+    await waitFor(() => expect(appels.some((a) => a.chemin === '/historique/inventaire/7')).toBe(true))
+    await userEvent.click(screen.getByRole('tab', { name: 'Pièces jointes' }))
+    await waitFor(() =>
+      expect(appels.some((a) => a.chemin.startsWith('/pieces?objet=inventaire&id=7'))).toBe(true),
+    )
+  })
+})
+
 describe('Inventaire : l’annulation d’un inventaire validé', () => {
   const valide = ficheEssai({
     statut: 'valide',

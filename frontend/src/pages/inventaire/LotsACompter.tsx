@@ -1,11 +1,12 @@
 /**
- * Les volets de la fenêtre de comptage (`?onglet=lots|pieces`) et le volet « Lots à compter »
+ * Les volets de la fenêtre de comptage (`?onglet=lots|pieces|historique`) et le volet « Lots à compter »
  * (ECRANS-PRO partie 6) : vues avec leurs compteurs posées sur la rangée des volets, recherche,
  * « Effacer les filtres » et « N critère(s) » dès deux critères (an. 9), tableau de saisie dans son
  * cadre avec pied de totaux, export du comptage (an. 10).
  */
 import { useState } from 'react'
 
+import { Historique } from '../../composants/documents/Historique'
 import { PiecesJointes } from '../../composants/documents/PiecesJointes'
 import { Onglets } from '../../composants/mise-en-page/Onglets'
 import { Bouton } from '../../composants/saisie/Bouton'
@@ -19,7 +20,7 @@ import styles from './Inventaire.module.css'
 import { colonnesComptage } from './LignesComptage'
 import type { InventaireFiche, LigneInventaire } from './types'
 
-const VOLETS = ['lots', 'pieces'] as const
+const VOLETS = ['lots', 'pieces', 'historique'] as const
 type Volet = (typeof VOLETS)[number]
 
 export interface VoletsProps {
@@ -107,6 +108,7 @@ export function VoletsComptage(p: VoletsProps) {
         onglets={[
           { cle: 'lots', libelle: 'Lots à compter', compte: p.fiche.lignes.length, sale: p.modifiees > 0 },
           { cle: 'pieces', libelle: 'Pièces jointes' },
+          { cle: 'historique', libelle: 'Historique' },
         ]}
         apres={
           volet === 'lots' ? (
@@ -126,8 +128,10 @@ export function VoletsComptage(p: VoletsProps) {
       />
       {volet === 'lots' ? (
         <Lots p={p} vue={active} q={q} setQ={setQ} />
-      ) : (
+      ) : volet === 'pieces' ? (
         <PiecesJointes objet="inventaire" id={p.fiche.id} />
+      ) : (
+        <Historique objet="inventaire" id={p.fiche.id} />
       )}
     </>
   )
