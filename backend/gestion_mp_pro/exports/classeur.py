@@ -35,7 +35,7 @@ from io import BytesIO
 from typing import Any
 
 from openpyxl import Workbook
-from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE, Cell
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
@@ -163,11 +163,16 @@ def _nom_d_onglet(texte: str, pris: set[str]) -> str:
 
 
 def _ajouter(ws: Worksheet, valeurs: Sequence[object]) -> None:
-    """Une ligne ; un texte qui ressemble à une formule reste un texte."""
-    ws.append([cellule(v) for v in valeurs])
-    for c in ws[ws.max_row]:
+    """Une ligne ; un texte qui ressemble à une formule reste un texte.
+
+    Les cellules sont faites ici, puis ajoutées : relire la ligne par `ws[ws.max_row]`
+    parcourait toute la feuille à chaque ligne (`max_row`, `max_column`) — un classeur de
+    dix mille lignes prenait 40 s (V4, épreuve de charge)."""
+    cellules = [Cell(ws, value=cellule(v)) for v in valeurs]
+    for c in cellules:
         if isinstance(c.value, str) and c.value.startswith(DANGEREUX):
             c.data_type = "s"
+    ws.append(cellules)
 
 
 def _format(colonne: Colonne) -> str:
