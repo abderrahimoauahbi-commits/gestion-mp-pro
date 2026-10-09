@@ -320,7 +320,7 @@
     },
     "qualite_plan": {
       "grandeur": "Plan d’une qualité",
-      "texte": "La base mensuelle : m² d’un mois ordinaire (coefficient 1). Le coût d’un mois = coût matière au m² × base mensuelle."
+      "texte": "La base mensuelle : m² d’un mois ordinaire (coefficient 1), avant saisonnalité et croissance ; elle se saisit dans la page Production."
     },
     "qualite_poids": {
       "grandeur": "Poids de la recette",
