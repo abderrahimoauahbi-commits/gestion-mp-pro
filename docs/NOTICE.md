@@ -135,7 +135,7 @@ Les règles, qui fait quoi, les gestes pas à pas, les calculs, et où est pass�
 | Sorties prévues | La demande entre la livraison et la commande suivante : ce que la commande doit couvrir. |
 | Seuil d’alerte | Le plus grand de : stock minimum de la fiche (plafonné à N mois de la consommation à venir ; aucun pour une matière non consommée), couverture minimum de la fiche × (1 + marge de sécurité), jours de sécurité de la classe ABC. Le délai du fournisseur n’y est plus : il est déjà retiré du stock projeté. |
 | Statut (au seuil) | RUPTURE (plus rien), CRITIQUE, URGENT, ATTENTION, OK : le stock projeté face au seuil d’alerte. |
-| Matières en alerte | Trois comptes nommés, servis par le serveur : « alerte rouge » = en rupture ou critiques (pastille du menu, bandeaux) ; « à commander vite » = rupture, critiques et urgentes (Ma journée) ; « en alerte » = les quatre statuts RUPTURE, CRITIQUE, URGENT, ATTENTION (onglet Matières en alerte). |
+| En rupture ou critiques | L’alerte rouge : les matières au statut RUPTURE ou CRITIQUE. Un seul compte, le même partout (pastille du Stock, Ma journée, Cockpit) ; les URGENT et les ATTENTION se nomment à part. L’onglet « Matières en alerte » du Cockpit montre les quatre statuts, la plus pressée d’abord. |
 | Statut de couverture | La couverture en jours face aux réglages « couverture critique » et « couverture d’ATTENTION ». |
 | Couverture | Stock projeté ÷ consommation journalière. Couverture pondérée (Cockpit) : la même, pondérée par la valeur. |
 | Quantité à commander | Sorties prévues + le plus grand de (sécurité de la classe sur la période, seuil d’alerte) − stock projeté − commandé arrivant pendant la période couverte − déjà en préparation (bons en brouillon ou à approuver), portée au minimum de commande et arrondie au conditionnement. Sous le gramme : rien. Une matière désactivée, d’un fournisseur désactivé, ou non consommée ne se rachète pas. |
@@ -210,19 +210,22 @@ Les écrans que votre rôle ne voit pas sont indiqués sans lien.
 
 ### Ma journée (`/accueil`)
 
-Ce qui attend aujourd’hui : les tâches à faire, ce qui est à valider, les arrivées des sept prochains jours et les besoins signalés par l’atelier.
+Ce qui attend une action aujourd’hui : à faire, à valider, et les arrivées des sept prochains jours. Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.
 
-- Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.
-- Achats : commandes en retard, prix à confirmer, brouillons à envoyer, réceptions à valider, factures sans dossier d’importation.
-- Alimentation au bureau : les sorties en brouillon, les retours à saisir, les besoins signalés et leur réponse.
+- Achats, dans cet ordre : les besoins signalés par l’atelier (urgents d’abord, « Traiter » y répond), les matières en rupture ou critiques, les commandes en retard, les prix à confirmer, les commandes en brouillon à envoyer, les factures sans dossier d’importation, les réceptions importées sans facture, chaque inventaire en cours, les réclamations ouvertes, les contrôles à corriger.
+- « À valider » : les réceptions, ordres et opérations saisis mais pas encore validés — le stock n’a pas bougé pour eux. « Tout valider… » ouvre Stock › À valider (`/stock?onglet=a-valider`).
+- Alimentation au bureau : les gestes du jour (envoyer aux machines, retour, ordres, métiers, déplacer un lot) et ses brouillons à valider ; ni prix ni conseil d’achat.
+- La direction a sa liste au Cockpit (`/cockpit`).
 
 ### Cockpit (`/cockpit`)
 
-Ce qui demande une décision de la direction : à faire et à valider, matières en alerte, vue d’ensemble, évolution, opportunités d’économies.
+La situation du stock et des achats, recalculée à chaque ouverture : six indicateurs, puis ce qui attend une décision, les matières en alerte, la vue d’ensemble, l’évolution et les opportunités d’économies.
 
-- Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur sa liste.
-- « Bilan du mois » imprime le mois écoulé sur le papier à en-tête.
+- Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur l’écran qui le détaille. Les chiffres sont ceux du serveur : la valeur du stock est celle de la Valorisation.
 - Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre.
+- « À faire et à valider » : les commandes à approuver (« Examiner » ouvre la fiche), puis tout ce qui attend une action, chacun avec son lien ; un besoin signalé se traite sur place.
+- « Matières en alerte » : RUPTURE, CRITIQUE, URGENT et ATTENTION, la plus pressée d’abord ; « Préparer la commande » ouvre la préparation chez le fournisseur.
+- « Bilan du mois » imprime le mois choisi (le précédent par défaut) sur le papier à en-tête, dans un nouvel onglet.
 
 ### Stock, lots & mouvements (`/stock`)
 
