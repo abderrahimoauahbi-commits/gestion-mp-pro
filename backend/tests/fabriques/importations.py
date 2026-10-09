@@ -42,6 +42,7 @@ __all__ = [
     "ligne",
     "numero_ancien",
     "ouvrir",
+    "ouvrir_facture",
     "poste",
     "sessions",
 ]
@@ -128,6 +129,13 @@ def ouvrir(client: TestClient, numero: str, code: int = 201, **corps: Any) -> An
     r = client.post("/api/dossiers", json={"facture_id": facture_id(client, numero), **corps})
     assert r.status_code == code, r.text
     return r.json()
+
+
+def ouvrir_facture(client: TestClient, fid: int, *, clos: bool = False) -> Any:
+    """Le vrai dossier d'une facture (par son identifiant), clos s'il le faut — en remplacement
+    de l'ancienne fabrique `fabriques/receptions.dossier` (dossier posé en base, lot D4)."""
+    d = ok(client.post("/api/dossiers", json={"facture_id": fid, "local_confirme": True}), 201)
+    return geste(client, d, "cloturer", alertes_lues=True) if clos else d
 
 
 def a_la_main(client: TestClient, code: int = 201, **corps: Any) -> Any:
