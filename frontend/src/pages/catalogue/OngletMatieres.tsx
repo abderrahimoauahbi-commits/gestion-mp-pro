@@ -13,6 +13,7 @@ import { Erreur } from '../../composants/retour/Erreur'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import { ExportExcel } from '../../composants/tableaux/ExportExcel'
+import styles from './catalogue.module.css'
 import { ChoixEtat } from './ChoixEtat'
 import { colonnesMatieres, filtresMatieres } from './colonnesMatieres'
 import { useMatieres } from './donnees'
@@ -91,7 +92,7 @@ export function OngletMatieres({
   const filtres = useMemo(() => filtresMatieres(matieres.data ?? []), [matieres.data])
   const actions = ecrit ? <Actions etatListe={etatListe} onOuvrir={onOuvrir} onTableur={onTableur} /> : null
   return (
-    <Carte titre="Matières" actions={actions} serre remplir>
+    <Carte titre="Matières" actions={actions} serre remplir className={styles.carteListe}>
       {matieres.isPending ? <Chargement quoi="le catalogue" /> : null}
       {matieres.isError ? (
         <Erreur erreur={matieres.error} onReessayer={() => void matieres.refetch()} />

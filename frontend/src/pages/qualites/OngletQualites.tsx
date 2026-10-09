@@ -114,7 +114,7 @@ export function OngletQualites({
   const lignes = useMemo(() => qualites.filter((q) => avecArretees || q.actif), [qualites, avecArretees])
   const cols = useMemo(() => colonnes(qualites, voitPrix), [qualites, voitPrix])
   return (
-    <Carte titre="Les qualités" serre remplir>
+    <Carte titre="Les qualités" serre remplir className={styles.carteListe}>
       <DataTable<Qualite>
         libelle="Qualités"
         lignes={lignes}

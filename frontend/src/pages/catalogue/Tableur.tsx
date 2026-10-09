@@ -149,7 +149,13 @@ function useTableur(onFermer: () => void) {
     const corps = new FormData()
     corps.append('fichier', fichier, fichier.name)
     corps.append('empreinte_apercu', apercu.empreinte_apercu)
-    await ecriture.mutateAsync(corps)
+    try {
+      await ecriture.mutateAsync(corps)
+    } catch (e) {
+      // Le catalogue a changé depuis l'aperçu : on le relit pour montrer ce qui est vrai maintenant.
+      void relire(fichier)
+      throw e
+    }
     setApercu(null)
     dire(APPLIQUE)
     onFermer()

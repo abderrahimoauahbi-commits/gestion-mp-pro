@@ -106,7 +106,7 @@ export default function Qualites() {
           setParams((p) => avecParametre(p, 'onglet', o === 'qualites' ? null : o), { replace: true })
         }
         onglets={[
-          { cle: 'qualites', libelle: 'Qualités', compte: qualites.data?.length },
+          { cle: 'qualites', libelle: 'Qualités', compte: qualites.data?.filter((q) => q.actif).length },
           { cle: 'nomenclature', libelle: 'Nomenclature' },
         ]}
       />

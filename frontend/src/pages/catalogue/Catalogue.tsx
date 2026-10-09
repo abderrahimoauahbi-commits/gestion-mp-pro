@@ -81,9 +81,15 @@ function useNavigationCatalogue(onglet: OngletCatalogue) {
     [navigate, search, onglet],
   )
   const remplacer = useCallback(
-    (adresse: string) => navigate(`${adresse}${search}`, { replace: true }),
+    (adresse: string) => {
+      const p = new URLSearchParams(search)
+      p.delete('onglet')
+      const texte = p.toString()
+      navigate(`${adresse}${texte ? `?${texte}` : ''}`, { replace: true })
+    },
     [navigate, search],
   )
+
   return { ouvrir, fermer, remplacer }
 }
 

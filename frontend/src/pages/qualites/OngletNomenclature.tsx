@@ -109,7 +109,12 @@ export function OngletNomenclature({
   )
   const cols = useMemo(() => colonnes(fautives, voitPrix), [fautives, voitPrix])
   return (
-    <Carte titre="Nomenclature : chaque matière de chaque qualité" serre remplir>
+    <Carte
+      titre="Nomenclature : chaque matière de chaque qualité"
+      serre
+      remplir
+      className={styles.carteListe}
+    >
       {lu.isPending ? <Chargement quoi="la nomenclature" /> : null}
       {lu.isError ? <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} /> : null}
       {lu.data ? (

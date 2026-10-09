@@ -4,6 +4,8 @@
  * le dit au-dessus de la saisie, avec « Recharger la fiche ». Rien n'est perdu sans le vouloir :
  * recharger remplace la saisie par la dernière version, et le dit.
  */
+import { useEffect, useRef } from 'react'
+
 import { Note } from '../../composants/retour/Note'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { ErreurApi } from '../../lib/api'
@@ -26,9 +28,14 @@ export function BandeauConflit({
   onRecharger: () => unknown
   libelle?: string
 }) {
+  const boite = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    // La saisie a pu défiler : le refus se montre là où l'on regarde.
+    if (message) boite.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [message])
   if (!message) return null
   return (
-    <div className={styles.conflit} role="alert">
+    <div ref={boite} className={styles.conflit} role="alert">
       <Note ton="attention">
         <strong>{message}</strong>
         <br />

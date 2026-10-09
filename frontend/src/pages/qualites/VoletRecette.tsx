@@ -56,8 +56,8 @@ function BlocFiche({ f, roles, ecrit }: VoletRecetteProps) {
           />
         </Champ>
       </Grille>
-      <strong>Poids d’un m² de tapis, rôle par rôle</strong>
-      <ChampsPoids roles={roles} poids={f.forme.poids} onChange={f.poser} lecture={!ecrit} />
+      <strong>Poids d’un m² de tapis, rôle par rôle (ml/m² pour un rôle au mètre)</strong>
+      <ChampsPoids roles={roles} poids={f.forme.poids} onChange={f.poser} lecture={!ecrit} compact />
     </>
   )
 }
@@ -102,9 +102,9 @@ export function VoletRecette(p: VoletRecetteProps) {
   return (
     <div className={styles.volet}>
       <BlocFiche {...p} />
-      <Note>
-        Dans chaque rôle utilisé, les parts des matières totalisent 100 %. Un rôle à zéro n’entre pas dans la
-        qualité ; en rouge, le rôle n’y est pas encore.
+      <Note uneLigne="Dans chaque rôle utilisé, les parts des matières totalisent 100 %. Un rôle à zéro n’entre pas dans la qualité ; en rouge, le rôle n’y est pas encore.">
+        Dans chaque rôle utilisé, les parts des matières totalisent 100 % ; en rouge, le rôle n’y est pas
+        encore.
       </Note>
       {disparues.length ? (
         <Note ton="critique">

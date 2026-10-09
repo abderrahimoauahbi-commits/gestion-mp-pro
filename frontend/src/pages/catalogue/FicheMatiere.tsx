@@ -68,7 +68,8 @@ function Bandeau({ m }: { m: MatiereFiche }) {
     <div className={styles.rangee}>
       <span className={styles.note}>
         {kgEtMetres(m.stock, m.lineaire ? m.kg_par_ml : null)} en stock
-        {m.modifie_le ? ` · modifiée le ${horodatage(m.modifie_le)}` : ''}
+        {m.modifie_le || m.modifie_par ? ' · modifiée' : ''}
+        {m.modifie_le ? ` le ${horodatage(m.modifie_le)}` : ''}
         {m.modifie_par ? ` par ${m.modifie_par}` : ''}
       </span>
       <span className={styles.pousse} />

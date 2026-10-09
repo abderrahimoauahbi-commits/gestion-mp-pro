@@ -26,6 +26,13 @@
   font-weight: 600;
 }
 
+.ref {
+  display: inline-block;
+  min-width: 140px;
+  max-width: 180px;
+  font-weight: 600;
+}
+
 .coupe {
   display: block;
   max-width: 220px;
@@ -111,4 +118,13 @@
 .liste {
   margin: 0;
   padding-left: var(--espace-4);
+}
+
+/* Au téléphone, la liste ne tient pas dans l'écran avec ses filtres : la carte prend sa hauteur
+   et la page défile, le tableau gardant son cadre (plancher de 200 px). */
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
 }

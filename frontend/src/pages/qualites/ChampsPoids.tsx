@@ -16,11 +16,14 @@ export function ChampsPoids({
   poids,
   onChange,
   lecture,
+  compact,
 }: {
   roles: readonly RoleQualite[]
   poids: Readonly<Record<number, number | null>>
   onChange: (role_id: number, v: number | null) => void
   lecture?: boolean
+  /** Sans l'aide sous chaque champ (l'unité dit déjà ml/m² ou kg/m²) : la recette garde la place. */
+  compact?: boolean
 }) {
   return (
     <Grille colonnes={4}>
@@ -28,7 +31,9 @@ export function ChampsPoids({
         <Champ
           key={r.role_id}
           libelle={r.role}
-          aide={r.lineaire ? 'mètres linéaires par m² de tapis' : 'kilos par m² de tapis'}
+          aide={
+            compact ? undefined : r.lineaire ? 'mètres linéaires par m² de tapis' : 'kilos par m² de tapis'
+          }
         >
           <Nombre
             valeur={poids[r.role_id] ?? null}

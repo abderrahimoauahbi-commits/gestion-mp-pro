@@ -236,7 +236,7 @@ export function OngletClassification({ direction }: { direction: boolean }) {
       </Bouton>
     )
   return (
-    <Carte titre="Classification des matières" actions={actions} remplir>
+    <Carte titre="Classification des matières" actions={actions} remplir className={styles.carteListe}>
       {lu.isPending ? <Chargement quoi="la classification" /> : null}
       {lu.isError ? <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} /> : null}
       {c ? (

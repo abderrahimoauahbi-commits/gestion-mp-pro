@@ -161,6 +161,7 @@ export function OngletFournisseurs({ onOuvrir }: { onOuvrir: (id: number | 'nouv
       actions={actions}
       serre
       remplir
+      className={styles.carteListe}
     >
       {lu.isPending ? <Chargement quoi="les fournisseurs" /> : null}
       {lu.isError ? <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} /> : null}

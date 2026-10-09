@@ -46,7 +46,7 @@ export function PrixMatiere({ m }: { m: Matiere }) {
 function Reference({ m }: { m: Matiere }) {
   return (
     <>
-      <span className={m.actif ? styles.code : `${styles.code} ${styles.eteinte}`}>{m.reference}</span>
+      <span className={m.actif ? styles.ref : `${styles.ref} ${styles.eteinte}`}>{m.reference}</span>
       {m.actif ? null : (
         <>
           {' '}
@@ -73,7 +73,7 @@ function Stock({ m }: { m: Matiere }) {
       {bas ? (
         <span className={styles.dessous}>
           <Badge ton="attention" titre="Sous le stock minimum">
-            sous le minimum
+            sous le min.
           </Badge>
         </span>
       ) : null}
@@ -97,9 +97,13 @@ const COLONNES_CLASSE: readonly Colonne<Matiere>[] = [
     titre: 'Référence',
     rendu: (m) => <Reference m={m} />,
     recherche: (m) => [m.designation, m.couleur_code, m.groupe_equiv, m.code_douanier],
-    largeur: 220,
   },
-  { cle: 'role', titre: 'Rôle' },
+  {
+    cle: 'role',
+    titre: 'Rôle',
+    aide: 'Rôle dans le tapis ; groupe d’équivalence dessous',
+    rendu: (m) => deux(m.role, m.groupe_equiv),
+  },
   {
     cle: 'fournisseur',
     titre: 'Fournisseur',
@@ -152,17 +156,16 @@ const COLONNES_STOCK: readonly Colonne<Matiere>[] = [
     cle: 'conditionnement',
     titre: 'Conditionnement',
     valeur: (m) => conditionnementLisible(m),
-    rendu: (m) =>
-      deux(
-        m.conditionnement.unite === 'kg' ? (
+    rendu: (m) => (
+      <span title={detailConditionnement(m) || undefined}>
+        {m.conditionnement.unite === 'kg' ? (
           'au kilo'
         ) : (
           <Badge ton={m.conditionnement.declare ? 'accent' : 'neutre'}>{conditionnementLisible(m)}</Badge>
-        ),
-        detailConditionnement(m),
-      ),
+        )}
+      </span>
+    ),
   },
-  { cle: 'groupe_equiv', titre: 'Groupe' },
   { cle: 'stock', titre: 'En stock', droite: true, unite: 'kg', total: true, rendu: (m) => <Stock m={m} /> },
 ]
 
