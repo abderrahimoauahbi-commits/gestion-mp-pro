@@ -125,7 +125,13 @@ défaut ''), le motif des inventaires abandonnés y est déplacé ; retour arri�
 4. Route 246 plutôt qu'un champ de `GET /parametres` : la date à clore est celle que la direction
    choisit dans la fenêtre.
 
-## 6. Ce qui reste
+## 6. Hors de mes fichiers (après la fusion de V2)
+
+- `backend/essais/scenario_e_achats.py` (l. 125) attend le code `RUPTURE` (au lieu de
+  « ⚫ RUPTURE ») et `backend/essais/scenario_e_reception.py` (l. 264) la phrase « … direction ou
+  des achats » : deux lignes, sans quoi `test_scenario_court` échouait (V2 fusionné, terminé).
+
+## 7. Ce qui reste
 
 - Écran (RESTES4) : `make types`, puis les adaptations listées au § 1 et dans RESTES.md.
 - R2 / C1 : déclarer la nouvelle forme des statuts (§ 1.1) dans la parité et la comparaison.

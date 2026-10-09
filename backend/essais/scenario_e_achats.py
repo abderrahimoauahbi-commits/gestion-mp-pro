@@ -122,7 +122,7 @@ def etape_plan_achat(m: Monde) -> None:
         v.egal(f"{cle} : montant en dirhams", x["montant_mad"], MONTANT_MAD[cle], MAD)
         v.egal(f"{cle} : stock projeté", x["stock_projete"], PROJETE[cle], KG)
         v.egal(f"{cle} : consommation mensuelle", x["conso_mensuelle"], BESOIN[cle], KG)
-        v.egal(f"{cle} : statut", x["statut"], "⚫ RUPTURE")
+        v.egal(f"{cle} : statut", x["statut"], "RUPTURE")  # code du moteur (RESTES3)
         v.egal(f"{cle} : tier (rupture)", x["tier"], "🔥 TIER 1")
     g = next(x for x in plan["fournisseurs"] if x["fournisseur_id"] == m.ids["F1"])
     v.egal("fournisseur : USD", g["montants_par_devise"]["USD"], 36250 + 11897.28, MAD)
