@@ -24,3 +24,8 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D9 | docs | API-PRO 114 « HTML A4 » : fait en étiquettes 100 × 70 mm, une par page (comme Gestion MP et ECRANS-PRO). ECRANS-PRO 4.29 : le bon fournisseur est en anglais jusque dans l'en-tête (« HEAD OFFICE », « BANKS », décision du 8 octobre) — corriger le document. |
 | D9 | X1 | Caddy ne doit pas remplacer la CSP posée par l'application (le bouton « Imprimer » est autorisé par son empreinte sha256). |
 | D9 | S4 | Étiquettes (`lots_lecture.etiquettes`) : kilos selon la règle § 9.3 (espace insécable, décimales) ; champ « ≈ N bobines » manquant. |
+| D10 | S1 | `GenreSauvegarde` : ajouter `avant_vidage` et `avant_mise_a_jour` (décision X2) ; le registre les ignore en attendant (`services/sauvegarde_registre.GENRES_DU_REGISTRE`). |
+| D10 | S0 | `tests/conftest.py` : `GESTIONMPPRO_SAUVEGARDES` et `GESTIONMPPRO_PIECES` vers un dossier temporaire pour toute la séance (G-03). Code `sauvegarde_impossible` (503) ajouté à `api/erreurs.py`. |
+| D10 | S2 | G-13 : `services.appareils.acces()` garde `:8050` derrière HTTPS ; reprendre `services.serveur.adresse_de()` (schéma et port de la requête). |
+| D10 | D8 | Exposer `services.indicateurs.photographier(s) -> IndicateurJour` : la tâche `photo_indicateurs` l'appelle s'il existe (sinon repli sur `calcul.suivi`). |
+| D10 | docs | API-PRO routes 43, 45, 48 et `Sante.taches` : formes de `docs/lots/D10.md` § 3. |
