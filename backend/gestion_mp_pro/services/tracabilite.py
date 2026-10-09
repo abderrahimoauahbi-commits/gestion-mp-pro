@@ -49,11 +49,15 @@ class EtapeTracee:
     quantite: float
     lot: str
     lot_id: int | None
+    matiere_id: int | None
     ordre: str
+    ordre_id: int | None
     magasin_source: str
     magasin_destination: str
     utilisateur: str
     document: str
+    document_type: str | None
+    document_id: int | None
     annulation: bool
     annule: bool
 
@@ -64,7 +68,9 @@ class Tracabilite:
 
     lot_id: int | None = None
     lot: str = ""
+    ordre_id: int | None = None
     ordre: str = ""
+    matiere_id: int | None = None
     matiere: str = ""
     references: list[str] = field(default_factory=list)
     lots: list[str] = field(default_factory=list)
@@ -93,22 +99,51 @@ def _cibles(
     return lot, ordre, matiere
 
 
-def _etape(
-    x: Ecriture, base: dict[int, tuple[int, str, int | None]], annules: set[int]
-) -> EtapeTracee:
+@dataclass(frozen=True)
+class Relu:
+    """Ce que la base sait d'une écriture : lot, matière, document (genre, id, n°), ordre."""
+
+    lot_id: int | None = None
+    matiere_id: int | None = None
+    document: str = ""
+    document_type: str | None = None
+    document_id: int | None = None
+    ordre_id: int | None = None
+    contrepasse_id: int | None = None
+
+
+def _relire(s: Session, ids: list[int]) -> dict[int, Relu]:
+    """Les écritures du chemin, relues en base (liens de l'écran : RESTES3, F2)."""
+    m = Mouvement
+    requete = select(m.id, m.lot_id, m.matiere_id, m.document_numero, m.document, m.reception_id,
+                     m.ordre_id, m.operation_id, m.inventaire_id, m.contrepasse_id)  # fmt: skip
+    relus = {}
+    for i, lot, mat, numero, genre, rec, ordre, ope, inv, cp in s.execute(
+        requete.where(m.id.in_(ids))
+    ).all():
+        ident = {"reception": rec, "ordre": ordre, "operation": ope, "inventaire": inv}.get(
+            str(genre)
+        )
+        relus[i] = Relu(lot, mat, numero, str(genre), ident, ordre, cp)
+    return relus
+
+
+def _etape(x: Ecriture, base: dict[int, Relu], annules: set[int]) -> EtapeTracee:
     """Une écriture du moteur, relue avec ce que la base sait d'elle."""
     type_ = TYPE_DE_LA_BASE.get(x.type, x.type)
-    lot_id, document, contrepasse = base.get(x.id or 0, (None, x.reference_doc, None))
+    r = base.get(x.id or 0, Relu())
     libelle = LIBELLES.get(type_, type_)
-    annulation = contrepasse is not None
+    annulation = r.contrepasse_id is not None
     return EtapeTracee(
         id=x.id, date=x.date, type=type_,
         libelle=f"Annulation — {libelle.lower()}" if annulation else libelle,
         reference=x.reference,
         quantite=x.quantite if type_ == "TRANSFERT" else x.quantite_signee,
-        lot=x.lot_fournisseur, lot_id=lot_id, ordre=x.numero_of,
+        lot=x.lot_fournisseur, lot_id=r.lot_id, matiere_id=r.matiere_id, ordre=x.numero_of,
+        ordre_id=r.ordre_id,
         magasin_source=x.magasin_source, magasin_destination=x.magasin_destination,
-        utilisateur=x.utilisateur, document=document or x.reference_doc,
+        utilisateur=x.utilisateur, document=r.document or x.reference_doc,
+        document_type=r.document_type, document_id=r.document_id,
         annulation=annulation, annule=(x.id or 0) in annules,
     )  # fmt: skip
 
@@ -131,16 +166,8 @@ def tracabilite(
     ecritures = brut.mouvements
     if lot is not None and matiere is not None:
         ecritures = [x for x in ecritures if x.reference == matiere.reference]
-    ids = [x.id for x in ecritures if x.id is not None]
-    base: dict[int, tuple[int, str, int | None]] = {
-        i: (lot_, doc, cp)
-        for i, lot_, doc, cp in s.execute(
-            select(
-                Mouvement.id, Mouvement.lot_id, Mouvement.document_numero, Mouvement.contrepasse_id
-            ).where(Mouvement.id.in_(ids))
-        ).all()
-    }
-    annules = {cp for _, _, cp in base.values() if cp is not None}
+    base = _relire(s, [x.id for x in ecritures if x.id is not None])
+    annules = {r.contrepasse_id for r in base.values() if r.contrepasse_id is not None}
     etapes = [_etape(x, base, annules) for x in ecritures]
     comptes = [
         (x, e) for x, e in zip(ecritures, etapes, strict=True)
@@ -149,7 +176,9 @@ def tracabilite(
     return Tracabilite(
         lot_id=lot.id if lot is not None else None,
         lot=brut.lot,
+        ordre_id=ordre.id if ordre is not None else None,
         ordre=brut.ordre,
+        matiere_id=matiere.id if matiere is not None else None,
         matiere=matiere.reference if matiere is not None else "",
         references=sorted({x.reference for x in ecritures}),
         lots=sorted({x.lot_fournisseur for x in ecritures if x.lot_fournisseur}),

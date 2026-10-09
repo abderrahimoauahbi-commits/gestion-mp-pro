@@ -10,7 +10,6 @@ from typing import Any
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.importations import Import, a_la_main, fiche, frais, geste, ouvrir, poste
-from fabriques.receptions import menage  # noqa: F401 — fixture du module
 from fastapi.testclient import TestClient
 
 GESTES = ("modifier", "frais", "cours", "cloturer", "rouvrir", "annuler")
@@ -36,8 +35,6 @@ ATTENDU: dict[tuple[str, str], tuple[int, str]] = {
     ("annule", "annuler"): (409, "annule"),
 }
 """(statut, geste) → (code, statut suivant) pour la direction et les achats."""
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture(scope="module")

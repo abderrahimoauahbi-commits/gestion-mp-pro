@@ -173,7 +173,11 @@ def test_abandon_garde_le_numero_et_les_comptages(s: Session) -> None:
     r = _refus(inv.abandonner, s, achats, i.id, i.version, "")
     assert (r.http, r.detail) == (422, "Dire pourquoi l'inventaire est abandonné.")
     i = inv.abandonner(s, achats, i.id, i.version, "comptage reporté")
-    assert (i.statut, i.annulation_motif) == (StatutInventaire.abandonne, "comptage reporté")
+    assert (i.statut, i.abandon_motif, i.annulation_motif) == (
+        StatutInventaire.abandonne,
+        "comptage reporté",
+        "",
+    )  # RESTES3 : sa colonne (0005), plus annulation_motif
     assert any(x.lot_trouve and x.compte == 8 for x in i.lignes)
     assert s.scalars(select(Lot).where(Lot.numero == "TROUVE-1")).first() is None
     r = _refus(inv.valider, s, achats, i.id, i.version)

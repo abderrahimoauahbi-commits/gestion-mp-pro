@@ -21,7 +21,7 @@ from fabriques.importations import (
     ouvrir,
     poste,
 )
-from fabriques.receptions import menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import ok
 from fabriques.referentiels import code_douanier
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -29,12 +29,11 @@ from fastapi.testclient import TestClient
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Matiere, PosteFrais
 
-pytestmark = pytest.mark.usefixtures("menage")
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture
 def arrivees(application: FastAPI) -> dict[str, Any]:
-    """Un fournisseur turc (devise à 10 MAD), trois fils, deux arrivées sous deux factures."""
+    """Un fournisseur turc (devise à 10 MAD), trois fils, deux arrivées sous deux factures — à
+    chaque essai les siennes (RESTES3 : chaque essai passe seul, dans n'importe quel ordre)."""
     achats = client_de(application, "achats")
     imp = Import.nouveau(cours="10")
     r1 = imp.recevoir(
@@ -47,7 +46,20 @@ def arrivees(application: FastAPI) -> dict[str, Any]:
         ],
     )
     r2 = imp.recevoir(achats, "FAC-2", [("FRISÉ ROUGE", "IR-2", 1000, 2.0)])
-    return {"imp": imp, "r1": r1, "r2": r2, "dossier": {}}
+    return {"imp": imp, "r1": r1, "r2": r2}
+
+
+def _premier(arrivees: dict[str, Any], achats: TestClient) -> dict[str, Any]:
+    """Le dossier de la facture FAC-1 (trois fils, 6 000 en devise)."""
+    return ouvrir(achats, arrivees["imp"].f("FAC-1"))  # type: ignore[no-any-return]
+
+
+def _cours_et_fret(achats: TestClient, d: dict[str, Any]) -> dict[str, Any]:
+    """Le cours de la banque (10) et un fret de 3 500 MAD à la valeur posés sur le dossier."""
+    d = ok(
+        achats.put(f"/api/dossiers/{d['id']}/cours", json={"version": d["version"], "cours": 10})
+    )
+    return frais(achats, d, "FRET", 3500, prestataire="CMA CGM", piece="F-88")  # type: ignore[no-any-return]
 
 
 def _attente(client: TestClient, numero: str) -> dict[str, Any]:
@@ -68,7 +80,7 @@ def test_un_dossier_par_facture(arrivees: dict[str, Any], achats: TestClient) ->
     d = ouvrir(achats, imp.f("FAC-1"))
     assert d["nb_lignes"] == 3 and d["facture"]["numero"] == imp.f("FAC-1") and not d["a_la_main"]
     assert d["pieces"] == [{"facture": imp.f("FAC-1"), "receptions": [arrivees["r1"]["numero"]]}]
-    assert d["numero"].endswith("/25") and d["statut"] == "ouvert" and not d["repris"]
+    assert d["numero"].endswith("/26") and d["statut"] == "ouvert" and not d["repris"]
     r = achats.post("/api/dossiers", json={"facture_id": d["facture"]["id"]})
     assert r.status_code == 409 and d["numero"] in r.json()["detail"]
     assert r.json()["detail"].startswith("Cette facture a déjà son dossier")
@@ -84,7 +96,6 @@ def test_un_dossier_par_facture(arrivees: dict[str, Any], achats: TestClient) ->
     corps = {"matiere_id": x["matiere_id"], "quantite_kg": 1, "valeur_devise": 1}
     r = geste(achats, d, "lignes", 409, **corps)
     assert r["detail"].startswith(f"Le dossier de la facture {imp.f('FAC-1')} porte ce")
-    arrivees["dossier"] = d
 
 
 def test_cours_et_frais_au_poids_ou_a_la_valeur(
@@ -93,7 +104,7 @@ def test_cours_et_frais_au_poids_ou_a_la_valeur(
     """Hérité : test_importations::test_cours_commentaire_et_frais_au_poids_ou_a_la_valeur —
     6 000 × 10 = 60 000 MAD ; fret 3 500 à la valeur (le rouge : 20 000 / 60 000) puis au
     poids (1 000 / 3 500 kg) ; échéancier : la facture et le fret."""
-    d = arrivees["dossier"]
+    d = _premier(arrivees, achats)
     d = ok(
         achats.put(f"/api/dossiers/{d['id']}/cours", json={"version": d["version"], "cours": 10})
     )
@@ -148,7 +159,7 @@ def test_droits_attendus_par_code_douanier_et_tva(
     fret + assurance ; TVA attendue = taux × (douane + droits + TPI) ; seule la TVA de la douane
     se compare ; l'écart toléré vient du réglage `toler_tva_import` (C29)."""
     imp: Import = arrivees["imp"]
-    d = fiche(achats, arrivees["dossier"]["id"])
+    d = _cours_et_fret(achats, _premier(arrivees, achats))
     rouge, noir, jute = (imp.matieres[k] for k in ("FRISÉ ROUGE", "FRISÉ NOIR", "JUTE"))
     pp, jt = code_douanier(taux="0.10"), code_douanier(taux="0.025")
     _code_sur([rouge, noir], pp)
@@ -251,7 +262,7 @@ def test_cloture_fige_cours_et_cle(
     d = geste(achats, d, "cloturer", alertes_lues=True)
     assert d["statut"] == "clos" and d["lignes"][0]["cours"] == 10
     assert d["lignes"][0]["cours_origine"] == "clos_au_jour" and d["actions"]["frais"]
-    premier = fiche(achats, arrivees["dossier"]["id"])
+    premier = _cours_et_fret(achats, _premier(arrivees, achats))
     premier = geste(achats, premier, "cloturer", alertes_lues=True)
     refus = frais(achats, premier, "FRET", 1, 409)
     assert refus["detail"] == "Ce dossier est clos : le rouvrir pour y toucher (c'est tracé)."

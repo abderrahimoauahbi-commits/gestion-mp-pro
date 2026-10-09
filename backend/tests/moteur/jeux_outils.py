@@ -17,6 +17,12 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
+from gestion_mp_pro.calcul.constantes import (
+    ACTION_AUCUNE,
+    ACTION_CREER_BC,
+    LIBELLES_GESTION_MP,
+    LIBELLES_STATUT,
+)
 from gestion_mp_pro.calcul.modele import Donnees
 
 JEUX = Path(__file__).parent / "jeux"
@@ -111,6 +117,34 @@ def propre(x: Any) -> Any:
     if x is None or isinstance(x, str | int | float):
         return x
     raise TypeError(f"Sortie de type inattendu : {type(x).__name__}")
+
+
+CHAMPS_DE_STATUT = ("statut", "statut_couverture")
+"""Les champs où PRO rend un code de statut et Gestion MP son libellé à émoji (RESTES3, S3)."""
+
+
+def comme_gestion_mp(x: Any) -> Any:
+    """Les sorties PRO mises à plat (`propre`), codes ramenés à la forme de Gestion MP : statut
+    « CRITIQUE » → « 🔴 CRITIQUE », action « CREER_BC » → « 📝 Créer BC - <fournisseur> »,
+    « AUCUNE » → « — », relance du plan d'achat « CRITIQUE — … » → « 🔴 CRITIQUE — … ». Même
+    valeur logique, autre forme (seule différence voulue)."""
+    if isinstance(x, list):
+        return [comme_gestion_mp(v) for v in x]
+    if not isinstance(x, dict):
+        return x
+    rendu = {k: comme_gestion_mp(v) for k, v in x.items()}
+    for cle in CHAMPS_DE_STATUT:
+        if isinstance(rendu.get(cle), str) and rendu[cle] in LIBELLES_GESTION_MP:
+            rendu[cle] = LIBELLES_GESTION_MP[rendu[cle]]
+    relance = rendu.get("relance")
+    for code, libelle in LIBELLES_STATUT.items():
+        if isinstance(relance, str) and relance.startswith(f"{libelle} — "):
+            rendu["relance"] = LIBELLES_GESTION_MP[code] + relance.removeprefix(libelle)
+    if rendu.get("action") == ACTION_CREER_BC:
+        rendu["action"] = f"📝 Créer BC - {rendu.get('fournisseur', '')}"
+    elif rendu.get("action") == ACTION_AUCUNE:
+        rendu["action"] = "—"
+    return rendu
 
 
 def differences(

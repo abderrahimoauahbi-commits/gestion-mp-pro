@@ -66,7 +66,10 @@ def test_quarantaine_liberee_par_les_achats_seulement(s: Session) -> None:
     assert r.http == 422 and "Libération" in r.detail
     o = ops.creer(s, achats, _liberation(s, m))
     r = _refus(ops.valider, s, atelier, o.id, o.version)
-    assert r.http == 403 and r.detail == gestes.droits.REFUS_LIBERATION
+    assert r.http == 403 and r.detail == gestes.droits.REFUS_LIBERATION == (
+        "Libérer une quarantaine est une décision de la direction ou des achats, après contrôle "
+        "de la matière."
+    )  # RESTES3 (F6) : la règle est « direction ou achats », la phrase le dit
     o = ops.valider(s, achats, o.id, o.version)
     assert o.numero is not None and o.numero.startswith("TRF-")
     assert _solde(s, m.lots["E-Q1"], m.courant.id) == 100

@@ -4,7 +4,8 @@
 - retour des machines : direction, alimentation ;
 - transfert : direction, achats, alimentation ;
 - motif « Libération de quarantaine » (sortir un lot d'une quarantaine) : direction, achats
-  seulement — décision de Mohamed : libérer est une décision des achats, après contrôle ;
+  seulement — décision de Mohamed : libérer est une décision de la direction ou des achats,
+  après contrôle (le message le dit : REGLES OR24 nommait les seuls achats, RESTES3) ;
 - motif « Mise en quarantaine » : direction, achats, alimentation (l'atelier y met un lot
   douteux, avec ses observations).
 
@@ -73,9 +74,11 @@ RANG: dict[str, int] = {
 """Le même jour, ce qui apporte la matière passe avant ce qui la prend (S131)."""
 
 REFUS_LIBERATION = (
-    "Libérer une quarantaine est une décision des achats, après contrôle de la matière."
+    "Libérer une quarantaine est une décision de la direction ou des achats, après contrôle de "
+    "la matière."
 )
-"""OR24, OR33 (mot pour mot)."""
+"""OR24, OR33 : la phrase de Gestion MP nommait les achats seuls ; la règle (et le droit servi)
+est « direction ou achats » — la phrase le dit (RESTES3, F6)."""
 
 
 def type_operation(type_: str) -> TypeOperation:

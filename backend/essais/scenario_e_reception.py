@@ -261,7 +261,7 @@ def etape_liberation(m: Monde) -> None:
         ],
     }
     r = m.L.appeler("POST", "/operations", corps)
-    v.refus("l'alimentation ne libère pas", r, 403, None, "décision des achats")
+    v.refus("l'alimentation ne libère pas", r, 403, None, "direction ou des achats")
     op = a.ok("POST", "/operations", corps, attendu=201)
     v.vrai("libération : TRF numéroté", (op.get("numero") or "").startswith("TRF-2026-"))
     eur = a.get(f"/commandes/{m.ids['BC_EUR']}")

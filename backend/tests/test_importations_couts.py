@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.importations import Import, a_la_main, fiche, frais, geste, ligne, ouvrir
-from fabriques.receptions import camion, menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import camion, ok
 from fabriques.receptions import facture as facture_reception
 from fabriques.receptions import geste as geste_reception
 from fabriques.referentiels import poste_frais, unique
@@ -22,8 +22,6 @@ from gestion_mp_pro.calcul.valorisation import couts_du_journal
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import DossierFrais, Lot, Matiere, Mouvement, PosteFrais
 from gestion_mp_pro.services import donnees_moteur, horloge
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 def _cours(client: TestClient, d: dict[str, Any], cours: float) -> dict[str, Any]:
@@ -97,7 +95,7 @@ def test_le_dossier_d_importation_depuis_la_facture(achats: TestClient) -> None:
     lots = [("POIL", "PA", 998, 2.6), ("POIL", "PB", 600, 2.6), ("POIL", "PC", 805, 2.6)]
     rec = imp.recevoir(achats, "PARC", lots)
     d = _cours(achats, ouvrir(achats, imp.f("PARC")), 10)
-    assert d["numero"].split("/")[1] == "25"
+    assert d["numero"].split("/")[1] == "26"
     marchandise = (998 + 600 + 805) * 2.6 * 10
     d = frais(achats, frais(achats, d, "DD", 6000), "TVA", 13_000)
     assert d["marchandise_mad"] == pytest.approx(marchandise)

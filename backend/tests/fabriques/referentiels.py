@@ -130,7 +130,9 @@ def devise(
 
     def faire(x: Session) -> str:
         choisi = code
-        while choisi is None or (code is None and x.get(Devise, choisi) is not None):
+        while choisi is None or (
+            code is None and (choisi.startswith("QQ") or x.get(Devise, choisi) is not None)
+        ):  # « QQ… » : réservé à test_erreurs
             choisi = "".join(random.choices(string.ascii_uppercase, k=3))
         x.add(Devise(code=choisi, nom=nom, cours=Decimal(cours), actif=actif))
         x.flush()

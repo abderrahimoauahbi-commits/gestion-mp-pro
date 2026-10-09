@@ -15,7 +15,7 @@ import pytest
 from fabrique import *  # noqa: F403
 from fabrique import client_de
 from fabriques.importations import Import, facture_id, fiche, ouvrir, poste
-from fabriques.receptions import menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import ok
 from fabriques.referentiels import unique
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -27,8 +27,6 @@ from gestion_mp_pro.services import factures
 from gestion_mp_pro.services.importations import etats, ouverture
 
 REPETITIONS = 3
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 def _ensemble(appels: list[Callable[[], int]]) -> list[int]:
