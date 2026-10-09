@@ -29,7 +29,7 @@ Branche `lot-RESTES1`. Lignes traitées retirées de `docs/lots/RESTES.md`.
   `summary`, une étiquette, réponse de succès décrite, 401/403 déclarés) ; les routes du
   catalogue pas encore servies sont listées par lot (lecture de LOTS-DE-TRAVAIL) dans un
   **saut** (`pytest -rs`) jusqu'à ce que `docs/RECETTE.md` existe, en échec ensuite. À la date
-  du lot : 106 attendues (C1, D4, D5, D6, D7, D8).
+  du lot (après fusion de D5) : 83 attendues (C1, D4, D6, D7, D8).
 
 ## 3. Comportements changés
 
