@@ -1,11 +1,13 @@
 /**
- * Écrans du domaine « Opérations de stock » (lot F6), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F6 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Opérations de stock » (lot F6), rassemblés par `routes.ts` : la liste à cinq
+ * onglets (l'alimentation : transferts et retours des machines) et la fenêtre d'une opération à
+ * adresse stable, `/operations/nouvelle?type=` et `/operations/:id`. Les trois chemins mènent à la
+ * même page (la liste dessous).
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Operations')
+const roles = ['direction', 'achats', 'alimentation'] as const
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -13,10 +15,10 @@ export const ecrans: readonly Ecran[] = [
     titre: 'Ouvertures, transferts, ajustements',
     groupe: 'Stock',
     detail: 'Ouvertures, transferts, ajustements, retours au fournisseur et retours des machines',
-    roles: ['direction', 'achats', 'alimentation'],
+    roles,
     aide: 'operations',
     onglets: [
-      { cle: 'ouverture', libelle: 'Ouvertures', roles: ['direction', 'achats'] },
+      { cle: 'ouverture', libelle: 'Stock d’ouverture', roles: ['direction', 'achats'] },
       { cle: 'transfert', libelle: 'Transferts' },
       { cle: 'ajustement', libelle: 'Ajustements', roles: ['direction', 'achats'] },
       {
@@ -25,9 +27,24 @@ export const ecrans: readonly Ecran[] = [
         court: 'Retours fournisseur',
         roles: ['direction', 'achats'],
       },
-      { cle: 'retour_machine', libelle: 'Retours des machines' },
+      { cle: 'retour_machine', libelle: 'Retours des machines', court: 'Retours machine' },
     ],
-    lot: 'F6',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/operations/nouvelle',
+    titre: 'Nouvelle opération',
+    parent: '/operations',
+    roles,
+    aide: 'operations',
+    page,
+  },
+  {
+    chemin: '/operations/:id',
+    titre: 'Opération',
+    parent: '/operations',
+    roles,
+    aide: 'operations',
+    page,
   },
 ]

@@ -95,3 +95,12 @@
 .corps > button {
   align-self: flex-start;
 }
+
+/* Au téléphone (≤ 700 px, la limite de l'application), les actions passent sous le titre au
+   lieu de le serrer ou de le chevaucher. */
+@media (width <= 700px) {
+  .entete {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

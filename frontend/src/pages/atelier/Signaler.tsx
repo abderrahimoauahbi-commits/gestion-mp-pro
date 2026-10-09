@@ -21,11 +21,11 @@ import { api } from '../../lib/api'
 import { horodatage, date } from '../../lib/format'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
-import type { MatiereResumee, SignalementCreation } from '../../lib/types-provisoires'
+import type { SignalementCreation } from '../../lib/types-provisoires'
 import { attente, Fiche, NoteAtelier } from './briques'
 import styles from './atelier.module.css'
 import { ChargerSuivants } from './Ordres'
-import type { PageSignalements, SignalementFiche } from './types'
+import type { MatiereResume, PageSignalements, SignalementFiche } from './types'
 
 const PAGE_SIGNALEMENTS = 40
 
@@ -35,7 +35,7 @@ const vide = (): SignalementCreation => ({ matiere_id: null, texte: '', urgence:
 export const etatSignalement = (x: SignalementFiche) =>
   x.traite_le ? 'traite' : x.urgence === 'urgente' ? 'urgent' : 'en_attente'
 
-function MesSignalements({ moi, matieres }: { moi: number; matieres: readonly MatiereResumee[] }) {
+function MesSignalements({ moi, matieres }: { moi: number; matieres: readonly MatiereResume[] }) {
   const lus = useLecture<PageSignalements>('/signalements', { mes: true }, { refetchInterval: 60_000 })
   const [nb, setNb] = useState(PAGE_SIGNALEMENTS)
   const miens = (lus.data?.elements ?? []).filter((x) => x.par_id === moi)
@@ -77,7 +77,7 @@ function MesSignalements({ moi, matieres }: { moi: number; matieres: readonly Ma
 
 export default function Signaler() {
   const { moi } = useSession()
-  const matieres = useLecture<MatiereResumee[]>('/matieres', { actif: true })
+  const matieres = useLecture<MatiereResume[]>('/matieres', { actif: true })
   const [s, setS, oublier] = useSaisieGardee<SignalementCreation>('signaler', vide())
   const poser = (m: Partial<SignalementCreation>) => setS((avant) => ({ ...avant, ...m }))
   const envoi = useEcriture((corps: SignalementCreation) => api.post('/signalements', corps))

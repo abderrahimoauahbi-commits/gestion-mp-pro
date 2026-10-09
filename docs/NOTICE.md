@@ -291,17 +291,21 @@ Un dossier d’importation par facture : ses marchandises, ses frais répartis, 
 
 ### Inventaire (`/inventaire`)
 
-Ouvrir un inventaire sur un périmètre, compter, justifier les écarts au-delà de la tolérance, valider : un ajustement par écart.
+Ouvrir un inventaire sur un périmètre, compter à l’aveugle, justifier les écarts au-delà de la tolérance, valider : un ajustement par écart.
 
-- Pendant l’inventaire, les mouvements du périmètre compté sont suspendus ; le reste de l’usine travaille.
-- Le stock théorique est figé à l’ouverture ; la feuille de comptage s’imprime à l’aveugle.
+- Pendant l’inventaire, les mouvements des matières comptées sont suspendus dans son magasin (dans tous s’il est global) ; les autres matières continuent de bouger. Un seul inventaire ouvert par magasin.
+- Le stock théorique est figé à l’ouverture ; la **feuille de comptage** s’imprime sans lui (à l’aveugle), la **feuille de recomptage** avec lui, pour les lots hors tolérance enregistrés.
+- Au-delà de la tolérance, un écart se justifie (3 caractères au moins) et se recompte par une autre personne : un recomptage fait par la même personne, ou par celle qui a ouvert l’inventaire, est signalé.
+- Un lot trouvé sur place s’ajoute au comptage ; il n’est créé qu’à la validation (« Lot interne » : numéro LOT-AAAA-NNNN donné à ce moment).
+- Abandonner garde l’inventaire et son numéro, avec un motif ; un inventaire validé ne se défait que par son annulation (contre-passation, motif exigé), et passe « Annulé ».
 
 ### Ouvertures, transferts, ajustements (`/operations`)
 
-Un document par geste de stock : ouverture, transfert, ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.
+Un document par geste de stock : stock d’ouverture, transfert (dont quarantaine), ajustement, retour au fournisseur, retour des machines — en brouillon, puis validé.
 
-- L’alimentation y fait ses transferts et ses retours des machines ; le reste est aux achats.
-- Un document validé ne s’efface pas : il s’annule (contre-passation).
+- L’alimentation y fait ses transferts (mise en quarantaine comprise, en disant ce qui est douteux) et ses retours des machines ; libérer une quarantaine est une décision des achats ou de la direction.
+- Ce qui ferait refuser la validation est dit d’avance (« sera refusée ») : inventaire en cours sur la matière, lot épuisé, date, quarantaine.
+- Le numéro est donné à la validation ; un document validé ne s’efface pas : il s’annule (contre-passation).
 
 ### Matières, classification, fournisseurs (`/catalogue`)
 

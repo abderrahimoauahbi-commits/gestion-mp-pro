@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Inventaire » (lot F6), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F6 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Inventaire » (lot F6), rassemblés par `routes.ts` : la liste et ses deux
+ * fenêtres à adresse stable, `/inventaires/nouveau` (ouvrir) et `/inventaires/:id` (comptage,
+ * volets `?onglet=lots|pieces|historique`). Les trois chemins mènent à la même page (la liste dessous).
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Inventaire')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -15,11 +15,14 @@ export const ecrans: readonly Ecran[] = [
     roles: ['direction', 'achats'],
     aide: 'inventaire',
     onglets: [
-      { cle: 'cours', libelle: 'En cours' },
-      { cle: 'passes', libelle: 'Inventaires clos' },
+      { cle: 'cours', libelle: 'En cours de comptage' },
+      {
+        cle: 'passes',
+        libelle: 'Inventaires clos : validés, abandonnés et annulés',
+        court: 'Inventaires clos',
+      },
     ],
-    lot: 'F6',
-    page: aVenir,
+    page,
   },
   {
     chemin: '/inventaires/nouveau',
@@ -27,7 +30,19 @@ export const ecrans: readonly Ecran[] = [
     parent: '/inventaire',
     roles: ['direction', 'achats'],
     aide: 'inventaire',
-    lot: 'F6',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/inventaires/:id',
+    titre: 'Comptage d’un inventaire',
+    parent: '/inventaire',
+    roles: ['direction', 'achats'],
+    aide: 'inventaire',
+    onglets: [
+      { cle: 'lots', libelle: 'Lots à compter' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]

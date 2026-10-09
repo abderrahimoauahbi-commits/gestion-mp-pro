@@ -42,7 +42,7 @@ from gestion_mp_pro.modeles.types import (
     Nombre,
     arrondir,
 )
-from gestion_mp_pro.services import audit
+from gestion_mp_pro.services import audit, horloge
 from gestion_mp_pro.services.fournisseurs import devise_connue
 from gestion_mp_pro.services.matieres_lecture import (
     ROLES_LINEAIRES,
@@ -252,7 +252,7 @@ def creer(s: Session, qui: audit.Qui, champs: dict[str, Any]) -> Matiere:
     """Une matière nouvelle (route 72)."""
     e = verifier(s, champs, None)
     reference_libre(s, e["reference"], None)
-    m = Matiere(**e, modifie_par_id=qui.id)
+    m = Matiere(**e, modifie_par_id=qui.id, modifie_le=horloge.maintenant())
     s.add(m)
     audit.creation(s, qui, "création matière", m, detail=m.reference)
     return m

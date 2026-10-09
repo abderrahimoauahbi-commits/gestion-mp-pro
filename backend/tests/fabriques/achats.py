@@ -1,5 +1,5 @@
 """Fabriques des achats (lot D3) : bons par l'API, réglages et cours le temps d'un essai,
-réceptions validées écrites directement (le domaine des réceptions est au lot D4).
+réceptions validées par le service des réceptions (lot D4).
 
     from fabriques.achats import bon, geste, reglage, recevoir, Achat
 
@@ -8,7 +8,7 @@ réceptions validées écrites directement (le domaine des réceptions est au lo
     b = bon(achats, a, {m: 1000})                        # un brouillon (fiche rendue)
     b = geste(achats, b, "envoyer")                      # la version lue est envoyée d'office
     with reglage("seuil_approbation", "5000"): ...       # remis à sa valeur ensuite
-    recevoir(b["lignes"][0]["id"], 478)                  # une réception validée (D4 simulé)
+    recevoir(b["lignes"][0]["id"], 478)                  # une réception validée (service D4)
 """
 
 from __future__ import annotations
@@ -21,29 +21,19 @@ from decimal import Decimal
 from typing import Any
 
 from fabriques.referentiels import devise as nouvelle_devise
-from fabriques.referentiels import fournisseur, magasin_seme, matiere, unique
+from fabriques.referentiels import fournisseur, matiere, unique
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from gestion_mp_pro.db import fabrique as fabrique_de_sessions
 from gestion_mp_pro.modeles import (
-    CommandeLigne,
     Devise,
-    Matiere,
     Parametre,
-    Reception,
     ReceptionLigne,
 )
 from gestion_mp_pro.modeles.enums import (
-    DocumentMouvement,
     QualiteReception,
-    SerieNumero,
-    StatutDocument,
-    TypeMagasin,
-    TypeMouvement,
 )
-from gestion_mp_pro.services import horloge, lots, numerotation, stock
-from gestion_mp_pro.services.commandes import recaler_soldes
 
 __all__ = [
     "Achat",
@@ -160,55 +150,12 @@ def recevoir(
     qualite: str = QualiteReception.conforme,
     le: date | None = None,
 ) -> int:
-    """Une réception validée sur une ligne de bon (écrite comme le lot D4 l'écrira : lot,
-    entrée de stock — en quarantaine si « sous réserve » —, puis soldes recalés) ; rend son id."""
-    jour = le or horloge.aujourd_hui()
-    with fabrique_de_sessions()() as s, s.begin():
-        ligne = s.get(CommandeLigne, commande_ligne_id)
-        assert ligne is not None
-        m = s.get(Matiere, ligne.matiere_id)
-        assert m is not None
-        quarantaine = qualite == QualiteReception.reserve
-        magasin = magasin_seme(TypeMagasin.quarantaine if quarantaine else "stock_courant", s=s)
-        numero = numerotation.numero(s, SerieNumero.REC, jour)
-        r = Reception(
-            numero=numero,
-            statut=StatutDocument.validee,
-            date=jour,
-            fournisseur_id=m.fournisseur_id,
-            devise=m.devise,
-            validee_le=horloge.maintenant(),
-        )
-        s.add(r)
-        s.flush()
-        lot = lots.lot_ou_creer(s, m.id, unique("L"), jour, fournisseur_id=m.fournisseur_id)
-        s.add(
-            ReceptionLigne(
-                reception_id=r.id,
-                commande_ligne_id=commande_ligne_id,
-                matiere_id=m.id,
-                lot_numero=lot.numero,
-                quantite_pesee=Decimal(str(kg)),
-                magasin_id=magasin,
-                qualite=QualiteReception(qualite),
-                lot_id=lot.id,
-            )
-        )
-        s.flush()
-        stock.ecrire(
-            s,
-            type=TypeMouvement.RECEPTION,
-            lot=lot,
-            magasin_id=magasin,
-            quantite=Decimal(str(kg)),
-            jour=jour,
-            piece=stock.Piece(DocumentMouvement.reception, r.id, numero),
-            auteur_id=None,
-            prix=0,
-            devise=m.devise,
-        )
-        recaler_soldes(s, None, {ligne.commande_id}, "réception")
-        return r.id
+    """Une réception validée sur une ligne de bon, par le vrai service du lot D4
+    (`fabriques.receptions.recevoir_ligne` : lot, entrée de stock — en quarantaine si « sous
+    réserve » —, puis soldes recalés) ; rend son id."""
+    from fabriques.receptions import recevoir_ligne
+
+    return recevoir_ligne(commande_ligne_id, kg, qualite=qualite, le=le)
 
 
 def lot_de_reception(reception_id: int) -> int:
