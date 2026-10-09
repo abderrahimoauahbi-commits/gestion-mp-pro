@@ -1,7 +1,8 @@
 /**
  * Trouver un lot (`/atelier/chercher`) : la recherche part 250 ms après la frappe, au serveur,
  * sans accents (chaque mot dans la référence, la désignation, le n° de lot, le rôle, le magasin,
- * le fournisseur) ; ou la caméra lit le QR de l'étiquette (`ScanQR`) et ouvre la fiche du lot.
+ * le fournisseur) ; ou la caméra lit le QR de l'étiquette (`ScanQR`) et ouvre la fiche du lot (un
+ * numéro porté par plusieurs lots filtre la liste sur lui).
  * 50 lots, puis « charger les suivants » (an. 18) ; une coupure dit « Pas de réseau » (an. 3).
  */
 import { useState } from 'react'
@@ -63,7 +64,13 @@ export default function Chercher() {
           placeholder="Référence, couleur, numéro de lot…"
           libelle="Chercher un lot"
         />
-        <ScanQR onLot={(id) => void naviguer(`/atelier/lots/${id}`)} />
+        <ScanQR
+          onLot={(id) => void naviguer(`/atelier/lots/${id}`)}
+          onPlusieurs={(numero) => {
+            setQ(numero)
+            setNb(PAGE_ATELIER)
+          }}
+        />
         {attente([lots], 'les lots') ?? (
           <>
             {!liste.length ? <Vide>Aucun lot en stock ne correspond.</Vide> : null}
