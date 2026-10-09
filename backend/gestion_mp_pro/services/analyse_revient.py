@@ -76,7 +76,8 @@ def _references(s: Session, ids: tuple[int, ...]) -> str:
     """Les références des matières choisies, séparées par « ; » (422 pour une inconnue)."""
     if not ids:
         return ""
-    trouvees = dict(s.execute(select(Matiere.id, Matiere.reference).where(Matiere.id.in_(ids))))
+    requete = select(Matiere.id, Matiere.reference).where(Matiere.id.in_(ids))
+    trouvees = dict(s.execute(requete).all())
     inconnues = sorted(set(ids) - set(trouvees))
     if inconnues:
         raise Refus.saisie(

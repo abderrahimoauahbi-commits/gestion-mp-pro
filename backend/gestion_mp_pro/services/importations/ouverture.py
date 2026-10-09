@@ -215,7 +215,7 @@ def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
         )
     paires = de_la_facture(s, f)
     periode.cout_hors_periode_close(s, None, "ouverture du dossier", [r.date for _, r in paires])
-    arrivee = e.date_arrivee or min(r.date for _, r in paires)
+    arrivee = e.date_arrivee or min((r.date for _, r in paires), default=horloge.aujourd_hui())
     annee, rang, numero = numero_suivant(s, arrivee)
     nom = fournisseur.nom if fournisseur else ""
     d = Dossier(
