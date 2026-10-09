@@ -72,7 +72,6 @@ export function EnTeteSaisie({ x }: { x: ReturnType<typeof useOperation> }) {
         )}
         <Champ
           libelle={exige ? 'Observations (obligatoires)' : 'Observations'}
-          large={s.type === 'ouverture'}
           aide={
             s.type === 'ajustement'
               ? 'ce qui a été constaté, en quelques mots'
@@ -85,7 +84,7 @@ export function EnTeteSaisie({ x }: { x: ReturnType<typeof useOperation> }) {
             valeur={s.commentaire}
             onChange={(commentaire) => poser({ commentaire })}
             max={300}
-            placeholder={PLACEHOLDERS[s.type] ?? ''}
+            placeholder={modifiable ? (PLACEHOLDERS[s.type] ?? '') : ''}
             desactive={!modifiable}
           />
         </Champ>

@@ -19,7 +19,7 @@ const numero: C = {
   valeur: (o) => o.numero ?? 'Brouillon',
   rendu: (o) => (
     <span className={styles.valeur}>
-      <strong>{o.numero ?? 'Brouillon'}</strong>
+      <strong className={styles.numero}>{o.numero ?? 'Brouillon'}</strong>
       {o.blocages.length ? (
         <span className={styles.refus} title={o.blocages.join(' ; ')}>
           sera refusée

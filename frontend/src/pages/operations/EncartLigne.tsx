@@ -148,21 +148,23 @@ function ChampsLotACreer({ p, x }: { p: EncartProps; x: Encart }) {
     <>
       <Champ
         libelle="Numéro de lot"
+        groupe
         aide={e.lot_interne ? 'numéro donné à la validation (LOT-AAAA-NNNN)' : 'Celui de l’étiquette'}
       >
-        <Saisie
-          valeur={e.lot_interne ? '' : e.lot_numero}
-          onChange={(v) => poser({ lot_numero: v })}
-          max={80}
-          desactive={e.lot_interne}
-        />
-      </Champ>
-      <Champ libelle="Lot interne" groupe aide="Le lot n’a pas d’étiquette lisible">
-        <Interrupteur
-          valeur={e.lot_interne}
-          onChange={(v) => poser({ lot_interne: v })}
-          libelle="Lot interne"
-        />
+        <span className={styles.pile}>
+          <Saisie
+            libelle="Numéro de lot"
+            valeur={e.lot_interne ? '' : e.lot_numero}
+            onChange={(v) => poser({ lot_numero: v })}
+            max={80}
+            desactive={e.lot_interne}
+          />
+          <Interrupteur
+            valeur={e.lot_interne}
+            onChange={(v) => poser({ lot_interne: v })}
+            libelle="Lot interne"
+          />
+        </span>
       </Champ>
       {magasin}
     </>
@@ -211,25 +213,29 @@ function ChampsSens({ p, x }: { p: EncartProps; x: Encart }) {
   )
 }
 
-/** La quantité (kg, bobines, palettes ; kg seul pour une ouverture), prix et devise d'une ouverture. */
-function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
-  const { e, poser, m, place } = x
-  if (p.type === 'ouverture') {
-    return (
-      <>
-        <Champ libelle="Quantité (kg)">
-          <Nombre valeur={e.kg} onChange={(v) => poser({ kg: v })} min={0} decimales={3} unite="kg" />
-        </Champ>
-        <Champ
-          libelle="Prix d’achat / kg"
-          aide={
-            m?.prix_kg != null ? `catalogue : ${prixUnite(m.prix_kg, m.devise ?? 'MAD', 'kg')}` : undefined
-          }
-        >
-          <Prix valeur={e.prix} onChange={(v) => poser({ prix: v })} devise={e.devise} unite="kg" />
-        </Champ>
-        <Champ libelle="Devise">
+/** Quantité en kg, prix au kilo et devise d'un stock d'ouverture. */
+function ChampsOuverture({ p, x }: { p: EncartProps; x: Encart }) {
+  const { e, poser, m } = x
+  return (
+    <>
+      <Champ libelle="Quantité (kg)">
+        <Nombre valeur={e.kg} onChange={(v) => poser({ kg: v })} min={0} decimales={3} unite="kg" />
+      </Champ>
+      <Champ
+        libelle="Prix d’achat / kg"
+        groupe
+        aide={m?.prix_kg != null ? `catalogue : ${prixUnite(m.prix_kg, m.devise ?? 'MAD', 'kg')}` : undefined}
+      >
+        <span className={styles.prixDevise}>
+          <Prix
+            libelle="Prix d’achat / kg"
+            valeur={e.prix}
+            onChange={(v) => poser({ prix: v })}
+            devise={e.devise}
+            unite="kg"
+          />
           <Selecteur
+            libelle="Devise"
             effacable={false}
             valeur={e.devise}
             options={p.devises
@@ -237,10 +243,16 @@ function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
               .map((d) => ({ id: d.code, titre: d.code, sous: d.nom }))}
             onChange={(id) => poser({ devise: id ?? 'MAD' })}
           />
-        </Champ>
-      </>
-    )
-  }
+        </span>
+      </Champ>
+    </>
+  )
+}
+
+/** La quantité (kg, bobines, palettes ; kg seul pour une ouverture), prix et devise d'une ouverture. */
+function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
+  const { e, poser, m, place } = x
+  if (p.type === 'ouverture') return <ChampsOuverture p={p} x={x} />
   const sort = p.type !== 'retour_machine' && !(p.type === 'ajustement' && e.sens === '+')
   const borne = sort && place ? place.quantite : undefined
   const apres =

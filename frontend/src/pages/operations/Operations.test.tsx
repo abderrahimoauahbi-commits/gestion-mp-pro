@@ -214,4 +214,43 @@ describe('Opérations : la fenêtre', () => {
       ],
     })
   })
+
+  it('un stock d’ouverture validé d’un coup : lot interne, prix et devise, en une transaction (E10)', async () => {
+    const appels = serveur('achats', {
+      'POST /operations': {
+        corps: operationEssai({ id: 13, type: 'ouverture', numero: 'OUV-2026-0002', statut: 'validee' }),
+      },
+      'GET /operations/13': {
+        corps: operationEssai({ id: 13, type: 'ouverture', numero: 'OUV-2026-0002', statut: 'validee' }),
+      },
+    })
+    const app = monterApp('/operations/nouvelle?type=ouverture')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Matière' }))
+    await userEvent.click(await screen.findByRole('option', { name: /IMP FRISÉ ROUGE/ }))
+    await userEvent.click(screen.getByRole('switch', { name: 'Lot interne' }))
+    await userEvent.click(screen.getByRole('combobox', { name: 'Magasin' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'PRINCIPAL' }))
+    await userEvent.type(screen.getByLabelText('Quantité (kg)'), '120')
+    expect(screen.getByRole('textbox', { name: 'Prix d’achat / kg' })).toHaveValue('3,2')
+    await userEvent.click(screen.getByRole('button', { name: 'Ajouter la ligne' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Valider : le stock bouge' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Oui, valider' }))
+    await waitFor(() => expect(app.adresse()).toBe('/operations/13'))
+    expect(appels.find((a) => a.methode === 'POST')?.corps).toMatchObject({
+      type: 'ouverture',
+      valider: true,
+      lignes: [
+        {
+          lot_id: null,
+          lot_interne: true,
+          lot_numero: '',
+          magasin_id: 1,
+          quantite: 120,
+          prix: 3.2,
+          devise: 'EUR',
+        },
+      ],
+    })
+    expect(await screen.findByText('OUV-2026-0002 validée : le stock est à jour.')).toBeInTheDocument()
+  })
 })

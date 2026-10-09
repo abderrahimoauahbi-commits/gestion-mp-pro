@@ -50,7 +50,8 @@ function useOnglet(permisDuRole: readonly TypeOperation[], typeDeLaFiche: TypeOp
   const demande = params.get('onglet')
   const premier = permisDuRole[0] ?? 'transfert'
   const onglet: TypeOperation =
-    typeDeLaFiche ?? (estType(demande) && permisDuRole.includes(demande) ? demande : premier)
+    (typeDeLaFiche && permisDuRole.includes(typeDeLaFiche) ? typeDeLaFiche : null) ??
+    (estType(demande) && permisDuRole.includes(demande) ? demande : premier)
   const choisir = (o: TypeOperation) =>
     setParams((p) => avecParametre(p, 'onglet', o === premier ? null : o), { replace: true })
   return [onglet, choisir] as const

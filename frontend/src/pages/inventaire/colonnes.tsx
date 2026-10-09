@@ -16,7 +16,7 @@ const numero: C = {
   titre: 'Inventaire',
   rendu: (i) => (
     <span className={styles.valeur}>
-      <strong>{i.numero}</strong>
+      <strong className={styles.lot}>{i.numero}</strong>
       {i.libelle ? <span className={styles.note}>{i.libelle}</span> : null}
     </span>
   ),
@@ -86,7 +86,24 @@ export function parDe(i: InventaireResume): string {
   return morceaux.filter(Boolean).join(' · ')
 }
 
-const par: C = { cle: 'par', titre: 'Par', valeur: parDe }
+const par: C = {
+  cle: 'par',
+  titre: 'Par',
+  valeur: parDe,
+  rendu: (i) => {
+    const [ouvreur, ...suite] = parDe(i).split(' · ')
+    return (
+      <span className={`${styles.valeur} ${styles.lot}`}>
+        <span>{ouvreur}</span>
+        {suite.map((s) => (
+          <span key={s} className={styles.note}>
+            {s}
+          </span>
+        ))}
+      </span>
+    )
+  },
+}
 
 /** Les colonnes d'un onglet ; sans la valeur de l'écart pour qui ne voit pas les prix. */
 export function colonnesInventaires(onglet: 'cours' | 'passes', voitPrix: boolean): C[] {
