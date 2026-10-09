@@ -251,37 +251,6 @@ def performance(numero: str) -> Any:
     return next(p for p in notes if p.numero == numero)
 
 
-def dossier(facture_id: int | None, *, clos: bool = False, lignes: tuple[int, ...] = ()) -> int:
-    """Un dossier d'importation posé en base (le lot D7 les ouvrira par l'API) : il porte la
-    facture et, s'il y en a, des lignes reçues ; ouvert ou clos."""
-    from gestion_mp_pro.modeles import Dossier, DossierLigne, ReceptionLigne
-    from gestion_mp_pro.modeles.enums import StatutDossier
-
-    with fabrique_de_sessions()() as s, s.begin():
-        d = Dossier(
-            numero=unique("ANC-D4"),
-            saisi_a_la_main=True,
-            facture_id=facture_id,
-            statut=StatutDossier.clos if clos else StatutDossier.ouvert,
-            clos_le=horloge.maintenant() if clos else None,
-        )
-        s.add(d)
-        s.flush()
-        for lid in lignes:
-            x = s.get(ReceptionLigne, lid)
-            assert x is not None
-            s.add(
-                DossierLigne(
-                    dossier_id=d.id,
-                    reception_ligne_id=x.id,
-                    matiere_id=x.matiere_id,
-                    lot_id=x.lot_id,
-                    quantite_kg=x.quantite_pesee,
-                )
-            )
-        return d.id
-
-
 @pytest.fixture(scope="module")
 def menage() -> Iterator[None]:
     """Après un module d'essais des réceptions : ses brouillons de réception supprimés, ses bons
