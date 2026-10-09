@@ -8,12 +8,12 @@ projeté) et monter n'écrit aucun mouvement.
 
 from __future__ import annotations
 
-import io
 from typing import Any
 
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.qualites import (
+    classeur_lu,
     creer_metier,
     lire_metier,
     ok,
@@ -25,7 +25,6 @@ from fabriques.qualites import (
 )
 from fabriques.referentiels import matiere, qualite, stock_initial
 from fastapi.testclient import TestClient
-from openpyxl import load_workbook
 from sqlalchemy import func, select
 
 from gestion_mp_pro.calcul.stock import stock_en_machine
@@ -324,9 +323,7 @@ def test_valeur_sur_les_metiers_et_prix_masques(
     for client in (achats, alimentation):
         r = client.get("/api/export/metiers")
         assert r.status_code == 200 and r.content[:2] == b"PK"
-        feuille = load_workbook(io.BytesIO(r.content)).active
-        assert feuille is not None
-        entetes.append(next(feuille.iter_rows(values_only=True)))
+        entetes.append(classeur_lu(r.content)[0])
     assert "Valeur (MAD)" in entetes[0] and "Valeur (MAD)" not in entetes[1]
 
 

@@ -7,15 +7,22 @@ jugé sur le plan de son époque (décision de Mohamed).
 
 from __future__ import annotations
 
-import io
 from datetime import date, datetime, timedelta
 
 import pytest
 from fabrique import *  # noqa: F403
-from fabriques.qualites import UN, corps_fiche, creer_qualite, lire_qualite, ok, ordre_valide, refus
+from fabriques.qualites import (
+    UN,
+    classeur_lu,
+    corps_fiche,
+    creer_qualite,
+    lire_qualite,
+    ok,
+    ordre_valide,
+    refus,
+)
 from fabriques.referentiels import matiere, stock_initial
 from fastapi.testclient import TestClient
-from openpyxl import load_workbook
 from sqlalchemy import select, update
 
 from gestion_mp_pro.calcul.besoins import besoins_mensuels
@@ -276,9 +283,7 @@ def test_exports_de_la_production(achats: TestClient, alimentation: TestClient) 
     entetes = []
     for client in (achats, alimentation):
         r = client.get("/api/export/production?onglet=besoins")
-        feuille = load_workbook(io.BytesIO(r.content)).active
-        assert feuille is not None
-        entetes.append(next(feuille.iter_rows(values_only=True)))
+        entetes.append(classeur_lu(r.content)[0])
     assert "À commander (kg)" in entetes[0] and "À commander (kg)" not in entetes[1]
     assert achats.get("/api/export/production?onglet=autre").status_code == 422
 

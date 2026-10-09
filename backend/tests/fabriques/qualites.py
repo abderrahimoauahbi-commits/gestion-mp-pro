@@ -24,6 +24,19 @@ from gestion_mp_pro.services import horloge, stock
 UN = [1] * 12
 
 
+def classeur_lu(contenu: bytes) -> tuple[tuple[Any, ...], list[tuple[Any, ...]]]:
+    """L'en-tête (la première ligne d'au moins deux cases) et les lignes d'un classeur."""
+    import io
+
+    from openpyxl import load_workbook
+
+    feuille = load_workbook(io.BytesIO(contenu)).active
+    assert feuille is not None
+    lignes = list(feuille.iter_rows(values_only=True))
+    rang = next(i for i, x in enumerate(lignes) if sum(v is not None for v in x) >= 2)
+    return lignes[rang], lignes[rang + 1 :]
+
+
 def ok(r: Any, statut: int = 200) -> Any:
     """La réponse JSON d'un appel qui doit réussir."""
     assert r.status_code == statut, r.text

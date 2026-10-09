@@ -7,9 +7,10 @@ qui voit les prix (barrière 4 : un classeur n'est pas filtré par la route).
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from datetime import date
 from typing import Any
 
-from gestion_mp_pro.exports.stock import Colonne, classeur
+from gestion_mp_pro.exports.classeur import Colonne, Feuille, classeur, exporte_le
 
 Ligne = tuple[dict[str, Any], dict[str, Any]]
 """(métier, fil) ; le fil est vide pour un métier sans fil."""
@@ -32,25 +33,26 @@ def _nom(x: Ligne) -> str:
 
 
 COLONNES = (
-    Colonne("Métier", _nom, largeur=24),
-    Colonne("État", lambda x: "en service" if x[0]["actif"] else "arrêté", largeur=10),
-    Colonne("Laize (m)", _m("laize"), "montant"),
-    Colonne("Bobines par mètre", _m("bobines_par_metre"), "montant"),
-    Colonne("Étage", _f("etage"), largeur=8),
-    Colonne("Référence", _f("reference"), largeur=30),
-    Colonne("Désignation", _f("designation"), largeur=24),
-    Colonne("Mètres", _f("metres"), "montant"),
-    Colonne("Part (%)", _f("pourcentage"), "montant"),
-    Colonne("Bobines", _f("bobines"), "montant"),
-    Colonne("kg / bobine retenu", _f("poids_bobine_utilise"), "kg"),
-    Colonne("Origine du poids", _f("source_poids"), largeur=20),
+    Colonne("Métier", _nom),
+    Colonne("État", lambda x: "en service" if x[0]["actif"] else "arrêté"),
+    Colonne("Laize (m)", _m("laize"), "#,##0.00"),
+    Colonne("Bobines par mètre", _m("bobines_par_metre"), "#,##0.0"),
+    Colonne("Étage", _f("etage")),
+    Colonne("Référence", _f("reference")),
+    Colonne("Désignation", _f("designation")),
+    Colonne("Mètres", _f("metres"), "#,##0.00"),
+    Colonne("Part (%)", _f("pourcentage"), "#,##0.00"),
+    Colonne("Bobines", _f("bobines"), "#,##0.0"),
+    Colonne("kg / bobine retenu", _f("poids_bobine_utilise"), "kg_precis"),
+    Colonne("Origine du poids", _f("source_poids")),
     Colonne("Sur les métiers (kg)", _f("poids"), "kg"),
     Colonne("Valeur (MAD)", _f("valeur_mad"), "montant", monetaire=True),
-    Colonne("Observations", _f("commentaire"), largeur=30),
+    Colonne("Observations", _f("commentaire")),
 )
 
 
-def metiers(liste: Sequence[dict[str, Any]], voit_prix: bool) -> bytes:
+def metiers(liste: Sequence[dict[str, Any]], jour: date, voit_prix: bool) -> bytes:
     """Le classeur « Métiers »."""
     lignes: list[Ligne] = [(m, f) for m in liste for f in (m["fils"] or [{}])]
-    return classeur("Métiers", COLONNES, lignes, voit_prix)
+    entete = [exporte_le("Métiers à tisser et fils montés", jour)]
+    return classeur([Feuille("Métiers", COLONNES, lignes, entete)], voit_prix)

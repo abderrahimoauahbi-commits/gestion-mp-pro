@@ -6,12 +6,12 @@ D-01, D-03, D-04, D-05, D-18, D-19 ; ECRANS-PRO partie 7 (P7-5, P7-8).
 
 from __future__ import annotations
 
-import io
 import json
 
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.qualites import (
+    classeur_lu,
     corps_fiche,
     creer_qualite,
     lignes,
@@ -23,7 +23,6 @@ from fabriques.qualites import (
 )
 from fabriques.referentiels import matiere, role_id, unique
 from fastapi.testclient import TestClient
-from openpyxl import load_workbook
 
 
 def _versions(client: TestClient, qid: int) -> list[dict]:
@@ -153,10 +152,7 @@ def test_d19_export_des_qualites(direction: TestClient, achats: TestClient) -> N
     ordre_valide(q["id"], 5)
     r = achats.get("/api/export/qualites")
     assert r.status_code == 200 and r.content[:2] == b"PK"
-    feuille = load_workbook(io.BytesIO(r.content)).active
-    assert feuille is not None
-    lignes_lues = list(feuille.iter_rows(values_only=True))
-    entete = lignes_lues[0]
+    entete, lignes_lues = classeur_lu(r.content)
     assert "En service" in entete and "Fabriquée" in entete
     ligne = next(x for x in lignes_lues if x[0] == q["code"])
     assert ligne[entete.index("Fabriquée")] == "oui" and ligne[entete.index("En service")] == "oui"

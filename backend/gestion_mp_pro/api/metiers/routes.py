@@ -27,9 +27,9 @@ from gestion_mp_pro.api.metiers.schemas import (
     ResultatMontage,
 )
 from gestion_mp_pro.exports import metiers as classeurs
-from gestion_mp_pro.exports.production import XLSX, telecharger
+from gestion_mp_pro.exports.classeur import REPONSES_XLSX, reponse
 from gestion_mp_pro.securite import C, D, L, QuiDep, droit
-from gestion_mp_pro.services import metiers, metiers_lecture
+from gestion_mp_pro.services import horloge, metiers, metiers_lecture
 from gestion_mp_pro.services.metiers import EtageMonte, FicheMetier
 from gestion_mp_pro.services.montage import Fil
 
@@ -196,11 +196,11 @@ def matieres(s: SessionDep) -> list[MatiereMontage]:
     "/export/metiers",
     dependencies=[droit(*C)],
     summary="Les métiers et leurs fils montés en classeur (sans valeur pour l'alimentation).",
-    responses={**reponses(401, 403), 200: {"content": {XLSX: {}}}},
+    responses={**reponses(401, 403), **REPONSES_XLSX},
     response_class=Response,
 )
 def exporter(qui: QuiDep, s: SessionDep) -> Response:
     """Route 238."""
-    return telecharger(
-        classeurs.metiers(metiers_lecture.lister(s, qui.voit_prix), qui.voit_prix), "metiers"
-    )
+    jour = horloge.aujourd_hui()
+    liste = metiers_lecture.lister(s, qui.voit_prix)
+    return reponse(classeurs.metiers(liste, jour, qui.voit_prix), "metiers", jour)

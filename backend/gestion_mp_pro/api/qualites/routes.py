@@ -29,9 +29,9 @@ from gestion_mp_pro.api.qualites.schemas import (
     Restauration,
 )
 from gestion_mp_pro.exports import qualites as classeurs
-from gestion_mp_pro.exports.production import XLSX, telecharger
+from gestion_mp_pro.exports.classeur import REPONSES_XLSX, reponse
 from gestion_mp_pro.securite import A, C, D, QuiDep, droit
-from gestion_mp_pro.services import qualites, qualites_lecture
+from gestion_mp_pro.services import horloge, qualites, qualites_lecture
 from gestion_mp_pro.services.qualites import FicheSaisie, PoidsSaisi, Resultat
 from gestion_mp_pro.services.recettes import LigneSaisie
 
@@ -233,9 +233,11 @@ def nomenclature(jour: DateReferenceDep, qui: QuiDep, s: SessionDep) -> Nomencla
     "/export/qualites",
     dependencies=[droit(D, A)],
     summary="Les qualités et leurs recettes, matière par matière, en classeur.",
-    responses={**reponses(401, 403), 200: {"content": {XLSX: {}}}},
+    responses={**reponses(401, 403), **REPONSES_XLSX},
     response_class=Response,
 )
 def exporter(qui: QuiDep, s: SessionDep) -> Response:
     """Route 93 : « En service » et « Fabriquée » (vraie) en deux colonnes (D-19)."""
-    return telecharger(classeurs.qualites(qualites_lecture.lister(s, qui.voit_prix)), "qualites")
+    jour = horloge.aujourd_hui()
+    liste = qualites_lecture.lister(s, qui.voit_prix)
+    return reponse(classeurs.qualites(liste, jour, qui.voit_prix), "qualites", jour)

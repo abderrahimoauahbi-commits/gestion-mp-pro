@@ -21,6 +21,7 @@ from gestion_mp_pro.api.production.schemas import (
     PlanProduction,
 )
 from gestion_mp_pro.exports import production as classeurs
+from gestion_mp_pro.exports.classeur import REPONSES_XLSX, reponse
 from gestion_mp_pro.securite import C, D, QuiDep, droit
 from gestion_mp_pro.services import horloge, production, production_lecture
 
@@ -91,7 +92,7 @@ def besoins(
     "/export/production",
     dependencies=[droit(*C)],
     summary="Un onglet de la production en classeur (plan glissant, réalisé, besoins).",
-    responses={**reponses(401, 403, 422), 200: {"content": {classeurs.XLSX: {}}}},
+    responses={**reponses(401, 403, 422), **REPONSES_XLSX},
     response_class=Response,
 )
 def exporter(
@@ -108,4 +109,4 @@ def exporter(
         contenu = classeurs.besoins(vue, qui.voit_prix)
     else:
         contenu = classeurs.glissant(production_lecture.plan(s, jour))
-    return classeurs.telecharger(contenu, f"production-{onglet}")
+    return reponse(contenu, f"production-{onglet}", jour)
