@@ -12,7 +12,7 @@ from typing import Any
 
 from pydantic import Field
 
-from gestion_mp_pro.api.communs import Entree, Sortie
+from gestion_mp_pro.api.communs import Entree, Nombre, Sortie
 from gestion_mp_pro.modeles import longueurs as L
 from gestion_mp_pro.services.matieres import BORNES
 
@@ -27,7 +27,7 @@ class Conditionnement(Sortie):
     """L'unité dans laquelle la matière se commande (déclarée, ou déduite)."""
 
     unite: str
-    contenance: float
+    contenance: Nombre
     declare: bool
 
 
@@ -55,27 +55,27 @@ class MatiereResume(Sortie):
     couleur_code: str
     fournisseur_id: int | None
     fournisseur: str | None
-    prix: float | None
+    prix: Nombre | None
     unite_prix: str | None
-    prix_kg: float | None
+    prix_kg: Nombre | None
     devise: str | None
-    densite: float
-    kg_par_ml: float
+    densite: Nombre
+    kg_par_ml: Nombre
     unite_achat: str
-    contenance_achat: float
+    contenance_achat: Nombre
     conditionnement: Conditionnement
-    contenance_palette: float
-    minimum_commande: float | None
-    poids_bobine: float
-    bobines_palette: float
-    stock_min: float
-    couv_min_mois: float
+    contenance_palette: Nombre
+    minimum_commande: Nombre | None
+    poids_bobine: Nombre
+    bobines_palette: Nombre
+    stock_min: Nombre
+    couv_min_mois: Nombre
     groupe_equiv: str
-    priorite_equiv: float | None
+    priorite_equiv: Nombre | None
     code_douanier_id: int | None
     code_douanier: str | None
     actif: bool
-    stock: float = Field(description="kg, tous magasins, quarantaine comprise")
+    stock: Nombre = Field(description="kg, tous magasins, quarantaine comprise")
     utilisee: bool = Field(description="a des traces : se désactive, ne se supprime pas")
 
 

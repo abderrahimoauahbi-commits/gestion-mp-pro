@@ -143,7 +143,7 @@ def _devise(d: Devise, reprises: set[str]) -> DeviseFiche:
     return DeviseFiche(
         code=d.code,
         nom=d.nom,
-        cours=float(d.cours),
+        cours=d.cours,
         cours_le=d.cours_le,
         cours_repris=d.code in reprises,
         actif=d.actif,

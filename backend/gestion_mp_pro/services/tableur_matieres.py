@@ -168,6 +168,7 @@ def _lire_ligne(
     """Une ligne : ses cases traduites, ses colonnes à vider, sa version."""
 
     def case(nom: str) -> object:
+        """La case d'une colonne (ou rien)."""
         i = index.get(nom)
         return valeurs[i] if i is not None and i < len(valeurs) else None
 

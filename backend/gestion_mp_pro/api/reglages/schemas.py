@@ -11,7 +11,7 @@ from typing import Annotated, ClassVar
 
 from pydantic import Field
 
-from gestion_mp_pro.api.communs import Entree, Page, Sortie
+from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.modeles import longueurs as L
 
 Fini = Annotated[float, Field(allow_inf_nan=False)]
@@ -91,7 +91,7 @@ class DeviseFiche(Sortie):
 
     code: str
     nom: str
-    cours: float
+    cours: Nombre
     cours_le: datetime | None
     cours_repris: bool = Field(description="aucun cours saisi depuis la mise en service")
     actif: bool
@@ -102,7 +102,7 @@ class CoursHistorique(Sortie):
     """Un cours saisi (route 28) ; `variation` : fraction sur le cours précédent."""
 
     id: int
-    cours: float
+    cours: Nombre
     saisi_le: datetime
     par: str
     variation: float | None
@@ -137,7 +137,7 @@ class MagasinFiche(Sortie):
     type: str
     contenu: str
     actif: bool
-    kg_detenus: float
+    kg_detenus: Nombre
     version: int
 
 
@@ -210,7 +210,7 @@ class CodeDouanierFiche(Sortie):
     id: int
     code: str
     libelle: str
-    taux_droits: float
+    taux_droits: Nombre
     actif: bool
     nb_matieres: int
     version: int

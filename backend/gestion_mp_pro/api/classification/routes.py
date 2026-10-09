@@ -59,6 +59,7 @@ def lire(s: SessionDep) -> Classification:
     lu = cla.lire(s)
 
     def liste(nom: str) -> list[ValeurFiche]:
+        """Les fiches d'une liste."""
         return [_valeur(v, n) for v, n in lu.valeurs[nom]]
 
     return Classification(

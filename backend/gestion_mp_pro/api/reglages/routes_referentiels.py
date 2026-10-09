@@ -45,7 +45,7 @@ def _magasin(g: Magasin, detenus: Mapping[int, Decimal]) -> MagasinFiche:
         type=g.type,
         contenu=g.contenu,
         actif=g.actif,
-        kg_detenus=float(detenus.get(g.id, Decimal(0))),
+        kg_detenus=detenus.get(g.id, Decimal(0)),
         version=g.version,
     )
 
@@ -178,7 +178,7 @@ def _code(c: CodeDouanier, matieres: dict[int, int]) -> CodeDouanierFiche:
         id=c.id,
         code=c.code,
         libelle=c.libelle,
-        taux_droits=float(c.taux_droits),
+        taux_droits=c.taux_droits,
         actif=c.actif,
         nb_matieres=matieres.get(c.id, 0),
         version=c.version,
