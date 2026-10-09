@@ -1,0 +1,136 @@
+/* Les Réglages (lot F8) : seulement des jetons (stylelint). */
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.code {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.liste {
+  margin: 0;
+  padding-left: var(--espace-4);
+}
+
+.parametres {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.familles {
+  display: flex;
+  flex: 0 0 220px;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--espace-2);
+  border-right: 1px solid var(--bord);
+  overflow-y: auto;
+}
+
+.famille,
+.familleActive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2);
+  padding: 6px var(--espace-2);
+  color: var(--texte-2);
+  background: none;
+  border: 0;
+  border-radius: var(--rayon-petit);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.famille:hover {
+  background: var(--survol);
+}
+
+.familleActive {
+  color: var(--accent-fonce);
+  background: var(--accent-clair);
+  font-weight: 600;
+}
+
+.compte {
+  min-width: 20px;
+  padding: 0 6px;
+  color: var(--sur-accent);
+  background: var(--accent);
+  border-radius: 10px;
+  font-size: var(--taille-petite);
+  text-align: center;
+}
+
+.champs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  padding: var(--espace-3) var(--espace-4);
+}
+
+.modifie :is(input, textarea) {
+  border-color: var(--accent);
+}
+
+.avecUnite {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.unite {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+.nombre {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.periode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  padding: var(--espace-3) var(--espace-4);
+}
+
+@media (width <= 900px) {
+  .parametres {
+    flex-direction: column;
+  }
+
+  .familles {
+    flex: 0 0 auto;
+    flex-flow: row wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--bord);
+  }
+}
+
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+}

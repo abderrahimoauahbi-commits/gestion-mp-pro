@@ -6,22 +6,20 @@
  * Défaut : la Valorisation pour la direction, la Matrice pour les achats ; `?onglet=prix` (ancienne
  * adresse de Gestion MP) mène à la Matrice. Les compteurs des onglets viennent des mêmes lectures
  * que les onglets (cache partagé, P8-26). Le « Coût de revient » est réalisé par le lot F5
- * (`pages/importations/revient/AnalyseRevient.tsx`) et monté ici quand il est livré.
+ * (`pages/importations/revient/AnalyseRevient.tsx`) et monté ici.
  * L'en-tête porte « Bilan du mois » (direction et achats, P8-24).
  */
-import { lazy, Suspense, useEffect, type ComponentType } from 'react'
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
 import { EnTete } from '../../composants/coque/EnTete'
-import { Carte } from '../../composants/mise-en-page/Carte'
 import { Onglets } from '../../composants/mise-en-page/Onglets'
 import { Page } from '../../composants/mise-en-page/Page'
-import { Chargement } from '../../composants/retour/Chargement'
-import { Vide } from '../../composants/retour/Vide'
 import { useOngletAdresse } from '../../lib/adresse'
 import { ongletsPermis } from '../../lib/droits'
 import { useSession } from '../../lib/session'
 import { ECRANS } from '../../routes'
+import AnalyseRevient from '../importations/revient/AnalyseRevient'
 import styles from './analyse.module.css'
 import { BilanDuMois } from './BilanDuMois'
 import { Controles } from './controles/Controles'
@@ -33,11 +31,6 @@ import { Matrice } from './prix/Matrice'
 import { PrixPayes } from './prix/PrixPayes'
 import { Production } from './Production'
 import { Valorisation } from './Valorisation'
-
-/** Les onglets réalisés par d'autres lots, chargés s'ils existent (le lot F5 : coût de revient). */
-const HOTES = import.meta.glob<{ default: ComponentType }>('../importations/revient/AnalyseRevient.tsx')
-const chargerRevient = Object.values(HOTES)[0]
-const Revient = chargerRevient ? lazy(chargerRevient) : null
 
 /** La phrase sous le titre, onglet par onglet (ECRANS-PRO partie 8, « 9 phrases exactes »). */
 export const PHRASES: Readonly<Record<string, string>> = {
@@ -85,15 +78,7 @@ function Contenu({ onglet }: { onglet: string }) {
     case 'production':
       return <Production />
     default:
-      return Revient ? (
-        <Suspense fallback={<Chargement quoi="le coût de revient" />}>
-          <Revient />
-        </Suspense>
-      ) : (
-        <Carte remplir>
-          <Vide>Le coût de revient arrive avec le lot F5 (importations et coût de revient).</Vide>
-        </Carte>
-      )
+      return <AnalyseRevient />
   }
 }
 
@@ -123,11 +108,14 @@ export default function Analyse() {
   const permis = ecran ? ongletsPermis(ecran, role) : []
   const cles = permis.map((o) => o.cle)
   const defaut = role === 'achats' ? 'matrice' : 'valorisation'
-  const [onglet, choisir] = useOngletAdresse(cles, defaut)
+  const [onglet] = useOngletAdresse(cles, defaut)
+  // Chaque onglet a ses propres critères : en changer repart d'une adresse nette (le coût de
+  // revient et les fournisseurs lisent tous deux `fournisseur`, par exemple).
+  const choisir = (o: string) => setParams(o === defaut ? {} : { onglet: o }, { replace: true })
   const compteurs = useCompteurs()
   const ancien = params.get('onglet') === 'prix'
   useEffect(() => {
-    if (ancien) setParams((p) => ({ ...Object.fromEntries(p), onglet: 'matrice' }), { replace: true })
+    if (ancien) setParams({ onglet: 'matrice' }, { replace: true })
   }, [ancien, setParams])
   return (
     <Page titre="Analyse">

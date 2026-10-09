@@ -56,3 +56,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | X2 | docs | ARCHITECTURE § 13.2 et critères X2 : `installer.sh` n'installe le LaunchAgent qu'avec `--demarrage-automatique` (décision : réglage du Mac laissé à Mohamed). |
 | X2 | S0 | Cibles Makefile `poste-installer` et `coexistence`. |
 | X2 | C1 | « Administration › Reprise » (routes 243–244) attendue par le poste : à faire dans C1. |
+| F5 | E1 | `Interrupteur` sans `manque`/`blocages` ; `PiecesJointes` sans mode « joindre seulement » (dossier clos) ; `LienDocument` sans `state` ; `DataTable` : texte de liste vide filtrée générique, pas de lignes de groupe. |
+| F5 | docs | ECRANS-PRO 5.20 : `dossiers_ouverts` et `parts_figees` (et non `dossiers_recalcules`, `dossiers_figes`) ; `commentaire` à l'API, « Observations » à l'écran. |
+| F5 | D7/S2 | Recherche de facture : « FA-2026/117 » ne trouve pas « FA-2026-117 » (ponctuation différente) — normaliser la ponctuation dans la recherche. |
