@@ -91,7 +91,7 @@ type BrouillonsPeriode = Schema<'BrouillonsPeriode'>
 /**
  * Les brouillons datés jusqu'à la date choisie, annoncés avant la fenêtre (route 246) : « Clore la
  * période… » est grisé avec le refus que dirait le serveur, et la liste dit lesquels valider ou
- * supprimer d'abord.
+ * supprimer (ou redater) d'abord.
  */
 function useBrouillonsPeriode(jour: string) {
   const lu = useLecture<BrouillonsPeriode>(jour ? '/periode-close/brouillons' : null, { date: jour })
@@ -107,7 +107,7 @@ function NoteBrouillons({ b }: { b: BrouillonsPeriode | undefined }) {
         .filter((g) => g.nombre > 0)
         .map((g) => `${nombre(g.nombre)} ${g.libelle}(s)`)
         .join(', ')}
-      . Les valider ou les supprimer d’abord.
+      . Les valider, les supprimer ou les redater d’abord.
     </Note>
   )
 }
