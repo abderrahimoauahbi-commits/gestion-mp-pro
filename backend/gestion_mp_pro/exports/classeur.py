@@ -30,6 +30,7 @@ from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
+from enum import Enum
 from io import BytesIO
 from typing import Any
 
@@ -108,6 +109,11 @@ def titre(texte: str, jour: date) -> str:
     return f"{texte} au {date_fr(jour)}"
 
 
+def exporte_le(texte: str, jour: date) -> str:
+    """« Fournisseurs — exporté le 08/10/2026 » (une liste sans date de référence)."""
+    return f"{texte} — exporté le {date_fr(jour)}"
+
+
 def filtres(valeurs: Iterable[tuple[str, object]]) -> str:
     """« Filtres — par : Karim · du : 01/10/2026 » (les filtres vides ne s'écrivent pas) ;
     « » si aucun filtre n'est posé."""
@@ -121,9 +127,12 @@ def filtres(valeurs: Iterable[tuple[str, object]]) -> str:
 
 def cellule(valeur: object) -> object:
     """Une valeur sûre pour Excel : nombres en `float`, instants à l'heure de l'usine sans
-    fuseau (Excel n'en connaît pas), texte sans caractère de contrôle, booléen « oui » / « »."""
+    fuseau (Excel n'en connaît pas), texte sans caractère de contrôle, booléen « oui » / « »,
+    énumération sa valeur."""
     if isinstance(valeur, bool):
         return "oui" if valeur else ""
+    if isinstance(valeur, Enum):
+        return valeur.value
     if isinstance(valeur, Decimal):
         return float(valeur)
     if isinstance(valeur, datetime):
@@ -185,8 +194,8 @@ def ecrire_feuille(wb: Workbook, f: Feuille, voit_prix: bool, pris: set[str]) ->
         ws.cell(ws.max_row, 1).font = GRAS
     if lignes_titre:
         ws.append([])
-    rang_entete = ws.max_row + 1 if lignes_titre else 1
     _ajouter(ws, [c.titre for c in gardees])
+    rang_entete = ws.max_row  # après la ligne vide (qu'`append([])` ne compte pas)
     for c in ws[rang_entete]:
         c.font, c.fill, c.border = GRAS, FOND_ENTETE, Border(bottom=TRAIT)
         c.alignment = Alignment(vertical="center", wrap_text=True)
