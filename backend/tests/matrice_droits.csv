@@ -210,6 +210,7 @@ GET;/api/qualites/{qualite_id}/versions;401;ok;ok;ok;403
 POST;/api/qualites/{qualite_id}/versions/{version_id}/restaurer;401;ok;403;403;403
 GET;/api/receptions;401;ok;ok;403;403
 POST;/api/receptions;401;ok;ok;403;403
+GET;/api/receptions/apercu;401;ok;ok;403;403
 GET;/api/receptions/bobines;401;ok;ok;403;403
 GET;/api/receptions/pesees;401;ok;ok;403;403
 DELETE;/api/receptions/{rid};401;ok;ok;403;403

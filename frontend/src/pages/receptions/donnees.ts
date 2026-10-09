@@ -8,23 +8,24 @@ import { useLecture } from '../../lib/requetes'
 import type { CommandeResume } from '../commandes/types'
 import type { Matiere } from '../plan-achat/types'
 import type {
+  ApercuReceptions,
   EvolutionBobines,
   Fournisseur,
   Magasin,
   Motifs,
   ReceptionFiche,
-  ReceptionResume,
   ReclamationFiche,
   ReclamationResume,
 } from './types'
 
-export const useReceptions = () => useLecture<ReceptionResume[]>('/receptions')
-
-/** Les réceptions que la recherche du serveur trouve (lignes, lots, références compris). */
-export const useReceptionsTrouvees = (q: string) =>
-  useLecture<ReceptionResume[]>(
-    q.trim() ? '/receptions' : null,
-    { q: q.trim() },
+/**
+ * L'aperçu de la liste : comptes par onglet (suivant la recherche, tous onglets) et fournisseurs
+ * du filtre lié. La liste elle-même se lit page par page (`useListePaginee` dans l'onglet).
+ */
+export const useApercuReceptions = (q: string) =>
+  useLecture<ApercuReceptions>(
+    '/receptions/apercu',
+    { q: q.trim() || undefined },
     { placeholderData: keepPreviousData },
   )
 

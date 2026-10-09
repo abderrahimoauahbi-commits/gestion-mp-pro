@@ -38,7 +38,7 @@ def _receptions(a: Acces, r: Releve) -> None:
     lignes: dict[int, list[tuple[Any, ...]]] = defaultdict(list)
     for x in a.sql("SELECT reception_id, quantite_pesee, qualite, lot_id FROM reception_ligne"):
         lignes[x[0]].append(x)
-    for x in a.get("/receptions"):
+    for x in a.get("/receptions", limite=5000)["elements"]:
         siennes = lignes.get(x["id"], [])
         s = x["numero"] or f"brouillon {x['id']}"
         r.comparer(

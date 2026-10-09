@@ -159,24 +159,52 @@ export const CHERCHES = (r: ReceptionResume) => [
   r.annulation_motif,
 ]
 
-export function filtresReceptions(noms: ReadonlyMap<string, string>): Filtre<ReceptionResume>[] {
+const LIBELLE_ORIGINE: Record<string, string> = { bon: 'Sur bon', hors: 'Hors commande' }
+const LIBELLE_FACTURE: Record<string, string> = { avec: 'Avec facture', sans: 'À compléter' }
+const LIBELLE_QUALITE: Record<string, string> = {
+  refus: 'Avec refus',
+  reserve: 'Avec réserve',
+  conforme: 'Tout conforme',
+}
+
+/**
+ * Les filtres liés, appliqués **au serveur** (liste paginée) : leurs valeurs sont des codes
+ * (`bon`/`hors`, `avec`/`sans`, `refus`/`reserve`/`conforme`, id du fournisseur) envoyés tels
+ * quels à la route et à l'export ; `libelleValeur` les affiche comme avant. Les fournisseurs
+ * viennent de l'aperçu du serveur (`/receptions/apercu`), pas des lignes chargées.
+ */
+export function filtresReceptions(
+  fournisseurs: readonly { id: number; nom: string }[],
+): Filtre<ReceptionResume>[] {
+  const noms = new Map(fournisseurs.map((f) => [String(f.id), f.nom]))
   return [
     {
       cle: 'fournisseur',
       libelle: 'Fournisseur',
       valeur: (r) => String(r.fournisseur_id),
       libelleValeur: (v) => noms.get(v) ?? v,
+      options: fournisseurs.map((f) => String(f.id)),
     },
-    { cle: 'origine', libelle: 'Bon', valeur: (r) => (r.commandes.length ? 'Sur bon' : 'Hors commande') },
+    {
+      cle: 'origine',
+      libelle: 'Bon',
+      valeur: (r) => (r.commandes.length ? 'bon' : 'hors'),
+      libelleValeur: (v) => LIBELLE_ORIGINE[v] ?? v,
+      options: ['bon', 'hors'],
+    },
     {
       cle: 'facture',
       libelle: 'Facture',
-      valeur: (r) => (r.facture?.numero ? 'Avec facture' : 'À compléter'),
+      valeur: (r) => (r.facture?.numero ? 'avec' : 'sans'),
+      libelleValeur: (v) => LIBELLE_FACTURE[v] ?? v,
+      options: ['avec', 'sans'],
     },
     {
       cle: 'qualite',
       libelle: 'Qualité',
-      valeur: (r) => (r.nb_refus ? 'Avec refus' : r.nb_reserve ? 'Avec réserve' : 'Tout conforme'),
+      valeur: (r) => (r.nb_refus ? 'refus' : r.nb_reserve ? 'reserve' : 'conforme'),
+      libelleValeur: (v) => LIBELLE_QUALITE[v] ?? v,
+      options: ['refus', 'reserve', 'conforme'],
     },
   ]
 }

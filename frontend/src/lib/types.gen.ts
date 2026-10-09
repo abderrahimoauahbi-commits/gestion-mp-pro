@@ -1722,7 +1722,7 @@ export interface paths {
     }
     /**
      * Le journal du stock en classeur (mêmes filtres ; sans prix pour l'alimentation).
-     * @description Route 106.
+     * @description Route 106 : rendu **en flux** (V4 § 6), les lignes écrites une à une sans tout charger.
      */
     get: operations['exporter_mouvements_api_export_mouvements_get']
     put?: never
@@ -2969,8 +2969,8 @@ export interface paths {
       cookie?: never
     }
     /**
-     * Les réceptions, la plus récente d'abord ; brouillons recalés sans rien écrire.
-     * @description Route 167.
+     * Les réceptions, la plus récente d'abord, par pages ; brouillons recalés sans écrire.
+     * @description Route 167 (filtres et recherche poussés en SQL ; total et pesé de l'onglet au serveur).
      */
     get: operations['lister_receptions_api_receptions_get']
     put?: never
@@ -2979,6 +2979,26 @@ export interface paths {
      * @description Route 169.
      */
     post: operations['creer_api_receptions_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/receptions/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les comptes par onglet (suivant la recherche) et les fournisseurs du filtre lié.
+     * @description Route 181b : nourrit les pastilles des onglets et les options du filtre fournisseur.
+     */
+    get: operations['apercu_receptions_api_receptions_apercu_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -4390,6 +4410,22 @@ export interface components {
        * @description à renvoyer avec l'application
        */
       empreinte_apercu: string
+    }
+    /**
+     * ApercuReceptions
+     * @description Route 181b : comptes par onglet (suivant la recherche) et fournisseurs du filtre lié.
+     */
+    ApercuReceptions: {
+      /** Brouillon */
+      brouillon: number
+      /** Validee */
+      validee: number
+      /** Annulee */
+      annulee: number
+      /** Total */
+      total: number
+      /** Fournisseurs */
+      fournisseurs: components['schemas']['FournisseurOption'][]
     }
     /**
      * AppareilCreation
@@ -7674,6 +7710,16 @@ export interface components {
       actif: boolean
       /** Version */
       version: number
+    }
+    /**
+     * FournisseurOption
+     * @description Un fournisseur proposé par le filtre lié de la liste.
+     */
+    FournisseurOption: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
     }
     /**
      * FournisseurResume
@@ -11402,6 +11448,29 @@ export interface components {
       non_conformes: number
       /** Bobines Hors Tolerance */
       bobines_hors_tolerance: number
+    }
+    /**
+     * PageReceptions
+     * @description Route 167 : une page de réceptions (la plus récente d'abord) et le total pesé de l'onglet.
+     */
+    PageReceptions: {
+      /** Elements */
+      elements: components['schemas']['ReceptionResume'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+      /**
+       * Pese Total
+       * @description Σ des kilos pesés hors refus de l'onglet (pied)
+       */
+      pese_total: number
     }
     /**
      * PageSignalements
@@ -23855,6 +23924,9 @@ export interface operations {
         du?: string | null
         au?: string | null
         fournisseur?: number | null
+        origine?: string
+        facture?: string
+        qualite?: string
       }
       header?: never
       path?: never
@@ -24126,6 +24198,12 @@ export interface operations {
         du?: string | null
         au?: string | null
         fournisseur?: number | null
+        origine?: string
+        facture?: string
+        qualite?: string
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
       }
       header?: never
       path?: never
@@ -24139,7 +24217,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ReceptionResume'][]
+          'application/json': components['schemas']['PageReceptions']
         }
       }
       /** @description Non connecté */
@@ -24213,6 +24291,55 @@ export interface operations {
       }
       /** @description Conflit ou état */
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_receptions_api_receptions_apercu_get: {
+    parameters: {
+      query?: {
+        q?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuReceptions']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
         headers: {
           [name: string]: unknown
         }

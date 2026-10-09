@@ -81,10 +81,24 @@ function serveur(role: 'direction' | 'achats' | 'alimentation', autres: Record<s
   return fauxServeur({
     ...reponsesConnecte(role),
     'GET /receptions': {
-      corps: [
-        receptionResumeEssai({ id: 1, numero: 'REC-2026-0001', statut: 'validee', blocages: [] }),
-        receptionResumeEssai({ id: 2, numero: null, statut: 'brouillon', blocages: ['a', 'b'] }),
-      ],
+      corps: {
+        elements: [
+          receptionResumeEssai({ id: 1, numero: 'REC-2026-0001', statut: 'validee', blocages: [] }),
+          receptionResumeEssai({ id: 2, numero: null, statut: 'brouillon', blocages: ['a', 'b'] }),
+        ],
+        total: 2,
+        suivant: null,
+        pese_total: 0,
+      },
+    },
+    'GET /receptions/apercu': {
+      corps: {
+        brouillon: 1,
+        validee: 1,
+        annulee: 0,
+        total: 2,
+        fournisseurs: [{ id: 2, nom: 'Polyfil Industries' }],
+      },
     },
     'GET /receptions/1': { corps: receptionEssai() },
     'GET /reclamations': { corps: [reclamationEssai()] },

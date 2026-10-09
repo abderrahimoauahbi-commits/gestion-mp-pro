@@ -1,16 +1,21 @@
 /**
- * Réceptions › Brouillons · Validées · Annulées (ECRANS-PRO 4.15) : la recherche porte sur toute la
- * base (le serveur cherche aussi dans les lignes : référence, lot) ; filtres liés ; pied de totaux ;
- * une ligne ouvre la fiche, « Corriger » rouvre la saisie d'un brouillon.
+ * Réceptions › Brouillons · Validées · Annulées (ECRANS-PRO 4.15) : la liste est **paginée au
+ * serveur** (recherche, filtres liés et pied de totaux poussés en SQL ; mêmes chiffres qu'avant).
+ * Une ligne ouvre la fiche, « Corriger » rouvre la saisie d'un brouillon.
  */
 import { useMemo } from 'react'
 
 import { Carte } from '../../composants/mise-en-page/Carte'
+import { Erreur } from '../../composants/retour/Erreur'
+import { useListePaginee } from '../../composants/tableaux/ChargerPlus'
+import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import type { EtatTable } from '../../composants/tableaux/etatAdresse'
+import { kg } from '../../lib/format'
+import { useLecture } from '../../lib/requetes'
 import styles from '../plan-achat/achats.module.css'
-import { CHERCHES, colonnesReceptions, filtresReceptions } from './colonnesReceptions'
-import type { ReceptionResume } from './types'
+import { colonnesReceptions, filtresReceptions } from './colonnesReceptions'
+import type { PageReceptions, ReceptionResume } from './types'
 
 export type StatutListe = 'brouillon' | 'validee' | 'annulee'
 
@@ -34,46 +39,82 @@ const CARTES: Record<StatutListe, { titre: string; aide: string; vide: string }>
 
 export const CLES_FILTRES_RECEPTIONS = ['fournisseur', 'origine', 'facture', 'qualite'] as const
 
+/** Les paramètres de la route 167 : l'onglet, la recherche et les filtres liés (codes). */
+function parametres(statut: StatutListe, etat: EtatTable) {
+  const choix = etat.choix.valeurs
+  return {
+    statut,
+    q: etat.recherche.valeur.trim() || undefined,
+    fournisseur: choix.fournisseur || undefined,
+    origine: choix.origine || undefined,
+    facture: choix.facture || undefined,
+    qualite: choix.qualite || undefined,
+  }
+}
+
+/** Le pied de totaux du serveur : le pesé de **tout** l'onglet filtré, aligné sous sa colonne. */
+function PiedServeur({ colonnes, pese }: { colonnes: Colonne<ReceptionResume>[]; pese: number }) {
+  const visibles = colonnes.filter((c) => !c.cache)
+  return (
+    <tr>
+      {visibles.map((c, i) => (
+        <td key={c.cle} style={c.droite ? { textAlign: 'right' } : undefined}>
+          {c.total ? kg(pese) : i === 0 ? 'Total' : ''}
+        </td>
+      ))}
+    </tr>
+  )
+}
+
 export function OngletReceptions({
   statut,
-  receptions,
-  trouvees,
+  fournisseurs,
   etat,
   onOuvrir,
   onCorriger,
 }: {
   statut: StatutListe
-  receptions: readonly ReceptionResume[]
-  /** Les id que la recherche du serveur trouve (lignes et lots compris), `null` sans recherche. */
-  trouvees: ReadonlySet<number> | null
+  /** Les fournisseurs du filtre lié, donnés par l'aperçu du serveur (toute la liste). */
+  fournisseurs: readonly { id: number; nom: string }[]
   etat: EtatTable
   onOuvrir: (r: ReceptionResume) => void
   onCorriger: (r: ReceptionResume) => void
 }) {
-  const lignes = useMemo(() => receptions.filter((r) => r.statut === statut), [receptions, statut])
-  const noms = useMemo(
-    () => new Map(receptions.map((r) => [String(r.fournisseur_id), r.fournisseur])),
-    [receptions],
-  )
+  const params = parametres(statut, etat)
+  const liste = useListePaginee<ReceptionResume>('/receptions', params)
+  const pied = useLecture<PageReceptions>('/receptions', { ...params, limite: 1 })
   const colonnes = useMemo(() => colonnesReceptions(onCorriger), [onCorriger])
-  const q = etat.recherche.valeur
+  const filtres = useMemo(() => filtresReceptions(fournisseurs), [fournisseurs])
   const carte = CARTES[statut]
+  if (liste.requete.isError)
+    return <Erreur erreur={liste.requete.error} onReessayer={() => void liste.requete.refetch()} />
   return (
     <Carte titre={<span title={carte.aide}>{carte.titre}</span>} serre remplir className={styles.carteListe}>
       <DataTable<ReceptionResume>
         libelle={`Réceptions — ${carte.titre}`}
-        lignes={lignes}
+        serveur
+        lignes={liste.lignes}
+        total={liste.total}
+        chargerPlus={liste.chargerPlus}
         colonnes={colonnes}
-        filtres={filtresReceptions(noms)}
+        filtres={filtres}
         cle={(r) => r.id}
         recherche={etat.recherche}
         choix={etat.choix}
-        rechercheCachee={(r) => [...CHERCHES(r), trouvees?.has(r.id) ? q : '']}
+        pied={
+          liste.lignes.length ? (
+            <PiedServeur colonnes={colonnes} pese={pied.data?.pese_total ?? 0} />
+          ) : undefined
+        }
         placeholder="N°, fournisseur, BL, facture, bon, lot…"
         cliquable={onOuvrir}
         exporter={{ route: '/export/receptions', parametres: { statut } }}
         vide={
-          q.trim() ? 'Aucune réception de cet onglet ne correspond (voir les autres onglets).' : carte.vide
+          liste.requete.isPending
+            ? 'Chargement…'
+            : etat.recherche.valeur.trim()
+              ? 'Aucune réception de cet onglet ne correspond (voir les autres onglets).'
+              : carte.vide
         }
       />
     </Carte>

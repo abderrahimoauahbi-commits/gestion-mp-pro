@@ -11,25 +11,26 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from gestion_mp_pro.api.communs import ValidationVersion
-from gestion_mp_pro.api.dependances import SessionDep, VersionDep
-from gestion_mp_pro.api.erreurs import reponses
+from gestion_mp_pro.api.communs import ValidationVersion, encoder_curseur
+from gestion_mp_pro.api.dependances import PaginationDep, SessionDep, VersionDep
+from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.api.receptions import routes_exports, routes_pesees  # noqa: F401 — 176–180
 from gestion_mp_pro.api.receptions.routeur import FiltresDep, routeur
 from gestion_mp_pro.api.receptions.schemas import (
     AnnulationReception,
+    ApercuReceptions,
     FactureCorrection,
     FactureResume,
+    PageReceptions,
     ReceptionCreation,
     ReceptionFiche,
     ReceptionModification,
     ReceptionResume,
 )
 from gestion_mp_pro.securite import A, D, QuiDep, droit
-from gestion_mp_pro.services import contexte, receptions, receptions_facture
+from gestion_mp_pro.services import contexte, receptions, receptions_facture, receptions_liste
 from gestion_mp_pro.services.factures_lecture import FiltresFactures, lister
 from gestion_mp_pro.services.receptions_fiche import fiche
-from gestion_mp_pro.services.receptions_lecture import liste
 from gestion_mp_pro.services.receptions_saisie import FactureSaisie, LigneSaisie, Saisie
 
 __all__ = ["routeur"]
@@ -58,16 +59,47 @@ def _saisie(corps: ReceptionCreation) -> Saisie:
     )
 
 
+def _curseur(pagination: PaginationDep) -> int | None:
+    """Le n° d'entrée de la dernière réception rendue (curseur de pagination)."""
+    if not pagination.apres:
+        return None
+    try:
+        return int(str(pagination.apres[0]))
+    except (ValueError, TypeError, IndexError) as exc:
+        raise Refus.saisie(
+            "Curseur de pagination illisible : recharger la liste.", code="curseur_invalide"
+        ) from exc
+
+
 @routeur.get(
     "/receptions",
-    response_model=list[ReceptionResume],
+    response_model=PageReceptions,
     dependencies=[droit(D, A)],
-    summary="Les réceptions, la plus récente d'abord ; brouillons recalés sans rien écrire.",
+    summary="Les réceptions, la plus récente d'abord, par pages ; brouillons recalés sans écrire.",
     responses=reponses(401, 403, 422),
 )
-def lister_receptions(f: FiltresDep, s: SessionDep) -> list[ReceptionResume]:
-    """Route 167."""
-    return [ReceptionResume.model_validate(asdict(r)) for r in liste(s, f)]
+def lister_receptions(f: FiltresDep, pagination: PaginationDep, s: SessionDep) -> PageReceptions:
+    """Route 167 (filtres et recherche poussés en SQL ; total et pesé de l'onglet au serveur)."""
+    page = receptions_liste.lister(s, f, _curseur(pagination), pagination.limite)
+    suivant = encoder_curseur([page.dernier]) if page.dernier is not None else None
+    return PageReceptions(
+        elements=[ReceptionResume.model_validate(asdict(r)) for r in page.elements],
+        total=page.total,
+        suivant=suivant,
+        pese_total=page.pese_total,
+    )
+
+
+@routeur.get(
+    "/receptions/apercu",
+    response_model=ApercuReceptions,
+    dependencies=[droit(D, A)],
+    summary="Les comptes par onglet (suivant la recherche) et les fournisseurs du filtre lié.",
+    responses=reponses(401, 403, 422),
+)
+def apercu_receptions(s: SessionDep, q: str = "") -> ApercuReceptions:
+    """Route 181b : nourrit les pastilles des onglets et les options du filtre fournisseur."""
+    return ApercuReceptions.model_validate(asdict(receptions_liste.apercu(s, q[:200])))
 
 
 @routeur.get(

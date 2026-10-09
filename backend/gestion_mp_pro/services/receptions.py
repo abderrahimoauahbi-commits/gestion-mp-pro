@@ -335,7 +335,8 @@ class _GenreReception:
         réceptions leur sont fermées)."""
         if qui.role not in VOIENT_LES_BROUILLONS:
             return []
-        from gestion_mp_pro.services.receptions_lecture import FiltresReceptions, liste
+        from gestion_mp_pro.services.receptions_lecture import FiltresReceptions
+        from gestion_mp_pro.services.receptions_liste import liste
 
         return [
             Brouillon(

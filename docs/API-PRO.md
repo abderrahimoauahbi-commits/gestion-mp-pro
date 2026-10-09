@@ -31,7 +31,7 @@ est la forme exécutable de ce document ; l'essai `test_catalogue_api.py` compar
 - Listes : tableau complet pour les référentiels et les documents (la recherche multi-mots
   `?q=` et les filtres s'appliquent au serveur) ; **`Page[T]` = `{elements, total, suivant}`**
   (curseur opaque `?apres=`, `?limite=` ≤ 5 000, défaut 500) pour `mouvements`, `journal`,
-  `notifications`, `operations`, `signalements`, `receptions/pesees`. Plus aucune liste n'est
+  `notifications`, `operations`, `signalements`, `receptions/pesees`, `receptions`. Plus aucune liste n'est
   coupée sans le dire (incohérence B.13-19).
 - Date de référence : `?date=AAAA-MM-JJ` sur les lectures calculées (stock, plan d'achat,
   cockpit, valorisation, contrôles, besoins, exports) ; bornée 2000-01-01 … aujourd'hui → 422.
@@ -375,7 +375,8 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 167 | GET | `/receptions` | D, A | `?statut=&q=&du=&au=&fournisseur=` | `[ReceptionResume]` (brouillons recalés **sans écrire**) | A60 |
+| 167 | GET | `/receptions` | D, A | `?statut=&q=&du=&au=&fournisseur=&origine=bon\|hors&facture=avec\|sans&qualite=refus\|reserve\|conforme&apres=&limite=` (filtres liés poussés en SQL ; `q` cherche aussi, sans accents, lignes, lots, bons, personnes, devise, motif, statut) | `PageReceptions` = `Page[ReceptionResume]` + `pese_total` (Σ kg pesés hors refus de l'onglet, pied de totaux) ; brouillons recalés **sans écrire** | A60 |
+| 247 | GET | `/receptions/apercu` | D, A | `?q=` | `ApercuReceptions` {brouillon, validee, annulee, total (comptes par onglet suivant la recherche, tous onglets), fournisseurs `[{id, nom}]` (options du filtre lié)} | nouveau (pagination, lot PAGINATION2) |
 | 168 | GET | `/receptions/{id}` | D, A | — | `ReceptionFiche` (+ blocages, avertissements, reste après) | nouveau |
 | 169 | POST | `/receptions` | D, A | `ReceptionCreation` {date, fournisseur_id, numero_bl, controle_par, observations, factures: {devise: FactureEntree {numero, date, montant, echeance}} (**dictionnaire par devise** ; une facture pour une devise sans ligne → 422), lignes [{commande_ligne_id, matiere_id, lot_numero, lot_interne, quantite_bl, quantite_pesee, nb_palettes, bobines_en_plus, magasin_id, qualite, observations, prix, devise (hors commande)}]} ; bon pas parti → 409 dès la saisie | `[ReceptionFiche]` (une par devise, **une transaction** : aucune laissée en brouillon si une autre est refusée) | A61 |
 | 170 | PUT | `/receptions/{id}` | D, A | `ReceptionModification` = la saisie de 169 + `version`, **une seule devise** (422 « Une réception ne mêle pas deux devises… ») | `ReceptionFiche` (la fiche, pas une liste) | A62 |

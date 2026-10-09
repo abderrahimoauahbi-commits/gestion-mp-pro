@@ -44,15 +44,19 @@ def test_la_liste_se_filtre_au_serveur(achats: TestClient, decor: dict) -> None:
     )
     b = camion(achats, a.fournisseur_id, [_ligne(decor, "vert", "LI-2", 0)], date=j(-3))
     filtre = {"fournisseur": a.fournisseur_id}
-    tous = ok(achats.get("/api/receptions", params=filtre))
+    tous = ok(achats.get("/api/receptions", params=filtre))["elements"]
     assert {v["id"], b["id"]} <= {x["id"] for x in tous}
-    brouillons = ok(achats.get("/api/receptions", params=filtre | {"statut": "brouillon"}))
+    brouillons = ok(achats.get("/api/receptions", params=filtre | {"statut": "brouillon"}))[
+        "elements"
+    ]
     assert b["id"] in {x["id"] for x in brouillons} and v["id"] not in {x["id"] for x in brouillons}
     assert next(x for x in brouillons if x["id"] == b["id"])["blocages"]
-    trouves = ok(achats.get("/api/receptions", params={"q": "ecrue fes li-ecru"}))
+    trouves = ok(achats.get("/api/receptions", params={"q": "ecrue fes li-ecru"}))["elements"]
     assert [x["id"] for x in trouves] == [v["id"]]
-    assert ok(achats.get("/api/receptions", params={"q": "bl-ecru"}))[0]["id"] == v["id"]
-    du = ok(achats.get("/api/receptions", params=filtre | {"du": j(-1)}))
+    assert (
+        ok(achats.get("/api/receptions", params={"q": "bl-ecru"}))["elements"][0]["id"] == v["id"]
+    )
+    du = ok(achats.get("/api/receptions", params=filtre | {"du": j(-1)}))["elements"]
     assert b["id"] not in {x["id"] for x in du}
     assert achats.get("/api/receptions", params={"statut": "perdue"}).status_code == 422
 
@@ -139,7 +143,7 @@ def test_les_listes_s_exportent_comme_a_l_ecran(achats: TestClient, decor: dict)
     lignes = list(wb["Réceptions"].iter_rows(values_only=True))
     assert "onglet : Validées" in str(lignes[1][0])
     numeros = {x[0] for x in lignes[4:]}
-    liste = ok(achats.get("/api/receptions", params=filtres))
+    liste = ok(achats.get("/api/receptions", params=filtres))["elements"]
     assert numeros == {x["numero"] for x in liste} and r["numero"] in numeros
     lots = {x[5] for x in wb["Lignes"].iter_rows(min_row=5, values_only=True)}
     assert {"EX-1", "EX-2"} <= lots

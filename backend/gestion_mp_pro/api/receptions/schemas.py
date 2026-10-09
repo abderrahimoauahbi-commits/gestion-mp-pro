@@ -15,7 +15,7 @@ from decimal import Decimal
 
 from pydantic import Field, field_validator
 
-from gestion_mp_pro.api.communs import Entree, Nombre, Sortie
+from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.modeles import longueurs as L
 from gestion_mp_pro.modeles.enums import QualiteReception
 
@@ -191,6 +191,29 @@ class ReceptionResume(Sortie):
     blocages: list[str]
     annulation_motif: str
     version: int
+
+
+class PageReceptions(Page[ReceptionResume]):
+    """Route 167 : une page de réceptions (la plus récente d'abord) et le total pesé de l'onglet."""
+
+    pese_total: Nombre = Field(description="Σ des kilos pesés hors refus de l'onglet (pied)")
+
+
+class FournisseurOption(Sortie):
+    """Un fournisseur proposé par le filtre lié de la liste."""
+
+    id: int
+    nom: str
+
+
+class ApercuReceptions(Sortie):
+    """Route 181b : comptes par onglet (suivant la recherche) et fournisseurs du filtre lié."""
+
+    brouillon: int
+    validee: int
+    annulee: int
+    total: int
+    fournisseurs: list[FournisseurOption]
 
 
 class Annulee(Sortie):

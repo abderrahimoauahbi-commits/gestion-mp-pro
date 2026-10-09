@@ -19,14 +19,18 @@ TEXTE = Query(max_length=200, description="mots, sans accents")
 
 
 def filtres_receptions(
+    *,
     statut: Annotated[str, Query(pattern="^(brouillon|validee|annulee)?$")] = "",
     q: Annotated[str, TEXTE] = "",
     du: date | None = None,
     au: date | None = None,
     fournisseur: Annotated[int | None, Query(ge=1)] = None,
+    origine: Annotated[str, Query(pattern="^(bon|hors)?$")] = "",
+    facture: Annotated[str, Query(pattern="^(avec|sans)?$")] = "",
+    qualite: Annotated[str, Query(pattern="^(refus|reserve|conforme)?$")] = "",
 ) -> FiltresReceptions:
-    """`?statut=&q=&du=&au=&fournisseur=` (route 167 et son classeur 178)."""
-    return FiltresReceptions(statut, q, du, au, fournisseur)
+    """`?statut=&q=&du=&au=&fournisseur=&origine=&facture=&qualite=` (route 167 et classeur 178)."""
+    return FiltresReceptions(statut, q, du, au, fournisseur, origine, facture, qualite)
 
 
 def filtres_pesees(

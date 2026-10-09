@@ -16,7 +16,7 @@ from gestion_mp_pro.exports import receptions as classeurs
 from gestion_mp_pro.exports.classeur import REPONSES_XLSX, reponse
 from gestion_mp_pro.securite import A, D, droit
 from gestion_mp_pro.services import horloge, receptions_pesees
-from gestion_mp_pro.services.receptions_lecture import detailler
+from gestion_mp_pro.services.receptions_liste import detailler
 
 __all__ = ["routeur"]
 

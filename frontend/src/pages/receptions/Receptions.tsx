@@ -6,27 +6,22 @@
  * la courbe d'une matière `?matiere=ID`. Les anciens liens (`?ouvrir=ID`, `?reception=ID`) mènent
  * aux nouveaux.
  */
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { EnTete } from '../../composants/coque/EnTete'
 import { Onglets } from '../../composants/mise-en-page/Onglets'
 import { Page } from '../../composants/mise-en-page/Page'
-import { Chargement } from '../../composants/retour/Chargement'
-import { Erreur } from '../../composants/retour/Erreur'
 import { dire } from '../../composants/retour/Messages'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { champsCherches } from '../../composants/tableaux/colonnes'
 import { useEtatTableAdresse } from '../../composants/tableaux/etatAdresse'
-import { trouve } from '../../composants/tableaux/filtrage'
 import { nombre } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
 import { useListeEtFiches, useOngletListe } from '../commandes/adresse'
 import styles from '../plan-achat/achats.module.css'
-import { CHERCHES, colonnesReceptions } from './colonnesReceptions'
 import { CourbeBobine } from './CourbeBobine'
-import { useReceptions, useReceptionsTrouvees, useReclamations } from './donnees'
+import { useApercuReceptions, useReclamations } from './donnees'
 import { FicheReception } from './FicheReception'
 import { FicheReclamation } from './FicheReclamation'
 import { NouvelleReclamation } from './NouvelleReclamation'
@@ -35,7 +30,7 @@ import { OngletPesees } from './OngletPesees'
 import { OngletReceptions } from './OngletReceptions'
 import { OngletReclamations } from './OngletReclamations'
 import { SaisieReception } from './SaisieReception'
-import type { PagePesees, ReceptionFiche, ReceptionResume } from './types'
+import type { ApercuReceptions, PagePesees, ReceptionFiche } from './types'
 
 const ONGLETS = ['brouillon', 'validee', 'annulee', 'reclamations', 'bobines', 'pesees'] as const
 type Onglet = (typeof ONGLETS)[number]
@@ -145,22 +140,17 @@ function FenetresOuvertes({ nav }: { nav: Nav }) {
   return null
 }
 
-function useComptes(receptions: readonly ReceptionResume[], q: string, trouvees: ReadonlySet<number> | null) {
+function useComptes(apercu: ApercuReceptions | undefined) {
   const reclamations = useReclamations()
   const pesees = useLecture<PagePesees>('/receptions/pesees', { limite: 1 })
-  const colonnes = useMemo(() => colonnesReceptions(() => undefined), [])
-  const retenues = receptions.filter(
-    (r) => !q.trim() || trouvees?.has(r.id) || trouve(champsCherches(colonnes, r, CHERCHES), q),
-  )
-  const par = (s: string) => retenues.filter((r) => r.statut === s).length
   return {
-    brouillon: par('brouillon'),
-    validee: par('validee'),
-    annulee: par('annulee'),
+    brouillon: apercu?.brouillon,
+    validee: apercu?.validee,
+    annulee: apercu?.annulee,
     reclamations: reclamations.data?.filter((r) => r.statut === 'ouverte').length,
     bobines: undefined,
     pesees: pesees.data?.total,
-    trouvees: retenues.length,
+    trouvees: apercu?.total,
   }
 }
 
@@ -197,18 +187,14 @@ function useGestesAdresse() {
   return { changerOnglet, ouvrirCourbe }
 }
 
-function Contenu({ receptions, nav }: { receptions: readonly ReceptionResume[]; nav: Nav }) {
+function Contenu({ nav }: { nav: Nav }) {
   const { role } = useSession()
   const [params] = useSearchParams()
   const etat = useEtatTableAdresse(FILTRES)
   const q = etat.recherche.valeur
-  const serveur = useReceptionsTrouvees(q)
-  const trouvees = useMemo(
-    () => (q.trim() && serveur.data ? new Set(serveur.data.map((r) => r.id)) : null),
-    [q, serveur.data],
-  )
-  const comptes = useComptes(receptions, q, trouvees)
-  const defaut: Onglet = receptions.some((r) => r.statut === 'brouillon') ? 'brouillon' : 'validee'
+  const apercu = useApercuReceptions(q)
+  const comptes = useComptes(apercu.data)
+  const defaut: Onglet = apercu.data && apercu.data.brouillon > 0 ? 'brouillon' : 'validee'
   const [onglet] = useOngletListe<Onglet>('/receptions', ONGLETS, defaut)
   const ecarts = params.get('ecarts') === '1'
   const poserEcarts = (v: boolean) => etat.choix.poser('ecarts', v ? '1' : null)
@@ -229,8 +215,7 @@ function Contenu({ receptions, nav }: { receptions: readonly ReceptionResume[]; 
       {onglet === 'brouillon' || onglet === 'validee' || onglet === 'annulee' ? (
         <OngletReceptions
           statut={onglet}
-          receptions={receptions}
-          trouvees={trouvees}
+          fournisseurs={apercu.data?.fournisseurs ?? []}
           etat={etat}
           onOuvrir={(r) => nav.ouvrir(r.id)}
           onCorriger={(r) => nav.corriger(r.id)}
@@ -254,7 +239,6 @@ function Contenu({ receptions, nav }: { receptions: readonly ReceptionResume[]; 
 }
 
 export default function Receptions() {
-  const lu = useReceptions()
   const nav = useNavigationReceptions()
   const [params] = useSearchParams()
   const { pathname } = useLocation()
@@ -274,9 +258,7 @@ export default function Receptions() {
           </Bouton>
         }
       />
-      {lu.isError ? <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} /> : null}
-      {lu.isPending ? <Chargement quoi="les réceptions" /> : null}
-      {lu.data ? <Contenu receptions={lu.data} nav={nav} /> : null}
+      <Contenu nav={nav} />
       <FenetresOuvertes nav={nav} />
     </Page>
   )

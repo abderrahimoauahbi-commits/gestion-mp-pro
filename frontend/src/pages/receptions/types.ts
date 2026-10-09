@@ -5,6 +5,8 @@
 import type { Schema } from '../../lib/types'
 
 export type ReceptionResume = Schema<'ReceptionResume'>
+export type PageReceptions = Schema<'PageReceptions'>
+export type ApercuReceptions = Schema<'ApercuReceptions'>
 export type ReceptionFiche = Schema<'ReceptionFiche'>
 export type LigneReception = Schema<'LigneReception'>
 export type ReceptionCreation = Schema<'ReceptionCreation'>

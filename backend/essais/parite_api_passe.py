@@ -53,6 +53,23 @@ def _pages_pro(client: Client, chemin: str, champ: str) -> list[Any]:
             return elements
 
 
+def _liste_ou_pages(client: Client, chemin: str, reponse: Any, champ: str) -> list[Any]:
+    """La liste d'une réponse : telle quelle, ou l'union des pages d'un `Page[T]` (curseur),
+    ou le champ nommé (traduction de forme pour la parité : `Page.elements` → la liste)."""
+    if isinstance(reponse, list):
+        return reponse
+    if isinstance(reponse, dict) and "elements" in reponse and "suivant" in reponse:
+        elements = list(reponse["elements"])
+        suivant = reponse.get("suivant") or ""
+        sep = "&" if "?" in chemin else "?"
+        while suivant:
+            page = client.get(f"{chemin}{sep}apres={suivant}")
+            elements += page["elements"]
+            suivant = page.get("suivant") or ""
+        return elements
+    return reponse[champ]
+
+
 def lire(client: Client, chemin: str, page: bool, fiche: str, champ: str, pro: bool) -> Any:  # noqa: PLR0917
     """Une réponse entière : toutes les pages, ou la liste remplacée par les fiches."""
     if page:
@@ -60,7 +77,7 @@ def lire(client: Client, chemin: str, page: bool, fiche: str, champ: str, pro: b
     reponse = client.get(chemin)
     if not fiche:
         return reponse
-    liste = reponse if isinstance(reponse, list) else reponse[champ]
+    liste = _liste_ou_pages(client, chemin, reponse, champ)
     return [client.get(fiche.format(id=e["id"])) for e in liste]
 
 

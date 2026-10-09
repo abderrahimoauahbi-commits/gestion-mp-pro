@@ -125,7 +125,7 @@ def etape_camion(m: Monde) -> None:
     mag = magasins(m)
     m.ids |= {f"mag_{k}": x for k, x in mag.items()}
     m.avant["valo_19"] = valorisation(m)
-    existants = a.get("/receptions")
+    existants = a.get("/receptions")["elements"]
     corps = {
         "date": "2026-11-19",
         "fournisseur_id": m.ids["F1"],

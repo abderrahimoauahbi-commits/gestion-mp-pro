@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session, selectinload
 
 from gestion_mp_pro.modeles import Facture, Fournisseur, Lot, Reception, ReceptionLigne, Utilisateur
 from gestion_mp_pro.modeles.enums import QualiteReception, StatutDocument
-from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import reglages
 from gestion_mp_pro.services.chargeur.achats import retours_par_ligne_reception
 from gestion_mp_pro.services.commandes_socle import nom_commande
@@ -39,13 +38,20 @@ from gestion_mp_pro.services.receptions_socle import (
 
 @dataclass(frozen=True)
 class FiltresReceptions:
-    """`?statut=&q=&du=&au=&fournisseur=` de la liste et de son classeur."""
+    """`?statut=&q=&du=&au=&fournisseur=&origine=&facture=&qualite=` de la liste et du classeur.
+
+    `origine` (``bon``/``hors``), `facture` (``avec``/``sans``) et `qualite`
+    (``refus``/``reserve``/``conforme``) sont les filtres liés de l'écran, poussés en SQL.
+    """
 
     statut: str = ""
     q: str = ""
     du: dt.date | None = None
     au: dt.date | None = None
     fournisseur: int | None = None
+    origine: str = ""
+    facture: str = ""
+    qualite: str = ""
 
 
 @dataclass
@@ -307,46 +313,6 @@ def resume(s: Session, r: Reception, lu: _Lecture) -> ReceptionResume:
     )  # fmt: skip
 
 
-def _texte(r: ReceptionResume, lignes: list[ReceptionLigne], lu: _Lecture) -> str:
-    """Ce que la recherche lit : n°, fournisseur, BL, facture, personnes, bons, lignes."""
-    morceaux = [
-        r.numero or "brouillon", r.fournisseur, r.numero_bl,
-        r.facture.numero if r.facture else "", r.cree_par, r.controle_par, r.observations,
-        *(b.numero for b in r.commandes),
-        *(
-            f"{lu.ctx.matieres[x.matiere_id].reference} {lu.ctx.matieres[x.matiere_id].designation}"
-            f" {lu.lots.get(x.lot_id, '') if x.lot_id else x.lot_numero}"
-            for x in lignes
-        ),
-    ]  # fmt: skip
-    return normaliser(" ".join(m for m in morceaux if m))
-
-
-def _passe(r: Reception, f: FiltresReceptions) -> bool:
-    """Les filtres de statut, de dates et de fournisseur."""
-    if f.statut and str(r.statut) != f.statut:
-        return False
-    if f.du is not None and r.date < f.du:
-        return False
-    if f.au is not None and r.date > f.au:
-        return False
-    return f.fournisseur is None or r.fournisseur_id == f.fournisseur
-
-
-def liste(s: Session, f: FiltresReceptions) -> list[ReceptionResume]:
-    """Route 167 : la liste filtrée au serveur (recherche multi-mots, sans accents)."""
-    receptions = [r for r in charger_receptions(s) if _passe(r, f)]
-    lu = _lire(s, receptions)
-    mots = normaliser(f.q).split()
-    resultat = []
-    for r in receptions:
-        x = resume(s, r, lu)
-        if mots and not all(m in _texte(x, r.lignes, lu) for m in mots):
-            continue
-        resultat.append(x)
-    return resultat
-
-
 def lire_lignes(
     s: Session, receptions: list[Reception]
 ) -> tuple[_Lecture, dict[int, list[LigneLue]]]:
@@ -359,12 +325,3 @@ def lire_lignes(
             _ligne(x, r, lu, recal.get(x.id)) for x in sorted(r.lignes, key=lambda y: y.id or 0)
         ]
     return lu, lignes
-
-
-def detailler(s: Session, f: FiltresReceptions) -> list[tuple[ReceptionResume, list[LigneLue]]]:
-    """Les réceptions de la liste filtrée et leurs lignes (classeur 178 : filtres = écran)."""
-    resumes = liste(s, f)
-    if not resumes:
-        return []
-    _, lignes = lire_lignes(s, charger_receptions(s, [r.id for r in resumes]))
-    return [(r, lignes[r.id]) for r in resumes]

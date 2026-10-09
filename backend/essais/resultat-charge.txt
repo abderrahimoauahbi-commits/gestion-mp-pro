@@ -144,3 +144,22 @@ Exports :
 Vingt postes ouvrent le stock ensemble : total 13.30 s, médiane 13230 ms, p95 13285 ms  [DÉFAUT]
 
   → 14 dépassement(s) (projection de stress, hors volume de service ; voir docs/lots/V4.md § 6).
+
+================================================================================
+Pagination — lot PAGINATION2 (2026-10-09) : GET /receptions (167)
+================================================================================
+Micro-mesure au niveau service (3 appels, meilleur/médiane), base synthétique de
+9 000 réceptions (~×30 d'une année de ~300), chacune avec sa/ses ligne(s) ;
+scratchpad/bench_receptions.py, base gestion_mp_pro_pag2_mesure_essai (supprimée après).
+
+  Volume : 9 000 réceptions
+  ANCIEN — liste() reconstruit TOUT           380 ms (médiane 448)   ← O(N), croît avec l'historique
+  NOUVEAU — lister() une page (≤ 500)          49 ms (médiane 103)   ← borné, ne croît plus
+  NOUVEAU — apercu() (comptes + fournisseurs)   3 ms (médiane  4)    ← agrégats SQL (COUNT, DISTINCT)
+
+Lecture : au lieu de bâtir un `resume` par réception de tout l'historique (et de sérialiser
+toutes les lignes), la route ne bâtit que la page demandée et calcule total, comptes par onglet et
+pesé de l'onglet par des agrégats SQL. Le coût par appel cesse de croître avec l'historique (même
+patron que /operations, qui tient déjà ×30 en V4) ; la charge utile passe de 9 000 à ≤ 500
+éléments. Au volume de service réel, les chiffres sont identiques (essais verts) : aucune
+régression. /ordres, /commandes, /dossiers restent à paginer (voir docs/lots/PAGINATION2.md § 2).

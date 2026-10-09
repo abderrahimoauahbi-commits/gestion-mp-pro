@@ -85,7 +85,11 @@ def test_un_brouillon_ne_se_valide_pas_sur_un_bon_annule_entre_temps(
         achats, mad.fournisseur_id, [ligne_du_bon(b, m, 500, "G3-1", magasin_id=quai.courant)]
     )
     assert geste_bon(achats, b, "solder")["statut"] == "annulee"
-    vue = next(x for x in ok(achats.get("/api/receptions?statut=brouillon")) if x["id"] == r["id"])
+    vue = next(
+        x
+        for x in ok(achats.get("/api/receptions?statut=brouillon"))["elements"]
+        if x["id"] == r["id"]
+    )
     assert any("annulé" in x for x in vue["blocages"])
     assert geste(achats, r, "valider", 409)["code"] == "bon_clos"
 
