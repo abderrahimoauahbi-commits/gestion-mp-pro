@@ -55,6 +55,7 @@ GET;/api/export/matieres;401;ok;ok;403;403
 GET;/api/export/metiers;401;ok;ok;ok;403
 GET;/api/export/mouvements;401;ok;ok;ok;403
 GET;/api/export/operations;401;ok;ok;ok;403
+GET;/api/export/ordres;401;ok;ok;ok;403
 GET;/api/export/pilotage;401;ok;ok;403;403
 GET;/api/export/plan-achat;401;ok;ok;403;403
 GET;/api/export/production;401;ok;ok;ok;403
@@ -122,6 +123,16 @@ GET;/api/operations/{ident};401;ok;ok;ok;403
 PUT;/api/operations/{ident};401;ok;ok;ok;403
 POST;/api/operations/{ident}/annuler;401;ok;ok;ok;403
 POST;/api/operations/{ident}/valider;401;ok;ok;ok;403
+GET;/api/ordres;401;ok;ok;ok;403
+POST;/api/ordres;401;ok;403;ok;403
+GET;/api/ordres/consommation;401;ok;ok;ok;403
+POST;/api/ordres/proposition;401;ok;ok;ok;403
+DELETE;/api/ordres/{ident};401;ok;403;ok;403
+GET;/api/ordres/{ident};401;ok;ok;ok;403
+PUT;/api/ordres/{ident};401;ok;403;ok;403
+POST;/api/ordres/{ident}/annuler;401;ok;403;ok;403
+GET;/api/ordres/{ident}/lots-sortis;401;ok;ok;ok;403
+POST;/api/ordres/{ident}/valider;401;ok;403;ok;403
 GET;/api/parametres;401;ok;ok;403;ok
 PUT;/api/parametres;401;ok;403;403;ok
 GET;/api/parametres/historique;401;ok;403;403;ok

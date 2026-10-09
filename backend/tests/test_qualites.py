@@ -10,6 +10,7 @@ import json
 
 import pytest
 from fabrique import *  # noqa: F403
+from fabriques.ordres import ordre_valide
 from fabriques.qualites import (
     classeur_lu,
     corps_fiche,
@@ -17,7 +18,6 @@ from fabriques.qualites import (
     lignes,
     lire_qualite,
     ok,
-    ordre_valide,
     poids,
     refus,
 )

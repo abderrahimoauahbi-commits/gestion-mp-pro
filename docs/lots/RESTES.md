@@ -22,3 +22,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D5 | docs | API-PRO 122–123 (`Brouillons.lignes`, réponse `valides`/`refuses`/`ignores`), champs ajoutés à `OperationFiche`, `InventaireFiche`, `DefautsInventaire` en `{id, code}` ; ECRANS-PRO P6 : un inventaire ouvert par magasin (index unique), message OR24 de REGLES (docs/lots/D5.md § 4). |
 | D5 | D4, D6 | Définir `GENRE_BROUILLON` (protocole `services.brouillons.Genre` : rang 0 réceptions, rang 3 ordres) pour qu'« À valider » montre leurs brouillons ; D6 : partie « ordres » de `test_stock_atelier::test_brouillons_a_valider…`. |
 | F7 | D8 | `GET /pieces` (pièces jointes) répond 404 : onglet Pièces jointes des fiches en erreur ; route 215 `/fournisseurs/performance` absente (lue en forme provisoire `catalogue/performance.ts`). |
+| D6 | D8 | Moitié « bilan » de `test_plan_besoins::test_le_prevu_d_un_ordre_est_fige…` : lire `services.ordres.consommation.consommations`. |
+| D6 | D5 | Remplacer la fabrique décor `ordre_valide` de D5 par `fabriques.ordres.valide`. |
+| D6 | docs | Écarts de D6 (docs/lots/D6.md § 4) : `prevu`/`par_matiere`, filtres de la liste 135 non paginée, champ `blocage` (142), `vue=ordres|consommation` (144), `services/ordres/` en paquet. |
