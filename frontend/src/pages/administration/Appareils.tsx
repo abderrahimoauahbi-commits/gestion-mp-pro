@@ -24,6 +24,7 @@ import { horodatage, nombre } from '../../lib/format'
 import { useEcriture, useLecture } from '../../lib/requetes'
 import type { Schema } from '../../lib/types'
 import styles from './administration.module.css'
+import { svgEnImage } from './qr'
 
 type Appareil = Schema<'AppareilFiche'>
 type Enrolement = Schema<'Enrolement'>
@@ -88,11 +89,7 @@ function NouvelAppareil({ onFermer }: { onFermer: () => void }) {
           Depuis l’appareil, viser ce QR (ou ouvrir le lien). Il sert une fois, jusqu’au{' '}
           {horodatage(fait.expire_le)}.
         </Note>
-        <img
-          className={styles.qr}
-          alt={`QR d’enrôlement de ${fait.nom}`}
-          src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(fait.qr_svg)}`}
-        />
+        <img className={styles.qr} alt={`QR d’enrôlement de ${fait.nom}`} src={svgEnImage(fait.qr_svg)} />
         <span className={styles.code}>{fait.lien}</span>
       </Fenetre>
     )

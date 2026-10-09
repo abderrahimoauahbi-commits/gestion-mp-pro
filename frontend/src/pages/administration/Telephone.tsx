@@ -9,10 +9,10 @@ import { Carte } from '../../composants/mise-en-page/Carte'
 import { Chargement } from '../../composants/retour/Chargement'
 import { Erreur } from '../../composants/retour/Erreur'
 import { Note } from '../../composants/retour/Note'
-import { adresseApi } from '../../lib/api'
 import { useLecture } from '../../lib/requetes'
 import type { Schema } from '../../lib/types'
 import styles from './administration.module.css'
+import { useQrAcces } from './qr'
 
 type Acces = Schema<'Acces'>
 
@@ -21,6 +21,7 @@ export const nomMachine = (adresse: string | undefined) =>
   (adresse ?? 'serveur-usine').replace(/^https?:\/\//, '').replace(/:\d+$/, '')
 
 function Usine({ a }: { a: Acces }) {
+  const qr = useQrAcces().data
   const adresse = a.adresses[0]?.adresse ?? window.location.origin
   return (
     <Carte titre="Dans l’usine, sur le Wi-Fi">
@@ -32,7 +33,7 @@ function Usine({ a }: { a: Acces }) {
         </Note>
       ) : null}
       <div className={styles.rangee}>
-        <img className={styles.qr} alt={`QR de l’adresse ${a.adresse_qr}`} src={adresseApi('/acces/qr')} />
+        {qr ? <img className={styles.qr} alt={`QR de l’adresse ${a.adresse_qr}`} src={qr} /> : null}
         <span className={styles.note}>
           Visez ce QR avec l’appareil photo du téléphone : Gestion MP PRO s’ouvre à l’adresse {a.adresse_qr}{' '}
           (celle que portent aussi les étiquettes des lots). Pour la changer :{' '}
