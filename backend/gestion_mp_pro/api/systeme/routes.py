@@ -1,24 +1,24 @@
 """Routes du domaine « Système ».
 
-Lot S2 (routes 2–7) et D10 (route 1, santé) ; S0 a posé la première forme de `GET /sante`.
+Lot S2 (routes 2, 3, 5–7) et D10 (route 1, santé ; route 4, état du serveur) ; S0 a posé la
+première forme de `GET /sante`.
 Routes minces : chemin, droits, schémas, `summary` ; un appel de service ; aucune règle métier
 (ARCHITECTURE § 3.1).
 """
 
 from __future__ import annotations
 
-import time
 from typing import Annotated
 
 from fastapi import Query, Request, Response
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
 
 from gestion_mp_pro import __version__
 from gestion_mp_pro.api.communs import nouveau_routeur
 from gestion_mp_pro.api.comptes.schemas import Moi
 from gestion_mp_pro.api.dependances import SessionDep
 from gestion_mp_pro.api.erreurs import Refus, reponses
+from gestion_mp_pro.api.exploitation.routes import etat_sauvegardes, tache
+from gestion_mp_pro.api.exploitation.schemas import EtatServeur
 from gestion_mp_pro.api.systeme.schemas import (
     Acces,
     AdresseAcces,
@@ -29,10 +29,9 @@ from gestion_mp_pro.api.systeme.schemas import (
     Sante,
 )
 from gestion_mp_pro.config import RACINE
-from gestion_mp_pro.db import DISPONIBILITE, moteur
-from gestion_mp_pro.securite import TOUS, C, QuiDep, T, droit, gestes_de
+from gestion_mp_pro.securite import TOUS, C, D, QuiDep, T, droit, gestes_de
 from gestion_mp_pro.securite.matrice import domaines_permis
-from gestion_mp_pro.services import appareils, comptes, horloge
+from gestion_mp_pro.services import appareils, comptes, execution, horloge, serveur
 from gestion_mp_pro.services import contexte as service_contexte
 
 routeur = nouveau_routeur("systeme")
@@ -47,17 +46,6 @@ def version_servie() -> str:
     return f"{__version__} (projet)"
 
 
-def _base_ms() -> float | None:
-    """Temps d'un `SELECT 1`, en millisecondes ; `None` si la base ne répond pas."""
-    debut = time.perf_counter()
-    try:
-        with moteur().connect() as c:
-            c.execute(text("SELECT 1"))
-    except SQLAlchemyError:
-        return None
-    return round((time.perf_counter() - debut) * 1000, 1)
-
-
 @routeur.get(
     "/sante",
     response_model=Sante,
@@ -65,10 +53,29 @@ def _base_ms() -> float | None:
     summary="Santé du serveur pour la surveillance (public, sans donnée métier).",
 )
 def sante() -> Sante:
-    """Route 1 : la base répond-elle, le schéma est-il à jour, quelle version est servie."""
-    base_ms = _base_ms()
-    etat = "ok" if base_ms is not None and not DISPONIBILITE.schema_en_retard else "degrade"
-    return Sante(etat=etat, version=version_servie(), base_ms=base_ms)
+    """Route 1 (D10) : base, schéma, version servie, sauvegarde de cette base, tâches, courriels."""
+    e = serveur.sante()
+    return Sante.model_validate({**vars(e), "version": version_servie()})
+
+
+@routeur.get(
+    "/serveur",
+    response_model=EtatServeur,
+    dependencies=[droit(D, T)],
+    summary="L'état du serveur : versions, base, réseau, tâches, sauvegardes, sessions ouvertes.",
+    responses=reponses(401, 403),
+)
+def etat_serveur(requete: Request, s: SessionDep) -> EtatServeur:
+    """Route 4 (D10) : l'adresse reprend le schéma et le port de la requête (G-13)."""
+    e = serveur.etat_serveur(s, str(requete.base_url), version_servie())
+    return EtatServeur.model_validate(
+        {
+            **vars(e),
+            "sauvegardes": etat_sauvegardes(e.sauvegardes),
+            "taches": [tache(x) for x in execution.tous(s)],
+            "sessions": [vars(x) for x in e.sessions],
+        }
+    )
 
 
 @routeur.get(

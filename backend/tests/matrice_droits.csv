@@ -19,6 +19,8 @@ PUT;/api/codes-douaniers/{ident};401;ok;403;403;403
 POST;/api/connexion;ok;ok;ok;ok;ok
 GET;/api/contexte;401;ok;ok;ok;ok
 GET;/api/controles/soldes;401;ok;ok;403;403
+GET;/api/courriel/apercu;401;ok;403;403;403
+GET;/api/courriels;401;ok;403;403;ok
 POST;/api/deconnexion;401;ok;ok;ok;ok
 GET;/api/devises;401;ok;ok;403;403
 POST;/api/devises;401;ok;ok;403;403
@@ -75,8 +77,13 @@ DELETE;/api/postes-frais/{ident};401;ok;403;403;403
 PUT;/api/postes-frais/{ident};401;ok;403;403;403
 GET;/api/recherche;401;ok;ok;ok;403
 GET;/api/sante;ok;ok;ok;ok;ok
+GET;/api/sauvegardes;401;ok;403;403;ok
+POST;/api/sauvegardes;401;ok;403;403;ok
+POST;/api/sauvegardes/{nom}/restaurer;401;ok;403;403;ok
+GET;/api/serveur;401;ok;403;403;ok
 GET;/api/stock;401;ok;ok;ok;403
 GET;/api/stock/{matiere_id};401;ok;ok;ok;403
+GET;/api/taches;401;ok;403;403;ok
 GET;/api/tracabilite;401;ok;ok;ok;403
 GET;/api/utilisateurs;401;ok;403;403;ok
 POST;/api/utilisateurs;401;ok;403;403;ok
