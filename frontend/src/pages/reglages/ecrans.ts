@@ -5,7 +5,8 @@
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+// Page provisoire du lot F5 (onglets « Postes de frais », « Codes douaniers ») tant que le lot F8 n'a pas livré la sienne.
+const aVenir = () => import('../importations/PageReglages')
 
 export const ecrans: readonly Ecran[] = [
   {

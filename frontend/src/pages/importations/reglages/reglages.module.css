@@ -1,0 +1,52 @@
+/* Réglages › Postes de frais et Codes douaniers (lot F5) : seulement des jetons (stylelint). */
+
+.tete {
+  padding: var(--espace-3) var(--espace-4) var(--espace-2);
+  border-bottom: 1px solid var(--bord);
+}
+
+.code {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.saisieCode {
+  font-family: var(--mono);
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.etat {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.volet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-width: 0;
+}
+
+.case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}

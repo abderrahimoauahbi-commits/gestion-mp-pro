@@ -473,6 +473,30 @@
       "grandeur": "Matières d’un fournisseur",
       "texte": "Les matières du catalogue qui le désignent comme fournisseur, désactivées comprises, comptées par devise de leur prix."
     },
+    "import_achat": {
+      "grandeur": "Achat (importations)",
+      "texte": "Σ valeur de chaque marchandise au cours payé à la banque (sinon au cours du jour des réglages, marqué *) : pesée × prix × cours, en MAD. Une marchandise entre à sa pesée × son prix, pas au montant de la facture."
+    },
+    "import_charges": {
+      "grandeur": "Charges hors TVA",
+      "texte": "Σ des frais non récupérables répartis sur les marchandises (droits, fret, assurance, transitaire, port, banque…), à la valeur ou au poids selon le poste. La TVA, récupérable, n’y est pas. Les frais qu’aucune marchandise ne porte (« non répartis ») ne sont dans aucun coût : ils sont montrés à part."
+    },
+    "import_cout": {
+      "grandeur": "Coût hors TVA (coût de revient)",
+      "texte": "Achat + charges hors TVA : ce que la marchandise a coûté rendue usine. Au kilo : coût hors TVA ÷ poids (le cuir, les franges et le ruban compris, leur stock est en kilos). C’est le coût qui entre au coût moyen du stock à la clôture du dossier."
+    },
+    "import_cout_ttc": {
+      "grandeur": "Coût TTC",
+      "texte": "Coût hors TVA + TVA à l’importation (récupérable) : ce que le dossier a décaissé. TVA attendue = taux de TVA réglé × (valeur en douane + droits + TPI)."
+    },
+    "import_dossiers": {
+      "grandeur": "Dossiers d’importation",
+      "texte": "Tous les dossiers, ouverts et clos ; les dossiers annulés ne sont comptés nulle part. Un dossier = une facture = une livraison."
+    },
+    "import_poids": {
+      "grandeur": "Poids importé",
+      "texte": "Σ des kilos pesés à la réception des marchandises des dossiers (le cuir, les franges et le ruban compris). N lot(s) : les lots distincts."
+    },
     "inventaire_a_recompter": {
       "grandeur": "À recompter",
       "texte": "Les premiers comptages hors tolérance qui n’ont pas encore de recomptage. Le recomptage, fait par une autre personne, est retenu : c’est lui qui ajuste."
@@ -684,6 +708,22 @@
     "reste_lot": {
       "grandeur": "Reste d’un lot",
       "texte": "Ce que le lot porte dans tous les magasins, quarantaine comprise (le solde de son journal)."
+    },
+    "revient_cout_kg_tapis": {
+      "grandeur": "Coût / kg de tapis",
+      "texte": "Coût matière au m² ÷ poids au m² de la recette (rôles au poids) : le coût d’un kilo de tapis, pondéré par la recette. Les rôles au mètre (cuir, franges, ruban) comptent par leurs ml/m² × densité."
+    },
+    "revient_cout_m2": {
+      "grandeur": "Coût matière / m²",
+      "texte": "Σ, rôle par rôle, kg au m² du rôle × part de chaque fil × coût hors TVA au kilo de ce fil dans les dossiers. Un rôle dont une partie des fils n’a jamais été importée prend le coût connu, étendu au reste du rôle ; un rôle sans aucun fil importé est hors du coût calculé."
+    },
+    "revient_couverture": {
+      "grandeur": "Recette couverte",
+      "texte": "La part du poids au m² de la recette dont le coût est connu par des dossiers d’importation (fils importés ÷ fils de la recette, pondérés par leur poids)."
+    },
+    "revient_poids_importe": {
+      "grandeur": "Poids importé (qualité)",
+      "texte": "Σ des kilos importés des fils de la recette dans les dossiers retenus (période, statut), avec leur coût hors TVA."
     },
     "rotation": {
       "grandeur": "Rotation du stock",

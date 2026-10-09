@@ -1,0 +1,206 @@
+/* Analyse › Coût de revient (lot F5). Jetons seulement : la page ne défile pas, seul le cadre du
+   tableau défile ; les rangées de filtres sont compactes et passent à la ligne au téléphone. */
+
+.corps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--espace-2);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--espace-3);
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+.periode {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-1);
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.date {
+  width: 132px;
+}
+
+/* Bases serrées : à 1366 px, statut, période, qualité et matière tiennent sur une rangée. */
+.qualite {
+  flex: 0 1 170px;
+  min-width: 140px;
+}
+
+.matiere {
+  flex: 0 1 170px;
+  min-width: 140px;
+}
+
+.axe {
+  width: 180px;
+}
+
+.liste {
+  flex: 1 1 130px;
+  min-width: 110px;
+  max-width: 180px;
+  height: var(--hauteur-champ);
+  padding: 0 8px;
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.pose {
+  border-color: var(--accent);
+  background: var(--accent-clair);
+}
+
+.criteres {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+.puce {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  padding: 2px 4px 2px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-clair);
+  font-size: var(--taille-petite);
+}
+
+.retirer {
+  min-width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texte-2);
+  cursor: pointer;
+}
+
+.retirer:hover {
+  background: var(--survol);
+  color: var(--texte);
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.pile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.droite {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dossiers {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--espace-2);
+}
+
+/* Le tableau prend la hauteur qui reste (son cadre la mesure). */
+.tableau {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+}
+
+.detailKpi {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 var(--espace-2);
+}
+
+/* « + N MAD non répartis » : en rouge, une liste de liens qui s'ouvre par-dessus le tableau. */
+.nonRepartis {
+  position: relative;
+  display: inline-block;
+}
+
+.nonRepartis > summary {
+  color: var(--ton-critique);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.nonRepartis > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nonRepartis ul {
+  position: absolute;
+  z-index: var(--plan-liste);
+  right: 0;
+  min-width: 220px;
+  margin: var(--espace-1) 0 0;
+  padding: var(--espace-2) var(--espace-3);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  box-shadow: var(--ombre-haute);
+  list-style: none;
+}
+
+.nonRepartis li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espace-3);
+  padding: 2px 0;
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+@media (width <= 700px) {
+  .qualite,
+  .matiere,
+  .liste {
+    flex: 1 1 140px;
+    max-width: none;
+  }
+
+  .periode {
+    flex: 1 1 100%;
+  }
+
+  .date {
+    flex: 1 1 120px;
+    width: auto;
+  }
+
+  .axe {
+    flex: 1 1 100%;
+    width: auto;
+  }
+
+  .nonRepartis ul {
+    right: auto;
+    left: 0;
+  }
+}
