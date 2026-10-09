@@ -11,17 +11,13 @@ from __future__ import annotations
 import dataclasses
 import typing
 from datetime import date, datetime
-from decimal import Decimal
-from typing import Annotated, Any
+from typing import Any
 
-from pydantic import Field, PlainSerializer, create_model
+from pydantic import Field, create_model
 
-from gestion_mp_pro.api.communs import Entree, Page, Sortie
+from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.calcul.stock import LigneStock as _LigneDuMoteur
 from gestion_mp_pro.modeles import longueurs as L
-
-Nombre = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
-"""Un `NUMERIC` de la base, rendu en nombre JSON (API-PRO § 0.1), pas en texte."""
 
 
 def _ligne_de_stock() -> type[Sortie]:
