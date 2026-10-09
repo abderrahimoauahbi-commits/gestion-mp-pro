@@ -92,6 +92,16 @@
         "Code oublié : la direction ou l’administrateur le remet à zéro dans Administration › Comptes."
       ]
     },
+    "fournisseur": {
+      "titre": "Fiche fournisseur",
+      "resume": "Un fournisseur : identité et contact, approvisionnement (délai, couverture, devise, incoterm, port), paiement, ses pièces jointes et son historique ; ses indicateurs (matières, délai mesuré, OTIF, score).",
+      "points": [
+        "Le délai et la couverture règlent le plan d’achat ; une couverture à 0 suit le réglage général.",
+        "Le délai passe en attention quand le délai mesuré dépasse de plus de 20 % le déclaré, sur trois livraisons au moins : corriger la fiche.",
+        "Un fournisseur qui a servi (matières, commandes, réceptions, lots, opérations, factures, pièces) se désactive ; « Supprimer » dit ce qui l’en empêche.",
+        "Si la fiche a été modifiée entre-temps sur un autre poste, l’enregistrement est refusé : « Recharger la fiche » repart de sa dernière version."
+      ]
+    },
     "importations": {
       "titre": "Importations & coût de revient",
       "resume": "Un dossier d’importation par facture : ses marchandises, ses frais répartis, son échéancier, ses pièces ; ce que chaque fil a coûté rendu usine.",
@@ -124,6 +134,18 @@
         "« Où ce lot est-il allé ? » ouvre la traçabilité.",
         "Libérer une quarantaine est une décision des achats ou de la direction, après contrôle de la matière.",
         "L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche."
+      ]
+    },
+    "matiere": {
+      "titre": "Fiche matière",
+      "resume": "Une matière du catalogue : sa classification et sa référence, son achat (fournisseur, prix, unité d’achat, code douanier), son conditionnement et son stock minimum, ses pièces jointes et son historique.",
+      "points": [
+        "La référence se compose seule depuis la classification (composition, type de fil, titrage, couleur, code couleur, suffixe du fournisseur) tant qu’on ne la retouche pas ; une valeur qui manque s’ajoute sur place.",
+        "Le prix se dit au kilo, ou au mètre : il est alors ramené au kilo par la densité. Le stock et tous les calculs sont au kilo ; les mètres d’un cuir, de franges, d’un ruban sont affichés à titre indicatif.",
+        "Une unité d’achat vide est déduite : la palette si le poids d’une bobine et les bobines par palette sont connus, sinon la bobine, sinon le kilo.",
+        "Désactiver ne touche qu’à l’état : une matière qui a servi se désactive, elle ne se supprime pas ; le bouton « Supprimer » dit ce qui l’en empêche.",
+        "Si la fiche a été modifiée entre-temps sur un autre poste, l’enregistrement est refusé : « Recharger la fiche » repart de sa dernière version.",
+        "L’alimentation lit la fiche sans rien de l’achat : ni prix, ni devise, ni minimum de commande."
       ]
     },
     "metiers": {
@@ -201,6 +223,16 @@
         "La pastille du menu compte l’alerte rouge : matières en rupture ou critiques."
       ]
     },
+    "tableur_matieres": {
+      "titre": "Le catalogue par tableur",
+      "resume": "Télécharger le catalogue en tableur, le corriger dans Excel, le relire : l’aperçu dit ce qui sera créé, modifié ou refusé, avant toute écriture.",
+      "points": [
+        "Une case vide ne change rien ; pour vider une case, nommer sa colonne dans « Vider ».",
+        "Chaque ligne passe par les mêmes contrôles que la fiche ; un tableur en erreur n’écrit rien.",
+        "« Appliquer » écrit exactement ce que l’aperçu a montré : si le catalogue a changé depuis, il refuse ; relire alors le tableur.",
+        "Aucune matière n’est supprimée par le tableur."
+      ]
+    },
     "tracabilite": {
       "titre": "Suivi de traçabilité",
       "resume": "Le chemin de la matière dans les deux sens : d’un lot aux ordres qu’il a servis, d’un ordre aux lots qu’il a pris.",
@@ -237,6 +269,14 @@
     "cycle_tresorerie": {
       "grandeur": "Cycle de trésorerie",
       "texte": "Jours de stock + délai client − délai de paiement fournisseur (pondéré par les montants)."
+    },
+    "fournisseur_delai": {
+      "grandeur": "Délai d’un fournisseur",
+      "texte": "Le délai déclaré sur la fiche (commande → arrivée à l’usine). Mesuré : la moyenne commande → réception validée sur les douze derniers mois. En attention quand le mesuré dépasse de plus de 20 % le déclaré, sur trois livraisons au moins."
+    },
+    "fournisseur_matieres": {
+      "grandeur": "Matières d’un fournisseur",
+      "texte": "Les matières du catalogue qui le désignent comme fournisseur, désactivées comprises, comptées par devise de leur prix."
     },
     "opportunite": {
       "grandeur": "Opportunité d’économies",
@@ -285,6 +325,22 @@
     "sur_les_metiers": {
       "grandeur": "Fil sur les métiers",
       "texte": "Un fil monté à un étage pèse mètres × densité × poids d’une bobine × pourcentage. {{sur_les_metiers}} Il revient au magasin par un retour des machines."
+    },
+    "tableur_creees": {
+      "grandeur": "Matières créées par le tableur",
+      "texte": "Les lignes du tableur dont la référence n’est pas au catalogue (casse ignorée) et qui passent tous les contrôles de la fiche."
+    },
+    "tableur_erreurs": {
+      "grandeur": "Lignes en erreur du tableur",
+      "texte": "Les lignes refusées par un contrôle de la fiche (bornes, longueurs, valeurs inconnues, référence en double, fiche modifiée depuis le modèle). Une seule suffit à ce que rien ne s’écrive."
+    },
+    "tableur_inchangees": {
+      "grandeur": "Matières inchangées par le tableur",
+      "texte": "Les lignes qui disent la même chose que le catalogue : rien à écrire."
+    },
+    "tableur_modifiees": {
+      "grandeur": "Matières modifiées par le tableur",
+      "texte": "Les matières du catalogue dont au moins un champ change ; chaque champ qui change est montré avant → après."
     },
     "valeur_stock": {
       "grandeur": "Valeur du stock (CMUP)",

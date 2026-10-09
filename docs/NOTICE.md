@@ -371,6 +371,35 @@ Où est le lot, combien il en reste, d’où il vient, quels ordres il a servis 
 - Libérer une quarantaine est une décision des achats ou de la direction, après contrôle de la matière.
 - L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche.
 
+### Fiche fournisseur (`/fournisseurs/nouveau`)
+
+Un fournisseur : identité et contact, approvisionnement (délai, couverture, devise, incoterm, port), paiement, ses pièces jointes et son historique ; ses indicateurs (matières, délai mesuré, OTIF, score).
+
+- Le délai et la couverture règlent le plan d’achat ; une couverture à 0 suit le réglage général.
+- Le délai passe en attention quand le délai mesuré dépasse de plus de 20 % le déclaré, sur trois livraisons au moins : corriger la fiche.
+- Un fournisseur qui a servi (matières, commandes, réceptions, lots, opérations, factures, pièces) se désactive ; « Supprimer » dit ce qui l’en empêche.
+- Si la fiche a été modifiée entre-temps sur un autre poste, l’enregistrement est refusé : « Recharger la fiche » repart de sa dernière version.
+
+### Fiche matière (`/matieres/nouvelle`)
+
+Une matière du catalogue : sa classification et sa référence, son achat (fournisseur, prix, unité d’achat, code douanier), son conditionnement et son stock minimum, ses pièces jointes et son historique.
+
+- La référence se compose seule depuis la classification (composition, type de fil, titrage, couleur, code couleur, suffixe du fournisseur) tant qu’on ne la retouche pas ; une valeur qui manque s’ajoute sur place.
+- Le prix se dit au kilo, ou au mètre : il est alors ramené au kilo par la densité. Le stock et tous les calculs sont au kilo ; les mètres d’un cuir, de franges, d’un ruban sont affichés à titre indicatif.
+- Une unité d’achat vide est déduite : la palette si le poids d’une bobine et les bobines par palette sont connus, sinon la bobine, sinon le kilo.
+- Désactiver ne touche qu’à l’état : une matière qui a servi se désactive, elle ne se supprime pas ; le bouton « Supprimer » dit ce qui l’en empêche.
+- Si la fiche a été modifiée entre-temps sur un autre poste, l’enregistrement est refusé : « Recharger la fiche » repart de sa dernière version.
+- L’alimentation lit la fiche sans rien de l’achat : ni prix, ni devise, ni minimum de commande.
+
+### Le catalogue par tableur (`/catalogue/tableur`)
+
+Télécharger le catalogue en tableur, le corriger dans Excel, le relire : l’aperçu dit ce qui sera créé, modifié ou refusé, avant toute écriture.
+
+- Une case vide ne change rien ; pour vider une case, nommer sa colonne dans « Vider ».
+- Chaque ligne passe par les mêmes contrôles que la fiche ; un tableur en erreur n’écrit rien.
+- « Appliquer » écrit exactement ce que l’aperçu a montré : si le catalogue a changé depuis, il refuse ; relire alors le tableur.
+- Aucune matière n’est supprimée par le tableur.
+
 ### Mon compte (`/compte`)
 
 Votre nom, votre identifiant, votre rôle et votre courriel ; changer votre code ; l’apparence de l’écran.

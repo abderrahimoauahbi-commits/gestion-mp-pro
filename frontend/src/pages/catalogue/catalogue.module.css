@@ -1,0 +1,114 @@
+/* Le catalogue et les qualités (lot F7) : seulement des jetons (stylelint). */
+
+.conflit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.conflit > :first-child {
+  flex: 1 1 320px;
+}
+
+.dessous {
+  display: block;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.fort {
+  font-weight: 600;
+}
+
+.code {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.coupe {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eteinte {
+  color: var(--texte-3);
+}
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.volet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  min-width: 0;
+}
+
+.pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.etat {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  padding: var(--espace-3);
+  background: var(--surface-2);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+}
+
+.etats {
+  flex: 0 0 auto;
+}
+
+.lien {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.groupeRole {
+  font-weight: 600;
+  background: var(--surface-2);
+}
+
+.faux {
+  color: var(--ton-critique);
+  font-weight: 600;
+}
+
+.juste {
+  color: var(--ton-ok);
+  font-weight: 600;
+}
+
+.liste {
+  margin: 0;
+  padding-left: var(--espace-4);
+}
