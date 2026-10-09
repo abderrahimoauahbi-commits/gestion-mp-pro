@@ -1,0 +1,12 @@
+ÉPREUVE DE CONCURRENCE (lot V4) — vrai serveur uvicorn
+Rejouée le 2026-10-09 18:30 ; 50 répétitions par course.
+
+[TENUE] Double envoi d'un bon : un seul numéro (50 fois)
+[TENUE] Vingt envois simultanés : numéros consécutifs (1 fois)
+[TENUE] Deux enregistrements d'une fiche (verrou de version) (50 fois)
+[TENUE] Double approbation d'un bon (50 fois)
+[TENUE] Invariant final : soldes = journal, série BC sans trou (1 fois)
+
+Série BC : 120 numéros, du rang 1 au 120 (sans trou ni doublon)
+
+Verdict : toutes les courses tenues.
