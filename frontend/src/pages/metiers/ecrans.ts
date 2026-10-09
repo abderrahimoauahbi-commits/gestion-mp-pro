@@ -1,11 +1,13 @@
 /**
- * Écrans du domaine « Métiers à tisser » (lot F3), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F3 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans des métiers à tisser (lot F3, ECRANS-PRO partie 3), rassemblés par `routes.ts`. La fiche
+ * d'un métier et la création s'ouvrent en fenêtre par-dessus la liste (même page, adresse stable) ;
+ * le chemin fixe `/metiers/nouveau` passe avant `/metiers/:id`. La création est ouverte aux trois
+ * rôles par l'adresse, pour que la page dise aux achats et à l'alimentation qu'elle est réservée à
+ * la direction (an. 15) ; le serveur la refuse de toute façon (403).
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Metiers')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -14,7 +16,27 @@ export const ecrans: readonly Ecran[] = [
     groupe: 'Référentiels',
     roles: ['direction', 'achats', 'alimentation'],
     aide: 'metiers',
-    lot: 'F3',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/metiers/nouveau',
+    titre: 'Nouveau métier',
+    parent: '/metiers',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'metiers',
+    page,
+  },
+  {
+    chemin: '/metiers/:id',
+    titre: 'Métier',
+    parent: '/metiers',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'metiers',
+    onglets: [
+      { cle: 'fils', libelle: 'Fils montés' },
+      { cle: 'reglages', libelle: 'Réglages du métier', court: 'Réglages' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]
