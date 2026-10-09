@@ -110,6 +110,7 @@ class InventaireLu:
     valide_le: datetime | None
     abandonne_par: str
     abandonne_le: datetime | None
+    abandon_motif: str
     annule_par: str
     annule_le: datetime | None
     annulation_motif: str
@@ -294,6 +295,7 @@ def _lu(
         valide_le=i.valide_le,
         abandonne_par=nom(i.abandonne_par_id or 0, ""),
         abandonne_le=i.abandonne_le,
+        abandon_motif=i.abandon_motif,
         annule_par=nom(i.annule_par_id or 0, ""),
         annule_le=i.annule_le,
         annulation_motif=i.annulation_motif,

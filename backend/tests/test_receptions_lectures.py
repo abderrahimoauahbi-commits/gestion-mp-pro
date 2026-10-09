@@ -16,13 +16,10 @@ from fabriques.receptions import (
     camion,
     geste,
     j,
-    menage,  # noqa: F401 — fixture du module
     ok,
     recevoir,
 )
 from fastapi.testclient import TestClient
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture(scope="module")
@@ -95,6 +92,17 @@ def test_l_archive_des_pesees_se_pagine_et_dit_ses_ecarts(achats: TestClient, de
     assert [x["lot"] for x in ecarts["elements"]] == ["PE-2"]
     refus = achats.get("/api/receptions/pesees", params={"apres": "WyJ4Il0"})
     assert refus.status_code == 422 and refus.json()["code"] == "curseur_invalide"
+
+
+def test_la_pesee_d_un_brouillon_dit_brouillon(achats: TestClient, decor: dict) -> None:
+    """RESTES3 (F4) : un brouillon n'a pas de numéro ; sa pesée dit « Brouillon » (le
+    vocabulaire « brouillon n° 6 » est retiré de l'écran)."""
+    a = decor["a"]
+    b = camion(achats, a.fournisseur_id, [_ligne(decor, "bleu", "PB-BROUILLON", 12)])
+    page = ok(achats.get("/api/receptions/pesees", params={"q": "PB-BROUILLON"}))
+    (ligne,) = page["elements"]
+    assert ligne["reception_id"] == b["id"] and ligne["numero"] == "Brouillon"
+    assert ligne["statut_reception"] == "brouillon"
 
 
 def test_le_poids_des_bobines_suit_les_receptions(achats: TestClient, decor: dict) -> None:

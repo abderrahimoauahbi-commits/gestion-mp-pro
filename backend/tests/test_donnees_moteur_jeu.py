@@ -121,7 +121,7 @@ def test_le_chargeur_relit_un_jeu_reel_et_charger_au_rend_les_sorties_de_gestion
         lu = donnees_moteur.charger(s)
         ecarts = proches(_comme_la_base(jeux.propre(complet)), _trier(jeux.propre(lu)))
         assert ecarts == []
-        obtenu = jeux.propre(sorties_du_moteur(lu, jour, aujourdhui))
+        obtenu = jeux.comme_gestion_mp(jeux.propre(sorties_du_moteur(lu, jour, aujourdhui)))
     attendu = jeux.attendu(JEU)["sorties"]
     for sorties in (attendu, obtenu):
         sorties["controles"] = {x["code"]: x for x in sorties["controles"]}

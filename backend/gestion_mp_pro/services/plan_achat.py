@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.besoins import besoins_mensuels
+from gestion_mp_pro.calcul.constantes import LIBELLES_STATUT
 from gestion_mp_pro.calcul.controles import controler
 from gestion_mp_pro.calcul.controles.base import Controle
 from gestion_mp_pro.calcul.outils import mois_du_plan
@@ -30,6 +31,7 @@ from gestion_mp_pro.calcul.stock import LigneStock, etat_stock
 from gestion_mp_pro.modeles import Commande, Fournisseur, Matiere
 from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import donnees_moteur, horloge, pilotage_machine
+from gestion_mp_pro.services.recherche import compacter
 
 
 @dataclass
@@ -198,8 +200,56 @@ def _cherche(valeurs: list[object], mots: list[str]) -> bool:
     return all(m in texte for m in mots)
 
 
-def filtrer(p: Plan, onglet: str, q: str) -> list[dict[str, Any]]:
-    """Les lignes de l'onglet affiché, cherchées comme à l'écran (ECRANS-PRO § 4.2, 4.3)."""
+VIDE = "—"
+"""La valeur d'un filtre de l'écran pour « rien » (pays, classe absents)."""
+
+
+def _chiffres(texte: str) -> str:
+    """« 🔥 TIER 1 », « Tier 1 » → « 1 »."""
+    return "".join(c for c in texte if c.isdigit())
+
+
+def _urgence(texte: str) -> str:
+    """La clé d'urgence de l'écran (`cleUrgence`) : urgent, groupe, standard, ou rien."""
+    t = compacter(texte)
+    return next((k for k in ("urgent", "group", "standard") if k in t), "")
+
+
+def _egal(valeur: object, choisi: str) -> bool:
+    """Même texte à la ponctuation et aux accents près ; « — » choisit le vide."""
+    texte = str(valeur or "")
+    return compacter(texte) == compacter(choisi) if choisi != VIDE else not texte.strip()
+
+
+def _passe_reference(x: dict[str, Any], choix: dict[str, str]) -> bool:
+    """Les filtres liés de l'onglet « Références » : statut, priorité, classe, fournisseur."""
+    statut = str(x["statut"])
+    regles = {
+        "statut": lambda v: _egal(LIBELLES_STATUT.get(statut, statut), v) or _egal(statut, v),
+        "priorite": lambda v: _chiffres(str(x["tier"])) == _chiffres(v),
+        "abc": lambda v: _egal(x["classe_abc"], v),
+        "fournisseur": lambda v: _egal(x["fournisseur"], v),
+    }
+    return all(regles[k](v) for k, v in choix.items() if k in regles and v)
+
+
+def _passe_fournisseur(g: dict[str, Any], choix: dict[str, str]) -> bool:
+    """Les filtres liés de l'onglet « Fournisseurs » : urgence, devise(s), pays."""
+    devises = ", ".join(g["devises"] or [g["devise_par_defaut"]])
+    regles = {
+        "urgence": lambda v: _urgence(str(g["urgence"])) == _urgence(v),
+        "devise": lambda v: _egal(devises, v),
+        "pays": lambda v: _egal(g["pays"], v),
+    }
+    return all(regles[k](v) for k, v in choix.items() if k in regles and v)
+
+
+def filtrer(
+    p: Plan, onglet: str, q: str, choix: dict[str, str] | None = None
+) -> list[dict[str, Any]]:
+    """Les lignes de l'onglet affiché, cherchées et filtrées comme à l'écran (ECRANS-PRO § 4.2,
+    4.3, 4.28 : les filtres liés de l'écran s'appliquent au classeur — RESTES3, F4)."""
+    choix = choix or {}
     if onglet not in ONGLETS_PLAN:
         raise Refus.saisie(
             f"Onglet inconnu : « {onglet} » (fournisseurs ou references).",
@@ -212,11 +262,20 @@ def filtrer(p: Plan, onglet: str, q: str) -> list[dict[str, Any]]:
             g
             for g in p.fournisseurs
             if _cherche([*(g[k] for k in CHAMPS_FOURNISSEUR), *g["devises"]], mots)
+            and _passe_fournisseur(g, choix)
         ]
     return [
         x
         for x in p.lignes
-        if _cherche([*(x[k] for k in CHAMPS_REFERENCE), f"classe {x['classe_abc']}"], mots)
+        if _cherche(
+            [
+                *(x[k] for k in CHAMPS_REFERENCE),
+                f"classe {x['classe_abc']}",
+                LIBELLES_STATUT.get(str(x["statut"]), ""),
+            ],
+            mots,
+        )  # fmt: skip
+        and _passe_reference(x, choix)
     ]
 
 

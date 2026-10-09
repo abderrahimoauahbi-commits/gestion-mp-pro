@@ -28,7 +28,8 @@ def _enroler(client: TestClient, nom: str) -> tuple[int, str]:
     r = client.post("/api/appareils", json={"nom": nom})
     assert r.status_code == 201, r.text
     corps = r.json()
-    assert corps["qr_svg"].startswith("<svg") and corps["expire_le"].startswith("2026-10-08T10:15")
+    assert corps["qr_svg"].startswith('<svg xmlns="http://www.w3.org/2000/svg"')
+    assert corps["expire_le"].startswith("2026-10-08T10:15")
     lien = urlsplit(corps["lien"])
     assert lien.path == "/enroler"
     return corps["id"], parse_qs(lien.query)["jeton"][0]
@@ -50,7 +51,9 @@ def test_enrolement_a_usage_unique(application: FastAPI, direction: TestClient) 
     assert fiche["enrole"] is True and fiche["cree_par"] == "Direction"
     with sessions_db()() as s:
         actions = s.scalars(
-            select(Journal.action).where(Journal.objet == "appareil", Journal.objet_id == ident)
+            select(Journal.action)
+            .where(Journal.objet == "appareil", Journal.objet_id == ident)
+            .order_by(Journal.id)
         )
         assert list(actions) == ["appareil à enrôler", "enrôlement d'appareil"]
 
@@ -108,6 +111,7 @@ def test_acces_et_qr(
     assert [a["libelle"] for a in corps["adresses"]] == ["Adresse réseau", "Nom de la machine"]
     r = administrateur.get("/api/acces/qr")
     assert r.status_code == 200 and r.headers["content-type"].startswith("image/svg+xml")
+    assert r.text.startswith('<svg xmlns="http://www.w3.org/2000/svg"')  # RESTES3 (F8) : <img>
     r = direction.get("/api/acces/qr", params={"adresse": "ftp://usine"})
     assert r.status_code == 422
     assert (

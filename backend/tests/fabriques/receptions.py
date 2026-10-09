@@ -8,19 +8,18 @@ réception validée écrite par le vrai service (pour les essais des autres lots
     r = geste(achats, r, "valider")                          # la version lue est envoyée d'office
     rid = recevoir_ligne(cl_id, 400, qualite="reserve")      # validée par le service, sans client
 
-Les données des réceptions **validées** par ces essais sont datées en 2025 (`JOUR`) : le monde
-de S1 (`tests/modele_monde.py`) pose `REC-2026-0001` et `RCL-2026-0001` à la main (note D5).
+Les réceptions des essais sont datées de `JOUR` (août 2026) : le monde de S1 travaille sur une
+base neuve dans sa propre transaction (`base_connue`), ses numéros posés à la main ne rencontrent
+plus ceux des essais (RESTES3 : la date en 2025 et la fixture `menage` sont retirées).
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
-import pytest
 from fabrique import assurer_comptes
 from fabriques.referentiels import magasin, unique
 from fastapi.testclient import TestClient
@@ -32,8 +31,8 @@ from gestion_mp_pro.services import horloge, receptions
 from gestion_mp_pro.services.comptes import Acteur, acteur_de
 from gestion_mp_pro.services.receptions_saisie import LigneSaisie, Saisie
 
-JOUR = date(2025, 12, 31)
-"""Le jour des réceptions validées par les essais du lot (une autre année que le monde de S1)."""
+JOUR = date(2026, 8, 3)
+"""Le jour des réceptions des essais du lot (assez tôt pour que `j(45)` soit passé)."""
 
 
 def j(n: int = 0) -> str:
@@ -249,40 +248,3 @@ def performance(numero: str) -> Any:
     with fabrique_de_sessions()() as s:
         notes = performance_receptions(donnees_moteur.charger(s))
     return next(p for p in notes if p.numero == numero)
-
-
-@pytest.fixture(scope="module")
-def menage() -> Iterator[None]:
-    """Après un module d'essais des réceptions : ses brouillons de réception supprimés, ses bons
-    partis encore ouverts soldés à la main (décor d'essai, écrit sans journal). La base est
-    partagée par la séance : d'autres essais (courriel du lundi de D10, indicateurs) comptent les
-    bons en retard et les brouillons en attente. Les données du lot sont datées en 2025."""
-    yield
-    from sqlalchemy import delete, update
-
-    from gestion_mp_pro.modeles import Commande, Reception
-    from gestion_mp_pro.modeles.enums import OrigineSolde, StatutCommande, StatutDocument
-    from gestion_mp_pro.services import donnees_moteur
-
-    with fabrique_de_sessions()() as s, s.begin():
-        s.execute(
-            delete(Reception).where(
-                Reception.statut == StatutDocument.brouillon, Reception.date <= JOUR
-            )
-        )
-        s.execute(
-            update(Commande)
-            .where(
-                Commande.numero.is_not(None),
-                Commande.date_commande <= JOUR,
-                Commande.statut.in_(
-                    [StatutCommande.envoyee, StatutCommande.confirmee, StatutCommande.a_approuver]
-                ),
-            )
-            .values(
-                statut=StatutCommande.soldee,
-                solde_origine=OrigineSolde.manuel,
-                solde_le=horloge.maintenant(),
-            )
-        )
-    donnees_moteur.invalider()

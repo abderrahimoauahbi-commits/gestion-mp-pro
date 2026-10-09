@@ -77,6 +77,23 @@ class ClotureEntree(Entree):
     version: int = Field(ge=1, description="version de la clôture, lue avec la période")
 
 
+class GenreEnAttente(Sortie):
+    """Un genre de document daté de la période à clore (brouillons, inventaires ouverts)."""
+
+    genre: str = Field(description="reception, ordre, operation, inventaire")
+    libelle: str
+    nombre: int
+
+
+class BrouillonsPeriode(Sortie):
+    """Ce qui empêcherait de clore jusqu'au `jusqu_au` : annoncé avant la fenêtre de clôture."""
+
+    jusqu_au: date
+    total: int
+    genres: list[GenreEnAttente]
+    message: str | None = Field(description="le refus que la clôture opposerait, ou null")
+
+
 class Periode(Sortie):
     """La période close : jusqu'où, par qui, quand (route 26)."""
 

@@ -16,7 +16,6 @@ from fabriques.receptions import (
     fiche,
     geste,
     j,
-    menage,  # noqa: F401 — fixture du module
 )
 from fastapi.testclient import TestClient
 
@@ -40,8 +39,6 @@ ATTENDU: dict[tuple[str, str], tuple[int, str | None]] = {
     ("annulee", "facture"): (409, "annulee"),
 }
 """(statut, geste) → (code, statut suivant) pour la direction et les achats."""
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture(scope="module")

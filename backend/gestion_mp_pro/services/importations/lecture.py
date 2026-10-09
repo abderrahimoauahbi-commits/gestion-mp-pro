@@ -26,6 +26,7 @@ from gestion_mp_pro.services.importations.modele import (
     LigneDossier,
 )
 from gestion_mp_pro.services.importations.socle import contexte
+from gestion_mp_pro.services.recherche import trouve
 
 
 @dataclass(frozen=True)
@@ -79,8 +80,7 @@ def _retenu(r: DossierResume, d: Dossier, f: FiltresDossiers, mots: list[str]) -
             siens.add(r.facture.fournisseur_id)
         if f.fournisseur not in siens:
             return False
-    texte = _texte(r) if mots else ""
-    return all(mot in texte for mot in mots)
+    return trouve(" ".join(mots), _texte(r)) if mots else True
 
 
 def detailler(s: Session, f: FiltresDossiers) -> list[DossierDetaille]:

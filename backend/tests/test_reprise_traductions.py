@@ -50,6 +50,19 @@ def reprise(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Resultat
     supprimer_base(CIBLE)
 
 
+@pytest.fixture
+def puis_reprendre(reprise: tuple[Resultat, Path]) -> Iterator[tuple[Resultat, Path]]:
+    """Un essai qui vide la cible : la reprise est refaite après lui, pour que les autres essais
+    du module la lisent entière quel que soit l'ordre (RESTES3 : ordre aléatoire)."""
+    yield reprise
+    racine = reprise[1].parent
+    supprimer_base(CIBLE)
+    cible_migree(CIBLE)
+    shutil.rmtree(racine / "cible", ignore_errors=True)
+    r = reprendre((racine / "source", racine / "cible"))
+    assert r.reussie, r.rapport
+
+
 def valeurs(sql: str) -> dict[Any, Any]:
     """Les deux premières colonnes d'une requête en dictionnaire."""
     return {a: b for a, b in lire(sql)}
@@ -158,6 +171,27 @@ def test_importations(reprise: tuple[Resultat, Path]) -> None:
     assert sum(plus_forts_restes(Decimal("-10.01"), [3.0, 7.0])) == Decimal("-10.01")
 
 
+def test_la_reprise_relie_les_dossiers_a_leur_facture(reprise: tuple[Resultat, Path]) -> None:
+    """Hérité : test_importations::test_la_reprise_relie_les_dossiers_a_leur_facture — un dossier
+    d'une facture la garde (un dossier = une facture, I3) ; un dossier d'avant, sans facture
+    unique, n'en reçoit aucune (saisi à la main) ; rejouer ne change rien (RESTES3, R1)."""
+    lies = valeurs("SELECT d.numero, f.numero FROM dossier d LEFT JOIN facture f"
+                   " ON f.id = d.facture_id")  # fmt: skip
+    assert lies == {"01/26": "F-1", "ANC-X-OLD": None}
+
+
+def test_les_morceaux_d_un_ancien_eclatement_redeviennent_une_piece(
+    reprise: tuple[Resultat, Path],
+) -> None:
+    """Hérité : test_importations_second_audit::test_les_morceaux_d_un_ancien_eclatement_
+    redeviennent_une_piece — un frais réparti sur deux marchandises reste **une** pièce (sans
+    marchandise propre), ses parts au centime font son montant (RESTES3, R1)."""
+    frais = lire("SELECT id, ligne_id, montant FROM dossier_frais WHERE piece = 'D1'")
+    assert frais == [(1, None, Decimal("1000.01"))]
+    parts = lire("SELECT ligne_id, montant FROM dossier_frais_part WHERE frais_id = 1 ORDER BY 1")
+    assert [x for x, _ in parts] == [1, 2] and sum(m for _, m in parts) == Decimal("1000.01")
+
+
 def test_referentiels(reprise: tuple[Resultat, Path]) -> None:
     f = valeurs("SELECT id, pays FROM fournisseur")
     assert f == {1: "TURQUIE", 2: "MAROC"}
@@ -253,7 +287,7 @@ def _outil() -> Any:
     return module
 
 
-def test_vider_l_activite_garde_les_referentiels(reprise: tuple[Resultat, Path]) -> None:
+def test_vider_l_activite_garde_les_referentiels(puis_reprendre: tuple[Resultat, Path]) -> None:
     outil = _outil()
     assert outil.main(["--base", CIBLE]) == 2  # sans confirmation, rien
     assert un("SELECT count(*) FROM mouvement") == 14
@@ -271,7 +305,7 @@ def test_vider_l_activite_garde_les_referentiels(reprise: tuple[Resultat, Path])
 
 
 def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(
-    reprise: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch
+    puis_reprendre: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Révision 0004 : la sauvegarde d'avant le vidage a son genre (« avant vidage », jamais
     purgée), celle d'après est la base vide de référence ; les deux vont au registre."""
@@ -292,7 +326,11 @@ def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(
 
 
 @pytest.mark.skipif(shutil.which("pg_dump") is None, reason="outils PostgreSQL absents")
-def test_sauvegarde_avant_reprise(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_sauvegarde_avant_reprise(
+    puis_reprendre: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """La sauvegarde « avant reprise » d'une cible neuve (recréée : la reprise du module est
+    refaite après, `puis_reprendre`)."""
     from gestion_mp_pro.config import reglages
     from gestion_mp_pro.modeles.enums import GenreSauvegarde
     from gestion_mp_pro.reprise import sauvegarde

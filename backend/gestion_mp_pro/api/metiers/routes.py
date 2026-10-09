@@ -164,7 +164,7 @@ def monter_etage(
 ) -> ResultatMontage:
     """Route 100 : protégé par la version de l'étage (deux téléphones : un seul passe)."""
     demande = EtageMonte(etage, corps.version, _fils(etage, corps.fils))
-    r = metiers.monter(s, qui, metier_id, [demande], corps.confirme_effet_kg)
+    r = metiers.monter(s, qui, metier_id, [demande], corps.confirme_effet_kg, au_telephone=True)
     return ResultatMontage.model_validate(_resultat(s, qui, r))
 
 

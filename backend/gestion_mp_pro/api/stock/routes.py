@@ -128,12 +128,16 @@ def _curseur(pagination: PaginationDep) -> tuple[date, int] | None:
     responses=reponses(401, 403, 422),
 )
 def lister_mouvements(
-    f: FiltresDep, pagination: PaginationDep, s: SessionDep, avec_valeur: bool = False
+    f: FiltresDep,
+    pagination: PaginationDep,
+    qui: QuiDep,
+    s: SessionDep,
+    avec_valeur: bool = False,
 ) -> PageMouvements:
     """Route 105 : `avec_valeur` ajoute le coût unitaire et la valeur (MAD) de chaque ligne."""
     page = mouvements.lister(s, f, _curseur(pagination), pagination.limite, avec_valeur)
     return PageMouvements(
-        elements=[MouvementLigne.model_validate(asdict(x)) for x in page.lignes],
+        elements=[_mouvement(asdict(x), qui.voit_prix) for x in page.lignes],
         total=page.total,
         suivant=encoder_curseur([page.dernier[0], page.dernier[1]]) if page.dernier else None,
         types=mouvements.types_presents(s, f),
@@ -244,14 +248,22 @@ def disponibles(
     summary="Tout d'un lot : soldes, statut, histoire, réception, journal, commentaire.",
     responses=reponses(401, 403, 404),
 )
-def fiche_lot(lot_id: int, s: SessionDep) -> LotFiche:
+def fiche_lot(lot_id: int, qui: QuiDep, s: SessionDep) -> LotFiche:
     """Route 108."""
-    return _fiche(lots_fiche.fiche(s, lot_id))
+    return _fiche(lots_fiche.fiche(s, lot_id), qui.voit_prix)
 
 
-def _fiche(f: lots_fiche.LotFiche) -> LotFiche:
-    """La fiche à plat : la ligne du lot et ce qui s'y ajoute."""
+def _mouvement(ligne: dict[str, object], voit_prix: bool) -> MouvementLigne:
+    """Une écriture du journal ; sans devise hors direction et achats (an. 27, RESTES3 : le
+    filtre des prix retire prix et cours, la devise restait)."""
+    return MouvementLigne.model_validate(ligne if voit_prix else ligne | {"devise": None})
+
+
+def _fiche(f: lots_fiche.LotFiche, voit_prix: bool) -> LotFiche:
+    """La fiche à plat : la ligne du lot et ce qui s'y ajoute (journal sans devise pour qui ne
+    voit pas les prix)."""
     donnees = asdict(f)
+    donnees["mouvements"] = [_mouvement(x, voit_prix) for x in donnees["mouvements"]]
     return LotFiche.model_validate(donnees.pop("ligne") | donnees)
 
 
@@ -264,7 +276,8 @@ def _fiche(f: lots_fiche.LotFiche) -> LotFiche:
 )
 def modifier_lot(lot_id: int, corps: LotModification, qui: QuiDep, s: SessionDep) -> LotFiche:
     """Route 109."""
-    return _fiche(lots_fiche.modifier_commentaire(s, qui, lot_id, corps.commentaire, corps.version))
+    fiche = lots_fiche.modifier_commentaire(s, qui, lot_id, corps.commentaire, corps.version)
+    return _fiche(fiche, qui.voit_prix)
 
 
 @routeur.get(

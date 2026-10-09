@@ -179,6 +179,12 @@ class CommandeResume(Sortie):
     solde_par: str | None
     solde_le: datetime | None
     renvoi: RenvoiLu | None
+    en_retard: bool = Field(description="la règle de `?filtre=retard` (P1-11)")
+    arrivee_attendue: date | None = Field(description="ETA, sinon livraison promise (bon parti)")
+    arrivee_sous_7_jours: bool = Field(description="arrivée attendue d'hier à J+7")
+    kg_en_quarantaine: float = Field(
+        description="reçu sous réserve encore en quarantaine : attendu jusqu'à sa libération"
+    )
 
 
 class LigneCommande(Sortie):
@@ -203,7 +209,9 @@ class LigneCommande(Sortie):
     montant: float
     montant_estime: float
     recu: float
-    en_quarantaine: float
+    en_quarantaine: float = Field(
+        description="kg reçus sous réserve, en quarantaine : attendus jusqu'à leur libération"
+    )
     reste: float
     reste_estime: float
     confirme_par: str | None
@@ -255,8 +263,9 @@ class VersionPartie(Sortie):
 class CommandeFiche(CommandeResume):
     """La fiche d'un bon (route 153) : `actions` dit, geste par geste, `null` s'il est permis,
     sinon la phrase du refus ; `fin_possible` : « solder » (un camion est venu), « annuler »
-    (rien reçu) ou `null`."""
+    (rien reçu) ou `null` ; `promesse_figee` : pourquoi la date promise ne se change plus."""
 
+    promesse_figee: str | None
     seuil_approbation: float
     contact: str
     email: str

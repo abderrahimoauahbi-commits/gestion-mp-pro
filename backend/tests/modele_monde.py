@@ -1,7 +1,10 @@
 """Un « monde » minimal et valide : une ligne par table, toutes contraintes respectées (lot S1).
 
 `LIGNES` donne, pour chaque table, les valeurs d'une ligne valide en fonction des identifiants
-déjà créés (`ids`) ; `batir(c)` les insère dans l'ordre des dépendances et rend `ids`. Les
+déjà créés (`ids`) ; `batir(c)` remet la base à l'état d'une installation neuve **dans la
+transaction de `c`** (`base_connue.remettre` : les numéros posés à la main — `BC 2026`,
+`REC-2026-0001`, `INV-2026-0001`… — ne rencontrent rien de ce que les autres essais ont laissé),
+puis les insère dans l'ordre des dépendances et rend `ids`. Les
 essais du modèle s'en servent : la ligne valide passe, la même ligne avec **une** valeur
 interdite est refusée par **sa** contrainte.
 """
@@ -13,6 +16,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
+import base_connue
 from sqlalchemy import Connection, text
 
 INSTANT = datetime(2026, 10, 8, 9, 0, tzinfo=UTC)
@@ -271,7 +275,9 @@ def _semences(c: Connection) -> Ids:
 
 
 def batir(c: Connection) -> Ids:
-    """Insère une ligne valide dans chaque table (dans l'ordre de `LIGNES`) ; rend les ids."""
+    """Base neuve (dans la transaction), puis une ligne valide dans chaque table (dans l'ordre de
+    `LIGNES`) ; rend les ids."""
+    base_connue.remettre(c)
     ids = _semences(c)
     for table, ligne in LIGNES.items():
         if table not in SEMEES:
