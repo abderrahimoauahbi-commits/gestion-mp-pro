@@ -177,3 +177,60 @@ def test_classeur_des_operations(m: Monde, achats: TestClient, alimentation: Tes
     assert "Prix / kg" in entete and len(rangs) == 1 and rangs[0][entete.index("Lot")] == "XLS-1"
     entete, *rangs = feuille(alimentation)
     assert "Prix / kg" not in entete and "Devise" not in entete and rangs == []
+
+
+def test_aucun_prix_chez_l_alimentation_ni_recherche_joker(
+    m: Monde, base: Session, achats: TestClient, alimentation: TestClient
+) -> None:
+    """Balayage des routes GET du lot D5 en rôle alimentation, sur des données qui portent des
+    prix (ouverture à 8 MAD/kg, inventaire valorisé) : aucune clé monétaire n'a de valeur.
+    C-14 : « % » cherché ne ramène pas tout."""
+    o = _ok(
+        achats.post(
+            "/api/operations",
+            json={
+                "type": "ouverture",
+                "date": JOUR.isoformat(),
+                "valider": True,
+                "lignes": [
+                    {
+                        "matiere_id": m.a2.id,
+                        "lot_numero": "PRIX-1",
+                        "magasin_id": m.courant.id,
+                        "quantite": 3,
+                        "prix": 8,
+                    }
+                ],
+            },
+        ),
+        201,
+    )
+    i = _ok(
+        achats.post(
+            "/api/inventaires",
+            json={
+                "date": JOUR.isoformat(),
+                "magasin_id": m.courant.id,
+                "criteres": {"matieres": [m.a2.id]},
+            },
+        ),
+        201,
+    )
+    try:
+        for url in (
+            "/api/operations",
+            f"/api/operations/{o['id']}",
+            "/api/brouillons",
+            "/api/inventaires",
+            f"/api/inventaires/{i['id']}",
+        ):
+            r = alimentation.get(url)
+            assert r.status_code == 200 and fuites(r.json()) == [], url
+        assert _ok(achats.get("/api/operations", params={"q": "%"}))["total"] == 0
+    finally:
+        _ok(
+            achats.post(
+                f"/api/inventaires/{i['id']}/abandonner",
+                json={"version": i["version"], "motif": "fin de l'essai"},
+            )
+        )
