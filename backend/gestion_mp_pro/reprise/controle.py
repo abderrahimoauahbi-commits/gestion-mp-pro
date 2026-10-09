@@ -107,7 +107,7 @@ def comptes(ctx: Contexte, referentiels: bool, activite: bool) -> Verdict:
         signe = "=" if egal else "ÉCART"
         v.lignes.append(f"{source:<20} {n_source:>7} → {cible:<20} {n_cible:>7}  {signe}{note}")
     repris = len(ctx.photo.lignes("journal"))
-    note = int(
+    journal_repris = int(
         ctx.c.execute(
             text(
                 "SELECT count(*) FROM reprise_correspondance"
@@ -117,9 +117,11 @@ def comptes(ctx: Contexte, referentiels: bool, activite: bool) -> Verdict:
         ).scalar()
         or 0
     )
-    v.tenu &= repris == note
-    signe = "=" if repris == note else "ÉCART"
-    v.lignes.append(f"{'journal':<20} {repris:>7} → {'journal (repris)':<20} {note:>7}  {signe}")
+    v.tenu &= repris == journal_repris
+    signe = "=" if repris == journal_repris else "ÉCART"
+    v.lignes.append(
+        f"{'journal':<20} {repris:>7} → {'journal (repris)':<20} {journal_repris:>7}  {signe}"
+    )
     return v
 
 
