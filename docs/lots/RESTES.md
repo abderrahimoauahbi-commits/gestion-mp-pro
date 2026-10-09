@@ -46,7 +46,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F2 | S3 | `statut`, `statut_couverture`, `action` du moteur portent encore des émojis (l'écran les traduit par `cleStock`) : rendre des codes. |
 | F2 | F6 | Déclarer l'adresse d'écran `/operations/:id` (numéros de transferts et retours en liens). |
 | D8 | R2, C1 (correction déclarée K7) | PRO compte le fil monté à TOUTE date (rejeu de `montage_evenement`) dans la valorisation, le cockpit, les contrôles et le bilan ; Gestion MP ne le compte qu'au jour même (bilan : à part, mois en cours). Écart voulu (décision de Mohamed : le fil monté est du stock) : à déclarer et prouver dans la parité et la comparaison. |
-| D8 | S4 | `/stock?date=` ne compte pas le fil monté d'un soir passé : appeler `services.pilotage.lire(s, jour)` pour dire le même chiffre que la Valorisation. Preuves non portées : `test_api_les_lots_comptent_comme_les_soldes` (route 107), `test_les_cours_sont_dates` (D1). |
 | D8 | docs | Écarts de D8 (docs/lots/D8.md § 4) : routes 7, 209, 212, 213, 215, 221–229, 233, 235 ; ECRANS-PRO Valorisation (« à une date passée, le fil monté n'est pas compté » devenu faux) ; ARCHITECTURE § 3 (modules `pilotage_*`, `pieces_types`, `donnees_brutes`). |
 | F4 | D4 | `Pesee.numero` vaut « brouillon n° 6 » (vocabulaire retiré) : rendre « Brouillon ». |
 | F4 | D3 | `/export/plan-achat` ignore les filtres liés de l'écran ; la fiche ne dit pas pourquoi la date promise est figée. |
@@ -75,3 +74,4 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | R2 | docs | MODELE-DONNEES § 10.5 : corrections déclarées K7, K8a–h, K9 (K4 et K6 « identiques depuis Gestion MP corrigé ») ; ARCHITECTURE T1 dépassée par K7 ; docs/heritage/DECISIONS.md : ajouter K9 (prix connus à la date) en note de PRO. Voir docs/lots/R2.md. |
 | R2 | Mohamed (livraison) | K8b : 4 réceptions payées en deux devises — PRO affiche 5 prix payés en USD comme des EUR (historique, matrice, Cockpit). Garder tel quel ou scinder ces réceptions. |
 | R2 | V2 | La dynamique réduite joue tous les gestes en direction : V2 prend chaque rôle. |
+| V2 | R2, DECISIONS | Correction voulue à déclarer : un changement de cours dans PRO ne revalorise jamais le passé (les entrées reprises sans cours reçoivent le cours du jour de la reprise, V3), alors que Gestion MP valorise ces entrées au cours du jour. K7 couvre aussi `/stock?date=` et le plan d'achat passés : rejouer `parite_k7` (GESTIONMPPRO_ESSAIS_COMPLETS=1). |
