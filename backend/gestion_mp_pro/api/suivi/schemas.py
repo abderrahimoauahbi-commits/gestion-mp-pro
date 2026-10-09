@@ -14,6 +14,7 @@ from pydantic import Field
 
 from gestion_mp_pro.api.communs import Entree, Nombre, Page, Sortie
 from gestion_mp_pro.api.pilotage.schemas import du_moteur
+from gestion_mp_pro.calcul.production import OrdreAjuste, ReferenceAjustee
 from gestion_mp_pro.calcul.suivi import Echeance
 from gestion_mp_pro.calcul.suivi_bilan import BilanMois as _BilanMois
 from gestion_mp_pro.modeles import longueurs as L
@@ -136,10 +137,20 @@ class IndicateurJour(Sortie):
 
 # ── Bilan du mois (233) ───────────────────────────────────────────────────────────────
 
+ReferenceOrdreBilan = du_moteur(
+    ReferenceAjustee, "ReferenceOrdreBilan", "Un fil d'un ordre : prévu perte comprise, densité."
+)
+OrdreBilan = du_moteur(
+    OrdreAjuste,
+    "OrdreBilan",
+    "Un ordre du mois tel que l'écran Sorties le lit (prévu perte comprise, taux appliqué).",
+    references=(list[ReferenceOrdreBilan], ...),  # type: ignore[valid-type]
+)
 BilanMois = du_moteur(
     _BilanMois,
     "BilanMois",
     "Le bilan matières d'un mois : magasins et métiers, en kilos et en dirhams.",
+    ecarts_ordres=(list[OrdreBilan], ...),  # type: ignore[valid-type]
     mois_iso=(str, ...),
     du=(date, ...),
     au=(date, ...),
