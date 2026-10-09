@@ -25,3 +25,6 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F7 | D1 | Une matière créée a `modifie_par` posé mais `modifie_le` vide. |
 | F7 | D8 | `GET /pieces` (pièces jointes) répond 404 : onglet Pièces jointes des fiches en erreur ; route 215 `/fournisseurs/performance` absente (lue en forme provisoire `catalogue/performance.ts`). |
 | F7 | E2 | `types-provisoires.ts` (`MatiereResumee`) peut lire `Schema<'MatiereResume'>`. |
+| D6 | D8 | Moitié « bilan » de `test_plan_besoins::test_le_prevu_d_un_ordre_est_fige…` : lire `services.ordres.consommation.consommations`. |
+| D6 | D5 | Remplacer la fabrique décor `ordre_valide` de D5 par `fabriques.ordres.valide`. |
+| D6 | docs | Écarts de D6 (docs/lots/D6.md § 4) : `prevu`/`par_matiere`, filtres de la liste 135 non paginée, champ `blocage` (142), `vue=ordres|consommation` (144), `services/ordres/` en paquet. |
