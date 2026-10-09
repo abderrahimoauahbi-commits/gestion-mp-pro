@@ -36,6 +36,8 @@ CORRECTIONS = {
     "K8f": "Numéro de lot à blancs : blancs → « _ » (R1 n° 8).",
     "K8g": "Entrée de réception de l'ERP Fil : sa réception retrouvée par (lot, date) (R1 n° 7).",
     "K8h": "Prix confirmé sans date : date de création du bon (R1).",
+    "K8i": "Entrée en devise sans cours : le cours du jour de la reprise y est figé (R1, V3/V4 : "
+           "un changement de cours ne revalorise plus un mois clos) — même valeur aujourd'hui.",
     "K9": "Prix connus à la date : à une date passée, opportunités et économies du Cockpit ne "
           "lisent que les réceptions jusqu'à cette date (D8 n° 6) — preuve : la route de Gestion "
           "MP rejouée avec ses coûts rendus bornés à la date redonne la valeur de PRO.",

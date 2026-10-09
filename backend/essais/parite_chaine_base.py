@@ -116,6 +116,13 @@ TRADUCTIONS: dict[str, Callable[[Connection], dict[str, int]]] = {
         "UPDATE commande_ligne l SET confirme_le = c.cree_le FROM commande c "
         "WHERE c.id = l.commande_id AND l.prix_confirme AND l.confirme_le IS NULL",
     ),
+    "K8i": lambda c: _executer(
+        c,
+        "mouvement.cours",
+        "UPDATE mouvement m SET cours = d.taux FROM devise d WHERE d.code = m.devise "
+        "AND m.devise <> 'MAD' AND m.prix <> 0 AND coalesce(m.cours, 0) = 0 "
+        "AND m.type IN ('OUVERTURE', 'RECEPTION', 'RETOUR_FOURNISSEUR', 'AJUSTEMENT')",
+    ),
 }
 """Les traductions de la reprise, dans l'ordre de la chaîne des routes des documents."""
 

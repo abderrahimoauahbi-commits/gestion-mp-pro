@@ -15,6 +15,7 @@ d'excuses :
 | K8c | unité d'achat sans contenance → kg (R1 n° 3) | contenance 0 et unité vide |
 | K8d | brouillon numéroté : numéro retiré (R1 n° 4) | statut Brouillon et « brouillon n° id » |
 | K8e | ordre validé sans date : fin de son jour (R1 n° 5) | `None` → jour T23:59:59.999999 |
+| K8i | entrée en devise sans cours : cours figé à la reprise (R1, V3/V4) | 0 → taux |
 | P17 | méthode de calcul : la seule « corrigée » | `methode = corrigee` absent de PRO |
 
 `chaine()` rend les jeux intermédiaires D0 → D1 → … → Dpro (chaque traduction ajoutée à la
@@ -36,7 +37,7 @@ from typing import Any
 from sqlalchemy import create_engine, text
 
 Chemin = tuple[str | int, ...]
-ORDRE_DES_CLASSES = ("ORDRE", "K1", "K8a", "K8b", "K8c", "K8d", "K8e", "P17")
+ORDRE_DES_CLASSES = ("ORDRE", "K1", "K8a", "K8b", "K8c", "K8d", "K8e", "K8i", "P17")
 TITRES = {
     "ORDRE": "ordre de lecture des recettes (même contenu)",
     "K1": "arrondi à l'échelle des colonnes (MODELE-DONNEES § 10.2)",
@@ -45,6 +46,7 @@ TITRES = {
     "K8c": "unité d'achat sans contenance lue au kilo (R1 n° 3)",
     "K8d": "brouillon numéroté : numéro retiré (R1 n° 4)",
     "K8e": "ordre validé sans date : fin de son jour (R1 n° 5)",
+    "K8i": "entrée en devise sans cours : cours du jour de la reprise figé (R1, V3/V4)",
     "P17": "méthode de calcul « corrigée » seule (P17)",
 }
 ECHELLES: dict[str, int] = {
@@ -84,6 +86,8 @@ class Contexte:
 
     bidevises: dict[tuple[str, str], tuple[set[str], str]] = field(default_factory=dict)
     """(date, n° de bon) d'une réception en deux devises → (ses devises, devise de sa facture)."""
+    taux: dict[str, float] = field(default_factory=dict)
+    """Le cours du jour de chaque devise dans la copie (celui que la reprise fige, K8i)."""
 
 
 def lire_contexte(adresse: str) -> Contexte:
@@ -104,6 +108,7 @@ def lire_contexte(adresse: str) -> Contexte:
         for jour, bon, devise_facture, devise in c.execute(requete):
             devises, _ = ctx.bidevises.get((jour, bon), (set(), devise_facture))
             ctx.bidevises[(jour, bon)] = (devises | {devise}, devise_facture)
+        ctx.taux = {code: float(t) for code, t in c.execute(text("SELECT code, taux FROM devise"))}
     moteur.dispose()
     return ctx
 
@@ -162,6 +167,14 @@ def _k8(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> st
     return None
 
 
+def _k8i(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> bool:
+    """K8i : entrée en devise sans cours → cours du jour de la reprise figé (R1, V3/V4)."""
+    if motif(chemin) != "mouvements/*/cours" or a not in (0, 0.0, None):
+        return False
+    x = d0["mouvements"][chemin[1]]
+    return bool(x["devise"] != "MAD" and x["prix_unite"] and b == ctx.taux.get(x["devise"]))
+
+
 def classer(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -> str | None:
     """La traduction qui explique une différence de donnée, ou `None` (à corriger)."""
     if isinstance(a, list) and isinstance(b, list):
@@ -170,6 +183,8 @@ def classer(chemin: Chemin, a: Any, b: Any, d0: dict[str, Any], ctx: Contexte) -
         return "K1"
     if chemin == ("parametres", "methode") and a == "corrigee" and b is _ABSENT:
         return "P17"
+    if _k8i(chemin, a, b, d0, ctx):
+        return "K8i"
     return _k8(chemin, a, b, d0, ctx)
 
 

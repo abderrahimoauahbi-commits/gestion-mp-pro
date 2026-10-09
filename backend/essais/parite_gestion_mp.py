@@ -107,6 +107,8 @@ def _statique_rapport(r: rp.Rapport, jours: list[st.Jour]) -> None:
       f"{len(moteur)} écart(s)")  # fmt: skip
     r.a_corriger += len(moteur)
     rp.detail_a_corriger(r, moteur)
+    r(f"  codes du stock de PRO ramenés aux libellés de Gestion MP (forme RESTES3) : "
+      f"{sum(j.codes for j in jours)} valeurs")  # fmt: skip
     comparees: Counter[str] = Counter()
     for j in jours:
         comparees.update(j.comparees)

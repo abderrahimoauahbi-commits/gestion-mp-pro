@@ -99,13 +99,22 @@ def calculer_gestion_mp(jeux: list[Path], dossier: Path, dates: tuple[str, ...])
 
 
 def sorties_pro(complet: Any, jour: date) -> Any:
-    """Les sorties du moteur PRO sur `Dpro`, dans la forme de Gestion MP (`tests/moteur`)."""
+    """Les sorties du moteur PRO sur `Dpro`, dans la forme de Gestion MP (`tests/moteur`) :
+    codes du stock ramenés aux libellés de Gestion MP (RESTES3 § 1.1, forme déclarée, comptée
+    par `codes_traduits`)."""
     if str(TESTS) not in sys.path:
         sys.path.insert(0, str(TESTS))
     from moteur import jeux_outils
     from moteur.sorties_pro import sorties_du_moteur
+    from parite_api_formes import codes_du_stock
 
-    return jeux_outils.propre(sorties_du_moteur(complet, jour, AUJOURDHUI))
+    rendu, n = codes_du_stock(jeux_outils.propre(sorties_du_moteur(complet, jour, AUJOURDHUI)))
+    CODES_TRADUITS[jour.isoformat()] = n
+    return rendu
+
+
+CODES_TRADUITS: dict[str, int] = {}
+"""Par date : les valeurs de statut, d'action et de relance traduites (forme RESTES3)."""
 
 
 def _lire(dossier: Path, jeu: str, jour: str) -> Any:
@@ -123,13 +132,14 @@ class Jour:
     ecarts: list[pc.Explique] = field(default_factory=list)
     k7_attendus: int = 0
     k7_vus: list[tuple[pc.Chemin, Any, Any]] = field(default_factory=list)
+    codes: int = 0
 
 
 def comparer_jour(dossier: Path, complet: Any, jour: str, chaine: list[str]) -> Jour:
     """Moteur, parité et explications d'une date (les jeux intermédiaires lus à la demande)."""
     b = pc.ranger(sorties_pro(complet, date.fromisoformat(jour)))
     a = _lire(dossier, "D0", jour)
-    r = Jour(jour, dict(pc.feuilles_par_section(a)))
+    r = Jour(jour, dict(pc.feuilles_par_section(a)), codes=CODES_TRADUITS.get(jour, 0))
     r.moteur = pc.comparer(_lire(dossier, chaine[-1], jour), b, exact=True).ecarts
     restants = pc.comparer(a, b).ecarts
     for classe in chaine:

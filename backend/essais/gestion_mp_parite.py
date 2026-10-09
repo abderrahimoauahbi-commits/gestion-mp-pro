@@ -92,13 +92,14 @@ def _appeler(fonction: Any, session: Any, qui: Any, parametres: dict[str, Any]) 
 
 def _prix_connus_ce_jour(couts_rendus: Any, jour_de: Any) -> Any:
     """K9 appliquée à Gestion MP : à une date passée, les coûts rendus ne lisent que les
-    réceptions jusqu'à cette date (D8 n° 6) — la seule différence avec `couts_rendus`."""
+    réceptions jusqu'à cette date (D8 n° 6) — la seule différence avec `couts_rendus`.
+    Gestion MP corrigé depuis (d10180e) prend lui-même le jour : il est passé tel quel."""
 
-    def couts(session: Any, donnees: Any) -> Any:
+    def couts(session: Any, donnees: Any, *jour_donne: Any) -> Any:
         jour = jour_de()
         return {
             ref: [c for c in liste if c[0] <= jour]
-            for ref, liste in couts_rendus(session, donnees).items()
+            for ref, liste in couts_rendus(session, donnees, *jour_donne).items()
             if any(c[0] <= jour for c in liste)
         }
 

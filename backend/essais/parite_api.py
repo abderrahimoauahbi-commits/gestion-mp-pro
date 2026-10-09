@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import parite_comparer as pc
-from parite_api_formes import Forme
+from parite_api_formes import Forme, codes_du_stock
 
 
 @dataclass(frozen=True)
@@ -180,6 +180,9 @@ def comparer_listes(  # noqa: PLR0917
 def comparer_route(route: Route, gmp: Any, pro: Any) -> Resultat:
     """Les deux réponses d'une paire de routes."""
     r = Resultat(route.nom)
+    pro, codes = codes_du_stock(pro)
+    if codes:
+        r.traduites["codes du stock"] += codes
     if route.liste is not None:
         lg = gmp.get(route.champ_gmp, []) if isinstance(gmp, dict) else gmp
         lp = pro.get(route.champ_pro, []) if isinstance(pro, dict) else pro
