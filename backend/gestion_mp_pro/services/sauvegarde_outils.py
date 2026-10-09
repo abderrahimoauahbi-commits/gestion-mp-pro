@@ -101,9 +101,10 @@ def exiger(nom: str, geste: str = "Sauvegarde impossible") -> Path:
 
 
 @contextmanager
-def adresse_base() -> Iterator[str]:
-    """L'adresse libpq de la base du serveur ; le mot de passe va dans un `passfile` éphémère."""
-    url = make_url(reglages().base)
+def adresse_base(base: str | None = None) -> Iterator[str]:
+    """L'adresse libpq d'une base (celle du serveur par défaut) ; le mot de passe va dans un
+    `passfile` éphémère."""
+    url = make_url(base or reglages().base)
     mot_de_passe = url.password
     sans_secret = url.set(drivername="postgresql", password=None)
     adresse = sans_secret.render_as_string(hide_password=False)

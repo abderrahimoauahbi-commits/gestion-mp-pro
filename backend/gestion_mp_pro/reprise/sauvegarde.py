@@ -1,25 +1,25 @@
 """Sauvegarde de la cible avant d'y écrire (« avant reprise », « base vide de référence »).
 
-`pg_dump -Fc` de la base cible dans `<GESTIONMPPRO_SAUVEGARDES>/<base>/`, relue par
-`pg_restore --list` (nombre de tables), inscrite au registre `sauvegarde`. Le service complet
-des sauvegardes (rotation, copie externe, pièces) est au lot D10 ; la reprise et le vidage
-n'ont besoin que de ce geste, qu'ils ne peuvent pas sauter (MODELE-DONNEES § 10.1).
+Par le service des sauvegardes (lot D10, `services.sauvegarde.sauvegarder(url=…)`) : `pg_dump
+-Fc` de la base cible dans `<GESTIONMPPRO_SAUVEGARDES>/<base>/`, relue, avec l'archive de ses
+pièces jointes et sa copie de sécurité, au nom que l'écran liste et restaure ; inscrite ici au
+registre `sauvegarde` de la cible, dans la transaction de la reprise (MODELE-DONNEES § 10.1).
 """
 
 from __future__ import annotations
 
-import shutil
-import subprocess  # noqa: S404 (outils PostgreSQL, arguments en liste)
 from dataclasses import dataclass
 from pathlib import Path
 
 from sqlalchemy import Connection, insert
 from sqlalchemy.engine import make_url
 
+from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
 from gestion_mp_pro.modeles import metadata
 from gestion_mp_pro.modeles.enums import GenreSauvegarde
-from gestion_mp_pro.services import horloge
+from gestion_mp_pro.services import horloge, sauvegarde_outils
+from gestion_mp_pro.services import sauvegarde as service
 
 
 class SauvegardeImpossible(Exception):
@@ -36,42 +36,23 @@ class Fichier:
 
 
 def outil(nom: str) -> str:
-    """Le chemin de `pg_dump` / `pg_restore` (GESTIONMPPRO_PG_BIN, sinon le PATH)."""
-    dossier = reglages().pg_bin
-    chemin = str(dossier / nom) if dossier else shutil.which(nom)
-    if not chemin or not Path(chemin).is_file():
+    """Le chemin de `pg_dump` / `pg_restore` (GESTIONMPPRO_PG_BIN, sinon le PATH et les dossiers
+    connus : `services.sauvegarde_outils.outil`)."""
+    chemin = sauvegarde_outils.outil(nom)
+    if chemin is None:
         raise SauvegardeImpossible(f"{nom} introuvable (régler GESTIONMPPRO_PG_BIN)")
-    return chemin
-
-
-def adresse_libpq(url: str) -> str:
-    """L'URL SQLAlchemy en adresse libpq (`postgresql://…`)."""
-    return make_url(url).set(drivername="postgresql").render_as_string(hide_password=False)
+    return str(chemin)
 
 
 def sauvegarder(url: str, genre: GenreSauvegarde) -> Fichier:
-    """Écrit la sauvegarde de la base `url` et la relit."""
-    base = make_url(url).database or ""
-    dossier = reglages().sauvegardes / base
-    dossier.mkdir(parents=True, exist_ok=True)
-    instant = horloge.maintenant().strftime("%Y-%m-%d-%H%M%S")
-    chemin = dossier / f"{instant}-{genre.value.replace('_', '-')}-{base}.dump"
-    resultat = subprocess.run(  # noqa: S603
-        [outil("pg_dump"), "-Fc", "--no-owner", "-f", str(chemin), "--dbname", adresse_libpq(url)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if resultat.returncode != 0:
-        chemin.unlink(missing_ok=True)
-        raise SauvegardeImpossible(f"pg_dump : {resultat.stderr.strip()[:300]}")
-    liste = subprocess.run(  # noqa: S603
-        [outil("pg_restore"), "--list", str(chemin)], capture_output=True, text=True, check=False
-    )
-    if liste.returncode != 0:
-        raise SauvegardeImpossible(f"sauvegarde illisible : {liste.stderr.strip()[:300]}")
-    tables = sum(1 for x in liste.stdout.splitlines() if " TABLE DATA " in x)
-    return Fichier(chemin, chemin.stat().st_size, tables)
+    """Écrit la sauvegarde de la base `url` par le service du lot D10 (relue, pièces de cette
+    base, copie de sécurité, noms que l'écran liste et restaure)."""
+    try:
+        f = service.sauvegarder(genre.value.replace("_", "-"), exiger_copie=False, url=url)
+    except Refus as exc:
+        raise SauvegardeImpossible(exc.detail) from exc
+    chemin = reglages().sauvegardes / (make_url(url).database or "") / f.nom
+    return Fichier(chemin, f.taille, f.tables or 0)
 
 
 def inscrire(c: Connection, fichier: Fichier, genre: GenreSauvegarde, base: str) -> None:
@@ -84,7 +65,7 @@ def inscrire(c: Connection, fichier: Fichier, genre: GenreSauvegarde, base: str)
             "base": base,
             "taille": fichier.taille,
             "tables": fichier.tables,
-            "pieces_incluses": False,
+            "pieces_incluses": True,
             "copie_externe": False,
             "cree_le": horloge.maintenant(),
         },

@@ -35,9 +35,10 @@ def _fichiers(racine: Path) -> list[Path]:
     return sorted(f for f in racine.rglob("*") if f.is_file() and not f.is_symlink())
 
 
-def archiver(cible: Path) -> int:
-    """Écrit l'archive des pièces de cette base (atomique, relue) ; rend le nombre de fichiers."""
-    racine = dossier_pieces()
+def archiver(cible: Path, racine: Path | None = None) -> int:
+    """Écrit l'archive des pièces d'une base (cette base par défaut ; atomique, relue) ; rend le
+    nombre de fichiers."""
+    racine = racine or dossier_pieces()
     fichiers = _fichiers(racine)
     provisoire = cible.with_name(f".{cible.name}.{os.getpid()}.partiel")
     try:

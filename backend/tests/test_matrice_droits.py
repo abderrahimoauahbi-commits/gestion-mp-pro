@@ -29,7 +29,9 @@ from gestion_mp_pro.securite.matrice import LigneMatrice, en_csv, matrice, sans_
 
 CSV = Path(__file__).with_name("matrice_droits.csv")
 ROLES = (None, *Role)
-SANS_REJEU: frozenset[tuple[str, str]] = frozenset()
+SANS_REJEU: frozenset[tuple[str, str]] = frozenset(
+    {("POST", "/api/sauvegardes")}  # D10 : une vraie sauvegarde, dans le dossier réel
+)
 """(méthode, chemin) qu'un rôle permis n'appelle pas à vide pendant le rejeu."""
 EN_DERNIER = ("/api/deconnexion",)
 

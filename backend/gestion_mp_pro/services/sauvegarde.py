@@ -24,9 +24,11 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
@@ -88,19 +90,26 @@ def _nom_libre(d: Path, genre: str) -> str:
     return nom
 
 
-def _tables_en_base() -> int:
+def _tables_en_base(url: str | None) -> int:
     """Le nombre de tables du schéma `public` (ce que la relecture doit retrouver)."""
-    with moteur().connect() as c:
-        requete = text("SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")
-        return int(c.execute(requete).scalar() or 0)
+    requete = text("SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")
+    if url is None:
+        with moteur().connect() as c:
+            return int(c.execute(requete).scalar() or 0)
+    autre = create_engine(url, poolclass=NullPool)
+    try:
+        with autre.connect() as c:
+            return int(c.execute(requete).scalar() or 0)
+    finally:
+        autre.dispose()
 
 
-def _ecrire_dump(pg_dump: Path, cible: Path) -> o.Lecture:
+def _ecrire_dump(pg_dump: Path, cible: Path, url: str | None) -> o.Lecture:
     """`pg_dump -Fc` dans un provisoire, relu (toutes les tables), puis mis à sa place."""
-    attendues = _tables_en_base()
+    attendues = _tables_en_base(url)
     provisoire = cible.with_name(f".{cible.name}.{os.getpid()}.partiel")
     try:
-        with o.adresse_base() as adresse:
+        with o.adresse_base(url) as adresse:
             arguments = [str(pg_dump), "-Fc", "-f", str(provisoire), "-d", adresse]
             sortie = o.lancer(arguments, o.DELAI_DUMP_S)
         if sortie.returncode != 0:
@@ -134,9 +143,9 @@ def _copier_un(source: Path, vers: Path) -> None:
         provisoire.unlink(missing_ok=True)
 
 
-def _copier(cible: Path) -> str:
+def _copier(cible: Path, vers: Path | None = None) -> str:
     """La copie de sécurité du fichier et de ses pièces ; rend l'erreur (vide si réussie)."""
-    vers = dossier_copie()
+    vers = vers or dossier_copie()
     if vers is None:
         return ""
     try:
@@ -170,27 +179,35 @@ def _noter_au_registre(e: registre.Entree) -> None:
 
 
 def sauvegarder(
-    genre: str = "manuelle", par_id: int | None = None, exiger_copie: bool = True
+    genre: str = "manuelle",
+    par_id: int | None = None,
+    exiger_copie: bool = True,
+    url: str | None = None,
 ) -> FichierSauvegarde:
     """Écrit une sauvegarde relue, avec ses pièces, et sa copie ; 503 lisible si impossible.
 
     `exiger_copie=False` (sauvegarde « avant restauration ») : une copie de sécurité manquée
     est notée au registre et au journal du serveur sans arrêter le geste — le fichier
-    principal, relu, suffit à le défaire.
+    principal, relu, suffit à le défaire. `url` : une autre base que celle du serveur (cible
+    d'une reprise, outil de vidage) — mêmes noms, dossiers à son nom ; le registre est alors
+    tenu par l'appelant, dans la transaction qu'il ouvre sur cette base.
     """
     pg_dump = o.exiger("pg_dump")
     o.exiger("pg_restore")
-    d = dossier()
+    r = reglages()
+    base = make_url(url).database or r.nom_base if url else r.nom_base
+    d = r.sauvegardes / base
+    copie = r.sauvegardes_copie / base if r.sauvegardes_copie is not None else None
     with _ECRITURE:
         d.mkdir(parents=True, exist_ok=True)
         cible = d / _nom_libre(d, genre)
-        lecture = _ecrire_dump(pg_dump, cible)
+        lecture = _ecrire_dump(pg_dump, cible, url)
         try:
-            pieces = archiver(o.archive_de(cible))
+            pieces = archiver(o.archive_de(cible), r.pieces / base)
         except BaseException:
             cible.unlink(missing_ok=True)
             raise
-        erreur_copie = _copier(cible)
+        erreur_copie = _copier(cible, copie)
     lu = o.lire_nom(cible.name)
     quand = lu.instant if lu else horloge.maintenant()
     entree = registre.Entree(
@@ -200,12 +217,13 @@ def sauvegarder(
         taille=cible.stat().st_size,
         tables=lecture.tables,
         pieces_incluses=True,
-        copie_externe=dossier_copie() is not None and not erreur_copie,
+        copie_externe=copie is not None and not erreur_copie,
         cree_le=quand,
         par_id=par_id,
         erreur=erreur_copie,
     )
-    _noter_au_registre(entree)
+    if url is None:
+        _noter_au_registre(entree)
     JOURNAL.info(
         "Sauvegarde %s écrite (%s tables, %s pièce(s)).", cible.name, lecture.tables, pieces
     )
