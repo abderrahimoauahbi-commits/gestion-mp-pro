@@ -61,7 +61,9 @@ INSERT INTO commande (id, numero, fournisseur_id, date_commande, statut, devise,
 INSERT INTO commande_ligne VALUES (1, 1, 1, 1000.0000000001, 'Palette', 756, 2.5, true, NULL, ''),
  (2, 2, 2, 500, 'kg', 1, 10, false, NULL, '');
 INSERT INTO lot VALUES (1, 1, 'L 001', 1, '2026-09-03', 3.15, ''),
- (2, 1, 'LOT-2026-0001', 1, '2026-09-03', 0, ''), (3, 2, 'J-1', 2, '2026-09-01', 0, '');
+ (2, 1, 'LOT-2026-0001', 1, '2026-09-03', 0, ''), (3, 2, 'J-1', 2, '2026-09-01', 0, ''),
+ (4, 1, 'L-004', 1, '2026-09-06', 0, ''), (5, 1, 'L-005', 1, '2026-09-06', 0, ''),
+ (6, 1, 'L-006', 1, '2026-09-06', 0, '');
 INSERT INTO reception (id, numero, statut, date, fournisseur_id, numero_bl, facture_id,
  observations, cree_par, cree_le, validee_par, controle_par, validee_le) VALUES
  (1, 'REC-2026-0001', 'validee', '2026-09-03', 1, 'BL1', 1, '', 'Karim', '2026-09-03 08:00',
@@ -69,12 +71,17 @@ INSERT INTO reception (id, numero, statut, date, fournisseur_id, numero_bl, fact
  (2, 'REC-2026-0002', 'annulee', '2026-09-04', 2, '', 2, '', 'Karim', '2026-09-04 08:00',
   'Karim', '', '2026-09-04 09:00'),
  (3, 'REC-2026-0003', 'brouillon', '2026-09-05', 2, '', NULL, '', 'Karim', '2026-09-05 08:00',
-  '', '', NULL);
+  '', '', NULL),
+ (4, 'REC-2026-0004', 'validee', '2026-09-06', 1, 'BL4', NULL, 'camion mixte', 'Karim',
+  '2026-09-06 08:00', 'Karim', '', '2026-09-06 09:00');
 INSERT INTO reception_ligne (id, reception_id, commande_ligne_id, article_id, lot_numero,
  quantite_pesee, nb_bobines, magasin_id, qualite, prix, devise, lot_id) VALUES
  (1, 1, 1, 1, 'L 001', 1000, 320, 1, 'conforme', 2.5, 'USD', 1),
  (2, 1, NULL, 1, 'LOT INTERNE', 100, 30, 1, 'conforme', 2.0, 'EUR', 2),
- (3, 2, 2, 2, 'J-9', 50, 0, NULL, 'refuse', 10, 'MAD', NULL);
+ (3, 2, 2, 2, 'J-9', 50, 0, NULL, 'refuse', 10, 'MAD', NULL),
+ (4, 4, NULL, 1, 'L-004', 40, 0, 1, 'conforme', 2.6, 'USD', 4),
+ (5, 4, NULL, 1, 'L-005', 30, 0, 1, 'conforme', 2.6, 'USD', 5),
+ (6, 4, NULL, 1, 'L-006', 20, 0, 1, 'conforme', 2.1, 'EUR', 6);
 INSERT INTO bon_sortie VALUES
  (1, 'OF-2026-0001', 'valide', '2026-09-10', 1, 1, '', 'Youssef', '2026-09-10 08:00', 'Youssef',
   NULL, '{"perte": 0.02, "fils": {"PES ROUGE": 300.0, "Inconnue": 5.0}}'),
@@ -102,8 +109,12 @@ INSERT INTO mouvement (id, date_effet, date_saisie, type, article_id, lot_id, ma
  (8, '2026-09-12', '2026-09-12 09:00', 'TRANSFERT', 2, 3, 2, 50, 10, 'MAD', 0, 'operation', 1, 'TRF-2026-0001', NULL, 7, 'Rangement', 'Karim', NULL),
  (9, '2026-09-13', '2026-09-13 09:00', 'RETOUR_FOURNISSEUR', 2, 3, 1, -20, 10, 'MAD', 0, 'reprise', NULL, '', NULL, NULL, 'Excédent de réception', 'Karim', NULL),
  (10, '2026-09-14', '2026-09-14 09:00', 'RETOUR_MACHINE', 1, 1, 1, 10, 2.5, 'USD', 0, 'reprise', NULL, '', NULL, NULL, 'Reliquat de fin d''ordre', 'Youssef', NULL),
- (11, '2026-09-20', '2026-09-20 18:00', 'AJUSTEMENT', 2, 3, 2, -5, 10, 'MAD', 0, 'inventaire', 1, 'INV-2026-0001', NULL, NULL, 'Écart d''inventaire', 'Mohamed', NULL);
-INSERT INTO solde VALUES (1, 1, 810.0000000002), (2, 1, 100), (3, 1, 130), (3, 2, 45);
+ (11, '2026-09-20', '2026-09-20 18:00', 'AJUSTEMENT', 2, 3, 2, -5, 10, 'MAD', 0, 'inventaire', 1, 'INV-2026-0001', NULL, NULL, 'Écart d''inventaire', 'Mohamed', NULL),
+ (12, '2026-09-06', '2026-09-06 09:00', 'RECEPTION', 1, 4, 1, 40, 2.6, 'USD', 0, 'reception', NULL, 'REC-2026-0004', NULL, NULL, '', 'Karim', NULL),
+ (13, '2026-09-06', '2026-09-06 09:00', 'RECEPTION', 1, 5, 1, 30, 2.6, 'USD', 0, 'reception', NULL, 'REC-2026-0004', NULL, NULL, '', 'Karim', NULL),
+ (14, '2026-09-06', '2026-09-06 09:00', 'RECEPTION', 1, 6, 1, 20, 2.1, 'EUR', 0, 'reception', NULL, 'REC-2026-0004', NULL, NULL, '', 'Karim', NULL);
+INSERT INTO solde VALUES (1, 1, 810.0000000002), (2, 1, 100), (3, 1, 130), (3, 2, 45),
+ (4, 1, 40), (5, 1, 30), (6, 1, 20);
 INSERT INTO dossier VALUES (1, '01/26', 'LOMAT septembre', '2026-09-03', 'BMCI', 'clos',
  '2026-09-25 10:00', '', 1), (2, 'X-OLD', 'Ancien', NULL, '', 'ouvert', NULL, '', NULL);
 INSERT INTO dossier_ligne VALUES
@@ -116,7 +127,9 @@ INSERT INTO dossier_charge_part VALUES (1, 1, 909.0954545), (1, 2, 90.9095454);
 INSERT INTO reclamation (id, numero, fournisseur_id, reception_id, reception_ligne_id, lot_id,
  motif, description, quantite, montant_demande, devise, reponse, issue, montant_obtenu, statut,
  ouverte_le, close_le, cree_par) VALUES (1, 'RCL-2026-0001', 1, 1, 1, 1, 'Quantité manquante',
- 'manque', 20, 50, 'USD', 'avoir reçu', 'Avoir', 50, 'close', '2026-09-05', '2026-09-20', 'Mohamed');
+ 'manque', 20, 50, 'USD', 'avoir reçu', 'Avoir', 50, 'close', '2026-09-05', '2026-09-20', 'Mohamed'),
+ (2, 'RCL-2026-0002', 1, 4, 6, 6, 'Qualité (défaut du fil)', 'fil cassant', 5, 0, 'EUR', '', '',
+  0, 'ouverte', '2026-09-07', NULL, 'Mohamed');
 INSERT INTO signalement (id, quand, par, par_id, article_id, texte, urgence, traite_par,
  traite_le, reponse) VALUES (1, '2026-09-15 08:00', 'Atelier', 2, 1, 'Plus de fil rouge',
  'urgente', '', NULL, '');
