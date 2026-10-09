@@ -1,0 +1,129 @@
+/* Ma journée et Cockpit (lot F1) : seulement des jetons (stylelint). */
+
+/* Trois cartes côte à côte qui prennent la hauteur restante ; chacune fait défiler sa liste. */
+.grille {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espace-3);
+  align-items: start;
+  min-height: 0;
+}
+
+.deux {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (width <= 1100px) {
+  .grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 700px) {
+  .grille,
+  .deux {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.taches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tache {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-3);
+  padding: var(--espace-2) var(--espace-3);
+  border: 1px solid var(--bord);
+  border-left: var(--filet-ton) solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+}
+
+.critique {
+  border-left-color: var(--ton-critique);
+}
+
+.attention {
+  border-left-color: var(--ton-attention);
+}
+
+.ok {
+  border-left-color: var(--ton-ok);
+}
+
+.compte {
+  flex: none;
+  min-width: 32px;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.corpsTache {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.titreTache {
+  color: var(--texte);
+  font-weight: 600;
+}
+
+a.titreTache:hover {
+  color: var(--accent);
+}
+
+.detailTache {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  overflow-wrap: anywhere;
+}
+
+.traiter,
+.lienTache {
+  flex: none;
+  white-space: nowrap;
+}
+
+.traiter {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hauteur-bouton);
+  padding: 0 var(--espace-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon-petit);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.traiter:hover {
+  background: var(--accent-clair);
+  text-decoration: none;
+}
+
+.vide {
+  padding: var(--espace-3);
+  color: var(--texte-3);
+}
+
+.pied {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tuilesBureau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+}

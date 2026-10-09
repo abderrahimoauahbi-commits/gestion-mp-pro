@@ -2,11 +2,12 @@
   "ecran": {
     "accueil": {
       "titre": "Ma journée",
-      "resume": "Ce qui attend aujourd’hui : les tâches à faire, ce qui est à valider, les arrivées des sept prochains jours et les besoins signalés par l’atelier.",
+      "resume": "Ce qui attend une action aujourd’hui : à faire, à valider, et les arrivées des sept prochains jours. Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.",
       "points": [
-        "Chaque tâche ouvre son document s’il est seul, la liste filtrée sinon.",
-        "Achats : commandes en retard, prix à confirmer, brouillons à envoyer, réceptions à valider, factures sans dossier d’importation.",
-        "Alimentation au bureau : les sorties en brouillon, les retours à saisir, les besoins signalés et leur réponse."
+        "Achats, dans cet ordre : les besoins signalés par l’atelier (urgents d’abord, « Traiter » y répond), les matières en rupture ou critiques, les commandes en retard, les prix à confirmer, les commandes en brouillon à envoyer, les factures sans dossier d’importation, les réceptions importées sans facture, chaque inventaire en cours, les réclamations ouvertes, les contrôles à corriger.",
+        "« À valider » : les réceptions, ordres et opérations saisis mais pas encore validés — le stock n’a pas bougé pour eux. « Tout valider… » ouvre [Stock › À valider](/stock?onglet=a-valider).",
+        "Alimentation au bureau : les gestes du jour (envoyer aux machines, retour, ordres, métiers, déplacer un lot) et ses brouillons à valider ; ni prix ni conseil d’achat.",
+        "La direction a sa liste au [Cockpit](/cockpit)."
       ]
     },
     "administration": {
@@ -61,11 +62,13 @@
     },
     "cockpit": {
       "titre": "Cockpit",
-      "resume": "Ce qui demande une décision de la direction : à faire et à valider, matières en alerte, vue d’ensemble, évolution, opportunités d’économies.",
+      "resume": "La situation du stock et des achats, recalculée à chaque ouverture : six indicateurs, puis ce qui attend une décision, les matières en alerte, la vue d’ensemble, l’évolution et les opportunités d’économies.",
       "points": [
-        "Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur sa liste.",
-        "« Bilan du mois » imprime le mois écoulé sur le papier à en-tête.",
-        "{{sur_les_metiers}}"
+        "Six indicateurs ; chacun dit sa formule (« ? ») et s’ouvre sur l’écran qui le détaille. Les chiffres sont ceux du serveur : la valeur du stock est celle de la Valorisation.",
+        "{{sur_les_metiers}}",
+        "« À faire et à valider » : les commandes à approuver (« Examiner » ouvre la fiche), puis tout ce qui attend une action, chacun avec son lien ; un besoin signalé se traite sur place.",
+        "« Matières en alerte » : RUPTURE, CRITIQUE, URGENT et ATTENTION, la plus pressée d’abord ; « Préparer la commande » ouvre la préparation chez le fournisseur.",
+        "« Bilan du mois » imprime le mois choisi (le précédent par défaut) sur le papier à en-tête, dans un nouvel onglet."
       ]
     },
     "commande": {
@@ -330,8 +333,12 @@
       "texte": "Sur la valeur consommée par an, en MAD : jusqu’à 80 % cumulés → A, jusqu’à 95 % → B, sinon C (réglables)."
     },
     "alerte": {
-      "grandeur": "Matières en alerte",
-      "texte": "Trois comptes nommés, servis par le serveur : « alerte rouge » = en rupture ou critiques (pastille du menu, bandeaux) ; « à commander vite » = rupture, critiques et urgentes (Ma journée) ; « en alerte » = les quatre statuts RUPTURE, CRITIQUE, URGENT, ATTENTION (onglet Matières en alerte)."
+      "grandeur": "En rupture ou critiques",
+      "texte": "L’alerte rouge : les matières au statut RUPTURE ou CRITIQUE. Un seul compte, le même partout (pastille du Stock, Ma journée, Cockpit) ; les URGENT et les ATTENTION se nomment à part. L’onglet « Matières en alerte » du Cockpit montre les quatre statuts, la plus pressée d’abord."
+    },
+    "arrivees_semaine": {
+      "grandeur": "Arrivées dans les 7 jours",
+      "texte": "Les commandes parties, ni soldées ni annulées, attendues d’hier à dans sept jours : l’ETA du transport, sinon la livraison prévue. La plus proche d’abord."
     },
     "besoin_mois": {
       "grandeur": "Besoin matière du mois",
@@ -393,6 +400,10 @@
       "grandeur": "Reçu",
       "texte": "Pesé aux réceptions validées pour ce bon (hors refus), moins ce qui est reparti chez le fournisseur ; « livré » rapporte le reçu au commandé."
     },
+    "commandes_en_retard": {
+      "grandeur": "Commandes en retard",
+      "texte": "Les commandes parties, ni soldées ni annulées, dont l’arrivée attendue (ETA, sinon livraison prévue, tolérance de retard comprise) est passée sans que tout soit reçu — la règle du serveur, la même que le filtre « En retard » des Commandes et le courriel du lundi."
+    },
     "commandes_engage": {
       "grandeur": "Montant engagé",
       "texte": "Somme des montants estimés en MAD des bons envoyés et confirmés : prix confirmés, sinon prix du catalogue ; au cours figé, sinon au cours du jour."
@@ -412,6 +423,10 @@
     "commandes_retard": {
       "grandeur": "En retard",
       "texte": "Bons ouverts dont la livraison prévue (ou l’ETA) est dépassée sans être livrés en entier."
+    },
+    "controles_a_corriger": {
+      "grandeur": "Contrôles à corriger",
+      "texte": "Les contrôles de cohérence en anomalie, hors contrôles pour information. Chaque contrôle dit quoi faire et mène à l’écran où le corriger."
     },
     "cout_hors_tva": {
       "grandeur": "Coût hors TVA d’une marchandise",
