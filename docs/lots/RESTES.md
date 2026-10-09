@@ -8,11 +8,8 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | E2 | D4 | Déclarer `contexte.COMPTEURS["a_approuver"]` et `["receptions_brouillon"]` (pastilles Commandes et Réceptions). |
 | E2 | D8 | Déclarer `alerte_rouge` et `anomalies` dans les compteurs du contexte. |
 | E2 | D10 | `alerte_serveur` est une phrase affichée telle quelle en rouge pour D et T. |
-| S4 | D9 | Route 114 `GET /documents/etiquettes` : les données sont prêtes dans `services.lots_lecture.etiquettes` ; brancher la route (`api/documents/`) et le gabarit. |
 | S4 | tous les lots D | Toute écriture passe par `services/audit` (journal) : c'est aussi ce qui invalide le cache du moteur. Champs `Numeric` en sortie : type `api.communs.Nombre`. |
-| D1 | D9 | Les classeurs des référentiels passent par `exports/referentiels.classeur` en attendant `exports/classeur.py`. |
 | R1 | Mohamed (à la livraison) | 4 réceptions de Gestion MP payées en deux devises (LOMAT, USD et EUR) : reprises en une réception (devise de la facture en en-tête, prix des lignes intacts), signalé. À proposer : garder ou scinder. |
-| R1 | D10 | `reprise/sauvegarde.py` est un `pg_dump` minimal : le remplacer par le service de sauvegarde de D10. |
 | D9 | X1 | Caddy ne doit pas remplacer la CSP posée par l'application (le bouton « Imprimer » est autorisé par son empreinte sha256). |
 | D10 | D8 | Exposer `services.indicateurs.photographier(s) -> IndicateurJour` : la tâche `photo_indicateurs` l'appelle s'il existe (sinon repli sur `calcul.suivi`). |
 | D2 | docs | Écarts de D2 à API-PRO/ECRANS-PRO/MODELE-DONNEES : routes 82 (`facteurs_cout`), 84/85 (`poids` en liste `{role_id, poids}`), 90/146 (`coefficients` → `saisonnalite`, `modifiees`), 92 (`?date=` sans effet), 97 (`MetierModifie`, `bobines_par_metre`), corps du montage selon API-PRO, origine du montage déduite, étage hors bornes 404 (docs/lots/D2.md § 4). Routes 147, 237, 238 faites par D2. |
