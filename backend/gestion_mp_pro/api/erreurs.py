@@ -147,6 +147,7 @@ CODES: dict[str, Code] = {
             "schema_en_retard": "base pas à la révision attendue",
             "restauration_en_cours": "restauration de sauvegarde en cours",
             "base_indisponible": "base injoignable",
+            "sauvegarde_impossible": "sauvegarde ou restauration impossible (outils, disque)",
         },
     ),
     **_famille(

@@ -26,6 +26,7 @@ dev = [
   "ruff>=0.6",
   "mypy>=1.11",
   "pre-commit>=3.7",
+  "zxing-cpp>=2.2",  # décodeur de QR des essais (étiquettes, lot D9)
 ]
 
 [build-system]
