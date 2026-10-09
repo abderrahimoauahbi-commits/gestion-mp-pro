@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 from fabrique import *  # noqa: F403
-from fabriques.operations import Monde, monde
+from fabriques.operations import JOUR_DES_INVENTAIRES, Monde, monde
 from fabriques.stock import JOUR, autre_magasin
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
@@ -24,7 +24,7 @@ from gestion_mp_pro.db import fabrique
 def m() -> Iterator[Monde]:
     """Le décor des essais hérités, dans un magasin à soi, validé en base."""
     with fabrique()() as s:
-        decor = monde(s, courant=autre_magasin(s))
+        decor = monde(s, le=JOUR_DES_INVENTAIRES, courant=autre_magasin(s))
         s.commit()
         yield decor
 
@@ -35,7 +35,11 @@ def _ok(r: Any, code: int = 200) -> Any:
 
 
 def _ouvrir(client: TestClient, m: Monde, **criteres: Any) -> dict[str, Any]:
-    corps = {"date": JOUR.isoformat(), "magasin_id": m.courant.id, "criteres": criteres}
+    corps = {
+        "date": JOUR_DES_INVENTAIRES.isoformat(),
+        "magasin_id": m.courant.id,
+        "criteres": criteres,
+    }
     return _ok(client.post("/api/inventaires", json=corps), 201)
 
 

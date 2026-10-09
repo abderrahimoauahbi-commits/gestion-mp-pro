@@ -10,7 +10,7 @@ from typing import Any
 
 import pytest
 from fabrique import *  # noqa: F403
-from fabriques.operations import Monde, monde, motif, ordre_valide
+from fabriques.operations import JOUR_DES_INVENTAIRES, Monde, monde, motif, ordre_valide
 from fabriques.stock import JOUR, jour
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
@@ -205,17 +205,14 @@ def test_aucun_prix_chez_l_alimentation_ni_recherche_joker(
         ),
         201,
     )
-    i = _ok(
-        achats.post(
-            "/api/inventaires",
-            json={
-                "date": JOUR.isoformat(),
-                "magasin_id": m.courant.id,
-                "criteres": {"matieres": [m.a2.id]},
-            },
-        ),
-        201,
-    )
+    ancien = monde(base, le=JOUR_DES_INVENTAIRES)
+    base.commit()
+    corps = {
+        "date": JOUR_DES_INVENTAIRES.isoformat(),
+        "magasin_id": ancien.courant.id,
+        "criteres": {"matieres": [ancien.a2.id]},
+    }
+    i = _ok(achats.post("/api/inventaires", json=corps), 201)
     try:
         for url in (
             "/api/operations",

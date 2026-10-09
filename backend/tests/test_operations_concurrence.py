@@ -9,8 +9,15 @@ import threading
 from collections.abc import Callable
 from decimal import Decimal
 
-from fabriques.operations import acteur, ligne, monde, motif, ordre_valide, saisie
-from fabriques.stock import JOUR
+from fabriques.operations import (
+    JOUR_DES_INVENTAIRES,
+    acteur,
+    ligne,
+    monde,
+    motif,
+    ordre_valide,
+    saisie,
+)
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -112,14 +119,16 @@ def test_deux_clics_ne_valident_pas_deux_fois() -> None:
 
 def _course_inventaire_contre_sortie() -> None:
     with fabrique()() as s:
-        m = monde(s)
+        m = monde(s, le=JOUR_DES_INVENTAIRES)
         achats = acteur(s)
         lot_id, magasin_id, matiere_id = m.lots["E-T1"].id, m.courant.id, m.a2.id
         s.commit()
 
     def ouvrir(session: Session) -> object:
         criteres = Criteres(matieres=(matiere_id,))
-        return inv.ouvrir(session, achats, Ouverture(JOUR, magasin_id, criteres=criteres))
+        return inv.ouvrir(
+            session, achats, Ouverture(JOUR_DES_INVENTAIRES, magasin_id, criteres=criteres)
+        )
 
     def sortir(session: Session) -> object:
         lot = session.get_one(Lot, lot_id)

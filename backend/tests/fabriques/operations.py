@@ -32,6 +32,11 @@ from gestion_mp_pro.services import horloge, stock
 from gestion_mp_pro.services.comptes import Acteur
 from gestion_mp_pro.services.operations import SaisieLigne, SaisieOperation
 
+JOUR_DES_INVENTAIRES = date(2025, 12, 31)
+"""La date des inventaires **validés en base** par les essais : une autre année que celle du
+monde de S1 (`modele_monde`, qui pose `INV-2026-0001` à la main), pour ne jamais lui prendre
+son numéro."""
+
 NOMS = {
     Role.direction: "Direction",
     Role.achats: "Achats",
@@ -120,8 +125,9 @@ class Monde:
 
 
 def monde(s: Session, le: date = JOUR, courant: Magasin | None = None) -> Monde:
-    """Le décor, dans deux magasins à lui (courant et quarantaine) : E POIL BLEU (2 kg la bobine, 50 bobines la palette), E TRAME, E FRANGE (au
-    mètre), entrés la veille de `le` à 20, 22, 8, 1 et 20 MAD/kg."""
+    """Le décor, dans deux magasins à lui (courant et quarantaine) : E POIL BLEU (2 kg la
+    bobine, 50 bobines la palette), E TRAME, E FRANGE (au mètre), entrés la veille de `le` à
+    20, 22, 8, 1 et 20 MAD/kg."""
     f = ref.fournisseur(s=s)
     a1 = s.get_one(
         Matiere,
