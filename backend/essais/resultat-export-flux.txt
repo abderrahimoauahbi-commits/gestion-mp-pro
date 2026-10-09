@@ -1,0 +1,36 @@
+EXPORT DU JOURNAL DU STOCK EN FLUX (lot PAGINATION) — effet sur la mémoire
+Mesuré le 2026-10-09. Micro-épreuve isolée du seul chemin d'export (sans base), pour montrer
+l'effet du rendu « en flux » sur la mémoire : 60 000 lignes synthétiques × 17 colonnes, mêmes
+colonnes que la route 106 (/api/export/mouvements), prix compris.
+
+tracemalloc, pic d'allocation du serveur pendant la construction du classeur :
+
+  chemin                                             temps      pic mémoire    sortie
+  ancien (liste complète + classeur en mémoire)      33,6 s      337,0 Mo      3,4 Mo
+  flux   (générateur paresseux + write_only + temp)  31,9 s        0,4 Mo      3,4 Mo
+  --------------------------------------------------------------------------------
+  pic mémoire : ~810× moindre en flux (contenu identique)
+
+Lecture :
+- L'ancien chemin matérialisait TOUTES les lignes (`mouvements.tous` → liste) PUIS tout le
+  classeur openpyxl en mémoire (graphe de cellules complet) : à ×30 (313 000 lignes, V4 § 6) le
+  pic dépassait, d'où le risque de « dépasser » signalé par V4.
+- Le flux consomme les lignes UNE À UNE depuis un curseur (`mouvements.tous_en_flux`, `yield_per`)
+  et les écrit au fil de l'eau (`openpyxl` write_only), le classeur partant ensuite d'un fichier
+  temporaire par morceaux (`StreamingResponse`). Le pic reste borné quel que soit le volume.
+- La valorisation (prix) lit encore le coût par ligne depuis le cache du moteur : ce dictionnaire
+  est en O(mouvements) mais bien plus léger que la liste complète + le classeur ; pour le rôle
+  alimentation (sans prix), le chemin est entièrement borné.
+
+Temps : l'écriture openpyxl d'un xlsx reste proportionnelle au nombre de lignes (~1 900 lignes/s
+ici) ; le flux ne change pas cet ordre de grandeur (il supprime la mémoire, pas le coût d'écriture
+du format). À 313 000 lignes, un classeur xlsx de tout l'historique prend donc encore ~2–3 min :
+le seuil A9 de 3 s pour un export « de tout l'historique » n'est pas tenable en xlsx, quel que
+soit le rendu. Le vrai garde-fou est de borner l'export (la route 106 accepte déjà `du`/`au`,
+matière, lot, magasin, type, document) ; un export « tout, sur dix ans » est à proscrire côté
+écran ou à passer en CSV. Décision laissée au coordinateur (changement d'usage / de format).
+
+Ce qui N'A PAS été refait dans ce lot : l'épreuve de charge complète de V4 aux volumes ×10/×30
+(reconstruction des bases de 100 000 / 313 000 lignes par la reprise R1 puis `charge_volumes.py`).
+Le chemin d'export a été mesuré isolément (ci-dessus) ; le volume de service réel ne régresse pas
+(même contenu, test `tests/test_export_flux.py`).

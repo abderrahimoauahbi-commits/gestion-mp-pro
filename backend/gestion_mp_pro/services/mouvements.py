@@ -8,7 +8,7 @@ texte cherché), le lot, le n° de document, le motif, le commentaire et l'auteu
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
@@ -132,17 +132,41 @@ def _ligne(rang: Sequence[Any]) -> LigneMouvement:
     )  # fmt: skip
 
 
+def _couts(s: Session) -> tuple[Any, dict[str, float]]:
+    """Le coût de chaque ligne du journal et le coût moyen actuel par matière (une fois)."""
+    couts = couts_du_journal(donnees_moteur.charger(s))
+    return couts, couts.cmup()
+
+
+def _valoriser_une(x: LigneMouvement, couts: Any, actuel: dict[str, float]) -> None:
+    """Coût unitaire (MAD) et valeur d'une ligne : l'arrivée d'un transfert vaut son départ ; à
+    défaut, le coût moyen actuel de la matière (S55, S63)."""
+    cout = couts.unitaire.get(x.id, couts.unitaire.get(x.paire_id or 0))
+    x.cout_mad = actuel.get(x.reference, 0.0) if cout is None else cout
+    x.valeur_mad = float(x.quantite) * x.cout_mad
+
+
 def valoriser(s: Session, lignes: list[LigneMouvement]) -> None:
     """Coût unitaire (MAD) et valeur de chaque ligne : le calcul de la valorisation (S55, S63) ;
     l'arrivée d'un transfert vaut son départ ; à défaut, le coût moyen actuel de la matière."""
     if not lignes:
         return
-    couts = couts_du_journal(donnees_moteur.charger(s))
-    actuel = couts.cmup()
+    couts, actuel = _couts(s)
     for x in lignes:
-        cout = couts.unitaire.get(x.id, couts.unitaire.get(x.paire_id or 0))
-        x.cout_mad = actuel.get(x.reference, 0.0) if cout is None else cout
-        x.valeur_mad = float(x.quantite) * x.cout_mad
+        _valoriser_une(x, couts, actuel)
+
+
+def tous_en_flux(s: Session, f: FiltresMouvements, avec_valeur: bool) -> Iterator[LigneMouvement]:
+    """Route 106 (export en flux) : toutes les lignes filtrées, le plus récent d'abord, rendues
+    **une à une** depuis un curseur (`yield_per`) — aucune liste de tout l'historique en mémoire.
+    La valorisation lit son coût de ligne au passage (le calcul des coûts est fait une fois)."""
+    couts_actuel = _couts(s) if avec_valeur else None
+    requete = _requete(f).order_by(Mouvement.date_effet.desc(), Mouvement.id.desc())
+    for rang in s.execute(requete).yield_per(1000):
+        x = _ligne(rang)
+        if couts_actuel is not None:
+            _valoriser_une(x, *couts_actuel)
+        yield x
 
 
 @dataclass

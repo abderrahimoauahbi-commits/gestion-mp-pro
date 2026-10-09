@@ -35,6 +35,7 @@ from gestion_mp_pro.api.stock.schemas import (
     Tracabilite,
 )
 from gestion_mp_pro.exports import stock as classeurs
+from gestion_mp_pro.exports.flux import classeur_en_flux
 from gestion_mp_pro.modeles.enums import DocumentMouvement, TypeMouvement
 from gestion_mp_pro.securite import A, C, D, QuiDep, droit
 from gestion_mp_pro.services import (
@@ -154,9 +155,11 @@ def lister_mouvements(
 def exporter_mouvements(
     f: FiltresDep, qui: QuiDep, s: SessionDep, avec_valeur: bool = True
 ) -> Response:
-    """Route 106."""
-    lignes = mouvements.tous(s, f, avec_valeur and qui.voit_prix)
-    return _xlsx(classeurs.mouvements(lignes, qui.voit_prix), "mouvements")
+    """Route 106 : rendu **en flux** (V4 § 6), les lignes écrites une à une sans tout charger."""
+    lignes = mouvements.tous_en_flux(s, f, avec_valeur and qui.voit_prix)
+    return classeur_en_flux(
+        "Mouvements", classeurs.COLONNES_MOUVEMENTS, lignes, qui.voit_prix, "mouvements"
+    )
 
 
 def filtres_lots(
