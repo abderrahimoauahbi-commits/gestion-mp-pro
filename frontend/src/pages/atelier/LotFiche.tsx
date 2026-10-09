@@ -12,7 +12,9 @@ import { BoutonImprimer } from '../../composants/documents/BoutonImprimer'
 import { Badge } from '../../composants/retour/Badge'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { date, kgEtMetres, nombre, poidsBobine } from '../../lib/format'
+import { permis } from '../../lib/droits'
 import { useLecture } from '../../lib/requetes'
+import { useSession } from '../../lib/session'
 import { bobinesApprochees } from '../../lib/unites'
 import { attente, Fiche, LienBouton, Ligne, NoteAtelier } from './briques'
 import { estIntrouvable, qte } from './commun'
@@ -32,6 +34,22 @@ export function libelleMagasin(m: { magasin: string; type: string }): { nom: str
 export const recents = (m: readonly MouvementLigne[]) =>
   [...m].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
 
+/**
+ * Le n° du document d'un mouvement : un ordre mène à sa fiche de l'atelier, une opération
+ * (transfert, retour) à sa fiche quand le rôle peut l'ouvrir ; le reste se lit tel quel.
+ */
+export function NumeroMouvement({ m }: { m: MouvementLigne }) {
+  const { role } = useSession()
+  if (!m.document_numero) return null
+  const vers =
+    m.document === 'ordre' && m.document_id != null
+      ? `/atelier/ordres/${m.document_id}`
+      : m.document === 'operation' && m.document_id != null && permis(role, `/operations/${m.document_id}`)
+        ? `/operations/${m.document_id}`
+        : null
+  return vers ? <Link to={vers}>{m.document_numero}</Link> : <>{m.document_numero}</>
+}
+
 function Mouvements({ l }: { l: Lot }) {
   const [nb, setNb] = useState(PAGE_MOUVEMENTS)
   const liste = recents(l.mouvements)
@@ -49,7 +67,9 @@ function Mouvements({ l }: { l: Lot }) {
             {date(m.date)} · {m.libelle}
             <br />
             <span className={styles.note}>
-              {[m.document_numero, m.magasin, m.auteur ? `par ${m.auteur}` : ''].filter(Boolean).join(' · ')}
+              <NumeroMouvement m={m} />
+              {m.document_numero ? ' · ' : ''}
+              {[m.magasin, m.auteur ? `par ${m.auteur}` : ''].filter(Boolean).join(' · ')}
             </span>
           </span>
           <span className={styles.valeur}>

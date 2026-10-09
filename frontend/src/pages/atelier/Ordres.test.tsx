@@ -148,6 +148,19 @@ describe('Ordres de l’atelier', () => {
     expect(questionAnnuler(o)).toMatch(/^Annuler tout l’ordre et ses retours \(RET-2026-0001\) \?/)
   })
 
+  it('les retours d’un ordre mènent à leur fiche d’opération', async () => {
+    const o = {
+      ...donnees().ORDRE_VALIDE,
+      retours: [{ id: 3, numero: 'RET-2026-0001', date: '2026-10-08', quantite: 1 }],
+    }
+    fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres/1': { corps: o } }))
+    monterApp('/atelier/ordres/1')
+    expect(await screen.findByRole('link', { name: 'RET-2026-0001' })).toHaveAttribute(
+      'href',
+      '/operations/3',
+    )
+  })
+
   it('un brouillon : valider, modifier (rouvre ce brouillon), supprimer avec sa version', async () => {
     const appels = fauxServeur(reponsesAtelier('alimentation', { 'DELETE /ordres/5': { statut: 204 } }))
     const u = userEvent.setup()

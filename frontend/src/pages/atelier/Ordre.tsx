@@ -7,6 +7,7 @@
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 
 import { EcranAtelier } from '../../composants/atelier/EcranAtelier'
+import { LienDocument } from '../../composants/documents/LienDocument'
 import { dire } from '../../composants/retour/Messages'
 import { Badge } from '../../composants/retour/Badge'
 import { Note } from '../../composants/retour/Note'
@@ -15,11 +16,28 @@ import { Blocages } from '../../composants/saisie/Blocages'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import { horodatage, kgEtMetres, m2 } from '../../lib/format'
 import { api } from '../../lib/api'
+import { permis } from '../../lib/droits'
 import { useEcriture, useLecture } from '../../lib/requetes'
+import { useSession } from '../../lib/session'
 import { attente, Fiche, LienBouton, Ligne, NoteAtelier } from './briques'
 import { dateLisible, estIntrouvable, qte, useNomMetier } from './commun'
 import styles from './atelier.module.css'
 import type { OrdreFiche } from './types'
+
+/** Les retours d'un ordre, chacun lien vers sa fiche d'opération quand le rôle peut l'ouvrir. */
+function Retours({ o }: { o: OrdreFiche }) {
+  const { role } = useSession()
+  return o.retours.map((r, i) => (
+    <span key={`${r.numero}${i}`}>
+      {i ? ', ' : ''}
+      {r.id != null && permis(role, `/operations/${r.id}`) ? (
+        <LienDocument genre="operation" id={r.id} numero={r.numero} />
+      ) : (
+        r.numero || `retour repris de l’ERP Fil du ${dateLisible(r.date)}`
+      )}
+    </span>
+  ))
+}
 
 /** « Annuler tout l'ordre et ses retours (RET-…) ? … » : la question dit ce qui revient. */
 export function questionAnnuler(o: OrdreFiche): string {
@@ -84,10 +102,7 @@ function Matiere({ o }: { o: OrdreFiche }) {
       {o.revenu ? <Ligne libelle="dont revenu des machines">− {qte(o.revenu)}</Ligne> : null}
       {o.retours.length ? (
         <NoteAtelier>
-          Retours faits sur cet ordre :{' '}
-          {o.retours
-            .map((r) => r.numero || `retour repris de l’ERP Fil du ${dateLisible(r.date)}`)
-            .join(', ')}
+          Retours faits sur cet ordre : <Retours o={o} />
         </NoteAtelier>
       ) : null}
     </Fiche>
