@@ -1,25 +1,48 @@
 /**
- * Écrans du domaine « Importations & coût de revient » (lot F5), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F5 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Importations & coût de revient » (lot F5), rassemblés par `routes.ts` : la
+ * page à trois onglets (`?onglet=ouverts|clos|rattacher`), le nouveau dossier
+ * (`/dossiers/nouveau?onglet=facture|main`) et la fiche d'un dossier
+ * (`/dossiers/:id?onglet=familles|marchandises|frais|echeancier|pieces|facture|main|historique`),
+ * en fenêtres à adresse stable par-dessus la liste : les trois chemins mènent à la même page.
+ * Direction et achats seulement (ECRANS-PRO partie 5).
+ *
+ * Le « Coût de revient » (`/analyse?onglet=revient`), les « Postes de frais » et les « Codes
+ * douaniers » (`/reglages?onglet=postes|codes`) sont des onglets des pages du lot F8 : leurs
+ * contenus sont ici (`revient/`, `reglages/`), montés par `PageAnalyse` et `PageReglages`.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Importations')
+const roles = ['direction', 'achats'] as const
 
 export const ecrans: readonly Ecran[] = [
   {
     chemin: '/importations',
     titre: 'Importations & coût de revient',
     groupe: 'Achats',
-    roles: ['direction', 'achats'],
+    roles,
     aide: 'importations',
     onglets: [
       { cle: 'ouverts', libelle: 'Dossiers ouverts' },
       { cle: 'clos', libelle: 'Dossiers clos' },
       { cle: 'rattacher', libelle: 'En attente de dossier' },
     ],
-    lot: 'F5',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/dossiers/nouveau',
+    titre: 'Nouveau dossier d’importation',
+    parent: '/importations',
+    roles,
+    aide: 'importations',
+    page,
+  },
+  {
+    chemin: '/dossiers/:id',
+    titre: 'Dossier d’importation',
+    parent: '/importations',
+    roles,
+    aide: 'importations',
+    page,
   },
 ]

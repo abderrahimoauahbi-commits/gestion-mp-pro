@@ -44,7 +44,7 @@ class ReclamationModification(Entree):
     montant_obtenu: Decimal | None = Field(None, ge=0, le=MAX_MONTANT)
 
 
-class Cloture(Entree):
+class ClotureReclamation(Entree):
     """Clore avec l'issue (obligatoire)."""
 
     version: int = Field(ge=1)
@@ -54,7 +54,7 @@ class Cloture(Entree):
     reponse: str | None = Field(None, max_length=MAX_TEXTE)
 
 
-class Reouverture(Entree):
+class ReouvertureReclamation(Entree):
     """Rouvrir : on attend de nouveau le fournisseur ; le motif reste au journal."""
 
     version: int = Field(ge=1)

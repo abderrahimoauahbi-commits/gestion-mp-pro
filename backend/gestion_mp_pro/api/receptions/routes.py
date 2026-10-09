@@ -17,7 +17,7 @@ from gestion_mp_pro.api.erreurs import reponses
 from gestion_mp_pro.api.receptions import routes_exports, routes_pesees  # noqa: F401 — 176–180
 from gestion_mp_pro.api.receptions.routeur import FiltresDep, routeur
 from gestion_mp_pro.api.receptions.schemas import (
-    Annulation,
+    AnnulationReception,
     FactureCorrection,
     FactureResume,
     ReceptionCreation,
@@ -141,7 +141,7 @@ def valider(rid: int, corps: ValidationVersion, qui: QuiDep, s: SessionDep) -> R
     summary="Annuler une réception validée (contre-passation ; toute refusée, sans mouvement).",
     responses=GESTE,
 )
-def annuler(rid: int, corps: Annulation, qui: QuiDep, s: SessionDep) -> ReceptionFiche:
+def annuler(rid: int, corps: AnnulationReception, qui: QuiDep, s: SessionDep) -> ReceptionFiche:
     """Route 173."""
     receptions.annuler(s, qui, rid, corps.version, corps.motif)
     return _fiche(s, rid)

@@ -4230,6 +4230,29 @@ export interface components {
       total_decaisse_mad: number
     }
     /**
+     * AnnulationDossier
+     * @description Annuler le dossier (il garde son numéro) : le motif est exigé.
+     */
+    AnnulationDossier: {
+      /** Version */
+      version: number
+      /** Motif */
+      motif: string
+    }
+    /**
+     * AnnulationOperation
+     * @description Route 121 : la version lue et, si l'on veut, pourquoi on annule.
+     */
+    AnnulationOperation: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
      * AnnulationOrdre
      * @description Route 141 : la version lue ; un motif facultatif.
      */
@@ -4240,6 +4263,16 @@ export interface components {
        * Motif
        * @default
        */
+      motif: string
+    }
+    /**
+     * AnnulationReception
+     * @description Annuler une réception validée : le motif est exigé (il reste sur la fiche).
+     */
+    AnnulationReception: {
+      /** Version */
+      version: number
+      /** Motif */
       motif: string
     }
     /**
@@ -4536,7 +4569,7 @@ export interface components {
       /** Ordres */
       ordres: number
       /** Ecarts Ordres */
-      ecarts_ordres: components['schemas']['gestion_mp_pro__calcul__production__ConsommationOrdre'][]
+      ecarts_ordres: components['schemas']['EcartOrdreBilan'][]
       /** Ruptures */
       ruptures: number
       /** Critiques */
@@ -4740,6 +4773,19 @@ export interface components {
       roles: components['schemas']['RoleFiche'][]
     }
     /**
+     * ClotureDossier
+     * @description Clore : les alertes du dossier ont été lues (sinon elles sont rendues en refus).
+     */
+    ClotureDossier: {
+      /** Version */
+      version: number
+      /**
+       * Alertes Lues
+       * @default false
+       */
+      alertes_lues: boolean
+    }
+    /**
      * ClotureEntree
      * @description Clore la période jusqu'à une date passée, ou la rouvrir (`null`), avec un motif.
      */
@@ -4753,6 +4799,26 @@ export interface components {
        * @description version de la clôture, lue avec la période
        */
       version: number
+    }
+    /**
+     * ClotureReclamation
+     * @description Clore avec l'issue (obligatoire).
+     */
+    ClotureReclamation: {
+      /** Version */
+      version: number
+      /**
+       * Issue
+       * @description code ou libellé
+       * @default
+       */
+      issue: string
+      /** Montant Obtenu */
+      montant_obtenu?: number | string | null
+      /** Close Le */
+      close_le?: string | null
+      /** Reponse */
+      reponse?: string | null
     }
     /**
      * Cockpit
@@ -5212,6 +5278,57 @@ export interface components {
       identifiant: string
       /** Code */
       code: string
+    }
+    /**
+     * ConsommationOrdre
+     * @description Route 143 : ce qu'un ordre validé a consommé, face au prévu de sa recette (kg).
+     */
+    ConsommationOrdre: {
+      /** Ordre Id */
+      ordre_id: number
+      /** Numero */
+      numero: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /**
+       * Debut
+       * Format: date
+       */
+      debut: string
+      /**
+       * Fin
+       * Format: date
+       */
+      fin: string
+      /** Qualites */
+      qualites: components['schemas']['QualiteM2'][]
+      /** Fabrication */
+      fabrication: string
+      /** M2 */
+      m2: number
+      /** Commentaire */
+      commentaire: string
+      /** Consomme */
+      consomme: number
+      /** Retours */
+      retours: number
+      /** Net */
+      net: number
+      /** Prevu */
+      prevu: number
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Relatif */
+      ecart_relatif: number | null
+      /** Taux Perte */
+      taux_perte: number
+      /** References */
+      references: components['schemas']['ParMatiere'][]
+      /** Lots */
+      lots: string[]
     }
     /**
      * ConsommationReference
@@ -6096,6 +6213,50 @@ export interface components {
       hors_tolerance: boolean
     }
     /**
+     * EcartOrdreBilan
+     * @description Un ordre du mois et son écart au prévu (bilan).
+     */
+    EcartOrdreBilan: {
+      /** Numero Of */
+      numero_of: string
+      /** Consomme */
+      consomme: number
+      /** Retours */
+      retours: number
+      /** References */
+      references: components['schemas']['ConsommationReference'][]
+      /** Lots */
+      lots: string[]
+      /**
+       * Debut
+       * Format: date
+       */
+      debut: string
+      /**
+       * Fin
+       * Format: date
+       */
+      fin: string
+      /** Net */
+      net: number
+      /** Fabrications */
+      fabrications: components['schemas']['Fabrication'][]
+      /** Qualite */
+      qualite: string
+      /** M2 */
+      m2: number
+      /** Commentaire */
+      commentaire: string
+      /** Theorique */
+      theorique: number
+      /** Taux Perte Fige */
+      taux_perte_fige: number | null
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Relatif */
+      ecart_relatif: number | null
+    }
+    /**
      * EcartRole
      * @description Un rôle dont les parts ne font pas 100 %.
      */
@@ -6659,7 +6820,7 @@ export interface components {
       /** Quantite */
       quantite: number
       /** Valeurs */
-      valeurs: components['schemas']['gestion_mp_pro__api__importations__schemas_fiche__ValeurDevise'][]
+      valeurs: components['schemas']['ValeurDeviseDossier'][]
       /** Familles */
       familles: components['schemas']['FamillePoids'][]
       /** Local */
@@ -9065,6 +9226,42 @@ export interface components {
       kg_par_ml: number
     }
     /**
+     * LigneVersionBon
+     * @description Une ligne de la version partie.
+     */
+    LigneVersionBon: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Contenance */
+      contenance: number
+      /** Prix */
+      prix: number
+      /** Prix Confirme */
+      prix_confirme: boolean
+    }
+    /**
+     * LigneVersionRecette
+     * @description Une matière d'une version de recette, avec son rôle à cette date.
+     */
+    LigneVersionRecette: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Pourcentage */
+      pourcentage: number
+    }
+    /**
      * Locaux
      * @description Ce qu'un fournisseur marocain a livré sans dossier, écarté (compté).
      */
@@ -10455,7 +10652,7 @@ export interface components {
       /** Lignes */
       lignes: components['schemas']['LigneOperation'][]
       /** Valeurs */
-      valeurs: components['schemas']['gestion_mp_pro__api__operations__schemas__ValeurDevise'][] | null
+      valeurs: components['schemas']['ValeurDeviseOperation'][] | null
       /** Blocages */
       blocages: string[]
     }
@@ -12224,7 +12421,7 @@ export interface components {
       /** Quantite */
       quantite: number
       /** Valeurs */
-      valeurs: components['schemas']['gestion_mp_pro__api__importations__schemas_fiche__ValeurDevise'][]
+      valeurs: components['schemas']['ValeurDeviseDossier'][]
     }
     /**
      * RecetteEntree
@@ -12268,7 +12465,7 @@ export interface components {
       /** En Vigueur */
       en_vigueur: boolean
       /** Lignes */
-      lignes: components['schemas']['gestion_mp_pro__api__qualites__schemas__LigneVersion'][]
+      lignes: components['schemas']['LigneVersionRecette'][]
       /**
        * Poids
        * @description null : poids non gardés alors
@@ -12638,6 +12835,29 @@ export interface components {
       motif: string
     }
     /**
+     * ReouvertureDossier
+     * @description Rouvrir pour corriger (motif facultatif, au journal).
+     */
+    ReouvertureDossier: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * ReouvertureReclamation
+     * @description Rouvrir : on attend de nouveau le fournisseur ; le motif reste au journal.
+     */
+    ReouvertureReclamation: {
+      /** Version */
+      version: number
+      /** Motif */
+      motif: string
+    }
+    /**
      * ReseauServeur
      * @description L'adresse du serveur pour un autre poste (schéma et port de la requête).
      */
@@ -12650,6 +12870,26 @@ export interface components {
       port: number
       /** Https */
       https: boolean
+    }
+    /**
+     * RestaurationSauvegarde
+     * @description Route 45 : la confirmation tapée (« RESTAURER », casse indifférente) et le motif.
+     */
+    RestaurationSauvegarde: {
+      /** Confirmation */
+      confirmation: string
+      /** Motif */
+      motif: string
+    }
+    /**
+     * RestaurationVersionRecette
+     * @description Revenir à une version : le motif est obligatoire.
+     */
+    RestaurationVersionRecette: {
+      /** Motif */
+      motif: string
+      /** Version */
+      version: number
     }
     /**
      * ResultatImport
@@ -13337,6 +13577,26 @@ export interface components {
       actif: boolean
     }
     /**
+     * ValeurDeviseDossier
+     * @description Une valeur dans sa devise (les devises ne s'additionnent jamais).
+     */
+    ValeurDeviseDossier: {
+      /** Devise */
+      devise: string
+      /** Valeur */
+      valeur: number
+    }
+    /**
+     * ValeurDeviseOperation
+     * @description La valeur d'une ouverture dans une devise.
+     */
+    ValeurDeviseOperation: {
+      /** Devise */
+      devise: string
+      /** Montant */
+      montant: number | null
+    }
+    /**
      * ValeurFiche
      * @description Une valeur de classification et le nombre de matières qui la portent.
      *
@@ -13506,7 +13766,7 @@ export interface components {
       /** Montant Reference */
       montant_reference: number
       /** Lignes */
-      lignes: components['schemas']['gestion_mp_pro__api__commandes__schemas__LigneVersion'][]
+      lignes: components['schemas']['LigneVersionBon'][]
     }
     /**
      * Visage
@@ -13526,266 +13786,6 @@ export interface components {
        * @description 4 pour l'alimentation (le code part au 4ᵉ chiffre), sinon null
        */
       longueur_code: number | null
-    }
-    /**
-     * LigneVersion
-     * @description Une ligne de la version partie.
-     */
-    gestion_mp_pro__api__commandes__schemas__LigneVersion: {
-      /** Matiere Id */
-      matiere_id: number
-      /** Reference */
-      reference: string
-      /** Quantite */
-      quantite: number
-      /** Unite Achat */
-      unite_achat: string
-      /** Contenance */
-      contenance: number
-      /** Prix */
-      prix: number
-      /** Prix Confirme */
-      prix_confirme: boolean
-    }
-    /**
-     * Restauration
-     * @description Route 45 : la confirmation tapée (« RESTAURER », casse indifférente) et le motif.
-     */
-    gestion_mp_pro__api__exploitation__schemas__Restauration: {
-      /** Confirmation */
-      confirmation: string
-      /** Motif */
-      motif: string
-    }
-    /**
-     * Annulation
-     * @description Annuler le dossier (il garde son numéro) : le motif est exigé.
-     */
-    gestion_mp_pro__api__importations__schemas__Annulation: {
-      /** Version */
-      version: number
-      /** Motif */
-      motif: string
-    }
-    /**
-     * Cloture
-     * @description Clore : les alertes du dossier ont été lues (sinon elles sont rendues en refus).
-     */
-    gestion_mp_pro__api__importations__schemas__Cloture: {
-      /** Version */
-      version: number
-      /**
-       * Alertes Lues
-       * @default false
-       */
-      alertes_lues: boolean
-    }
-    /**
-     * Reouverture
-     * @description Rouvrir pour corriger (motif facultatif, au journal).
-     */
-    gestion_mp_pro__api__importations__schemas__Reouverture: {
-      /** Version */
-      version: number
-      /**
-       * Motif
-       * @default
-       */
-      motif: string
-    }
-    /**
-     * ValeurDevise
-     * @description Une valeur dans sa devise (les devises ne s'additionnent jamais).
-     */
-    gestion_mp_pro__api__importations__schemas_fiche__ValeurDevise: {
-      /** Devise */
-      devise: string
-      /** Valeur */
-      valeur: number
-    }
-    /**
-     * Annulation
-     * @description Route 121 : la version lue et, si l'on veut, pourquoi on annule.
-     */
-    gestion_mp_pro__api__operations__schemas__Annulation: {
-      /** Version */
-      version: number
-      /**
-       * Motif
-       * @default
-       */
-      motif: string
-    }
-    /**
-     * ValeurDevise
-     * @description La valeur d'une ouverture dans une devise.
-     */
-    gestion_mp_pro__api__operations__schemas__ValeurDevise: {
-      /** Devise */
-      devise: string
-      /** Montant */
-      montant: number | null
-    }
-    /**
-     * ConsommationOrdre
-     * @description Route 143 : ce qu'un ordre validé a consommé, face au prévu de sa recette (kg).
-     */
-    gestion_mp_pro__api__ordres__schemas__ConsommationOrdre: {
-      /** Ordre Id */
-      ordre_id: number
-      /** Numero */
-      numero: string
-      /**
-       * Date
-       * Format: date
-       */
-      date: string
-      /**
-       * Debut
-       * Format: date
-       */
-      debut: string
-      /**
-       * Fin
-       * Format: date
-       */
-      fin: string
-      /** Qualites */
-      qualites: components['schemas']['QualiteM2'][]
-      /** Fabrication */
-      fabrication: string
-      /** M2 */
-      m2: number
-      /** Commentaire */
-      commentaire: string
-      /** Consomme */
-      consomme: number
-      /** Retours */
-      retours: number
-      /** Net */
-      net: number
-      /** Prevu */
-      prevu: number
-      /** Ecart */
-      ecart: number | null
-      /** Ecart Relatif */
-      ecart_relatif: number | null
-      /** Taux Perte */
-      taux_perte: number
-      /** References */
-      references: components['schemas']['ParMatiere'][]
-      /** Lots */
-      lots: string[]
-    }
-    /**
-     * LigneVersion
-     * @description Une matière d'une version de recette, avec son rôle à cette date.
-     */
-    gestion_mp_pro__api__qualites__schemas__LigneVersion: {
-      /** Matiere Id */
-      matiere_id: number
-      /** Reference */
-      reference: string
-      /** Role Id */
-      role_id: number
-      /** Role */
-      role: string
-      /** Pourcentage */
-      pourcentage: number
-    }
-    /**
-     * Restauration
-     * @description Revenir à une version : le motif est obligatoire.
-     */
-    gestion_mp_pro__api__qualites__schemas__Restauration: {
-      /** Motif */
-      motif: string
-      /** Version */
-      version: number
-    }
-    /**
-     * Annulation
-     * @description Annuler une réception validée : le motif est exigé (il reste sur la fiche).
-     */
-    gestion_mp_pro__api__receptions__schemas__Annulation: {
-      /** Version */
-      version: number
-      /** Motif */
-      motif: string
-    }
-    /**
-     * Cloture
-     * @description Clore avec l'issue (obligatoire).
-     */
-    gestion_mp_pro__api__reclamations__schemas__Cloture: {
-      /** Version */
-      version: number
-      /**
-       * Issue
-       * @description code ou libellé
-       * @default
-       */
-      issue: string
-      /** Montant Obtenu */
-      montant_obtenu?: number | string | null
-      /** Close Le */
-      close_le?: string | null
-      /** Reponse */
-      reponse?: string | null
-    }
-    /**
-     * Reouverture
-     * @description Rouvrir : on attend de nouveau le fournisseur ; le motif reste au journal.
-     */
-    gestion_mp_pro__api__reclamations__schemas__Reouverture: {
-      /** Version */
-      version: number
-      /** Motif */
-      motif: string
-    }
-    /**
-     * ConsommationOrdre
-     * @description Ce qu'un ordre a consommé, fil par fil, et son écart au prévu.
-     */
-    gestion_mp_pro__calcul__production__ConsommationOrdre: {
-      /** Numero Of */
-      numero_of: string
-      /** Consomme */
-      consomme: number
-      /** Retours */
-      retours: number
-      /** References */
-      references: components['schemas']['ConsommationReference'][]
-      /** Lots */
-      lots: string[]
-      /**
-       * Debut
-       * Format: date
-       */
-      debut: string
-      /**
-       * Fin
-       * Format: date
-       */
-      fin: string
-      /** Net */
-      net: number
-      /** Fabrications */
-      fabrications: components['schemas']['Fabrication'][]
-      /** Qualite */
-      qualite: string
-      /** M2 */
-      m2: number
-      /** Commentaire */
-      commentaire: string
-      /** Theorique */
-      theorique: number
-      /** Taux Perte Fige */
-      taux_perte_fige: number | null
-      /** Ecart */
-      ecart: number | null
-      /** Ecart Relatif */
-      ecart_relatif: number | null
     }
   }
   responses: never
@@ -15935,7 +15935,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__exploitation__schemas__Restauration']
+        'application/json': components['schemas']['RestaurationSauvegarde']
       }
     }
     responses: {
@@ -18401,7 +18401,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__qualites__schemas__Restauration']
+        'application/json': components['schemas']['RestaurationVersionRecette']
       }
     }
     responses: {
@@ -20323,7 +20323,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__operations__schemas__Annulation']
+        'application/json': components['schemas']['AnnulationOperation']
       }
     }
     responses: {
@@ -21514,7 +21514,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['gestion_mp_pro__api__ordres__schemas__ConsommationOrdre'][]
+          'application/json': components['schemas']['ConsommationOrdre'][]
         }
       }
       /** @description Non connecté */
@@ -24138,7 +24138,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__receptions__schemas__Annulation']
+        'application/json': components['schemas']['AnnulationReception']
       }
     }
     responses: {
@@ -24572,7 +24572,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__reclamations__schemas__Cloture']
+        'application/json': components['schemas']['ClotureReclamation']
       }
     }
     responses: {
@@ -24643,7 +24643,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__reclamations__schemas__Reouverture']
+        'application/json': components['schemas']['ReouvertureReclamation']
       }
     }
     responses: {
@@ -25702,7 +25702,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__importations__schemas__Cloture']
+        'application/json': components['schemas']['ClotureDossier']
       }
     }
     responses: {
@@ -25773,7 +25773,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__importations__schemas__Reouverture']
+        'application/json': components['schemas']['ReouvertureDossier']
       }
     }
     responses: {
@@ -25844,7 +25844,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['gestion_mp_pro__api__importations__schemas__Annulation']
+        'application/json': components['schemas']['AnnulationDossier']
       }
     }
     responses: {

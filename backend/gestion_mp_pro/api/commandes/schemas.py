@@ -231,7 +231,7 @@ class Decision(Sortie):
     montant_apres: float | None
 
 
-class LigneVersion(Sortie):
+class LigneVersionBon(Sortie):
     """Une ligne de la version partie."""
 
     matiere_id: int
@@ -249,7 +249,7 @@ class VersionPartie(Sortie):
     figee_le: datetime
     motif: str
     montant_reference: float
-    lignes: list[LigneVersion]
+    lignes: list[LigneVersionBon]
 
 
 class CommandeFiche(CommandeResume):
