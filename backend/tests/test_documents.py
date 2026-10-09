@@ -227,7 +227,7 @@ def test_l_etiquette_porte_un_qr(base: Session, alimentation: TestClient) -> Non
     assert trouve["lot_id"] == x.id
     (texte,) = textes(html, "texte")
     assert x.numero in texte and m.reference in texte and "Entré le 08/10/2026" in texte
-    assert f"Reste 120,50 kg à l'impression N° {x.id}" in texte.replace(NSP, " ")
+    assert f"Reste 120,5{NSP}kg à l'impression N° {x.id}" in texte
     assert "@page { size: 100mm 70mm; margin: 4mm; }" in html
     assert "QUARANTAINE" not in html and "MAD" not in html and "prix" not in html.lower()
 
@@ -249,8 +249,32 @@ def test_un_lot_en_quarantaine_ne_sort_pas(base: Session, achats: TestClient) ->
     assert statut == 200
     assert textes(html, "quarantaine") == [
         "QUARANTAINE — NE PAS SORTIR",
-        f"QUARANTAINE — NE PAS SORTIR (dont 30,00{NSP}kg en quarantaine)".replace(NSP, " "),
+        f"QUARANTAINE — NE PAS SORTIR (dont 30,0{NSP}kg en quarantaine)",
     ]
+
+
+def test_etiquette_kilos_a_la_regle_et_bobines(base: Session, achats: TestClient) -> None:
+    """ECRANS-PRO « Étiquettes » (an. 28) et § 9.3 : kilos des documents (une décimale, espaces
+    insécables), mètres indicatifs d'un ruban, « ≈ N bobines » au poids de bobine du lot (sinon
+    du catalogue) ; rien sans poids de bobine."""
+    fil = matiere(base, unique("Fil bobiné"), poids_bobine=Decimal("2.5"))
+    mesure = lot(base, fil, numero=unique("BB"), poids_bobine=Decimal("2.4952"))
+    catalogue = lot(base, fil, numero=unique("BC"))
+    ruban = matiere(base, unique("Ruban"), role_code="Ruban")
+    au_metre = lot(base, ruban, numero=unique("RB"))
+    entree(base, mesure, "1234.56")
+    entree(base, catalogue, "5")
+    entree(base, au_metre, "14.3")
+    base.commit()
+    statut, html = _etiquettes(achats, f"{mesure.id},{catalogue.id},{au_metre.id}")
+    assert statut == 200
+    reste = [t for x in textes(html, "texte") for t in [x.split("Reste ", 1)[1].split(" N° ")[0]]]
+    assert reste == [
+        f"1{NSP}234,6{NSP}kg à l'impression ≈{NSP}495{NSP}bobines",
+        f"5,0{NSP}kg à l'impression ≈{NSP}2{NSP}bobines",
+        f"14,3{NSP}kg ≈{NSP}1{NSP}021{NSP}ml à l'impression",
+    ]
+    assert textes(html, "bobines") == [f"≈{NSP}495{NSP}bobines", f"≈{NSP}2{NSP}bobines"]
 
 
 def test_etiquettes_id_inconnu_signale(base: Session, achats: TestClient) -> None:

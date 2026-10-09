@@ -134,8 +134,9 @@ class Couleur(_Classification, Base):
     famille: Mapped[str] = chaine(L.FAMILLE)
 
 
-class RoleNomenclature(Base):
-    """Poil, Chaîne, Trame… ; Cuir, Franges et Ruban se comptent au mètre (`lineaire`)."""
+class RoleNomenclature(AvecVersion, Base):
+    """Poil, Chaîne, Trame… ; Cuir, Franges et Ruban se comptent au mètre (`lineaire`) ;
+    `version` (révision 0004) : la route 59 la contrôle."""
 
     __tablename__ = "role_nomenclature"
     __table_args__ = (

@@ -17,7 +17,7 @@ define exige
 endef
 
 .PHONY: aide installer verifier verifier-rapide verifier-serveur verifier-ecran verifier-outils \
-	essais matrice types parite comparer miroir construire docker demarrer verrouiller
+	essais matrice types notice parite comparer miroir construire docker demarrer verrouiller
 
 aide: ## Liste des cibles
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/:.*## /\t/' | expand -t 20
@@ -57,6 +57,10 @@ matrice: ## Régénère tests/matrice_droits.csv depuis les routes (jamais à la
 types: ## openapi.json → frontend/src/lib/types.gen.ts
 	$(call exige,scripts/generer_types.sh,E0/E2)
 	scripts/generer_types.sh
+
+notice: ## Régénère docs/NOTICE.md depuis frontend/src/aide.json (jamais à la main)
+	$(call exige,scripts/generer_notice.py,E2)
+	$(BIN)/python scripts/generer_notice.py
 
 parite: ## Parité de calcul avec Gestion MP sur l'année d'essai
 	$(call exige,$(BACK)/essais/parite_gestion_mp.py,R2)

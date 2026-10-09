@@ -246,3 +246,24 @@ def test_un_nom_se_lit_a_l_heure_de_l_usine() -> None:
     assert lu is not None and lu.instant == instant and lu.genre == "quotidienne"
     assert o.lire_nom("gestion-mp-pro-2026-13-08-020005-quotidienne.dump") is None
     assert o.lire_nom("gestion-mp-2026-10-08.dump") is None  # Gestion MP : pas les siennes
+
+
+def test_le_registre_inscrit_tous_les_genres_du_disque() -> None:
+    """Révision 0004 (décision X2) : « avant vidage » et « avant mise à jour » vont au registre
+    comme les autres ; la photographie d'une restauration les rend tels quels."""
+    from gestion_mp_pro.services import sauvegarde_registre as registre
+
+    assert set(registre.GENRES_DU_REGISTRE) == set(o.GENRES)
+    instant = datetime(2026, 10, 8, 2, 0, tzinfo=horloge.FUSEAU)
+    with fabrique()() as s:
+        for genre in o.GENRES:
+            nom = o.nom_de(genre, instant).replace(".dump", f"-registre-{genre}.dump")
+            registre.enregistrer(
+                s, registre.Entree(nom, genre, reglages().nom_base, 1, 1, True, False, instant)
+            )
+        lus = {x.fichier: x.genre for x in registre.photographier(s) if "-registre-" in x.fichier}
+        assert sorted(lus.values()) == sorted(o.GENRES)
+        a_moi = Sauvegarde.fichier.contains("-registre-")
+        en_base = s.scalars(select(Sauvegarde.genre).where(a_moi))
+        assert {str(g) for g in en_base} >= {"avant_vidage", "avant_mise_a_jour"}
+        s.rollback()

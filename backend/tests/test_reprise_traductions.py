@@ -258,6 +258,27 @@ def test_vider_l_activite_garde_les_referentiels(reprise: tuple[Resultat, Path])
     assert prochain > 11  # les identifiants ne repartent pas à 1
 
 
+def test_vider_sauvegarde_avant_vidage_puis_la_base_vide(
+    reprise: tuple[Resultat, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Révision 0004 : la sauvegarde d'avant le vidage a son genre (« avant vidage », jamais
+    purgée), celle d'après est la base vide de référence ; les deux vont au registre."""
+    from gestion_mp_pro.modeles.enums import GenreSauvegarde
+
+    outil = _outil()
+    faites: list[GenreSauvegarde] = []
+    inscrites: list[GenreSauvegarde] = []
+    monkeypatch.setattr(
+        outil.sauvegarde, "sauvegarder", lambda url, genre: faites.append(genre) or genre
+    )
+    monkeypatch.setattr(
+        outil.sauvegarde, "inscrire", lambda c, fichier, genre, base: inscrites.append(genre)
+    )
+    outil.vider_la_base(CIBLE)
+    attendu = [GenreSauvegarde.avant_vidage, GenreSauvegarde.reference_vide]
+    assert faites == attendu and inscrites == attendu
+
+
 @pytest.mark.skipif(shutil.which("pg_dump") is None, reason="outils PostgreSQL absents")
 def test_sauvegarde_avant_reprise(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from gestion_mp_pro.config import reglages

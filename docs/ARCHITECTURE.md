@@ -88,7 +88,9 @@ gestion-mp-pro/
 │   │   ├── main.py                 application, cycle de vie, middlewares, routeurs, écran statique (poste Mac)
 │   │   ├── config.py               Reglages(BaseSettings) : GESTIONMPPRO_* (§ 16), lu une fois
 │   │   ├── db.py                   moteur, fabrique de sessions, dépendance `session`, verrous consultatifs nommés
-│   │   ├── securite.py             sessions, appareils, acteur, droit(), matrice, sans_prix, journal(), notifier()
+│   │   ├── securite/               paquet (plafond de 400 lignes) : acteurs.py (cookie → Acteur, QuiDep, poste
+│   │   │                           local), droits.py (droit(), GESTES, exiger), prix.py (CLES_MONETAIRES,
+│   │   │                           sans_prix, RouteSansPrix), matrice.py, __main__.py (`python -m … matrice`)
 │   │   ├── journalisation.py       configuration de logging (format, niveau, rotation), middleware de trace
 │   │   ├── modeles/
 │   │   │   ├── __init__.py         importe tout (métadonnées complètes pour Alembic)
@@ -144,8 +146,12 @@ gestion-mp-pro/
 │   │   │   ├── installation.py     migrer() (Alembic sous verrou), premier compte, vérification des semences
 │   │   │   ├── notifications.py    notifier(role|personne, texte, lien, ton, cle) ; règles d'émission
 │   │   │   ├── recherche.py        recherche globale filtrée par rôle (normaliser() de modeles/recherche.py)
-│   │   │   ├── comptes.py          comptes, codes (scrypt), sessions, tentatives, visages
-│   │   │   ├── appareils.py        enrôlement, jetons, révocation
+│   │   │   ├── comptes.py          Acteur, codes (scrypt), installation, connexion, son compte, visages
+│   │   │   ├── sessions.py         sessions, essais comptés (compte et adresse), purge
+│   │   │   ├── utilisateurs.py     comptes gérés par D et T (créer, modifier, remettre le code)
+│   │   │   ├── journal.py          lecture du journal (filtres, curseur), valeurs, droits de l'historique
+│   │   │   ├── contexte.py         `/contexte` : menu, compteurs (pastilles), alertes du serveur
+│   │   │   ├── appareils.py        enrôlement, jetons, révocation, adresses d'accès (schéma et port de la requête)
 │   │   │   ├── reglages.py         lire, écrire (bornes, ordres), historique ; registre_reglages.py (les clés de CLES_REGLAGES)
 │   │   │   ├── devises.py          cours, historique ; taux(devise)
 │   │   │   ├── classification.py   valeurs, rôles de nomenclature
@@ -215,7 +221,9 @@ gestion-mp-pro/
 │   │   │   ├── rendu.py            environnement Jinja2 (autoescape), filtres fr/en, société (papier à en-tête)
 │   │   │   ├── anglais.py          traductions du bon (conditionnements, dates « 08 Oct 2026 »)
 │   │   │   ├── qr.py               segno → SVG
-│   │   │   └── gabarits/  _papier_a_en_tete.html  _impression.css  bon_commande.html  etiquettes.html
+│   │   │   ├── format.py           règle d'affichage § 9.3 (jumeau de format.ts), filtres des gabarits et classeurs
+│   │   │   ├── etiquettes.py       mise en page des étiquettes de lots (route 114)
+│   │   │   └── gabarits/  _papier_a_en_tete.html  _papier.html (macros)  _impression.css  bon_commande.html  etiquettes.html
 │   │   │                  feuille_comptage.html  bilan.html
 │   │   ├── exports/
 │   │   │   ├── classeur.py         conventions communes (en-tête, formats, largeurs, volets, filtre, dates, `=` en texte)
@@ -341,7 +349,9 @@ Exemple : `POST /api/receptions/42/valider` par la responsable des achats.
   (nom distinct de Gestion MP : les cookies ne sont pas isolés par port), `HttpOnly`,
   `SameSite=Lax`, `Secure` derrière HTTPS ; en base la seule empreinte. Durée
   `GESTIONMPPRO_SESSION_JOURS` (30). Changement de code, désactivation, révocation d'appareil
-  → sessions fermées.
+  → sessions fermées ; celles d'un compte désactivé sont gardées closes (expirées) jusqu'à la purge :
+  la requête suivante reçoit 401 `compte_inactif` « Ce compte n'est plus actif. » (H-09), pas
+  « Connectez-vous pour continuer. ».
 - Appareils enrôlés (téléphones de l'atelier) : QR d'enrôlement à usage unique (15 min) depuis
   Administration › Appareils ; cookie d'appareil `gestion_mp_pro_appareil` (400 jours). Les
   « visages » (choisir son nom) ne s'affichent que sur le poste local (`127.0.0.1`/`::1`) ou un
@@ -418,7 +428,8 @@ chaque fiche (`/api/historique/{objet}/{id}`) dans un onglet « Historique » de
 ## 7. Moteur de calcul
 
 - **Entrée** : `Donnees` (dataclasses de `calcul/modele.py`, identiques à celles de Gestion MP,
-  CALCULS § 1) construites par `services/donnees_moteur.py` en une dizaine de requêtes groupées.
+  CALCULS § 1) construites par `services/donnees_moteur.py` en requêtes groupées, en nombre **fixe** (≈ 60,
+  une par table lue, quel que soit le nombre de lignes).
   Les `Decimal` deviennent des `float` ; les clés textuelles du moteur (référence, code de
   qualité, nom de fournisseur, code de magasin) sont gardées **pour l'affichage**, mais versions
   de recette, plan et prévus sont reliés par id avant d'être traduits.
@@ -624,11 +635,12 @@ Docker : `deploiement/gestion-mp-pro.service` (systemd).
 
 ### 13.3 Sauvegardes et restauration
 
-Quotidienne relue + manuelle + « avant restauration » + « avant reprise » + « base vide de
-référence » ; dossier propre à la base (`~/gestion-mp-pro-sauvegardes/<base>/`) ; pièces jointes
+Quotidienne relue + manuelle + « avant restauration » + « avant reprise » + « avant vidage » +
+« avant mise à jour » + « base vide de référence » (seules les quotidiennes sont purgées) ; dossier propre à la base (`~/gestion-mp-pro-sauvegardes/<base>/`) ; pièces jointes
 **incluses** dans une archive à côté du dump (`.pieces.tar`) ; copie externe ; purge 14 + 12.
-Restauration (écran ou `scripts/restaurer.sh`) : tout ou rien (`pg_restore --list` d'abord,
-`--single-transaction`), sauvegarde « avant restauration », coupure des autres connexions,
+Restauration (écran ou `scripts/restaurer.sh`) : tout ou rien (`pg_restore --list` d'abord, puis
+`pg_restore -f script` et `psql -1 -v ON_ERROR_STOP=1` après `DROP SCHEMA public CASCADE`, pour
+qu'aucune table née après la sauvegarde ne reste), sauvegarde « avant restauration », coupure des autres connexions,
 pièces jointes restaurées, **migration à `head`** après restauration d'une sauvegarde plus
 ancienne, journal écrit dans la base restaurée, base d'une autre base refusée.
 
