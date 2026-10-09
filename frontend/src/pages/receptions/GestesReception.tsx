@@ -12,6 +12,7 @@ import { api } from '../../lib/api'
 import { useEcriture } from '../../lib/requetes'
 import { ConfirmerMotif } from '../commandes/ConfirmerMotif'
 import { lotsDe, questionValidation } from './calculFiche'
+import { Reglement } from './Reglement'
 import { raisonReception, type ReceptionFiche } from './types'
 
 export interface Navigation {
@@ -126,11 +127,7 @@ function Validee({
           {r.facture ? 'Corriger la facture' : 'Compléter la facture'}
         </Bouton>
       )}
-      {r.facture && !r.facture.payee_le ? (
-        <Bouton grise="Le règlement d’une facture se marque à l’échéancier (Analyse › Échéancier), pas encore en service.">
-          Marquer réglée
-        </Bouton>
-      ) : null}
+      <Reglement r={r} />
       <Bouton
         blocages={bloque(raisonReception(r, 'reclamer'))}
         titre="Un défaut constaté (qualité, manque, bobines, retard) : ouvrir une réclamation, lot et quantité préremplis"

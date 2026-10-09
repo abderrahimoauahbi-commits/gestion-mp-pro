@@ -168,14 +168,22 @@ describe('Réceptions', () => {
     expect(lignes.map((l) => l.devise).sort()).toEqual(['', '', 'EUR'])
   })
 
-  it('fiche validée : annulation avec motif de 3 caractères ; règlement grisé avec sa raison', async () => {
+  it('fiche validée : règlement de la facture (route 229) ; annulation avec motif de 3 caractères', async () => {
     const appels = serveur('direction', {
       'POST /receptions/1/annuler': { corps: receptionEssai({ statut: 'annulee' }) },
+      'PUT /echeancier/paiement': { corps: {} },
     })
     monterApp('/receptions/1')
     const fenetre = await screen.findByRole('dialog', { name: /Réception — REC-2026-0001/ })
-    expect(within(fenetre).getByRole('button', { name: 'Marquer réglée' }).dataset.raison).toMatch(
-      /échéancier/,
+    await userEvent.click(within(fenetre).getByRole('button', { name: 'Marquer réglée' }))
+    await userEvent.click(within(fenetre).getByRole('button', { name: 'Oui, réglée' }))
+    const facture = receptionEssai().facture
+    await waitFor(() =>
+      expect(appels.find((a) => a.chemin === '/echeancier/paiement')?.corps).toMatchObject({
+        genre: 'facture',
+        id: facture?.id,
+        version: facture?.version,
+      }),
     )
     await userEvent.click(within(fenetre).getByRole('button', { name: 'Annuler (contre-passation)' }))
     await userEvent.type(within(fenetre).getByRole('textbox', { name: 'Motif' }), 'ok')
