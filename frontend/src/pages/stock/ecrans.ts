@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Stock, lots & mouvements » (lot F2), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F2 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Stock, lots & mouvements » (lot F2), rassemblés par `routes.ts`. Les fiches
+ * s'ouvrent en fenêtre par-dessus la liste (même page, adresse stable, A5) : `/stock/matieres/:id`,
+ * `/lots/:id`, `/tracabilite?lot=|ordre=|matiere=`.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Stock')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -21,8 +21,15 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'ordres', libelle: 'Ordres de fabrication' },
       { cle: 'a-valider', libelle: 'À valider' },
     ],
-    lot: 'F2',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/stock/matieres/:id',
+    titre: 'Fiche matière',
+    parent: '/stock',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'stock',
+    page,
   },
   {
     chemin: '/lots/:id',
@@ -30,8 +37,7 @@ export const ecrans: readonly Ecran[] = [
     parent: '/stock',
     roles: ['direction', 'achats', 'alimentation'],
     aide: 'lot',
-    lot: 'F2',
-    page: aVenir,
+    page,
   },
   {
     chemin: '/tracabilite',
@@ -39,7 +45,6 @@ export const ecrans: readonly Ecran[] = [
     parent: '/stock',
     roles: ['direction', 'achats', 'alimentation'],
     aide: 'tracabilite',
-    lot: 'F2',
-    page: aVenir,
+    page,
   },
 ]

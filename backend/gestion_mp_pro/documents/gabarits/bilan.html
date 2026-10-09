@@ -1,0 +1,55 @@
+{#- Bilan matières premières du mois (route 234, lot D8) sur le papier à en-tête : le mois en
+chiffres (magasins et métiers, kilos et dirhams), l'équation qui le ferme, la fabrication, les
+écarts entre le prévu par la recette et le sorti net, les ruptures à la fin du mois. -#}
+{% extends "_papier_a_en_tete.html" %}
+{% block style %}
+.grille { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; }
+.case { border: .75pt solid var(--trait); border-radius: 2mm; padding: 2.5mm 3mm; font-size: 8.5pt; }
+.case b { display: block; font-size: 13pt; margin: .5mm 0; }
+.equation { font-size: 9pt; line-height: 1.5; }
+{% endblock %}
+{% block contenu %}
+<h1>Bilan matières premières — {{ b.mois }}</h1>
+<div class="sous-titre">Du {{ b.du|date }} au {{ b.au|date }} · valeurs au coût moyen pondéré · le fil monté sur les métiers est du stock</div>
+
+<h2>Le mois en chiffres</h2>
+<div class="grille">
+  <div class="case">Stock au début<b>{{ b.stock_debut_kg|kg }}</b>{{ b.valeur_debut_mad|montant('MAD') }}<br><span class="lib">dont métiers</span>{{ b.metiers_debut_kg|kg }}</div>
+  <div class="case">Stock à la fin<b>{{ b.stock_fin_kg|kg }}</b>{{ b.valeur_fin_mad|montant('MAD') }}<br><span class="lib">dont métiers</span>{{ b.metiers_fin_kg|kg }}</div>
+  <div class="case">Entrées (réceptions)<b>{{ b.entrees_kg|kg }}</b>{{ b.valeur_entrees_mad|montant('MAD') }} au coût de revient, hors réceptions annulées</div>
+  <div class="case">Sorties vers les machines<b>{{ b.sorties_kg|kg }}</b>{{ b.retours_machine_kg|kg }} revenus, net {{ b.sorties_nettes_kg|kg }} · coût net {{ b.consommation_mad|montant('MAD') }}</div>
+  {% if b.ouvertures_kg %}<div class="case">Stock d'ouverture saisi<b>{{ b.ouvertures_kg|kg }}</b>entré dans le mois</div>{% endif %}
+  <div class="case">Sur les métiers<b>{{ b.variation_metiers_kg|kg }}</b>variation du mois ({{ b.variation_metiers_mad|montant('MAD') }}) : monter n'écrit aucun mouvement</div>
+  <div class="case">Tissé<b>{{ b.m2_total|m2 }}</b>{{ b.ordres }} ordre(s)</div>
+  <div class="case">Commandes émises<b>{{ b.commandes }}</b>hors bons annulés · {{ b.receptions }} réception(s)</div>
+  <div class="case">Livraisons parfaites (OTIF)<b>{% if b.otif is not none %}{{ b.otif|part(0) }}{% else %}—{% endif %}</b>sur {{ b.receptions_notees }} réception(s) notée(s)</div>
+  <div class="case">Ajustements<b>{{ b.ajustements_kg|kg }}</b>retours fournisseur {{ b.retours_fournisseur_kg|kg }}</div>
+</div>
+
+<div class="note equation">
+  <strong>En kilos :</strong> stock à la fin = début + entrées + ouvertures − sorties + retours des machines − retours fournisseur + ajustements + annulations ± variation sur les métiers.<br>
+  <strong>En dirhams :</strong> valeur de fin = valeur de début + entrées − coût net des sorties + autres mouvements ({{ b.valeur_autres_mad|montant('MAD') }} : ouvertures, ajustements, retours fournisseur, annulations) ± variation sur les métiers ({{ b.variation_metiers_mad|montant('MAD') }}){% if b.ecart_valorisation_mad|abs >= 1 %} ; reste du coût moyen (sorties à un autre coût que la moyenne) : {{ b.ecart_valorisation_mad|montant('MAD') }}{% endif %}.<br>
+  <strong>Annulations (contre-passations) datées du mois : {{ b.annulations_kg|kg }}</strong>{% if b.annulations %} ({% for t, q in b.annulations.items() %}{{ libelles.get(t, t) }} {{ q|kg }}{% if not loop.last %}, {% endif %}{% endfor %}){% endif %} — elles défont des écritures et ne comptent ni en sorties ni en entrées ; une réception annulée dans le mois n'apparaît nulle part.
+</div>
+
+<h2>Fabrication, qualité par qualité</h2>
+<table class="donnees">
+  <thead><tr><th>Qualité</th><th class="n">m² tissés</th></tr></thead>
+  <tbody>
+  {% for q, m in b.m2_par_qualite.items() %}<tr><td>{{ q }}</td><td class="n">{{ m|m2 }}</td></tr>
+  {% else %}<tr><td colspan="2" class="vide">Aucun ordre ce mois-ci.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>Les plus grands écarts entre le prévu par la recette et le sorti net</h2>
+<table class="donnees">
+  <thead><tr><th>Ordre</th><th>Qualité</th><th class="n">Prévu (kg)</th><th class="n">Sorti net (kg)</th><th class="n">Écart</th></tr></thead>
+  <tbody>
+  {% for x in b.ecarts_ordres %}<tr><td>{{ x.numero_of }}</td><td>{{ x.qualite }}</td><td class="n">{{ x.theorique|kg }}</td><td class="n">{{ x.net|kg }}</td><td class="n">{{ x.ecart_relatif|part }}</td></tr>
+  {% else %}<tr><td colspan="5" class="vide">Aucun.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>À la fin du mois</h2>
+<p>{{ b.ruptures }} matière(s) en rupture, {{ b.critiques }} critique(s) : {{ b.alerte_rouge }} en rupture ou critiques.</p>
+{% endblock %}

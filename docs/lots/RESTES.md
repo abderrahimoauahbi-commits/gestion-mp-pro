@@ -40,3 +40,15 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | D7 | R1 | Preuves de reprise du domaine 8 : `test_la_reprise_relie_les_dossiers_a_leur_facture`, `test_les_morceaux_d_un_ancien_eclatement_redeviennent_une_piece`. |
 | D7 | docs | Écarts de D7 (docs/lots/D7.md § 4) : 188 `{factures, sans_facture, locaux}` ; 189 enrichie ; `commentaire` (ECRANS-PRO : `observations`) ; 192 sans `reception_ligne_ids` (rattacher par facture seulement) ; 200–204, 206 précisés ; dossiers annulés, jamais supprimés ; REGLES X-IMP-17 sans objet. |
 | D7 | F1 | Pastille « factures sans dossier » si l'écran en a besoin (à déclarer). |
+| F2 | F2/F3 (unification) | Deux moteurs de saisie d'ordre : `pages/sorties/ordre.ts` + `useSaisieOrdre.ts` (F2) et `pages/atelier/sortie.ts` (F3), mêmes règles et textes : n'en garder qu'un (ECRANS-PRO le veut unique). |
+| F2 | E1 | `Bascule` déborde de sa carte sur téléphone ; `Barres` ne sait pas empiler (plan glissant côte à côte au lieu d'« empilées »). |
+| F2 | S4 | `LigneStock` sans id de rôle ni de fournisseur ; `par_magasin` indexé par code ; `Tracabilite` sans ids ni comparaison par matière ; `EtapeTracee.document` sans id (pas de lien). |
+| F2 | S3 | `statut`, `statut_couverture`, `action` du moteur portent encore des émojis (l'écran les traduit par `cleStock`) : rendre des codes. |
+| F2 | F6 | Déclarer l'adresse d'écran `/operations/:id` (numéros de transferts et retours en liens). |
+| D8 | R2, C1 (correction déclarée K7) | PRO compte le fil monté à TOUTE date (rejeu de `montage_evenement`) dans la valorisation, le cockpit, les contrôles et le bilan ; Gestion MP ne le compte qu'au jour même (bilan : à part, mois en cours). Écart voulu (décision de Mohamed : le fil monté est du stock) : à déclarer et prouver dans la parité et la comparaison. |
+| D8 | S4 | `/stock?date=` ne compte pas le fil monté d'un soir passé : appeler `services.pilotage.lire(s, jour)` pour dire le même chiffre que la Valorisation. Preuves non portées : `test_api_les_lots_comptent_comme_les_soldes` (route 107), `test_les_cours_sont_dates` (D1). |
+| D8 | docs | Écarts de D8 (docs/lots/D8.md § 4) : routes 7, 209, 212, 213, 215, 221–229, 233, 235 ; ECRANS-PRO Valorisation (« à une date passée, le fil monté n'est pas compté » devenu faux) ; ARCHITECTURE § 3 (modules `pilotage_*`, `pieces_types`, `donnees_brutes`). |
+| F4 | D4 | `Pesee.numero` vaut « brouillon n° 6 » (vocabulaire retiré) : rendre « Brouillon ». |
+| F4 | D3 | `/export/plan-achat` ignore les filtres liés de l'écran ; la fiche ne dit pas pourquoi la date promise est figée. |
+| F4 | E1 | `Confirmer` : longueur minimale du motif (F4 a écrit `ConfirmerMotif` en attendant). |
+| F4 | F4 | Remplacer le `Paiement` provisoire de `receptions/Reglement.tsx` par `Schema<'Paiement'>` (types régénérés après le lot NOMS). |

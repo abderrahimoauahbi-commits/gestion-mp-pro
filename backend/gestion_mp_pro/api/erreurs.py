@@ -134,6 +134,7 @@ CODES: dict[str, Code] = {
         },
     ),
     **_famille(405, {"methode_non_permise": "méthode HTTP non permise sur cette adresse"}),
+    **_famille(410, {"fichier_disparu": "fichier d'une pièce jointe disparu du disque (G-10)"}),
     **_famille(
         429,
         {
@@ -252,6 +253,7 @@ def reponses(*statuts: int) -> dict[int | str, dict[str, Any]]:
         401: "Non connecté",
         403: "Droit refusé",
         404: "Introuvable",
+        410: "Disparu",
         409: "Conflit ou état",
         422: "Saisie refusée",
         429: "Trop d'essais",

@@ -1,11 +1,10 @@
 /**
- * Écrans du domaine « Production & besoins » (lot F2), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F2 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Production & besoins » (lot F2), rassemblés par `routes.ts`. D'où vient le
+ * besoin d'une matière s'ouvre en fenêtre par-dessus l'onglet des besoins (même page, adresse stable).
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Production')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -20,7 +19,14 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'realise', libelle: 'Plan et réalisé' },
       { cle: 'besoins', libelle: 'Besoins matière' },
     ],
-    lot: 'F2',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/production/besoins/:matiereId',
+    titre: 'Besoin d’une matière',
+    parent: '/production',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'production',
+    page,
   },
 ]

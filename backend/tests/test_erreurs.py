@@ -300,7 +300,7 @@ def test_codes_declares() -> None:
     assert len(CODES) >= 60
     for nom, code in CODES.items():
         assert re.fullmatch(r"[a-z][a-z_]+[a-z]", nom), nom
-        assert code.http in {401, 403, 404, 405, 409, 422, 429, 500, 503}, nom
+        assert code.http in {401, 403, 404, 405, 409, 410, 422, 429, 500, 503}, nom
         assert code.sens
 
 
