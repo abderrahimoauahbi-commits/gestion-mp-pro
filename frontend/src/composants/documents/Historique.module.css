@@ -44,3 +44,13 @@
   color: var(--texte);
   font-weight: 600;
 }
+
+.valeurs {
+  margin-top: 4px;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.valeurs summary {
+  cursor: pointer;
+}

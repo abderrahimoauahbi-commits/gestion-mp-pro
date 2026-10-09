@@ -29,6 +29,7 @@ import {
 } from './donnees'
 import { VoletLectureClassification, VoletLectureConditionnement } from './FicheMatiereLecture'
 import { manques, nomVolet, type DefautsCreation, type Volet } from './formeMatiere'
+import { useNomsMatiere } from './nomsHistorique'
 import { PiedMatiere } from './PiedMatiere'
 import { estComplet, LISTES, type Classification, type Matiere, type MatiereFiche } from './types'
 import { useFicheMatiere, type FicheMatiereEtat } from './useFicheMatiere'
@@ -111,6 +112,7 @@ function CorpsVolet({
   const fournisseurs = useFournisseurs()
   const devises = useDevises(true)
   const codes = useCodesDouaniers(true)
+  const noms = useNomsMatiere(true)
   return (
     <>
       {volet === 'classification' ? (
@@ -139,7 +141,7 @@ function CorpsVolet({
         <VoletConditionnement forme={f.forme} maj={f.maj} groupes={groupes} />
       ) : null}
       {volet === 'pieces' && f.base ? <PiecesJointes objet="matiere" id={f.base.id} /> : null}
-      {volet === 'historique' && f.base ? <Historique objet="matiere" id={f.base.id} /> : null}
+      {volet === 'historique' && f.base ? <Historique objet="matiere" id={f.base.id} noms={noms} /> : null}
     </>
   )
 }
@@ -202,6 +204,7 @@ function FicheEcrite({
 function Lecture({ m, onFermer }: { m: MatiereFiche; onFermer: () => void }) {
   const volets = ['classification', 'conditionnement', 'historique'] as const
   const [volet, choisir] = useOngletAdresse(volets, 'classification')
+  const noms = useNomsMatiere(false)
   return (
     <Fenetre titre={<Titre m={m} />} onFermer={onFermer} taille="large">
       <Bandeau m={m} />
@@ -213,7 +216,7 @@ function Lecture({ m, onFermer }: { m: MatiereFiche; onFermer: () => void }) {
       />
       {volet === 'classification' ? <VoletLectureClassification m={m} /> : null}
       {volet === 'conditionnement' ? <VoletLectureConditionnement m={m} /> : null}
-      {volet === 'historique' ? <Historique objet="matiere" id={m.id} /> : null}
+      {volet === 'historique' ? <Historique objet="matiere" id={m.id} noms={noms} /> : null}
     </Fenetre>
   )
 }
