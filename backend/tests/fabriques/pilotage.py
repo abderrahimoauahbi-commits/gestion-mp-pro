@@ -17,17 +17,17 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Any
 
+import base_connue
 import pytest
 from fabrique import client_de
 from fabriques import referentiels as ref
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro import db
 from gestion_mp_pro.modeles import (
-    Base,
     Commande,
     CommandeLigne,
     Dossier,
@@ -56,12 +56,6 @@ from gestion_mp_pro.modeles.enums import (
 from gestion_mp_pro.services import donnees_moteur, horloge, lots, stock
 
 JOUR = date(2026, 10, 8)
-GARDEES = {
-    "parametre", "devise", "devise_cours", "role_nomenclature", "poste_frais", "magasin",
-    "motif", "utilisateur", "session", "appareil", "tentative", "alembic_version",
-}  # fmt: skip
-"""Tables gardées par le vidage : semences, comptes et leurs sessions (les clients restent
-connectés)."""
 REPRISE = stock.Piece(DocumentMouvement.reprise, None, "")
 
 
@@ -77,12 +71,9 @@ def ok(r: Any, code: int = 200) -> Any:
 
 
 def vider_activite(s: Session) -> None:
-    """Vide l'activité et les référentiels non semés dans la transaction ; un magasin par type."""
-    tables = [t.name for t in Base.metadata.sorted_tables if t.name not in GARDEES]
-    s.execute(text("TRUNCATE " + ", ".join(tables) + " CASCADE"))
-    s.execute(
-        text("DELETE FROM magasin WHERE id NOT IN (SELECT min(id) FROM magasin GROUP BY type)")
-    )
+    """La base d'une installation neuve dans la transaction (`base_connue.remettre`) : activité
+    et référentiels vidés, réglages à leur défaut, un magasin par type, comptes gardés."""
+    base_connue.remettre(s.connection())
 
 
 @dataclass

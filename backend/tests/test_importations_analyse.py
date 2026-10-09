@@ -14,13 +14,12 @@ import pytest
 from fabrique import *  # noqa: F403
 from fabrique import client_de
 from fabriques.importations import Import, a_la_main, fiche, frais, geste, ligne, ouvrir
-from fabriques.receptions import menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import ok
 from fabriques.referentiels import poste_frais, qualite, unique, valeur_classification
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
 
-pytestmark = pytest.mark.usefixtures("menage")
 URL = "/api/analyse/revient"
 
 

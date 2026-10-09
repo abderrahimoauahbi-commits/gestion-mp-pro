@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
+from gestion_mp_pro.calcul.constantes import LIBELLES_STATUT
 from gestion_mp_pro.exports.classeur import Colonne, Feuille, classeur, exporte_le, filtres, titre
 from gestion_mp_pro.services import horloge
 from gestion_mp_pro.services.commandes_fiche import BonDetaille, FiltresCommandes
@@ -141,7 +142,7 @@ COLONNES_REFERENCES = (
     Colonne("Désignation", _cle("designation")),
     Colonne("Fournisseur", _cle("fournisseur")),
     Colonne("Classe", _cle("classe_abc")),
-    Colonne("Statut", _cle("statut")),
+    Colonne("Statut", lambda x: LIBELLES_STATUT.get(x["statut"], x["statut"])),
     Colonne("Disponible (kg)", _cle("stock_disponible"), "kg"),
     Colonne("Commandé (kg)", _cle("commande_kg"), "kg"),
     Colonne("Couverture (j)", _cle("couverture_jours"), "entier"),

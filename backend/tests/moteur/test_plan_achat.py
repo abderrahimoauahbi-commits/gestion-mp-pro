@@ -47,7 +47,7 @@ def test_le_budget_est_la_somme_des_lignes_affichees() -> None:
     d = usine(100, mouvements=[Mouvement(date(2026, 6, 1), "STOCK_INITIAL", "FIL A", 2500)])
     lignes = etat_stock(d, JOUR)
     a = next(x for x in lignes if x.reference == "FIL A")
-    assert a.quantite_a_commander > 0 and a.statut == "🟢 OK"
+    assert a.quantite_a_commander > 0 and a.statut == "OK"
     plan = plan_achat(d, lignes)
     assert [x.reference for x in plan.lignes] == ["FIL A"]
     assert plan.budget_mad == pytest.approx(sum(x.montant_mad for x in plan.lignes))

@@ -5,14 +5,13 @@ résumé, lignes, réceptions, décisions, version partie, gestes permis (ECRANS
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul.achats import echeance_commande
-from gestion_mp_pro.modeles import Commande, CommandeVersion, Matiere
+from gestion_mp_pro.modeles import Commande
 from gestion_mp_pro.modeles.enums import StatutCommande
 from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import commandes_gestes as gestes
@@ -33,7 +32,9 @@ from gestion_mp_pro.services.commandes_lecture import (
     livraison,
     renvoi,
 )
-from gestion_mp_pro.services.commandes_socle import CLOS
+from gestion_mp_pro.services.commandes_saisie import promesse_figee
+from gestion_mp_pro.services.commandes_socle import CLOS, prix_deja_confirmes
+from gestion_mp_pro.services.commandes_versions import VersionPartie, version_partie
 
 ONGLETS = {
     "brouillon": {StatutCommande.brouillon},
@@ -109,6 +110,10 @@ class CommandeResume:
     solde_par: str | None
     solde_le: datetime | None
     renvoi: Renvoi | None
+    en_retard: bool = False
+    arrivee_attendue: date | None = None
+    arrivee_sous_7_jours: bool = False
+    kg_en_quarantaine: float = 0.0
 
 
 @dataclass
@@ -124,32 +129,10 @@ class DecisionLue:
 
 
 @dataclass
-class LigneVersion:
-    """Une ligne de la version partie."""
-
-    matiere_id: int
-    reference: str
-    quantite: float
-    unite_achat: str
-    contenance: float
-    prix: float
-    prix_confirme: bool
-
-
-@dataclass
-class VersionPartie:
-    """Ce que le fournisseur a entre les mains, et le montant auquel une hausse se mesure."""
-
-    figee_le: datetime
-    motif: str
-    montant_reference: float
-    lignes: list[LigneVersion]
-
-
-@dataclass
 class CommandeFiche(CommandeResume):
     """La fiche complète d'un bon (route 153)."""
 
+    promesse_figee: str | None = None
     seuil_approbation: float = 0.0
     contact: str = ""
     email: str = ""
@@ -179,6 +162,25 @@ def _jalons(c: Commande) -> Jalons:
         c.conteneur,
         c.navire,
     )
+
+
+@dataclass(frozen=True)
+class Arrivee:
+    """Quand le bon doit arriver (ETA, sinon livraison promise) et s'il arrive d'hier à J+7
+    (« Arrivées attendues dans les 7 jours » : la règle de Gestion MP, comptée au serveur)."""
+
+    arrivee_attendue: date | None
+    arrivee_sous_7_jours: bool
+
+
+def arrivee(c: Commande) -> Arrivee:
+    """L'arrivée attendue d'un bon parti, ni soldé ni annulé (RESTES3, F1)."""
+    if not c.numero or c.statut in CLOS:
+        return Arrivee(None, False)
+    quand = c.eta or c.date_livraison_prevue
+    jour = horloge.aujourd_hui()
+    proche = quand is not None and jour - timedelta(days=1) <= quand <= jour + timedelta(days=7)
+    return Arrivee(quand, proche)
 
 
 def resume(c: Commande, ctx: Lecture, lues: list[LigneLue] | None = None) -> CommandeResume:
@@ -233,6 +235,9 @@ def resume(c: Commande, ctx: Lecture, lues: list[LigneLue] | None = None) -> Com
         solde_par=ctx.nom(c.solde_par_id),
         solde_le=c.solde_le,
         renvoi=renvoi(c, ctx),
+        en_retard=bool(c.numero) and c.statut not in CLOS and code in EN_RETARD,
+        **vars(arrivee(c)),
+        kg_en_quarantaine=sum(x.en_quarantaine for x in lues),
     )
 
 
@@ -314,38 +319,6 @@ def liste(s: Session, f: FiltresCommandes) -> list[CommandeResume]:
     return [x.resume for x in detailler(s, f)]
 
 
-def _version_partie(s: Session, cid: int) -> VersionPartie | None:
-    """La dernière version partie, lisible (références)."""
-    v = s.scalars(
-        select(CommandeVersion)
-        .where(CommandeVersion.commande_id == cid)
-        .options(selectinload(CommandeVersion.lignes))
-        .order_by(CommandeVersion.figee_le.desc(), CommandeVersion.id.desc())
-        .limit(1)
-    ).first()
-    if v is None:
-        return None
-    ids = [x.matiere_id for x in v.lignes]
-    refs = dict(s.execute(select(Matiere.id, Matiere.reference).where(Matiere.id.in_(ids))).all())
-    return VersionPartie(
-        v.figee_le,
-        str(v.motif),
-        float(v.montant_reference),
-        [
-            LigneVersion(
-                x.matiere_id,
-                refs.get(x.matiere_id, ""),
-                float(x.quantite),
-                x.unite_achat,
-                float(x.contenance),
-                float(x.prix),
-                x.prix_confirme,
-            )
-            for x in v.lignes
-        ],  # fmt: skip
-    )
-
-
 def fiche(s: Session, cid: int, role: str) -> CommandeFiche:
     """Route 153 : la fiche complète, dont les gestes permis à ce rôle et pourquoi pas."""
     s.flush()
@@ -368,6 +341,7 @@ def fiche(s: Session, cid: int, role: str) -> CommandeFiche:
     confirmes = [x.confirme_le for x in lues if x.confirme_le]
     return CommandeFiche(
         **vars(resume(c, ctx, lues)),
+        promesse_figee=promesse_figee(c, prix_deja_confirmes(s, c)),
         seuil_approbation=ctx.seuil,
         contact=f.contact,
         email=f.email,
@@ -393,5 +367,5 @@ def fiche(s: Session, cid: int, role: str) -> CommandeFiche:
             )
             for d in ctx.decisions.get(c.id, [])
         ],  # fmt: skip
-        version_partie=_version_partie(s, c.id),
+        version_partie=version_partie(s, c.id),
     )

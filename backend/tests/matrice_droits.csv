@@ -181,6 +181,7 @@ GET;/api/parametres;401;ok;ok;403;ok
 PUT;/api/parametres;401;ok;403;403;ok
 GET;/api/parametres/historique;401;ok;403;403;ok
 PUT;/api/periode-close;401;ok;403;403;403
+GET;/api/periode-close/brouillons;401;ok;403;403;403
 GET;/api/pieces;401;ok;ok;403;403
 POST;/api/pieces;401;ok;ok;403;403
 DELETE;/api/pieces/{ident};401;ok;ok;403;403

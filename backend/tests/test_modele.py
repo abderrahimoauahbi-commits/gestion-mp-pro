@@ -11,6 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
+import base_connue
 import pytest
 from modele_monde import Ids, batir, inserer
 from psycopg import errors
@@ -39,9 +40,11 @@ indicateur_jour, reprise_correspondance, reprise_execution, alembic_version"""
 
 @pytest.fixture
 def lien() -> Iterator[Connection]:
-    """Une connexion dans une transaction annulée à la fin de l'essai."""
+    """Une connexion sur une base neuve (`base_connue`), dans une transaction annulée à la fin
+    de l'essai."""
     with moteur().connect() as c:
         transaction = c.begin()
+        base_connue.remettre(c)
         yield c
         transaction.rollback()
 

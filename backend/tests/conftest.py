@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import atexit
 import os
+import random
 import shutil
 import tempfile
 from collections.abc import Iterator
@@ -39,6 +40,7 @@ os.environ["GESTIONMPPRO_SAUVEGARDES"] = str(DOSSIER_DES_ESSAIS / "sauvegardes")
 os.environ["GESTIONMPPRO_PIECES"] = str(DOSSIER_DES_ESSAIS / "pieces")
 os.environ.pop("GESTIONMPPRO_SAUVEGARDES_COPIE", None)
 
+import base_connue  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
@@ -69,8 +71,43 @@ def preparer_schema() -> None:
 
 @pytest.fixture(scope="session", autouse=True)
 def schema() -> None:
-    """Le schéma de la base d'essai, recréé une fois par lancement."""
+    """Le schéma de la base d'essai, recréé une fois par lancement ; semences photographiées
+    (`base_connue`)."""
     preparer_schema()
+    with moteur().connect() as c:
+        base_connue.photographier(c)
+
+
+@pytest.fixture
+def base_neuve() -> None:
+    """La base d'une installation neuve, validée (comptes gardés) : pour un essai qui compte
+    toute la base et dont le code ouvre ses propres sessions (`base_connue`)."""
+    base_connue.remettre_et_valider()
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """`--melanger=GRAINE` : modules et essais de chaque module dans un ordre tiré au hasard."""
+    parser.addoption(
+        "--melanger",
+        default=os.environ.get("GESTIONMPPRO_MELANGE", ""),
+        help="graine : rejoue la suite dans un ordre aléatoire (modules, puis essais du module)",
+    )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """L'ordre aléatoire de `--melanger` : aucun essai ne doit dépendre de ceux d'avant."""
+    graine = str(config.getoption("--melanger") or "")
+    if not graine:
+        return
+    tirage = random.Random(graine)  # noqa: S311
+    par_module: dict[str, list[pytest.Item]] = {}
+    for item in items:
+        par_module.setdefault(item.nodeid.split("::")[0], []).append(item)
+    modules = list(par_module.values())
+    tirage.shuffle(modules)
+    for groupe in modules:
+        tirage.shuffle(groupe)
+    items[:] = [item for groupe in modules for item in groupe]
 
 
 @pytest.fixture(autouse=True)

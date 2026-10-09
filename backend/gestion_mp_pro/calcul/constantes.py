@@ -54,14 +54,37 @@ ACHATS_JOURNAL = ("STOCK_INITIAL", "ENTREE_RECEPTION")
 
 # ── Statuts d'une matière ─────────────────────────────────────────────────────
 STATUTS = {
+    "RUPTURE": "RUPTURE",
+    "CRITIQUE": "CRITIQUE",
+    "URGENT": "URGENT",
+    "ATTENTION": "ATTENTION",
+    "OK": "OK",
+    "SANS_CONSO": "NON_CONSOMMEE",
+}
+"""Le statut d'une matière (`statut`, `statut_couverture`) : un **code**, sans émoji (l'écran le
+traduit, `lib/statuts.ts`) ; Gestion MP rendait « ⚫ RUPTURE », « ⚪ NON CONSOMMÉE »…
+(`LIBELLES_GESTION_MP`, pour la parité)."""
+LIBELLES_GESTION_MP = {
     "RUPTURE": "⚫ RUPTURE",
     "CRITIQUE": "🔴 CRITIQUE",
     "URGENT": "🟠 URGENT",
     "ATTENTION": "🟡 ATTENTION",
     "OK": "🟢 OK",
-    "SANS_CONSO": "⚪ NON CONSOMMÉE",
+    "NON_CONSOMMEE": "⚪ NON CONSOMMÉE",
 }
-"""Le statut d'une matière : les libellés sont les valeurs (comparées telles quelles)."""
+"""Code du statut → libellé de Gestion MP (même valeur logique, autre forme)."""
+LIBELLES_STATUT = {
+    "RUPTURE": "RUPTURE",
+    "CRITIQUE": "CRITIQUE",
+    "URGENT": "URGENT",
+    "ATTENTION": "ATTENTION",
+    "OK": "OK",
+    "NON_CONSOMMEE": "NON CONSOMMÉE",
+}
+"""Code du statut → libellé des classeurs (celui de l'écran)."""
+ACTION_CREER_BC, ACTION_AUCUNE = "CREER_BC", "AUCUNE"
+"""L'action d'une ligne de stock (`action`) : un bon à créer chez son fournisseur, ou rien
+(Gestion MP : « 📝 Créer BC - <fournisseur> », « — »)."""
 STATUTS_EN_ALERTE = (
     STATUTS["RUPTURE"],
     STATUTS["CRITIQUE"],

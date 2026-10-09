@@ -76,6 +76,7 @@ class Inventaire(AvecVersion, Base):
     valide_le: Mapped[datetime | None] = instant()
     abandonne_par_id: Mapped[int | None] = qui()
     abandonne_le: Mapped[datetime | None] = instant()
+    abandon_motif: Mapped[str] = chaine(L.MOTIF)
     annule_par_id: Mapped[int | None] = qui()
     annule_le: Mapped[datetime | None] = instant()
     annulation_motif: Mapped[str] = chaine(L.MOTIF)

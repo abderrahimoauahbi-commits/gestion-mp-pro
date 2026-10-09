@@ -119,24 +119,36 @@ def cout_hors_periode_close(
     )
 
 
+@dataclass(frozen=True)
+class Restes:
+    """Ce qui est daté de la période à clore et l'empêcherait : un genre de document."""
+
+    genre: str
+    libelle: str
+    nombre: int
+
+
+def compter_brouillons(s: Session, jour: date) -> list[Restes]:
+    """Brouillons et inventaires ouverts datés jusqu'à `jour`, genre par genre (même ceux à 0) :
+    annoncés avant la clôture (`GET /periode-close/brouillons`, RESTES3, F8)."""
+    a_voir: tuple[tuple[str, str, type[Reception | Ordre | Operation | Inventaire], str], ...] = (
+        ("reception", "réception", Reception, StatutDocument.brouillon),
+        ("ordre", "ordre de fabrication", Ordre, StatutOrdre.brouillon),
+        ("operation", "opération", Operation, StatutDocument.brouillon),
+        ("inventaire", "inventaire", Inventaire, StatutInventaire.ouvert),
+    )
+    return [
+        Restes(genre, libelle, int(s.scalar(
+            select(func.count()).select_from(modele)
+            .where(modele.statut == statut, modele.date <= jour)
+        ) or 0))
+        for genre, libelle, modele, statut in a_voir
+    ]  # fmt: skip
+
+
 def brouillons_dans_la_periode(s: Session, jour: date) -> list[str]:
     """Ce qui resterait à faire dans la période à clore : brouillons et inventaires ouverts."""
-    restes: list[str] = []
-    a_voir: tuple[tuple[str, type[Reception | Ordre | Operation | Inventaire], str], ...] = (
-        ("réception", Reception, StatutDocument.brouillon),
-        ("ordre de fabrication", Ordre, StatutOrdre.brouillon),
-        ("opération", Operation, StatutDocument.brouillon),
-        ("inventaire", Inventaire, StatutInventaire.ouvert),
-    )
-    for libelle, modele, statut in a_voir:
-        nombre = s.scalar(
-            select(func.count())
-            .select_from(modele)
-            .where(modele.statut == statut, modele.date <= jour)
-        )
-        if nombre:
-            restes.append(f"{nombre} {libelle}(s)")
-    return restes
+    return [f"{r.nombre} {r.libelle}(s)" for r in compter_brouillons(s, jour) if r.nombre]
 
 
 @dataclass(frozen=True)
@@ -171,13 +183,20 @@ def _verifier_cloture(s: Session, jour: date | None, motif: str) -> None:
         raise Refus.saisie("On ne clôt qu'une période passée.", code="date_invalide")
     if jour < PREMIER_JOUR:
         date_permise(s, jour, "date_cloture")
-    restes = brouillons_dans_la_periode(s, jour)
-    if restes:
-        raise Refus.etat(
-            f"Des brouillons sont datés de la période à clore : {', '.join(restes)}. Les "
-            "valider, les supprimer ou les redater d'abord : après la clôture, ils ne "
-            "pourraient plus se valider."
-        )
+    message = message_brouillons(brouillons_dans_la_periode(s, jour))
+    if message:
+        raise Refus.etat(message)
+
+
+def message_brouillons(restes: list[str]) -> str | None:
+    """Le refus E-14 (mot pour mot), ou `None` s'il ne reste rien dans la période."""
+    if not restes:
+        return None
+    return (
+        f"Des brouillons sont datés de la période à clore : {', '.join(restes)}. Les "
+        "valider, les supprimer ou les redater d'abord : après la clôture, ils ne "
+        "pourraient plus se valider."
+    )
 
 
 def _lisible(jour: date | None) -> str:

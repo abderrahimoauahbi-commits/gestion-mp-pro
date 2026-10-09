@@ -17,7 +17,6 @@ from fabriques.receptions import (
     bon_relu,
     camion,
     ligne_du_bon,
-    menage,  # noqa: F401 — fixture du module
     parti,
 )
 from fastapi import FastAPI
@@ -28,8 +27,6 @@ from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Mouvement
 
 REPETITIONS = 10
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 def _ensemble(appels: list[Callable[[], int]]) -> list[int]:

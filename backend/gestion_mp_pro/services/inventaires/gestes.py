@@ -250,7 +250,7 @@ def abandonner(s: Session, qui: Acteur, ident: int, version: int, motif: str) ->
         qui.id,
         horloge.maintenant(),
     )
-    i.annulation_motif = texte
+    i.abandon_motif = texte
     s.flush()
     audit.journal(
         s,

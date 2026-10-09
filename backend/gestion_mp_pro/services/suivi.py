@@ -94,6 +94,17 @@ def lister(
     return _lus(s, liste), total
 
 
+def lien_du_besoin(role: Role, ident: int) -> str:
+    """L'écran où ce rôle retrouve le besoin : l'accueil de l'atelier pour l'alimentation, le
+    Cockpit pour la direction (elle n'a pas « Ma journée », ECRANS-PRO § 2.1 ; RESTES3, F1),
+    « Ma journée » sinon."""
+    if role == Role.alimentation:
+        return "/atelier"
+    if role == Role.direction:
+        return f"/cockpit?signalement={ident}"
+    return f"/accueil?signalement={ident}"
+
+
 def signaler(
     s: Session, qui: audit.Qui, matiere_id: int | None, texte: str, urgence: Urgence
 ) -> SignalementLu:
@@ -112,7 +123,7 @@ def signaler(
             s,
             role,
             f"Besoin signalé par {qui.nom} : « {texte[:EXTRAIT]} »",
-            lien=f"/accueil?signalement={x.id}",
+            lien=lien_du_besoin(role, x.id),
             ton=TonNotification.alerte if urgent else TonNotification.info,
             objet="signalement",
             objet_id=x.id,
@@ -137,12 +148,11 @@ def traiter(s: Session, qui: audit.Qui, ident: int, reponse: str) -> Signalement
     audit.journal(s, qui, "besoin traité", ObjetJournal.signalement, x.id, detail=reponse[:EXTRAIT])
     auteur = s.get(Utilisateur, x.par_id) if x.par_id is not None else None
     if auteur is not None and auteur.id != qui.id:
-        lien = "/atelier" if auteur.role == Role.alimentation else f"/accueil?signalement={x.id}"
         notifications.notifier(
             s,
             auteur.id,
             f"Votre besoin « {x.texte[:EXTRAIT]} » est traité : {reponse or 'vu'}.",
-            lien=lien,
+            lien=lien_du_besoin(Role(auteur.role or Role.achats), x.id),
             ton=TonNotification.succes,
             objet="signalement",
             objet_id=x.id,

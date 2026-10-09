@@ -13,7 +13,7 @@ import pytest
 from fabriques import referentiels as ref
 from fabriques import stock as fabriques_stock
 from fabriques.ordres import JOUR, acteur, atelier, retour, retour_repris, saisie, valide
-from fabriques.stock import entree, lot
+from fabriques.stock import entree, lot, vider
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -169,7 +169,9 @@ def test_le_prevu_d_un_ordre_est_fige(s: Session) -> None:
 def test_d07_changer_le_taux_de_perte_ne_reecrit_pas_un_ordre(s: Session) -> None:
     """Hérité : test_defauts_d::test_d07_changer_le_taux_de_perte_ne_reecrit_pas_un_ordre_ancien
     — un ordre validé garde son taux figé ; un ordre repris sans prévu figé prend le taux en
-    vigueur à sa validation, relu dans l'historique des réglages."""
+    vigueur à sa validation, relu dans l'historique des réglages (base neuve : l'historique
+    des réglages laissé par d'autres essais n'y est pas)."""
+    vider(s)
     a, qui = atelier(s), acteur(s, Role.alimentation)
     o = valide(s, qui, saisie(a.m.courant.id, [(a.lot("E-L1"), 10)], [(a.e1, 10)]))
     ancien = valide(s, qui, saisie(a.m.courant.id, [(a.lot("E-L2"), 10)], [(a.e1, 10)]))

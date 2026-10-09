@@ -59,7 +59,9 @@ def periode_rouverte() -> Iterator[None]:
         s.execute(update(Parametre).where(Parametre.cle == "date_cloture").values(valeur=""))
 
 
-def test_clore_avec_motif_trace_et_rouvrir(direction: TestClient, achats: TestClient) -> None:
+def test_clore_avec_motif_trace_et_rouvrir(
+    base_neuve: None, direction: TestClient, achats: TestClient
+) -> None:
     """Hérité : test_parcours::test_une_periode_close_ne_bouge_plus ; KR33 ; REGLAGES § 9
     n° 13 — motif obligatoire, période passée, historique avec motif, journal avant/après."""
     r = clore(direction, "2026-09-30", "ok")
@@ -83,7 +85,7 @@ def test_clore_avec_motif_trace_et_rouvrir(direction: TestClient, achats: TestCl
     assert ok(clore(direction, None, "Correction du mois"))["date_cloture"] is None
 
 
-def test_cloture_refusee_si_brouillon_dans_periode(direction: TestClient) -> None:
+def test_cloture_refusee_si_brouillon_dans_periode(base_neuve: None, direction: TestClient) -> None:
     """Hérité : test_defauts_e::test_cloture_refusee_si_brouillon_dans_periode (E-14)."""
     f = fournisseur()
     with sessions()() as s, s.begin():
