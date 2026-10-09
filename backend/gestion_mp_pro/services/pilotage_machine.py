@@ -95,6 +95,14 @@ def _metiers_au_soir(s: Session, d: Donnees, jour: date) -> list[Metier]:
     return [replace(m, fils=par_code.get(m.code, [])) for m in d.metiers]
 
 
+def au_soir(s: Session, jour: date) -> Donnees:
+    """Les données du moteur au soir de `jour`, fil monté de ce soir-là compris : la même base
+    pour toutes les pages d'une date (stock, plan d'achat, Valorisation, Cockpit, bilan)."""
+    from gestion_mp_pro.services import donnees_moteur
+
+    return avec_montage(s, donnees_moteur.charger_au(s, jour), jour)
+
+
 def avec_montage(s: Session, d: Donnees, jour: date) -> Donnees:
     """Les données à `jour` avec le fil monté ce soir-là (aujourd'hui : rien à changer)."""
     if jour >= horloge.aujourd_hui() and d.montage_connu:

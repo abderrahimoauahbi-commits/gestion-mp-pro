@@ -5331,22 +5331,6 @@ export interface components {
       lots: string[]
     }
     /**
-     * ConsommationReference
-     * @description Ce qu'un ordre a consommé d'un fil, face au prévu de la recette.
-     */
-    ConsommationReference: {
-      /** Reference */
-      reference: string
-      /** Quantite */
-      quantite: number
-      /** Theorique */
-      theorique: number
-      /** Ecart */
-      ecart: number | null
-      /** Hors Recette */
-      hors_recette: boolean
-    }
-    /**
      * Contexte
      * @description Route 3 `GET /contexte` : le démarrage de l'écran en un appel.
      */
@@ -6214,7 +6198,7 @@ export interface components {
     }
     /**
      * EcartOrdreBilan
-     * @description Un ordre du mois et son écart au prévu (bilan).
+     * @description Un ordre du mois et son écart au prévu (bilan), tel que l'écran Sorties le lit.
      */
     EcartOrdreBilan: {
       /** Numero Of */
@@ -6224,7 +6208,7 @@ export interface components {
       /** Retours */
       retours: number
       /** References */
-      references: components['schemas']['ConsommationReference'][]
+      references: components['schemas']['ReferenceOrdreBilan'][]
       /** Lots */
       lots: string[]
       /**
@@ -6255,6 +6239,8 @@ export interface components {
       ecart: number | null
       /** Ecart Relatif */
       ecart_relatif: number | null
+      /** Taux Perte */
+      taux_perte: number
     }
     /**
      * EcartRole
@@ -12722,6 +12708,24 @@ export interface components {
       designation: string
       /** Existe */
       existe: boolean
+    }
+    /**
+     * ReferenceOrdreBilan
+     * @description Un fil d'un ordre : prévu perte comprise, densité.
+     */
+    ReferenceOrdreBilan: {
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+      /** Theorique */
+      theorique: number
+      /** Ecart */
+      ecart: number | null
+      /** Hors Recette */
+      hors_recette: boolean
+      /** Kg Par Ml */
+      kg_par_ml: number
     }
     /**
      * Reglage

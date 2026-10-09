@@ -73,7 +73,9 @@ def _factures(a: Acces, r: Releve) -> None:
     for f in a.get("/factures"):
         s = f"facture {f['numero']} ({f['fournisseur']})"
         r.comparer(NOM_REC, s + " (poids)", f["poids"], poids.get(f["id"], 0.0), KG)
-        attendu = f["montant"] if f["montant"] else montant.get(f["id"], 0.0)
+        # Σ pesée × prix des réceptions validées, hors refus (schéma de la route 175) : la
+        # facture peut dire autre chose (lot refusé facturé : C36), l'estimation n'en dépend pas.
+        attendu = montant.get(f["id"], 0.0)
         r.comparer(NOM_REC, s + " (montant estimé)", f["montant_estime"], attendu)
 
 

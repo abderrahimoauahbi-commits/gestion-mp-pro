@@ -3,7 +3,8 @@
 - Données brutes (route 7) = la base, table par table, ligne par ligne ; à une date, le même
   nombre de lignes datées.
 - Stock de chaque matière à chaque date : Σ du journal jusqu'au soir de la date, magasins
-  (quarantaine comprise) ; quarantaine à part ; par magasin ; disponible = net − quarantaine.
+  (quarantaine comprise) ; quarantaine à part ; par magasin ; disponible = net − quarantaine
+  + fil monté (CALCULS § 3.9, décision U8 ; le fil monté est jugé avec la Valorisation).
 - Soldes = journal, jamais négatifs ; contrôle des soldes (route 113) d'accord.
 - Aucun lot sous zéro à aucune date passée (cumul du soir, l'ordre dans la journée ne compte
   pas : C37).
@@ -118,7 +119,7 @@ def stock_par_matiere(a: Acces, r: Releve, dates: list[date]) -> None:
                 nom,
                 sujet + " (disponible)",
                 x["stock_disponible"],
-                net.get(mid, 0.0) - quarantaine.get(mid, 0.0),
+                net.get(mid, 0.0) - quarantaine.get(mid, 0.0) + (x.get("stock_machine") or 0.0),
                 KG,
             )
             for magasin, q in (x.get("par_magasin") or {}).items():

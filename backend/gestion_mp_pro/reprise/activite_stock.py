@@ -140,7 +140,8 @@ def mouvements(ctx: Contexte, sortie: Lignes) -> None:
     index = _receptions_par_lot(ctx)
     numeros = {r["numero"]: r["id"] for r in ctx.photo.lignes("reception") if r["numero"]}
     connus = motifs(ctx)
-    prix_retires = sans_document = 0
+    taux = {d["code"]: d["taux"] for d in ctx.photo.lignes("devise")}
+    prix_retires = sans_document = cours_figes = 0
     for m in ctx.photo.lignes("mouvement"):
         v = {
             k: m[k]
@@ -163,7 +164,10 @@ def mouvements(ctx: Contexte, sortie: Lignes) -> None:
             sans_document += 1
         v["prix"] = m["prix"] if m["type"] in ENTREES else 0.0
         prix_retires += int(m["type"] not in ENTREES and bool(m["prix"]))
-        v["cours"] = None if m["devise"] == "MAD" or not m["cours"] or not v["prix"] else m["cours"]
+        v["cours"] = None if m["devise"] == "MAD" or not v["prix"] else m["cours"] or None
+        if v["prix"] and m["devise"] != "MAD" and not m["cours"] and taux.get(m["devise"]):
+            v["cours"] = taux[m["devise"]]
+            cours_figes += 1
         genre = "inventaire" if v["document"] == "inventaire" else TYPE_MOTIF.get(m["type"], "")
         v["motif_id"] = connus.get((genre, m["motif"] or ""))
         v["motif_texte"] = "" if v["motif_id"] else (m["motif"] or "")
@@ -175,6 +179,13 @@ def mouvements(ctx: Contexte, sortie: Lignes) -> None:
             "*",
             f"{prix_retires} prix de sorties, transferts ou "
             "retours machine non repris (valorisés au coût moyen)",
+        )
+    if cours_figes:
+        ctx.norm.signaler(
+            "mouvement",
+            "*",
+            f"{cours_figes} entrées en devise sans cours : cours du jour de la reprise figé "
+            "(V3, V4 : un changement de cours ne revalorise plus un mois clos)",
         )
     if sans_document:
         ctx.norm.signaler(

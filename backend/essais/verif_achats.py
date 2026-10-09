@@ -237,6 +237,20 @@ def _numeros_pris(a: Acces) -> dict[tuple[str, int], dict[int, str]]:
     return pris
 
 
+RETIRE = re.compile(r"brouillon numéroté ([A-Z]+)-(\d{4})-(\d+) : numéro retiré")
+
+
+def _retires_a_la_reprise(a: Acces) -> set[tuple[str, int, int]]:
+    """Les numéros que la reprise a retirés aux brouillons numérotés de Gestion MP et gardés
+    au compteur (R1, décision 4) : jamais redonnés, ils manquent à bon droit — même si le
+    brouillon est ensuite supprimé (lot V2 : le scénario le fait avant de clore novembre)."""
+    retires: set[tuple[str, int, int]] = set()
+    for (rapport,) in a.sql("SELECT rapport FROM reprise_execution WHERE statut = 'reussie'"):
+        for m in RETIRE.finditer(rapport or ""):
+            retires.add((m[1], int(m[2]), int(m[3])))
+    return retires
+
+
 def _numeros(a: Acces, r: Releve) -> None:
     """Chaque série, chaque année : 1…N sans trou ; le compteur au moins à N. Un trou n'est
     permis que sous le plus grand numéro repris de Gestion MP (numéros gardés tels quels)."""
@@ -244,10 +258,15 @@ def _numeros(a: Acces, r: Releve) -> None:
     compteurs = {
         (s, int(an)): int(n) for s, an, n in a.sql("SELECT serie, annee, dernier FROM compteur")
     }
+    retires = _retires_a_la_reprise(a)
     for (serie, annee), numeros in sorted(_numeros_pris(a).items()):
         repris = max((n for n, v in numeros.items() if v == "repris"), default=0)
         plus_grand = max((n for n, v in numeros.items() if v != "occupé"), default=0)
-        trous = [n for n in range(repris + 1, plus_grand + 1) if n not in numeros]
+        trous = [
+            n
+            for n in range(repris + 1, plus_grand + 1)
+            if n not in numeros and (serie, annee, n) not in retires
+        ]
         r.juger(nom, f"{serie} {annee}", not trous, f"trous {trous[:10]}")
         r.juger(
             nom,

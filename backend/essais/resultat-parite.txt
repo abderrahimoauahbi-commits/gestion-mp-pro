@@ -1,0 +1,349 @@
+PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
+le 2026-10-09 14:07 · Gestion MP c1133ba · PRO c0b1bd2
+source : gestion_mp_comparaison (copie : gestion_mp_pro_r2_source_essai) → PRO gestion_mp_pro_r2_cible_essai
+empreinte gestion_mp : af08c36c24e20ffc… avant, après : identique
+empreinte gestion_mp_comparaison : 476aeea01b88f331… avant, après : identique
+
+CONTRÔLE D'IMPORT (REPRISE R1)
+------------------------------
+  REPRISE DE GESTION MP DANS GESTION MP PRO
+  source : gestion_mp_pro_r2_source_essai (erp_fil) — lecture seule vérifiée : oui
+  cible  : gestion_mp_pro_r2_cible_essai — mode tout
+  empreinte de la source avant : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86
+  empreinte de la source après : 476aeea01b88f33125aa8f1b97675a6b7e26f0b360deb4c2bcca8102cd202e86 (identique)
+  activité : reprise
+  durée : 4.5 s
+  
+  CONTRÔLES
+  [tenu] Comptes de lignes par table (source → cible)
+      article                  124 → matiere                  124  =
+      fournisseur               12 → fournisseur               12  =
+      composition                7 → composition                7  =
+      type_fil                   9 → type_fil                   9  =
+      titrage                   28 → titrage                   28  =
+      couleur                   34 → couleur                   34  =
+      role_nomenclature          8 → role_nomenclature          8  =
+      code_douanier              0 → code_douanier              0  =
+      poste_frais               11 → poste_frais               11  =
+      devise                     3 → devise                     3  =
+      magasin                    3 → magasin                    3  =
+      metier                     4 → metier                     4  =
+      fil_monte                  0 → montage                    0  =
+      qualite                   18 → qualite                   18  =
+      qualite_poids            118 → qualite_poids            118  =
+      qualite_saison           216 → qualite_saison           216  =
+      recette                  319 → recette                  319  =
+      recette_version           18 → recette_version           18  =
+      lot                     1684 → lot                     1684  =
+      mouvement              10438 → mouvement              10438  =
+      solde                   1594 → solde                   1594  =
+      commande                 330 → commande                 330  =
+      commande_ligne          1604 → commande_ligne          1604  =
+      facture                  316 → facture                  316  =
+      reception                317 → reception                317  =
+      reception_ligne         1508 → reception_ligne         1508  =
+      bon_sortie               320 → ordre                    320  =
+      bon_fabrication          315 → ordre_qualite            315  =
+      bon_ligne               8532 → ordre_ligne             8532  =
+      operation                  0 → operation                  0  =
+      operation_ligne            0 → operation_ligne            0  =
+      inventaire                12 → inventaire                12  =
+      inventaire_ligne         360 → inventaire_ligne         360  =
+      dossier                   90 → dossier                   90  =
+      dossier_ligne            984 → dossier_ligne            984  =
+      dossier_charge           508 → dossier_frais            508  =
+      dossier_charge_part        0 → dossier_frais_part         0  =
+      reclamation                0 → reclamation                0  =
+      signalement                0 → signalement                0  =
+      indicateur_jour            0 → indicateur_jour            0  =
+      journal                 3823 → journal (repris)        3823  =
+  [tenu] Mêmes recettes et plans versionnés
+      recettes : 319 source, 319 cible, différentes 0
+      versions de recette : 319 lignes source, absentes en cible 0
+      versions du plan : 0 attendues (journal), 0 en cible
+  [tenu] Σ quantités et Σ quantité × prix (entrées) par matière
+      124 matières ; écart max 4.07e-11 kg, 3.38e-12 en valeur ; hors de l'arrondi déclaré : 0
+  [tenu] Soldes = journal
+      soldes ≠ Σ mouvements en cible : 0 ; écart max au solde source : 0.00e-1 kg
+  [tenu] Mêmes numéros de documents
+      commande       330 numéros ; manquants 0, en plus 0
+      reception      316 numéros ; manquants 0, en plus 0
+      ordre          319 numéros ; manquants 0, en plus 0
+      operation        0 numéros ; manquants 0, en plus 0
+      inventaire      12 numéros ; manquants 0, en plus 0
+      dossier         90 numéros ; manquants 0, en plus 0
+      reclamation      0 numéros ; manquants 0, en plus 0
+      facture        316 numéros ; manquants 0, en plus 0
+      lot           1566 numéros ; manquants 0
+  
+  LIGNES PAR TABLE CIBLE (lues, creees, mises_a_jour, sautees, signalees, supprimees, ecartees)
+      commande                     330     330       0       0       0       0       0
+      commande_ligne              1604    1604       0       0       1       0       0
+      composition                    7       7       0       0       0       0       0
+      compteur                      10      10       0       0       0       0       0
+      couleur                       34      34       0       0       0       0       0
+      devise                         3       0       2       1       0       0       0
+      dossier                       90      90       0       0       0       0       0
+      dossier_frais                508     508       0       0       0       0       0
+      dossier_ligne                984     984       0       0       0       0       0
+      facture                      316     316       0       0       0       0       0
+      fournisseur                   12      12       0       0       0       0       0
+      inventaire                    12      12       0       0       0       0       0
+      inventaire_ligne             360     360       0       0       0       0       0
+      inventaire_matiere           360     360       0       0       0       0       0
+      journal                     3823    3823       0       0       0       0       0
+      lot                         1684    1684       0       0     117       0       0
+      magasin                        3       1       2       0       0       0       0
+      matiere                      124     124       0       0       1       0       0
+      metier                         4       4       0       0       0       0       0
+      metier_etage                   0      28       0       0       0       0       0
+      mouvement                  10438   10438       0       0       0       0       0
+      ordre                        320     320       0       0     320       0       0
+      ordre_ligne                 8532    8532       0       0       0       0       0
+      ordre_qualite                315     315       0       0       0       0       0
+      parametre                     56       0      56       0       0       0       0
+      poste_frais                   11       0       0      11       0       0       0
+      qualite                       18      18       0       0       0       0       0
+      qualite_poids                118     118       0       0       0       0       0
+      qualite_saison               216     216       0       0       0       0       0
+      reception                    317     317       0       0       5       0       0
+      reception_ligne             1508    1508       0       0       0       0       0
+      recette                      319     319       0       0       0       0       0
+      recette_version               18      18       0       0       0       0       0
+      recette_version_ligne          0     319       0       0       0       0       0
+      recette_version_poids          0     118       0       0       0       0       0
+      role_nomenclature              8       0       0       8       0       0       0
+      solde                       1594    1594       0       0       0       0       0
+      titrage                       28      28       0       0       0       0       0
+      type_fil                       9       9       0       0       0       0       0
+      utilisateur                    7       7       0       0       0       0       0
+  
+  ARRONDIS À L'ÉCHELLE DES COLONNES (K1)
+      commande_ligne.contenance : 106 valeurs arrondies, écart max 1.00e-13
+      commande_ligne.quantite : 104 valeurs arrondies, écart max 1.00e-12
+      dossier_ligne.valeur_devise : 946 valeurs arrondies, écart max 5.00e-3
+      facture.montant : 312 valeurs arrondies, écart max 5.00e-3
+      inventaire_ligne.theorique : 239 valeurs arrondies, écart max 4.50e-11
+      lot.poids_bobine : 653 valeurs arrondies, écart max 5.00e-7
+      mouvement.quantite : 198 valeurs arrondies, écart max 3.78e-11
+      ordre_ligne.quantite : 85 valeurs arrondies, écart max 1.00e-13
+      ordre_qualite.m2 : 314 valeurs arrondies, écart max 5.00e-4
+      reception_ligne.quantite_attendue : 7 valeurs arrondies, écart max 1.00e-13
+  
+  SIGNALEMENTS (12)
+      commande_ligne * : 1604 prix confirmés sans date : date du bon
+      lot * : 117 numéros de lot avec des blancs : blancs → « _ »
+      matiere PP FRZ-2900 Dtex-Gold 3423-Hs : contenance d'achat nulle (Palette) : achat au kg
+      mouvement * : 8747 prix de sorties, transferts ou retours machine non repris (valorisés au coût moyen)
+      ordre * : 319 ordres validés sans date : fin de leur jour
+      ordre 320 : brouillon numéroté OF-2026-0224 : numéro retiré (gardé au compteur)
+      reception 316 : brouillon numéroté REC-2026-0276 : numéro retiré (gardé au compteur)
+      reception 141 : lignes en EUR, USD : devise de l'en-tête EUR, prix des lignes gardés
+      reception (3) : lignes en EUR, USD : devise de l'en-tête USD, prix des lignes gardés — 153, 175, 283
+      utilisateur mohamed : graphies Mohamed, MOHAMED → un même compte
+
+DONNÉES DES DEUX MOTEURS (CHARGEUR DE PRO CONTRE DÉPÔT DE GESTION MP)
+---------------------------------------------------------------------
+  K8c        articles/*/unite_commande : 1
+  K1         commandes/*/lignes/*/contenance_commande : 106, commandes/*/lignes/*/quantite_commandee : 104, dossiers_import/*/facture_montant : 24, dossiers_import/*/lignes/*/valeur_devise : 946, mouvements/*/quantite : 198, mouvements/*/total_devise : 14, ordres/*/fabrications/*/* : 314, parametres/seuil_bc_urgent : 1, receptions/*/lignes/*/quantite_commandee : 7
+  K8b        historique_prix/*/devise : 5
+  K8a        mouvements/*/prix_unite : 8720, mouvements/*/total_devise : 8720
+  K8e        ordres/*/valide_le : 319
+  P17        parametres/methode : 1
+  K8d        receptions/*/numero : 1
+  ORDRE      recettes : 1, versions_recette/8F/*/lignes : 1, versions_recette/8M/*/lignes : 1, versions_recette/8S/*/lignes : 1, versions_recette/BR/*/lignes : 1, versions_recette/FB/*/lignes : 1, versions_recette/IS/*/lignes : 1, versions_recette/LH/*/lignes : 1, versions_recette/LP/*/lignes : 1, versions_recette/MF/*/lignes : 1, versions_recette/MN/*/lignes : 1, versions_recette/MP/*/lignes : 1, versions_recette/PS/*/lignes : 1, versions_recette/SH/*/lignes : 1, versions_recette/SL/*/lignes : 1, versions_recette/TN/*/lignes : 1, versions_recette/YF/*/lignes : 1, versions_recette/YH/*/lignes : 1, versions_recette/YL/*/lignes : 1
+
+STATIQUE : LES DEUX MOTEURS À 19 DATES
+--------------------------------------
+  dates : 2025-10-31, 2025-11-30, 2025-12-31, 2026-01-31, 2026-02-28, 2026-03-31, 2026-04-30, 2026-05-31, 2026-06-30, 2026-07-31, 2026-08-31, 2026-09-30, 2026-10-08, 2025-11-15, 2026-01-15, 2026-03-15, 2026-05-15, 2026-07-15, 2026-09-15
+  moteur PRO = moteur de Gestion MP sur les mêmes données (égalité exacte) : 0 écart(s)
+  PRO contre Gestion MP — section : comparées | expliquées par classe (ampleur max) | à corriger
+  a_la_date                                      29376 | — | 0
+  aberrantes                                       133 | — | 0
+  achats_dates                                   26382 | K8b 41 (2.91) | 0
+  besoins                                        20292 | — | 0
+  cmup_par_reference                              2356 | K1 7 (0.00261) | 0
+  cockpit                                         4131 | K8b 20 (0.018) | 0
+  cockpit_meme_couleur                            4131 | K8b 20 (0.018) | 0
+  controle_recettes                               1596 | — | 0
+  controles                                      14124 | K1 133 (0.1) | 0
+  cout_matiere_annuel                               19 | — | 0
+  couts_du_journal                              314920 | K1 38743 (0.409) | 0
+  devises_pratiquees                               247 | — | 0
+  ecart_facture                                   4902 | K1 646 (0.0117) | 0
+  evolution_bobines                              57300 | — | 0
+  fils_en_machine                                    0 | — | 0
+  historique_prix                               184674 | K8b 247 (2.47e+04) | 0
+  lots                                          250711 | — | 0
+  lots_disponibles                               10632 | — | 0
+  negatives                                          0 | — | 0
+  nomenclature                                   90915 | — | 0
+  opportunites                                   24694 | — | 0
+  ordres                                        583874 | K1 1238 (0.00235) | 0
+  performance_receptions                         26424 | — | 0
+  pesees                                        363582 | K8d 76 | 0
+  plan_achat                                     17382 | — | 0
+  plan_mensuel                                    4104 | — | 0
+  prix_constates                                  7068 | K8b 4 (1.67) | 0
+  realise                                         9842 | K1 47 (0.00253) | 0
+  revient                                       403617 | K1 60382 (0.551) | 0
+  revient_par_lot                                    0 | — | 0
+  revient_par_reception                         403617 | K1 60382 (0.551) | 0
+  scorecard                                       3876 | — | 0
+  stock                                         188480 | — | 0
+  stock_en_machine                                   0 | — | 0
+  synthese                                         133 | — | 0
+  tracabilite                                    18200 | K8a 1574 (1.61e+03) | 0
+  tva_attendue                                    1710 | K1 1577 (0.0675) | 0
+  valorisation                                   30628 | K1 1888 (0.409) | 0
+  K7 (services de PRO, fil monté du soir, contre le moteur seul) : 0 fil(s) monté(s) dans l'année d'essai, 0 écart(s) ; attendu : 0 et 0
+
+PAR L'API : 155 PAIRES DE ROUTES (DIRECTION)
+--------------------------------------------
+  rejeu des routes de Gestion MP sur ses données (D0) = réponses du serveur : oui
+  chaîne en base (ce que chaque traduction a changé dans la copie de Gestion MP) :
+    K1   commande_ligne.contenance 106, commande_ligne.quantite 104, dossier_ligne.valeur_devise 946, facture.montant 312, inventaire_ligne.theorique 239, lot.poids_bobine 653, mouvement.quantite 198, ordre_ligne.quantite 85, ordre_qualite.m2 314, reception_ligne.quantite_attendue 7
+    K8a  mouvement.prix 8747
+    K8b  reception_ligne.devise 5
+    K8c  article.unite_achat 1
+    K8d  reception.numero 1, bon_sortie.numero 1
+    K8e  bon_sortie.valide_le 319
+    K8f  lot.numero 117
+    K8g  mouvement.document_id 1443
+    K8h  commande_ligne.confirme_le 1604
+  routes — section : comparées | expliquées par classe (ampleur max) | à corriger
+  analyse du revient                              3489 | K1 324 (0.551) | 0
+  besoins                                         1526 | — | 0
+  bilan                                          15684 | K1 36 (0.00253) | 0
+  bobines                                         5956 | — | 0
+  cockpit                                         4917 | K1 24 (9.26), K8b 22 (0.018), K9 1385 (3.59e+06) | 0
+  commandes                                      53388 | K8d 3, K8h 1934 | 0
+  controles                                      20174 | K1 140 (0.1) | 0
+  dossiers                                       62499 | K1 3896 (0.551) | 0
+  factures                                        2844 | — | 0
+  inventaires                                     8880 | K1 33 (0.000211), K8f 360 | 0
+  matières                                        4340 | K8c 2 (1) | 0
+  mouvements                                    250512 | K8a 8747 (21), K8g 1443 | 0
+  nomenclature                                    4550 | — | 0
+  opportunites                                    7834 | K1 181 (9.26), K9 1926 (3.59e+06) | 0
+  ordres                                        196018 | K1 208 (0.00239), K8d 1, K8e 319 | 0
+  performance                                     3064 | — | 0
+  pesées                                         37700 | K8d 38 | 0
+  plan-achat                                     18711 | — | 0
+  prix                                           23075 | K8b 41 (2.47e+04) | 0
+  production                                      9741 | K1 3 (0.00253) | 0
+  receptions                                     59436 | K8b 8, K8d 1 | 0
+  soldes                                         13440 | — | 0
+  stock                                         200960 | — | 0
+  valorisation                                   34880 | K1 2002 (0.409) | 0
+  échéancier                                      8068 | K1 35 (0.144) | 0
+  valeurs traduites (formes déclarées) : 39889 (cours 10775, saisi_le 10438, document 8586, confirme_par 1604, (vue de l'élément) 1508, statut_reception 1508, cree_le 967, type 672, second_par 360, cree_par 342, livraison 330, approuvee_par 330…)
+  champs ajoutés par PRO (excusés) : 1117
+  réciproque — champs de Gestion MP rendus ailleurs par PRO (14) :
+    besoins.plan : m² du plan par qualité : PRO les rend dans `/production/plan` (`qualites[].glissant`), comparés par la route « production (plan) »
+    controles.colonnes : libellés des colonnes de tous les contrôles : PRO les rend dans chaque contrôle (`controles[].colonnes`, {cle, libelle, unite}), D8 § 4
+    dossiers.lignes.poids_kg : poids en kg d'une marchandise : `quantite_kg` (le stock est en kg)
+    matières.historique_raison : raison du refus de suppression : dite par le refus (REGLES) ; la liste dit `utilisee`
+    matières.modifie_le : idem (historique de la fiche)
+    matières.modifie_par : dernière modification d'une matière : historique de la fiche (route `historique/matiere/{id}`, journal en tables)
+    matières.version : compteur de verrou propre à chaque base (T5) : non comparable
+    nomenclature.poids_categorie : poids du rôle dans la qualité : PRO le rend sur la fiche de la qualité (route 84, `poids`), pas sur chaque ligne de la nomenclature
+    ordres.qualite : qualité tissée : PRO rend la liste `qualites` (un ordre peut en tisser plusieurs) et `fabrication` (texte), comparées par `fabrications`
+    ordres.taux_perte_fige : taux de perte figé : PRO dit `prevu_fige` sur l'ordre (route 135) et `taux_perte` appliqué ici
+    pesées.nature : libellé de la composition : fiche de la matière (route 66, `composition_libelle`)
+    pesées.quantite_commandee : quantité du bon : fiche de la réception (`lignes[].quantite_commandee`)
+    receptions.devise_fournisseur : devise du fournisseur : fiche du fournisseur (route 60, `devise`)
+    receptions.lignes.devise : devise de la ligne : PRO tient une devise par réception (I35), vérifiée contre l'en-tête par `parite_api_passe.verifier_devises`
+
+PAR L'API : ÉCRANS DE L'ALIMENTATION
+------------------------------------
+  prix ou montants vus chez Gestion MP : 0, chez PRO : 0 ; réglages et cours (K6) : [('/api/parametres', 403, 403), ('/api/devises', 403, 403)]
+  routes — section : comparées | expliquées par classe (ampleur max) | à corriger
+  alimentation : inventaires                       216 | — | 0
+  alimentation : lots                            13440 | — | 0
+  alimentation : ordres                           5120 | K1 52 (0.00239) | 0
+  alimentation : stock                            9180 | — | 0
+  valeurs traduites (formes déclarées) : 1153 (type 672, cree_le 320, action 124, valide_par 13, cree_par 12, valide_le 12…)
+  champs ajoutés par PRO (excusés) : 27
+  réciproque — champs de Gestion MP rendus ailleurs par PRO (8) :
+    alimentation : ordres.fabrications : comparé par la direction (« ordres »)
+    alimentation : ordres.lignes : comparé par la direction (« ordres »)
+    alimentation : ordres.numero : comparé par la direction (K8d)
+    alimentation : ordres.par_fil : comparé par la direction
+    alimentation : ordres.retours : comparé par la direction
+    alimentation : ordres.retours_detail : comparé par la direction
+    alimentation : ordres.theorique : comparé par la direction (`prevu`)
+    alimentation : ordres.valide_le : comparé par la direction (K8e)
+
+DYNAMIQUE : 22 GESTES JOUÉS DANS LES DEUX LOGICIELS
+---------------------------------------------------
+  réception : création                             Gestion MP 201 · PRO 201
+  réception : validation                           Gestion MP 200 · PRO 200 · n° REC-2026-0278
+  ordre : création                                 Gestion MP 201 · PRO 201
+  ordre : validation                               Gestion MP 200 · PRO 200 · n° OF-2026-0225
+  retour des machines : création                   Gestion MP 201 · PRO 201
+  retour des machines : validation                 Gestion MP 200 · PRO 200 · n° RET-2026-0001
+  sortie de trop : création                        Gestion MP 201 · PRO 201
+  sortie de trop : validation                      Gestion MP 409 · PRO 409
+  sortie de trop : brouillon retiré                Gestion MP 200 · PRO 204
+  inventaire : ouverture                           Gestion MP 201 · PRO 201 · n° INV-2026-0001
+  inventaire : comptage                            Gestion MP 200 · PRO 200 · n° INV-2026-0001
+  inventaire : validation                          Gestion MP 200 · PRO 200 · n° INV-2026-0001
+  dossier : ouverture                              Gestion MP 201 · PRO 201 · n° 84/26
+  dossier : fret                                   Gestion MP 200 · PRO 200 · n° 84/26
+  dossier : clôture                                Gestion MP 200 · PRO 200 · n° 84/26
+  réception refusée : création                     Gestion MP 201 · PRO 201
+  réception refusée : validation                   Gestion MP 200 · PRO 200 · n° REC-2026-0279
+  réception refusée : annulation (K4)              Gestion MP 200 · PRO 200 · n° REC-2026-0279
+  inventaire du périmètre : ouverture              Gestion MP 201 · PRO 201 · n° INV-2026-0002
+  sortie hors périmètre : création                 Gestion MP 201 · PRO 201
+  sortie hors périmètre : validation (K2)          Gestion MP 409 · PRO 200
+  inventaire du périmètre : abandon (K3)           Gestion MP 200 · PRO 200
+  ce que chaque geste a fait — section : comparées | expliquées par classe (ampleur max) | à corriger
+  dossier                                          200 | — | 0
+  dossier : clôture                                133 | — | 0
+  inventaire                                       200 | — | 0
+  inventaire : validation                          116 | — | 0
+  inventaire du périmètre : abandon (K3)            20 | K3 5 (4) | 0
+  ordre                                            200 | — | 0
+  ordre : validation                                51 | — | 0
+  refus                                            200 | — | 0
+  retour                                           200 | — | 0
+  retour des machines : l'ordre                     56 | — | 0
+  réception                                        200 | — | 0
+  réception : le bon                                21 | — | 0
+  réception : validation                            61 | — | 0
+  réception refusée                                200 | — | 0
+  réception refusée : annulation (K4)               54 | — | 0
+  sortie de trop : validation                        1 | — | 0
+  sortie hors périmètre : validation (K2)            0 | K2 1 (209) | 0
+
+K7 : FIL MONTÉ À TOUTE DATE (COPIE MONTÉE)
+------------------------------------------
+  fil monté aujourd'hui : 27,175.02 MAD ; 14 dates ; 24402 valeurs comparées ; écarts expliqués par K7 : 126 ; à corriger : 0
+
+CORRECTIONS ET TRADUCTIONS DÉCLARÉES (ÉCARTS EXPLIQUÉS, TOUTES PASSES)
+----------------------------------------------------------------------
+  ORDRE       0  Ordre de lecture des recettes (même contenu) — traduction du chargeur ; preuve : Gestion MP recalculé sur ses données remises dans l'ordre de PRO.
+  K1     171977  Arrondi à l'échelle des colonnes (MODELE-DONNEES § 10.2) — preuve : Gestion MP recalculé sur ses données arrondies par la règle de la reprise (rejeu du moteur et des routes ; chaîne en base pour les documents).
+  K2          1  Inventaire limité à son périmètre — preuve : geste joué, Gestion MP refuse pour la suspension du magasin (message vérifié), PRO accepte un fil hors périmètre.
+  K3          5  Inventaire abandonné gardé avec ses lignes (hors des calculs) — preuve : abandonné des deux côtés, Gestion MP corrigé garde l'en-tête et efface les lignes.
+  K4          0  Réception toute refusée annulable — Gestion MP corrigé l'annule aussi : même issue.
+  K5          0  `controle_par` lu comme contrôleur — vide dans toute l'année d'essai : sans effet.
+  K6          0  Alimentation : ni réglages ni cours (403) — Gestion MP corrigé refuse aussi.
+  K7        126  Fil monté compté à toute date (décision de Mohamed, U8 ; D8) — preuve : copie montée, Gestion MP rejoué avec le montage connu aux dates passées redonne ce que PRO change.
+  K8a     10321  Prix des sorties, transferts, retours machine non repris (R1 n° 1).
+  K8b       403  Réception payée en deux devises : devise de l'en-tête (R1 n° 2 ; Mohamed tranche).
+  K8c         2  Unité d'achat sans contenance lue au kilo (R1 n° 3).
+  K8d       119  Brouillon numéroté : numéro retiré, gardé au compteur (R1 n° 4).
+  K8e       319  Ordre validé sans date : fin de son jour (R1 n° 5).
+  K8f       360  Numéro de lot à blancs : blancs → « _ » (R1 n° 8).
+  K8g      1443  Entrée de réception de l'ERP Fil : sa réception retrouvée par (lot, date) (R1 n° 7).
+  K8h      1934  Prix confirmé sans date : date de création du bon (R1).
+  K9       3311  Prix connus à la date : à une date passée, opportunités et économies du Cockpit ne lisent que les réceptions jusqu'à cette date (D8 n° 6) — preuve : la route de Gestion MP rejouée avec ses coûts rendus bornés à la date redonne la valeur de PRO.
+  P17         0  Méthode « corrigée » seule : `methode` retiré des réglages du moteur.
+
+VERDICT
+-------
+  À CORRIGER : 0
+  expliqués : 190321 (K1 171977, K2 1, K3 5, K7 126, K8a 10321, K8b 403, K8c 2, K8d 119, K8e 319, K8f 360, K8g 1443, K8h 1934, K9 3311)

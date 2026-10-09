@@ -29,7 +29,7 @@ from gestion_mp_pro.calcul.plan_achat import plan_achat as calculer_plan
 from gestion_mp_pro.calcul.stock import LigneStock, etat_stock
 from gestion_mp_pro.modeles import Commande, Fournisseur, Matiere
 from gestion_mp_pro.modeles.recherche import normaliser
-from gestion_mp_pro.services import donnees_moteur, horloge
+from gestion_mp_pro.services import donnees_moteur, horloge, pilotage_machine
 
 
 @dataclass
@@ -97,7 +97,7 @@ def _stock(ligne: LigneStock, article: c.Article | None) -> dict[str, Any]:
 
 def plan(s: Session, jour: date) -> Plan:
     """Route 149 : le plan d'achat au soir du `jour`."""
-    d = donnees_moteur.charger_au(s, jour)
+    d = pilotage_machine.au_soir(s, jour)
     stock = etat_stock(d, jour)
     resultat = calculer_plan(d, stock)
     par_ref = {x.reference: x for x in stock}
@@ -136,7 +136,7 @@ def preparation(s: Session, fournisseur_id: int, jour: date) -> Preparation:
     f = s.get(Fournisseur, fournisseur_id)
     if f is None:
         raise Refus.introuvable("Fournisseur inconnu.")
-    d = donnees_moteur.charger_au(s, jour)
+    d = pilotage_machine.au_soir(s, jour)
     matieres = dict(s.execute(select(Matiere.reference, Matiere.id)).all())
     bons = _bons(s)
     suggerees = [
@@ -237,7 +237,7 @@ class Pilotage:
 def pilotage(s: Session, jour: date) -> Pilotage:
     """Route 151 : les mêmes chiffres que les écrans, au même instant."""
     complet = donnees_moteur.charger(s)
-    d = donnees_moteur.charger_au(s, jour)
+    d = pilotage_machine.au_soir(s, jour)
     stock = etat_stock(d, jour)
     return Pilotage(
         jour=jour,
