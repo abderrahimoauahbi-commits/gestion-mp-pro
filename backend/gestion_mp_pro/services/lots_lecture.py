@@ -14,6 +14,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from gestion_mp_pro.documents import format as fmt
 from gestion_mp_pro.modeles import (
     Fournisseur,
     Lot,
@@ -25,7 +26,7 @@ from gestion_mp_pro.modeles import (
 )
 from gestion_mp_pro.modeles.enums import TypeMagasin
 from gestion_mp_pro.services import horloge
-from gestion_mp_pro.services.conversions import Conditionnement, kg_et_metres
+from gestion_mp_pro.services.conversions import Conditionnement, bobines, metres
 
 ZERO = Decimal(0)
 
@@ -233,6 +234,24 @@ class Etiquette:
     en_quarantaine: Decimal
     texte_quantite: str
     texte_quarantaine: str
+    texte_bobines: str = ""
+
+
+def kilos_imprimes(kilos: Decimal, c: Conditionnement) -> str:
+    """« 120,5 kg », et pour un cuir, des franges, un ruban « 14,3 kg ≈ 1 021 ml » (règle
+    d'affichage § 9.3 des documents : `documents.format`, espaces insécables)."""
+    m = metres(kilos, c)
+    texte = fmt.kg(kilos)
+    return texte if m is None else f"{texte} ≈{fmt.INSECABLE}{fmt.nombre(m)}{fmt.INSECABLE}ml"
+
+
+def bobines_imprimees(kilos: Decimal, c: Conditionnement) -> str:
+    """« ≈ 48 bobines » quand le poids d'une bobine est connu (celui du lot, sinon du catalogue) ;
+    vide sinon, ou s'il reste moins d'une demi-bobine."""
+    n = bobines(kilos, c) if kilos > 0 else None
+    if not n:
+        return ""
+    return f"≈{fmt.INSECABLE}{fmt.nombre(n)}{fmt.INSECABLE}bobine{'s' if n > 1 else ''}"
 
 
 @dataclass
@@ -275,13 +294,14 @@ def etiquettes(s: Session, ids: str) -> Etiquettes:
                 entre_le=lot.entre_le,
                 quantite=total,
                 en_quarantaine=attente,
-                texte_quantite=f"{kg_et_metres(total, c)} à l'impression",
+                texte_quantite=f"{kilos_imprimes(total, c)} à l'impression",
                 texte_quarantaine=(
                     "QUARANTAINE — NE PAS SORTIR"
-                    + (f" (dont {kg_et_metres(attente, c)} en quarantaine)" if partiel else "")
+                    + (f" (dont {kilos_imprimes(attente, c)} en quarantaine)" if partiel else "")
                     if attente > 0
                     else ""
                 ),
+                texte_bobines=bobines_imprimees(total, c),
             )
         )
     return resultat

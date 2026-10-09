@@ -133,14 +133,17 @@ def test_changer_un_cours_ne_revalorise_pas_un_mois_clos(direction: TestClient) 
     avant_cloture = _dossier_ouvert(code, date(2026, 9, 10))
     ok(clore(direction, "2026-09-30"))
     figee = _ligne(avant_cloture)
-    assert (figee.cours, figee.cours_origine) == (Decimal(10), "saisi")
-    assert "cours figé à la clôture" in figee.commentaire
+    assert (figee.cours, figee.cours_origine) == (Decimal(10), "periode_close")
+    assert figee.commentaire == "", "l'origine du cours le dit : le commentaire reste à soi"
     apres_cloture = _dossier_ouvert(code, date(2026, 9, 20))
     ouverte = _dossier_ouvert(code, date(2026, 10, 2))
     with sessions()() as s:
         version = s.get_one(Devise, code).version
     ok(direction.put(f"/api/devises/{code}", json={"cours": 12, "version": version}))
-    assert _ligne(apres_cloture).cours == Decimal(10)
+    assert (_ligne(apres_cloture).cours, _ligne(apres_cloture).cours_origine) == (
+        Decimal(10),
+        "periode_close",
+    )
     assert _ligne(ouverte).cours is None
     assert _ligne(avant_cloture).cours == Decimal(10)
 

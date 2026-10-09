@@ -102,10 +102,3 @@ def metres(kilos: Decimal | float, c: Conditionnement) -> Decimal | None:
     if c.kg_par_ml <= 0:
         return None
     return Decimal(str(kilos)) / c.kg_par_ml
-
-
-def kg_et_metres(valeur: Decimal | float, c: Conditionnement, decimales: int = 2) -> str:
-    """« 14,30 kg », et pour un cuir, des franges, un ruban « 14,30 kg ≈ 1 021 ml »."""
-    texte = f"{kg(valeur, decimales)} kg"
-    m = metres(valeur, c)
-    return texte + (f" ≈ {kg(m, 0)} ml" if m is not None else "")

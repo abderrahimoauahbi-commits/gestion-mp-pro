@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Matières, classification, fournisseurs » (lot F7), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F7 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Matières, classification, fournisseurs » (lot F7), rassemblés par
+ * `routes.ts`. Les fiches s'ouvrent en fenêtre par-dessus la liste (même page, adresse stable) ;
+ * les chemins fixes passent avant les chemins à paramètre.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Catalogue')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -19,7 +19,58 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'classification', libelle: 'Classification', roles: ['direction', 'achats'] },
       { cle: 'fournisseurs', libelle: 'Fournisseurs', roles: ['direction', 'achats'] },
     ],
-    lot: 'F7',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/catalogue/tableur',
+    titre: 'Le catalogue par tableur',
+    parent: '/catalogue',
+    roles: ['direction', 'achats'],
+    aide: 'tableur_matieres',
+    page,
+  },
+  {
+    chemin: '/matieres/nouvelle',
+    titre: 'Nouvelle matière',
+    parent: '/catalogue',
+    roles: ['direction', 'achats'],
+    aide: 'matiere',
+    page,
+  },
+  {
+    chemin: '/matieres/:id',
+    titre: 'Fiche matière',
+    parent: '/catalogue',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'matiere',
+    onglets: [
+      { cle: 'classification', libelle: 'Classification et référence' },
+      { cle: 'achat', libelle: 'Achat', roles: ['direction', 'achats'] },
+      { cle: 'conditionnement', libelle: 'Conditionnement et stock' },
+      { cle: 'pieces', libelle: 'Pièces jointes', roles: ['direction', 'achats'] },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
+  },
+  {
+    chemin: '/fournisseurs/nouveau',
+    titre: 'Nouveau fournisseur',
+    parent: '/catalogue',
+    roles: ['direction', 'achats'],
+    aide: 'fournisseur',
+    page,
+  },
+  {
+    chemin: '/fournisseurs/:id',
+    titre: 'Fiche fournisseur',
+    parent: '/catalogue',
+    roles: ['direction', 'achats'],
+    aide: 'fournisseur',
+    onglets: [
+      { cle: 'fiche', libelle: 'Fiche' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]

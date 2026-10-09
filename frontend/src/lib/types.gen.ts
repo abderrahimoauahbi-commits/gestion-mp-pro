@@ -15,9 +15,29 @@ export interface paths {
     }
     /**
      * Santé du serveur pour la surveillance (public, sans donnée métier).
-     * @description Route 1 : la base répond-elle, le schéma est-il à jour, quelle version est servie.
+     * @description Route 1 (D10) : base, schéma, version servie, sauvegarde de cette base, tâches, courriels.
      */
     get: operations['sante_api_sante_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/serveur': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état du serveur : versions, base, réseau, tâches, sauvegardes, sessions ouvertes.
+     * @description Route 4 (D10) : l'adresse reprend le schéma et le port de la requête (G-13).
+     */
+    get: operations['etat_serveur_api_serveur_get']
     put?: never
     post?: never
     delete?: never
@@ -358,6 +378,398 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/parametres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les réglages (l'administrateur : la famille technique seule).
+     * @description Route 23 : la direction écrit, les achats lisent ; l'alimentation n'y a pas accès.
+     */
+    get: operations['lire_parametres_api_parametres_get']
+    /**
+     * Écrire des réglages, tout ou rien (seuils dans l'ordre, version à jour).
+     * @description Route 24 : l'administrateur n'écrit que la famille technique.
+     */
+    put: operations['ecrire_parametres_api_parametres_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/parametres/historique': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les changements des réglages, les plus récents d'abord.
+     * @description Route 25 : avant, après, par, quand, motif.
+     */
+    get: operations['historique_parametres_api_parametres_historique_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/periode-close': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Clore la période jusqu'à une date passée (ou la rouvrir), avec un motif.
+     * @description Route 26 : brouillons datés de la période refusés ; historique et journal.
+     */
+    put: operations['clore_periode_api_periode_close_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/devises': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les devises et leur cours du jour (MAD pour une unité).
+     * @description Route 27.
+     */
+    get: operations['lire_devises_api_devises_get']
+    put?: never
+    /**
+     * Ajouter une devise et son premier cours.
+     * @description Route 29.
+     */
+    post: operations['creer_devise_api_devises_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/devises/{code}/cours': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les cours successifs d'une devise, le plus récent d'abord.
+     * @description Route 28 : qui a saisi chaque cours, quand, et sa variation.
+     */
+    get: operations['cours_devise_api_devises__code__cours_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/devises/{code}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Changer le nom, le cours ou la mise en service d'une devise.
+     * @description Route 30 : un cours n'est historisé que s'il change ; un mois clos ne bouge pas.
+     */
+    put: operations['modifier_devise_api_devises__code__put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/magasins': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les magasins (courants et quarantaines) et les kilos qu'ils détiennent.
+     * @description Route 31.
+     */
+    get: operations['lire_magasins_api_magasins_get']
+    put?: never
+    /**
+     * Créer un magasin.
+     * @description Route 32.
+     */
+    post: operations['creer_magasin_api_magasins_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/magasins/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier un magasin (ni désactivé ni retypé s'il détient de la matière).
+     * @description Route 33.
+     */
+    put: operations['modifier_magasin_api_magasins__ident__put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/postes-frais': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les postes de frais d'importation, leur clé et leur usage.
+     * @description Route 34.
+     */
+    get: operations['lire_postes_api_postes_frais_get']
+    put?: never
+    /**
+     * Créer un poste de frais.
+     * @description Route 35.
+     */
+    post: operations['creer_poste_api_postes_frais_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/postes-frais/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier un poste : changer sa clé fige la répartition des dossiers clos.
+     * @description Route 36 : `parts_figees` dit combien de dossiers clos gardent leur répartition.
+     */
+    put: operations['modifier_poste_api_postes_frais__ident__put']
+    post?: never
+    /**
+     * Supprimer un poste ni système ni porté par un frais.
+     * @description Route 37.
+     */
+    delete: operations['supprimer_poste_api_postes_frais__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/codes-douaniers': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les codes douaniers, leur taux de droits et le nombre de matières qui les portent.
+     * @description Route 38.
+     */
+    get: operations['lire_codes_api_codes_douaniers_get']
+    put?: never
+    /**
+     * Créer un code douanier.
+     * @description Route 39.
+     */
+    post: operations['creer_code_api_codes_douaniers_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/codes-douaniers/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier un code douanier (le code lui-même se corrige).
+     * @description Route 40.
+     */
+    put: operations['modifier_code_api_codes_douaniers__ident__put']
+    post?: never
+    /**
+     * Supprimer un code douanier que nulle matière ne porte.
+     * @description Route 41 : `?version=` facultatif (contrôlé s'il est donné).
+     */
+    delete: operations['supprimer_code_api_codes_douaniers__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/motifs': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Types d'opération et leurs rôles, motifs de mouvement, motifs de réclamation.
+     * @description Route 42 : une seule source pour les listes fermées de l'écran.
+     */
+    get: operations['lire_motifs_api_motifs_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/sauvegardes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état des sauvegardes de cette base : dernière, âge, alerte, conservation, fichiers.
+     * @description Route 43.
+     */
+    get: operations['lire_sauvegardes_api_sauvegardes_get']
+    put?: never
+    /**
+     * Sauvegarder maintenant : sauvegarde manuelle relue, pièces et copie comprises.
+     * @description Route 44 : journal « sauvegarde » ; 503 lisible si pg_dump manque ou échoue (G-05).
+     */
+    post: operations['sauvegarder_api_sauvegardes_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/sauvegardes/{nom}/restaurer': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Restaurer une sauvegarde de cette base (l'état actuel est d'abord sauvegardé).
+     * @description Route 45 : 202, puis le remplacement en tâche de fond (verrou RESTAURATION tenu).
+     */
+    post: operations['restaurer_api_sauvegardes__nom__restaurer_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/taches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état des tâches de fond : dernier passage, dernier succès, erreur, durée.
+     * @description Route 46.
+     */
+    get: operations['lire_taches_api_taches_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/courriels': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La file des courriels : envoyés, en attente (prochain essai), abandonnés.
+     * @description Route 47 (sans le corps des courriels : il contient des montants).
+     */
+    get: operations['lire_courriels_api_courriels_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/courriel/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ce que le courriel du lundi dirait aujourd'hui (direction : chiffres et montants).
+     * @description Route 48.
+     */
+    get: operations['apercu_courriel_api_courriel_apercu_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/journal': {
     parameters: {
       query?: never
@@ -370,6 +782,26 @@ export interface paths {
      * @description Route 49 : qui a fait quoi, sur quoi, et quand (avant/après).
      */
     get: operations['lire_api_journal_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/journal': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le journal des actions en classeur, avec les filtres de l'écran.
+     * @description Route 52 : les lignes de la route 49 (mêmes filtres), sans prix pour l'administrateur.
+     */
+    get: operations['exporter_api_export_journal_get']
     put?: never
     post?: never
     delete?: never
@@ -499,6 +931,1764 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Toute la classification et les rôles, avec les matières qui les portent.
+     * @description Route 57.
+     */
+    get: operations['lire_api_classification_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification/roles': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ajouter un rôle de nomenclature (compté au poids).
+     * @description Route 58.
+     */
+    post: operations['ajouter_role_api_classification_roles_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification/roles/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Changer l'ordre ou le nom d'un rôle (un rôle de base garde son nom).
+     * @description Route 59.
+     */
+    put: operations['modifier_role_api_classification_roles__ident__put']
+    post?: never
+    /**
+     * Supprimer un rôle ajouté que rien ne porte.
+     * @description Route 60 : ses poids nuls partent avec lui.
+     */
+    delete: operations['supprimer_role_api_classification_roles__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification/{liste}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ajouter une valeur à une liste de classification.
+     * @description Route 61 : `liste` ∈ compositions, types-fil, titrages, couleurs.
+     */
+    post: operations['ajouter_valeur_api_classification__liste__post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification/{liste}/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier une valeur (le code se corrige ; désactivée, elle reste portée).
+     * @description Route 62 : `avertissement` dit les matières qui gardent une valeur désactivée.
+     */
+    put: operations['modifier_valeur_api_classification__liste___ident__put']
+    post?: never
+    /**
+     * Supprimer une valeur que nulle matière ne porte.
+     * @description Route 63 : `?version=` facultatif (contrôlé s'il est donné).
+     */
+    delete: operations['supprimer_valeur_api_classification__liste___ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/fournisseurs': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les fournisseurs (l'alimentation : nom, pays et état seulement).
+     * @description Route 64 : `q` cherche tous les mots, sans accents.
+     */
+    get: operations['lister_api_fournisseurs_get']
+    put?: never
+    /**
+     * Créer un fournisseur.
+     * @description Route 66.
+     */
+    post: operations['creer_api_fournisseurs_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/fournisseurs/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche d'un fournisseur.
+     * @description Route 65.
+     */
+    get: operations['lire_api_fournisseurs__ident__get']
+    /**
+     * Modifier un fournisseur (la fiche entière, à sa version lue).
+     * @description Route 67.
+     */
+    put: operations['modifier_api_fournisseurs__ident__put']
+    post?: never
+    /**
+     * Supprimer un fournisseur sans aucune trace (sinon le désactiver).
+     * @description Route 68 : `?version=` facultatif (contrôlé s'il est donné).
+     */
+    delete: operations['supprimer_api_fournisseurs__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/fournisseurs/fiches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les fiches des fournisseurs en classeur Excel.
+     * @description Route 69 : contact, délais déclaré et mesuré, paiement, port, banque, devises.
+     */
+    get: operations['exporter_api_export_fournisseurs_fiches_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le catalogue des matières (prix retirés pour l'alimentation).
+     * @description Route 70 : tout le catalogue, trié par référence ; `q` : tous les mots.
+     */
+    get: operations['lister_api_matieres_get']
+    put?: never
+    /**
+     * Créer une matière.
+     * @description Route 72.
+     */
+    post: operations['creer_api_matieres_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/reference': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La référence composée de la classification (saisie semi-automatique).
+     * @description Route 75 : `existe` dit si une matière porte déjà cette référence.
+     */
+    get: operations['reference_api_matieres_reference_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/classement': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ce que le classement automatique déduirait des références (rien n'est écrit).
+     * @description Route 76.
+     */
+    get: operations['apercu_classement_api_matieres_classement_get']
+    put?: never
+    /**
+     * Classer les matières choisies, à leur version lue.
+     * @description Route 77 : une valeur déjà renseignée n'est jamais écrasée.
+     */
+    post: operations['appliquer_classement_api_matieres_classement_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/tableur': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le modèle du tableur : le catalogue actuel (feuille « Matières »).
+     * @description Route 78 : + colonnes « Priorité dans le groupe », « Vider », « Version ».
+     */
+    get: operations['modele_tableur_api_matieres_tableur_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/tableur/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Relire un tableur : ce qui serait créé, modifié, et ce qui ne va pas.
+     * @description Route 79 : rien n'est écrit.
+     */
+    post: operations['apercu_tableur_api_matieres_tableur_apercu_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/tableur/appliquer': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Appliquer le tableur, tout ou rien, s'il dit encore ce que l'aperçu a montré.
+     * @description Route 80 : 409 si une matière a changé depuis l'aperçu.
+     */
+    post: operations['appliquer_tableur_api_matieres_tableur_appliquer_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/matieres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le catalogue en classeur Excel (avec les filtres de la liste).
+     * @description Route 81 : classification, achat, conditionnement, stock.
+     */
+    get: operations['exporter_api_export_matieres_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/matieres/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche d'une matière et ses traces.
+     * @description Route 71.
+     */
+    get: operations['lire_api_matieres__ident__get']
+    /**
+     * Modifier une matière (la fiche entière, à sa version lue).
+     * @description Route 73 : désactiver ne revalide que ce qui change.
+     */
+    put: operations['modifier_api_matieres__ident__put']
+    post?: never
+    /**
+     * Supprimer une matière sans aucune trace (sinon la désactiver).
+     * @description Route 74 : `?version=` facultatif (contrôlé s'il est donné).
+     */
+    delete: operations['supprimer_api_matieres__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les qualités : poids, plan, recette calculée, contrôle des 100 %, coût au m².
+     * @description Route 82 (facteurs de coût compris : l'ancienne route A19 y est fondue).
+     */
+    get: operations['lister_api_qualites_get']
+    put?: never
+    /**
+     * Créer une qualité : sa première version de recette et de plan naissent avec elle.
+     * @description Route 84.
+     */
+    post: operations['creer_api_qualites_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche d'une qualité.
+     * @description Route 83.
+     */
+    get: operations['fiche_api_qualites__qualite_id__get']
+    /**
+     * Modifier une qualité (fiche entière), avec sa recette dans la même transaction.
+     * @description Route 85 : `recette` facultative ; un rôle pesant sans matière est refusé pour une
+     *     qualité en service dont la recette est commencée, signalé sinon (`avertissement`).
+     */
+    put: operations['modifier_api_qualites__qualite_id__put']
+    post?: never
+    /**
+     * Supprimer une qualité jamais fabriquée (sa recette, son plan et leurs versions).
+     * @description Route 86.
+     */
+    delete: operations['supprimer_api_qualites__qualite_id__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}/recette': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Remplacer la recette : 100 % dans chaque rôle, aucun rôle pesant sans matière.
+     * @description Route 87.
+     */
+    put: operations['ecrire_recette_api_qualites__qualite_id__recette_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}/versions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les versions de la recette, de la plus récente à la plus ancienne.
+     * @description Route 88.
+     */
+    get: operations['versions_api_qualites__qualite_id__versions_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}/versions/{version_id}/restaurer': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Revenir à une version : ses parts et ses poids au m², d'un bloc, avec un motif.
+     * @description Route 89 : une seule version nouvelle, signée et motivée.
+     */
+    post: operations['restaurer_api_qualites__qualite_id__versions__version_id__restaurer_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}/plan': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Le plan d'une qualité : base mensuelle et douze coefficients (version tracée).
+     * @description Route 90 : une version du plan seulement si quelque chose change.
+     */
+    put: operations['ecrire_plan_api_qualites__qualite_id__plan_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/qualites/{qualite_id}/plan/versions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les versions du plan d'une qualité (la plus ancienne vaut depuis toujours).
+     * @description Route 91.
+     */
+    get: operations['versions_plan_api_qualites__qualite_id__plan_versions_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/nomenclature': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Chaque matière de chaque qualité (kg/m², ml/m², coût) et le contrôle des recettes.
+     * @description Route 92 : la nomenclature en vigueur (`date` bornée ; les recettes passées sont dans
+     *     les versions, route 88).
+     */
+    get: operations['nomenclature_api_nomenclature_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/qualites': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les qualités et leurs recettes, matière par matière, en classeur.
+     * @description Route 93 : « En service » et « Fabriquée » (vraie) en deux colonnes (D-19).
+     */
+    get: operations['exporter_api_export_qualites_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/metiers': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les métiers, leurs fils étage par étage, et ce qu'ils pèsent sur les métiers.
+     * @description Route 94.
+     */
+    get: operations['lister_api_metiers_get']
+    put?: never
+    /**
+     * Créer un métier à tisser et ses étages.
+     * @description Route 96.
+     */
+    post: operations['creer_api_metiers_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/metiers/{metier_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche d'un métier (avec la version de chaque étage).
+     * @description Route 95.
+     */
+    get: operations['fiche_api_metiers__metier_id__get']
+    /**
+     * Régler un métier (fiche entière), avec son montage dans la même transaction.
+     * @description Route 97 : `montage` facultatif (versions d'étage et effet confirmé).
+     */
+    put: operations['modifier_api_metiers__metier_id__put']
+    post?: never
+    /**
+     * Supprimer un métier sans fil monté, jamais nommé par un ordre.
+     * @description Route 98.
+     */
+    delete: operations['supprimer_api_metiers__metier_id__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/metiers/{metier_id}/montage': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Monter les fils de plusieurs étages (versions d'étage, effet confirmé).
+     * @description Route 99 : les étages absents ne bougent pas ; aucun mouvement de stock n'est écrit.
+     */
+    put: operations['monter_api_metiers__metier_id__montage_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/metiers/{metier_id}/etages/{etage}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Monter un étage (au téléphone) : les autres étages ne sont pas touchés.
+     * @description Route 100 : protégé par la version de l'étage (deux téléphones : un seul passe).
+     */
+    put: operations['monter_etage_api_metiers__metier_id__etages__etage__put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/metiers/{metier_id}/montages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'historique des montages d'un métier, le plus récent d'abord.
+     * @description Route 101.
+     */
+    get: operations['montages_api_metiers__metier_id__montages_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/montage/matieres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les matières qui se montent : poids de bobine compté, sorti en 30 jours, monté.
+     * @description Route 102.
+     */
+    get: operations['matieres_api_montage_matieres_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/metiers': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les métiers et leurs fils montés en classeur (sans valeur pour l'alimentation).
+     * @description Route 238.
+     */
+    get: operations['exporter_api_export_metiers_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/stock': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'état du stock à une date : une ligne par matière (tous les champs du moteur).
+     * @description Route 103 : sans prix, montants ni conseil d'achat pour l'alimentation.
+     */
+    get: operations['etat_api_stock_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/stock/{matiere_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche de stock d'une matière : sa ligne, d'où vient son besoin, ses lots.
+     * @description Route 104.
+     */
+    get: operations['fiche_matiere_api_stock__matiere_id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/mouvements': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le journal du stock, filtré, le plus récent d'abord, par pages.
+     * @description Route 105 : `avec_valeur` ajoute le coût unitaire et la valeur (MAD) de chaque ligne.
+     */
+    get: operations['lister_mouvements_api_mouvements_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/mouvements': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le journal du stock en classeur (mêmes filtres ; sans prix pour l'alimentation).
+     * @description Route 106.
+     */
+    get: operations['exporter_mouvements_api_export_mouvements_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/lots': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les lots et leurs soldes par magasin, avec leur statut et leur histoire.
+     * @description Route 107 (`date` passée : ce que chaque lot pouvait donner ce jour-là).
+     */
+    get: operations['lister_lots_api_lots_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/lots': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La liste des lots en classeur (mêmes filtres que la liste).
+     * @description Route 236.
+     */
+    get: operations['exporter_lots_api_export_lots_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/lots/scan': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le lot d'une étiquette scannée (adresse …/lot/123) ou d'un numéro tapé.
+     * @description Route 110 : un même numéro peut exister pour deux matières (liste) ; 404 si aucun.
+     */
+    get: operations['scanner_api_lots_scan_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/lots/disponibles': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les lots d'une matière qu'on peut sortir à une date, hors quarantaine, FIFO.
+     * @description Route 111.
+     */
+    get: operations['disponibles_api_lots_disponibles_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/lots/{lot_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tout d'un lot : soldes, statut, histoire, réception, journal, commentaire.
+     * @description Route 108.
+     */
+    get: operations['fiche_lot_api_lots__lot_id__get']
+    /**
+     * Modifier le commentaire d'un lot (avec la version lue).
+     * @description Route 109.
+     */
+    put: operations['modifier_lot_api_lots__lot_id__put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/tracabilite': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le chemin de la matière : d'un lot, d'un ordre de fabrication, d'une matière.
+     * @description Route 112.
+     */
+    get: operations['tracer_api_tracabilite_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/controles/soldes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les soldes tenus égalent-ils le journal du stock ? Aucun n'est négatif ?
+     * @description Route 113.
+     */
+    get: operations['controle_soldes_api_controles_soldes_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/operations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les opérations de stock, filtrées, les plus récentes d'abord, par pages.
+     * @description Route 115 (prix masqués pour l'alimentation par le filtre).
+     */
+    get: operations['lister_api_operations_get']
+    put?: never
+    /**
+     * Crée un brouillon d'opération (et le valide aussitôt si `valider`).
+     * @description Route 117 : droit selon le type ; `valider: true` = une seule transaction.
+     */
+    post: operations['creer_api_operations_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/operations/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Une opération : lignes, auteurs, blocages, ce que le lecteur peut en faire.
+     * @description Route 116.
+     */
+    get: operations['lire_api_operations__ident__get']
+    /**
+     * Modifie un brouillon d'opération (lignes remplacées), à sa version.
+     * @description Route 118.
+     */
+    put: operations['modifier_api_operations__ident__put']
+    post?: never
+    /**
+     * Supprime un brouillon d'opération (aucun numéro consommé).
+     * @description Route 119.
+     */
+    delete: operations['supprimer_api_operations__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/operations/{ident}/valider': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Valide une opération : numéro donné, le stock bouge.
+     * @description Route 120.
+     */
+    post: operations['valider_api_operations__ident__valider_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/operations/{ident}/annuler': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Annule une opération validée par contre-passation, une fois.
+     * @description Route 121.
+     */
+    post: operations['annuler_api_operations__ident__annuler_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/brouillons': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tout ce qui attend d'être validé, avec ce qui le ferait refuser.
+     * @description Route 122.
+     */
+    get: operations['lister_brouillons_api_brouillons_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/brouillons/valider': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Valide les brouillons choisis (ou tous ceux du rôle), dans l'ordre des dates.
+     * @description Route 123 : un refus n'empêche pas les autres ; ce que le rôle ne peut pas est dit.
+     */
+    post: operations['tout_valider_api_brouillons_valider_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/operations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le classeur des opérations (sans prix pour l'alimentation ; ses types seulement).
+     * @description Route 241 : mêmes filtres que la liste (115).
+     */
+    get: operations['exporter_api_export_operations_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les inventaires (ouverts, validés, abandonnés, annulés), les plus récents d'abord.
+     * @description Route 124 (montants masqués pour l'alimentation).
+     */
+    get: operations['lister_api_inventaires_get']
+    put?: never
+    /**
+     * Ouvre un inventaire : numéro, théorique figé, mouvements du périmètre suspendus.
+     * @description Route 128.
+     */
+    post: operations['ouvrir_api_inventaires_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/defauts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ce que propose l'ouverture : tolérance, rôles et compositions en stock, cadences.
+     * @description Route 125.
+     */
+    get: operations['defauts_api_inventaires_defauts_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/a-compter': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'inventaire tournant : les matières à recompter selon leur classe ABC.
+     * @description Route 126 (par magasin : un comptage ne vaut que pour le magasin compté).
+     */
+    get: operations['a_compter_api_inventaires_a_compter_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Un inventaire : périmètre, lignes, écarts en kilos et en dirhams, blocages.
+     * @description Route 127.
+     */
+    get: operations['lire_api_inventaires__ident__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}/comptages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Enregistre des comptages (un champ absent ne change rien ; `null` le vide).
+     * @description Route 129.
+     */
+    put: operations['compter_api_inventaires__ident__comptages_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}/lots-trouves': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ajoute un lot trouvé sur place (le lot n'est créé qu'à la validation).
+     * @description Route 130.
+     */
+    post: operations['lot_trouve_api_inventaires__ident__lots_trouves_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}/valider': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Valide un inventaire : un ajustement par écart, daté du jour de l'inventaire.
+     * @description Route 131.
+     */
+    post: operations['valider_api_inventaires__ident__valider_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}/abandonner': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Abandonne un inventaire en cours : rien n'est ajusté, il garde son numéro.
+     * @description Route 132.
+     */
+    post: operations['abandonner_api_inventaires__ident__abandonner_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/inventaires/{ident}/annuler': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Annule un inventaire validé : ses ajustements sont contre-passés, une fois.
+     * @description Route 245.
+     */
+    post: operations['annuler_api_inventaires__ident__annuler_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/documents/inventaires/{ident}/feuille': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La feuille de comptage à imprimer (à l'aveugle), ou de recomptage.
+     * @description Route 133 : A4 paysage, une page par magasin, papier à en-tête.
+     */
+    get: operations['feuille_api_documents_inventaires__ident__feuille_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/inventaires': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le classeur des inventaires (filtrés par état).
+     * @description Route 239 : mêmes filtres que la liste (124).
+     */
+    get: operations['exporter_api_export_inventaires_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/inventaires/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le classeur d'un inventaire : ses lignes, écarts en kilos et en dirhams.
+     * @description Route 240.
+     */
+    get: operations['exporter_lignes_api_export_inventaires__ident__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/production/plan': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le plan de toutes les qualités : saisie, plan glissant, kg/m², tissé du mois.
+     * @description Route 145.
+     */
+    get: operations['plan_api_production_plan_get']
+    /**
+     * Enregistrer le plan de plusieurs qualités d'un bloc (tout ou rien).
+     * @description Route 146 : une version du plan par qualité dont le plan change.
+     */
+    put: operations['ecrire_plan_api_production_plan_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/production/realise': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le plan face au réalisé, chaque mois clos jugé sur le plan de son époque.
+     * @description Route 147.
+     */
+    get: operations['realise_api_production_realise_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/production/besoins': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les besoins par matière et par mois, et ce que le plan d'achat en retient.
+     * @description Route 148 : à la date (stock, commandes, sorties de ce jour-là).
+     */
+    get: operations['besoins_api_production_besoins_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/production': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Un onglet de la production en classeur (plan glissant, réalisé, besoins).
+     * @description Route 237.
+     */
+    get: operations['exporter_api_export_production_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/plan-achat': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le plan d'achat à une date : indicateurs, fournisseurs, références à commander.
+     * @description Route 149.
+     */
+    get: operations['lire_plan_api_plan_achat_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/plan-achat/fournisseurs/{fournisseur_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Préparer une commande : les quantités que le calcul suggère chez ce fournisseur.
+     * @description Route 150.
+     */
+    get: operations['preparer_api_plan_achat_fournisseurs__fournisseur_id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/pilotage': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le classeur de pilotage : stock, plan d'achat, fournisseurs, besoins, contrôles.
+     * @description Route 151.
+     */
+    get: operations['exporter_pilotage_api_export_pilotage_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/plan-achat': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * L'onglet affiché du plan d'achat (fournisseurs ou références), cherché, en classeur.
+     * @description Route 242.
+     */
+    get: operations['exporter_plan_api_export_plan_achat_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/documents/commandes/{cid}/bon': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le bon de commande à envoyer au fournisseur : A4, en anglais, sans aucun prix.
+     * @description Route 164.
+     */
+    get: operations['imprimer_bon_api_documents_commandes__cid__bon_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/commandes/{cid}/bon': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le bon fournisseur dans un classeur : même contenu que le document, sans prix.
+     * @description Route 165.
+     */
+    get: operations['exporter_bon_api_export_commandes__cid__bon_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/commandes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les bons de commande et leurs lignes en classeur (mêmes filtres que la liste).
+     * @description Route 166.
+     */
+    get: operations['exporter_commandes_api_export_commandes_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les bons de commande, du plus récent au plus ancien, filtrés au serveur.
+     * @description Route 152.
+     */
+    get: operations['lister_api_commandes_get']
+    put?: never
+    /**
+     * Créer les bons en brouillon chez un fournisseur, un par devise, sans numéro.
+     * @description Route 154.
+     */
+    post: operations['creer_api_commandes_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * La fiche d'un bon : lignes, reçu, version partie, décisions, gestes permis.
+     * @description Route 153.
+     */
+    get: operations['lire_api_commandes__cid__get']
+    /**
+     * Modifier un bon tant que rien n'est reçu (puis le garde-fou de l'approbation).
+     * @description Route 155.
+     */
+    put: operations['modifier_api_commandes__cid__put']
+    post?: never
+    /**
+     * Supprimer un brouillon jamais parti et sans réception.
+     * @description Route 156.
+     */
+    delete: operations['supprimer_api_commandes__cid__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/envoyer': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Envoyer le bon (numéro et date d'envoi) ou, au-delà du seuil, le soumettre.
+     * @description Route 157.
+     */
+    post: operations['envoyer_api_commandes__cid__envoyer_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/approuver': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Approuver un bon au montant estimé : il part, daté du jour réel d'envoi.
+     * @description Route 158.
+     */
+    post: operations['approuver_api_commandes__cid__approuver_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/renvoyer': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Renvoyer un bon aux achats avec un motif (parti : retour à sa version partie).
+     * @description Route 159.
+     */
+    post: operations['renvoyer_api_commandes__cid__renvoyer_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/prix': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmer les prix du fournisseur (le cours et la date promise se figent).
+     * @description Route 160.
+     */
+    post: operations['confirmer_prix_api_commandes__cid__prix_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/expedition': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Les jalons de l'expédition (champ absent : inchangé ; null : effacé).
+     * @description Route 161.
+     */
+    put: operations['expedition_api_commandes__cid__expedition_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/solder': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Solder (un camion est venu) ou annuler (rien reçu) : on n'attend plus le reste.
+     * @description Route 162.
+     */
+    post: operations['solder_api_commandes__cid__solder_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/{cid}/rouvrir': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Rouvrir un bon soldé ou annulé (parti : il repasse par le garde-fou).
+     * @description Route 163.
+     */
+    post: operations['rouvrir_api_commandes__cid__rouvrir_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/documents/etiquettes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les étiquettes QR des lots (100 × 70 mm), prêtes à imprimer.
+     * @description Route 114 : le QR porte l'adresse du lot (`{adresse}/lot/{id}`) ; lots inconnus dits.
+     */
+    get: operations['etiquettes_des_lots_api_documents_etiquettes_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -526,6 +2716,76 @@ export interface components {
       libelle: string
       /** Adresse */
       adresse: string
+    }
+    /**
+     * Annulation
+     * @description Route 121 : la version lue et, si l'on veut, pourquoi on annule.
+     */
+    Annulation: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * ApercuClassement
+     * @description Ce que le classement ferait (route 76) ou a fait (route 77).
+     */
+    ApercuClassement: {
+      /** Propositions */
+      propositions: components['schemas']['PropositionClassement'][]
+      /**
+       * A Creer
+       * @description valeurs de classification à créer
+       */
+      a_creer: {
+        [key: string]: string[]
+      }
+    }
+    /**
+     * ApercuCourriel
+     * @description Route 48 : ce que le courriel du lundi dirait aujourd'hui (direction seule).
+     */
+    ApercuCourriel: {
+      /** Sujet */
+      sujet: string
+      /** Texte */
+      texte: string
+      /** Serveur Configure */
+      serveur_configure: boolean
+      /** Destinataires */
+      destinataires: string[]
+      /**
+       * Illisibles
+       * @description adresses du réglage écartées (illisibles)
+       */
+      illisibles: string[]
+    }
+    /**
+     * ApercuImport
+     * @description L'aperçu du tableur (route 79) : ce qui serait écrit, et ce qui ne va pas.
+     */
+    ApercuImport: {
+      /** Lignes */
+      lignes: components['schemas']['LigneImport'][]
+      /** Creees */
+      creees: number
+      /** Modifiees */
+      modifiees: number
+      /** Inchangees */
+      inchangees: number
+      /** Erreurs */
+      erreurs: number
+      /** Appliquable */
+      appliquable: boolean
+      /**
+       * Empreinte Apercu
+       * @description à renvoyer avec l'application
+       */
+      empreinte_apercu: string
     }
     /**
      * AppareilCreation
@@ -565,6 +2825,225 @@ export interface components {
       sessions_ouvertes: number
     }
     /**
+     * BaseServeur
+     * @description La base de données du serveur.
+     */
+    BaseServeur: {
+      /** Nom */
+      nom: string
+      /** Hote */
+      hote: string
+      /** Port */
+      port: number
+      /** Version */
+      version: string
+      /** Taille Octets */
+      taille_octets: number
+      /** Schema */
+      schema: string | null
+      /** Schema Attendu */
+      schema_attendu: string
+    }
+    /**
+     * BesoinDeQualite
+     * @description D'où vient le besoin : une qualité qui consomme la matière, mois par mois.
+     */
+    BesoinDeQualite: {
+      /** Qualite */
+      qualite: string
+      /** Pourcentage */
+      pourcentage: number
+      /** Kg Par M2 */
+      kg_par_m2: number
+      /** M2 */
+      m2: number[]
+      /** Kg */
+      kg: number[]
+    }
+    /**
+     * BesoinMatiere
+     * @description Le besoin d'une matière par mois, et ce que le plan d'achat en retient.
+     */
+    BesoinMatiere: {
+      /** Matiere Id */
+      matiere_id: number | null
+      /** Reference */
+      reference: string
+      /** Nature */
+      nature: string
+      /** Designation */
+      designation: string
+      /** Fournisseur */
+      fournisseur: string
+      /** Role */
+      role: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Kg */
+      kg: number[]
+      /** Total */
+      total: number
+      /** Retenu */
+      retenu: number[]
+      /** Total Retenu */
+      total_retenu: number
+      /** Coefficient Realisation */
+      coefficient_realisation: number | null
+      /** Conso Reelle */
+      conso_reelle: number | null
+      /** Stock Disponible */
+      stock_disponible: number
+      /** Bc En Cours */
+      bc_en_cours: number
+      /** Stock Projete */
+      stock_projete: number
+      /** Couverture Jours */
+      couverture_jours: number | null
+      /** Statut */
+      statut: string
+      /** Quantite A Commander */
+      quantite_a_commander: number | null
+      /** Unite Achat */
+      unite_achat: string
+      /** Quantite A Commander Achat */
+      quantite_a_commander_achat: number | null
+      /** Qualites */
+      qualites: components['schemas']['BesoinQualite'][]
+    }
+    /**
+     * BesoinQualite
+     * @description Une qualité qui tire le besoin d'une matière.
+     */
+    BesoinQualite: {
+      /** Qualite Id */
+      qualite_id: number | null
+      /** Qualite */
+      qualite: string
+      /** Kg M2 */
+      kg_m2: number
+      /** Kg */
+      kg: number[]
+      /** Total */
+      total: number
+    }
+    /**
+     * BesoinsDetailles
+     * @description Le MRP par matière et par mois, à la date de référence.
+     */
+    BesoinsDetailles: {
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      /** Mois */
+      mois: string[]
+      /** Taux Perte */
+      taux_perte: number
+      /** Fenetre Realisation Jours */
+      fenetre_realisation_jours: number
+      /** Roles */
+      roles: string[]
+      /** Lignes */
+      lignes: components['schemas']['BesoinMatiere'][]
+    }
+    /** Body_apercu_tableur_api_matieres_tableur_apercu_post */
+    Body_apercu_tableur_api_matieres_tableur_apercu_post: {
+      /** Fichier */
+      fichier: string
+    }
+    /** Body_appliquer_tableur_api_matieres_tableur_appliquer_post */
+    Body_appliquer_tableur_api_matieres_tableur_appliquer_post: {
+      /** Fichier */
+      fichier: string
+      /** Empreinte Apercu */
+      empreinte_apercu: string
+    }
+    /**
+     * BonEnPreparation
+     * @description Un bon pas encore parti qui porte déjà la matière (déduit de la suggestion).
+     */
+    BonEnPreparation: {
+      /** Id */
+      id: number | null
+      /** Numero */
+      numero: string
+    }
+    /**
+     * Brouillon
+     * @description Un document en brouillon dans « À valider ».
+     */
+    Brouillon: {
+      /** Genre */
+      genre: string
+      /** Type */
+      type: string
+      /** Id */
+      id: number
+      /** Version */
+      version: number
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Libelle */
+      libelle: string
+      /** Resume */
+      resume: string
+      /** Quantite */
+      quantite: number
+      /** Cree Par */
+      cree_par: string
+      /** Cree Le */
+      cree_le: string | null
+      /** Lien */
+      lien: string
+      /** Peut Valider */
+      peut_valider: boolean
+      /** Raison */
+      raison: string
+      /** Valide Par */
+      valide_par: string
+      /** Blocages */
+      blocages: string[]
+    }
+    /**
+     * Brouillons
+     * @description Route 122 : les brouillons (tous, dans l'ordre de validation, puis par genre) et les
+     *     totaux (`validables` : que ce compte peut valider, sans blocage).
+     */
+    Brouillons: {
+      /** Lignes */
+      lignes: components['schemas']['Brouillon'][]
+      /** Ordres */
+      ordres: components['schemas']['Brouillon'][]
+      /** Operations */
+      operations: components['schemas']['Brouillon'][]
+      /** Receptions */
+      receptions: components['schemas']['Brouillon'][]
+      /** Nombre */
+      nombre: number
+      /** Bloques */
+      bloques: number
+      /** Validables */
+      validables: number
+    }
+    /**
+     * Changement
+     * @description Un champ qui change, en clair.
+     */
+    Changement: {
+      /** Champ */
+      champ: string
+      /** Libelle */
+      libelle: string
+      /** Avant */
+      avant: string
+      /** Apres */
+      apres: string
+    }
+    /**
      * ChangementCode
      * @description Route 14 : son code (l'actuel, puis le nouveau).
      */
@@ -573,6 +3052,451 @@ export interface components {
       ancien: string
       /** Nouveau */
       nouveau: string
+    }
+    /**
+     * Choix
+     * @description Une valeur proposée : son identifiant et son code.
+     */
+    Choix: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+    }
+    /**
+     * ClassementEntree
+     * @description Les matières à classer et leur version lue (route 77).
+     */
+    ClassementEntree: {
+      /** Ids */
+      ids: number[]
+      /** Versions */
+      versions: number[]
+    }
+    /**
+     * Classification
+     * @description Toute la classification (route 57).
+     */
+    Classification: {
+      /** Compositions */
+      compositions: components['schemas']['ValeurFiche'][]
+      /** Types Fil */
+      types_fil: components['schemas']['ValeurFiche'][]
+      /** Titrages */
+      titrages: components['schemas']['ValeurFiche'][]
+      /** Couleurs */
+      couleurs: components['schemas']['ValeurFiche'][]
+      /** Roles */
+      roles: components['schemas']['RoleFiche'][]
+    }
+    /**
+     * ClotureEntree
+     * @description Clore la période jusqu'à une date passée, ou la rouvrir (`null`), avec un motif.
+     */
+    ClotureEntree: {
+      /** Date Cloture */
+      date_cloture: string | null
+      /** Motif */
+      motif: string
+      /**
+       * Version
+       * @description version de la clôture, lue avec la période
+       */
+      version: number
+    }
+    /**
+     * CodeDouanierCreation
+     * @description Un code douanier nouveau (route 39) ; taux 0,10 = 10 %.
+     */
+    CodeDouanierCreation: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /** Taux Droits */
+      taux_droits: number
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * CodeDouanierFiche
+     * @description Un code douanier, son taux de droits (fraction) et ses matières (route 38).
+     */
+    CodeDouanierFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle: string
+      /** Taux Droits */
+      taux_droits: number
+      /** Actif */
+      actif: boolean
+      /** Nb Matieres */
+      nb_matieres: number
+      /** Version */
+      version: number
+    }
+    /**
+     * CodeDouanierModification
+     * @description Un code douanier modifié (route 40) ; le code lui-même se corrige.
+     */
+    CodeDouanierModification: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /** Taux Droits */
+      taux_droits: number
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * CommandeCreation
+     * @description Les bons à créer chez un fournisseur (un par devise des matières).
+     */
+    CommandeCreation: {
+      /** Fournisseur Id */
+      fournisseur_id: number
+      /**
+       * Date Livraison Prevue
+       * @description vide : date d'envoi + délai du fournisseur, comptée à l'envoi
+       */
+      date_livraison_prevue?: string | null
+      /**
+       * Prix Catalogue A Confirmer
+       * @description poser le prix du catalogue sur les lignes, non confirmé
+       * @default false
+       */
+      prix_catalogue_a_confirmer: boolean
+      /**
+       * Observations
+       * @description remarques au fournisseur
+       * @default
+       */
+      observations: string
+      /** Lignes */
+      lignes: components['schemas']['LigneCommandeEntree'][]
+    }
+    /**
+     * CommandeFiche
+     * @description La fiche d'un bon (route 153) : `actions` dit, geste par geste, `null` s'il est permis,
+     *     sinon la phrase du refus ; `fin_possible` : « solder » (un camion est venu), « annuler »
+     *     (rien reçu) ou `null`.
+     */
+    CommandeFiche: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string | null
+      /** Parti */
+      parti: boolean
+      /** Statut */
+      statut: string
+      /** Statut Libelle */
+      statut_libelle: string
+      /** Version */
+      version: number
+      /** Fournisseur Id */
+      fournisseur_id: number
+      /** Fournisseur */
+      fournisseur: string
+      /** Pays */
+      pays: string
+      /**
+       * Date Commande
+       * Format: date
+       */
+      date_commande: string
+      /** Date Livraison Prevue */
+      date_livraison_prevue: string | null
+      /** Devise */
+      devise: string
+      /** Cours */
+      cours: number | null
+      /** Taux Du Jour */
+      taux_du_jour: number
+      /**
+       * Quantite
+       * @description kg
+       */
+      quantite: number
+      /** Recu */
+      recu: number
+      /** Reste Kg */
+      reste_kg: number
+      /** Part Livree */
+      part_livree: number
+      /** Nb Lignes */
+      nb_lignes: number
+      /** References */
+      references: string[]
+      /**
+       * Montant
+       * @description au prix confirmé, devise du bon
+       */
+      montant: number
+      /** Montant Mad */
+      montant_mad: number
+      /**
+       * Montant Estime
+       * @description prix confirmé, sinon catalogue
+       */
+      montant_estime: number
+      /** Montant Estime Mad */
+      montant_estime_mad: number
+      /** Reste Estime Mad */
+      reste_estime_mad: number
+      /** Prix A Confirmer */
+      prix_a_confirmer: number
+      /** Approbation Requise */
+      approbation_requise: boolean
+      /**
+       * Livraison
+       * @description code de l'état de livraison (statuts.ts)
+       */
+      livraison: string
+      /** Livraison Libelle */
+      livraison_libelle: string
+      /** Livree Le */
+      livree_le: string | null
+      /** Derniere Reception Le */
+      derniere_reception_le: string | null
+      expedition: components['schemas']['Jalons']
+      /** Observations */
+      observations: string
+      /** Cree Par */
+      cree_par: string | null
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Approuvee Par */
+      approuvee_par: string | null
+      /** Approuvee Le */
+      approuvee_le: string | null
+      /**
+       * Montant Approuve
+       * @description MAD, au cours du bon
+       */
+      montant_approuve: number | null
+      /** Solde Origine */
+      solde_origine: string | null
+      /** Solde Par */
+      solde_par: string | null
+      /** Solde Le */
+      solde_le: string | null
+      renvoi: components['schemas']['RenvoiLu'] | null
+      /** Seuil Approbation */
+      seuil_approbation: number
+      /** Contact */
+      contact: string
+      /** Email */
+      email: string
+      /** Telephone */
+      telephone: string
+      /** Delai Jours */
+      delai_jours: number
+      /** Confirme Le */
+      confirme_le: string | null
+      /** Modifiable */
+      modifiable: boolean
+      /** Fin Possible */
+      fin_possible: string | null
+      /** Raison Sociale Reglee */
+      raison_sociale_reglee: boolean
+      /** Actions */
+      actions: {
+        [key: string]: string | null
+      }
+      /** Lignes */
+      lignes: components['schemas']['LigneCommande'][]
+      /** Receptions */
+      receptions: components['schemas']['ReceptionDuBon'][]
+      /** Decisions */
+      decisions: components['schemas']['Decision'][]
+      version_partie: components['schemas']['VersionPartie'] | null
+    }
+    /**
+     * CommandeModification
+     * @description Ce que la fiche modifie ; `date_livraison_prevue` absente = inchangée, `null` = vidée.
+     */
+    CommandeModification: {
+      /** Version */
+      version: number
+      /** Date Livraison Prevue */
+      date_livraison_prevue?: string | null
+      /**
+       * Observations
+       * @default
+       */
+      observations: string
+      /** Lignes */
+      lignes: components['schemas']['LigneCommandeEntree'][]
+    }
+    /**
+     * CommandeResume
+     * @description Un bon dans la liste (route 152).
+     */
+    CommandeResume: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string | null
+      /** Parti */
+      parti: boolean
+      /** Statut */
+      statut: string
+      /** Statut Libelle */
+      statut_libelle: string
+      /** Version */
+      version: number
+      /** Fournisseur Id */
+      fournisseur_id: number
+      /** Fournisseur */
+      fournisseur: string
+      /** Pays */
+      pays: string
+      /**
+       * Date Commande
+       * Format: date
+       */
+      date_commande: string
+      /** Date Livraison Prevue */
+      date_livraison_prevue: string | null
+      /** Devise */
+      devise: string
+      /** Cours */
+      cours: number | null
+      /** Taux Du Jour */
+      taux_du_jour: number
+      /**
+       * Quantite
+       * @description kg
+       */
+      quantite: number
+      /** Recu */
+      recu: number
+      /** Reste Kg */
+      reste_kg: number
+      /** Part Livree */
+      part_livree: number
+      /** Nb Lignes */
+      nb_lignes: number
+      /** References */
+      references: string[]
+      /**
+       * Montant
+       * @description au prix confirmé, devise du bon
+       */
+      montant: number
+      /** Montant Mad */
+      montant_mad: number
+      /**
+       * Montant Estime
+       * @description prix confirmé, sinon catalogue
+       */
+      montant_estime: number
+      /** Montant Estime Mad */
+      montant_estime_mad: number
+      /** Reste Estime Mad */
+      reste_estime_mad: number
+      /** Prix A Confirmer */
+      prix_a_confirmer: number
+      /** Approbation Requise */
+      approbation_requise: boolean
+      /**
+       * Livraison
+       * @description code de l'état de livraison (statuts.ts)
+       */
+      livraison: string
+      /** Livraison Libelle */
+      livraison_libelle: string
+      /** Livree Le */
+      livree_le: string | null
+      /** Derniere Reception Le */
+      derniere_reception_le: string | null
+      expedition: components['schemas']['Jalons']
+      /** Observations */
+      observations: string
+      /** Cree Par */
+      cree_par: string | null
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Approuvee Par */
+      approuvee_par: string | null
+      /** Approuvee Le */
+      approuvee_le: string | null
+      /**
+       * Montant Approuve
+       * @description MAD, au cours du bon
+       */
+      montant_approuve: number | null
+      /** Solde Origine */
+      solde_origine: string | null
+      /** Solde Par */
+      solde_par: string | null
+      /** Solde Le */
+      solde_le: string | null
+      renvoi: components['schemas']['RenvoiLu'] | null
+    }
+    /**
+     * Comptages
+     * @description Route 129 : la version lue et les lignes comptées.
+     */
+    Comptages: {
+      /** Version */
+      version: number
+      /** Lignes */
+      lignes: components['schemas']['LigneComptage'][]
+    }
+    /**
+     * Conditionnement
+     * @description L'unité dans laquelle la matière se commande (déclarée, ou déduite).
+     */
+    Conditionnement: {
+      /** Unite */
+      unite: string
+      /** Contenance */
+      contenance: number
+      /** Declare */
+      declare: boolean
+    }
+    /**
+     * ConfirmationPrix
+     * @description Les prix confirmés, et la date promise que le fournisseur confirme avec eux.
+     */
+    ConfirmationPrix: {
+      /** Version */
+      version: number
+      /** Lignes */
+      lignes: components['schemas']['PrixLigne'][]
+      /**
+       * Mettre A Jour Catalogue
+       * @default true
+       */
+      mettre_a_jour_catalogue: boolean
+      /** Date Livraison Prevue */
+      date_livraison_prevue?: string | null
     }
     /**
      * Connexion
@@ -626,6 +3550,287 @@ export interface components {
       alerte_serveur?: string | null
     }
     /**
+     * ControleNomenclature
+     * @description Le contrôle d'une qualité dans la nomenclature (les arrêtées se signalent à part).
+     */
+    ControleNomenclature: {
+      /** Roles Utilises */
+      roles_utilises: number
+      /** Roles Conformes */
+      roles_conformes: number
+      /** Ecarts */
+      ecarts: components['schemas']['EcartRole'][]
+      /** Conforme */
+      conforme: boolean
+      /** Qualite Id */
+      qualite_id: number | null
+      /** Qualite */
+      qualite: string
+      /** Actif */
+      actif: boolean
+    }
+    /**
+     * ControleQualite
+     * @description Le contrôle des 100 % par rôle (même tolérance que l'enregistrement : 0,01 point).
+     */
+    ControleQualite: {
+      /** Roles Utilises */
+      roles_utilises: number
+      /** Roles Conformes */
+      roles_conformes: number
+      /** Ecarts */
+      ecarts: components['schemas']['EcartRole'][]
+      /** Conforme */
+      conforme: boolean
+    }
+    /**
+     * ControleSoldes
+     * @description Route 113 : soldes contre journal, au gramme.
+     */
+    ControleSoldes: {
+      /** Conforme */
+      conforme: boolean
+      /** Ecarts */
+      ecarts: components['schemas']['EcartDeSolde'][]
+      /** Negatifs */
+      negatifs: number
+      /** Lots */
+      lots: number
+    }
+    /**
+     * CourrielFiche
+     * @description Route 47 : un courriel de la file (sans son corps).
+     */
+    CourrielFiche: {
+      /** Id */
+      id: number
+      /** Genre */
+      genre: string
+      /** Cle */
+      cle: string
+      /** Destinataires */
+      destinataires: string
+      /** Sujet */
+      sujet: string
+      /** Statut */
+      statut: string
+      /** Essais */
+      essais: number
+      /** Dernier Essai Le */
+      dernier_essai_le: string | null
+      /** Prochain Essai Le */
+      prochain_essai_le: string | null
+      /** Erreur */
+      erreur: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Envoye Le */
+      envoye_le: string | null
+    }
+    /**
+     * CoursHistorique
+     * @description Un cours saisi (route 28) ; `variation` : fraction sur le cours précédent.
+     */
+    CoursHistorique: {
+      /** Id */
+      id: number
+      /** Cours */
+      cours: number
+      /**
+       * Saisi Le
+       * Format: date-time
+       */
+      saisi_le: string
+      /** Par */
+      par: string
+      /** Variation */
+      variation: number | null
+    }
+    /**
+     * CriteresEntree
+     * @description Le périmètre : rien = tout le stock ; sinon les matières qui passent tous les critères.
+     */
+    CriteresEntree: {
+      /** Matieres */
+      matieres?: number[]
+      /** Roles */
+      roles?: number[]
+      /** Compositions */
+      compositions?: number[]
+      /** Classes Abc */
+      classes_abc?: string[]
+    }
+    /**
+     * CriteresLus
+     * @description Les critères du périmètre, tels qu'ils ont été choisis.
+     */
+    CriteresLus: {
+      /** Matieres */
+      matieres: number[]
+      /** Roles */
+      roles: number[]
+      /** Compositions */
+      compositions: number[]
+      /** Classes Abc */
+      classes_abc: string[]
+    }
+    /**
+     * Decision
+     * @description Une décision sur le bon (demande, approbation, renvoi, version rétablie…).
+     */
+    Decision: {
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Par */
+      par: string | null
+      /** Decision */
+      decision: string
+      /** Motif */
+      motif: string
+      /** Montant Avant */
+      montant_avant: number | null
+      /** Montant Apres */
+      montant_apres: number | null
+    }
+    /**
+     * DefautsInventaire
+     * @description Route 125 : tolérance réglée, rôles et compositions en stock, cadences du tournant.
+     */
+    DefautsInventaire: {
+      /** Tolerance */
+      tolerance: number
+      /** Roles */
+      roles: components['schemas']['Choix'][]
+      /** Compositions */
+      compositions: components['schemas']['Choix'][]
+      /** Cadence Jours */
+      cadence_jours: {
+        [key: string]: number
+      }
+    }
+    /**
+     * Depart
+     * @description La ligne telle que la préparation la propose d'abord (unité, kilos, unités).
+     */
+    Depart: {
+      /** Unite */
+      unite: string
+      /** Contenance */
+      contenance: number
+      /** Quantite */
+      quantite: number
+      /** Unites */
+      unites: number
+    }
+    /**
+     * DernierMontage
+     * @description Le dernier montage d'un métier.
+     */
+    DernierMontage: {
+      /** Par */
+      par: string | null
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Etage */
+      etage: number | null
+      /** Effet Kg */
+      effet_kg: number
+    }
+    /**
+     * DeviseCreation
+     * @description Une devise nouvelle (route 29).
+     */
+    DeviseCreation: {
+      /**
+       * Code
+       * @description trois lettres : GBP, CNY…
+       */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Cours
+       * @description MAD pour une unité
+       */
+      cours: number
+    }
+    /**
+     * DeviseFiche
+     * @description Une devise et son cours du jour en MAD (route 27).
+     */
+    DeviseFiche: {
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Cours */
+      cours: number
+      /** Cours Le */
+      cours_le: string | null
+      /**
+       * Cours Repris
+       * @description aucun cours saisi depuis la mise en service
+       */
+      cours_repris: boolean
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * DeviseModification
+     * @description Nom, cours, mise en service d'une devise (route 30).
+     */
+    DeviseModification: {
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /** Cours */
+      cours: number
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * DocumentChoisi
+     * @description Un document de la sélection : genre, numéro, version lue.
+     */
+    DocumentChoisi: {
+      /**
+       * Genre
+       * @enum {string}
+       */
+      genre: 'operation' | 'ordre' | 'reception'
+      /** Id */
+      id: number
+      /** Version */
+      version?: number | null
+    }
+    /**
+     * DocumentMouvement
+     * @description Document qui a écrit un mouvement (`sortie` de Gestion MP devient `ordre`).
+     * @enum {string}
+     */
+    DocumentMouvement: 'reception' | 'ordre' | 'operation' | 'inventaire' | 'reprise'
+    /**
      * DomainePermis
      * @description Un domaine de l'API où le rôle lit ou écrit (dérivé de la matrice des droits).
      */
@@ -636,6 +3841,36 @@ export interface components {
       lecture: boolean
       /** Ecriture */
       ecriture: boolean
+    }
+    /**
+     * EcartDeSolde
+     * @description Un solde tenu qui ne dit pas ce que dit le journal.
+     */
+    EcartDeSolde: {
+      /** Lot Id */
+      lot_id: number
+      /** Magasin Id */
+      magasin_id: number
+      /** Reference */
+      reference: string
+      /** Lot */
+      lot: string
+      /** Magasin */
+      magasin: string
+      /** Journal */
+      journal: number
+      /** Solde */
+      solde: number
+    }
+    /**
+     * EcartRole
+     * @description Un rôle dont les parts ne font pas 100 %.
+     */
+    EcartRole: {
+      /** Role */
+      role: string
+      /** Somme */
+      somme: number
     }
     /**
      * Enrolement
@@ -665,6 +3900,16 @@ export interface components {
       jeton: string
     }
     /**
+     * Envoi
+     * @description L'envoi (ou l'approbation) : le jour réel où le bon est parti ; vide = aujourd'hui.
+     */
+    Envoi: {
+      /** Version */
+      version: number
+      /** Date */
+      date?: string | null
+    }
+    /**
      * ErreurReponse
      * @description Corps d'un refus, tel qu'il figure dans l'OpenAPI.
      */
@@ -679,6 +3924,96 @@ export interface components {
       } | null
     }
     /**
+     * EtageEntree
+     * @description Le montage d'un seul étage (au téléphone) : les autres étages ne sont pas touchés.
+     */
+    EtageEntree: {
+      /** Version */
+      version: number
+      /** Fils */
+      fils?: components['schemas']['FilEntree'][]
+      /** Confirme Effet Kg */
+      confirme_effet_kg: number | string
+    }
+    /**
+     * EtageFiche
+     * @description Un étage : ses fils, sa largeur occupée, sa version (verrou du montage).
+     */
+    EtageFiche: {
+      /** Etage */
+      etage: number
+      /** Version */
+      version: number
+      /** Fils */
+      fils: number
+      /**
+       * Metres
+       * @description largeur occupée : Σ mètres × part
+       */
+      metres: number
+      /** Bobines */
+      bobines: number
+      /** Poids */
+      poids: number
+      /** Trop Large */
+      trop_large: boolean
+      /** Monte Le */
+      monte_le: string | null
+      /** Monte Par */
+      monte_par: string | null
+    }
+    /**
+     * EtageMontage
+     * @description Le montage d'un étage dans un montage de plusieurs étages.
+     */
+    EtageMontage: {
+      /** Etage */
+      etage: number
+      /** Version */
+      version: number
+      /** Fils */
+      fils?: components['schemas']['FilEntree'][]
+    }
+    /**
+     * EtapeTracee
+     * @description Une écriture du chemin de la matière (quantité signée ; un transfert : ce qui a bougé).
+     */
+    EtapeTracee: {
+      /** Id */
+      id: number | null
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Type */
+      type: string
+      /** Libelle */
+      libelle: string
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+      /** Lot */
+      lot: string
+      /** Lot Id */
+      lot_id: number | null
+      /** Ordre */
+      ordre: string
+      /** Magasin Source */
+      magasin_source: string
+      /** Magasin Destination */
+      magasin_destination: string
+      /** Utilisateur */
+      utilisateur: string
+      /** Document */
+      document: string
+      /** Annulation */
+      annulation: boolean
+      /** Annule */
+      annule: boolean
+    }
+    /**
      * EtatInstallation
      * @description Route 2 `GET /etat` (public) : ce que l'écran de connexion a besoin de savoir (K23).
      */
@@ -690,10 +4025,710 @@ export interface components {
       /** Version */
       version: string
     }
+    /**
+     * EtatRestauration
+     * @description Route 45 (202) : la restauration a commencé ; l'écran suit `/api/sante`.
+     */
+    EtatRestauration: {
+      /**
+       * Etat
+       * @default en_cours
+       * @constant
+       */
+      etat: 'en_cours'
+      /** Fichier */
+      fichier: string
+      /**
+       * Avant
+       * @description la sauvegarde « avant restauration » qui permet de la défaire
+       */
+      avant: string
+      /**
+       * Debut
+       * Format: date-time
+       */
+      debut: string
+      /** Message */
+      message: string
+    }
+    /**
+     * EtatSauvegardes
+     * @description Routes 43 et 44 : l'état des sauvegardes de cette base.
+     */
+    EtatSauvegardes: {
+      /** Base */
+      base: string
+      /** Derniere */
+      derniere: string | null
+      /** Age H */
+      age_h: number | null
+      /** Alerte */
+      alerte: string | null
+      /** Politique */
+      politique: string
+      /** Dossier */
+      dossier: string
+      /**
+       * Copie
+       * @description dossier de la copie de sécurité, s'il est réglé
+       */
+      copie: string | null
+      /**
+       * Nb
+       * @description sauvegardes de cette base
+       */
+      nb: number
+      /**
+       * Autres
+       * @description fichiers d'autres bases dans le dossier
+       */
+      autres: number
+      /**
+       * Outils
+       * @description pg_dump et pg_restore trouvés
+       */
+      outils: boolean
+      /**
+       * Fichiers
+       * @description les 30 plus récentes
+       */
+      fichiers: components['schemas']['FichierSauvegarde'][]
+    }
+    /**
+     * EtatServeur
+     * @description Route 4 : versions, base, réseau, tâches, sauvegardes, sessions (D, T).
+     */
+    EtatServeur: {
+      /** Application */
+      application: string
+      /** Python */
+      python: string
+      /** Systeme */
+      systeme: string
+      /** Machine */
+      machine: string
+      base: components['schemas']['BaseServeur']
+      reseau: components['schemas']['ReseauServeur']
+      /**
+       * Taches Actives
+       * @description GESTIONMPPRO_TACHES de ce processus
+       */
+      taches_actives: boolean
+      /**
+       * Porteur Ici
+       * @description ce processus porte les tâches de fond
+       */
+      porteur_ici: boolean
+      /** Taches */
+      taches: components['schemas']['TacheEtat'][]
+      /** Session Jours */
+      session_jours: number
+      /**
+       * Outils
+       * @description chemins de pg_dump, pg_restore, psql
+       */
+      outils: {
+        [key: string]: string | null
+      }
+      sauvegardes: components['schemas']['EtatSauvegardes']
+      /** Sessions */
+      sessions: components['schemas']['SessionsCompte'][]
+    }
+    /**
+     * EtatStock
+     * @description Route 103 : l'état du stock à la date de référence.
+     */
+    EtatStock: {
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      /** Magasins */
+      magasins: string[]
+      /** Lignes */
+      lignes: components['schemas']['LigneStock'][]
+    }
+    /**
+     * ExpeditionEntree
+     * @description Les jalons : un champ absent garde sa valeur, `null` l'efface (A-16).
+     */
+    ExpeditionEntree: {
+      /** Version */
+      version: number
+      /** Proforma Le */
+      proforma_le?: string | null
+      /** Acompte Le */
+      acompte_le?: string | null
+      /** Embarquee Le */
+      embarquee_le?: string | null
+      /** Eta */
+      eta?: string | null
+      /** Au Port Le */
+      au_port_le?: string | null
+      /** Dedouanee Le */
+      dedouanee_le?: string | null
+      /** Arrivee Usine Le */
+      arrivee_usine_le?: string | null
+      /** Conteneur */
+      conteneur?: string | null
+      /** Navire */
+      navire?: string | null
+    }
+    /**
+     * FacteursCout
+     * @description De quoi recalculer le coût d'une recette à la frappe : perte et cours des devises.
+     */
+    FacteursCout: {
+      /**
+       * Perte
+       * @description 1 + taux de perte
+       */
+      perte: number
+      /** Cours */
+      cours: {
+        [key: string]: number
+      } | null
+    }
+    /**
+     * FicheStockMatiere
+     * @description Route 104 : la ligne de la matière, d'où vient son besoin, ses lots, ses métiers.
+     */
+    FicheStockMatiere: {
+      ligne: components['schemas']['LigneStock']
+      /** Besoins Par Qualite */
+      besoins_par_qualite: components['schemas']['BesoinDeQualite'][]
+      /** Lots */
+      lots: components['schemas']['LotSolde'][]
+      /** Sur Les Metiers */
+      sur_les_metiers: components['schemas']['FilSurMetier'][]
+    }
+    /**
+     * FichierSauvegarde
+     * @description Une sauvegarde du dossier (celles d'une autre base sont listées, signalées, non comptées).
+     */
+    FichierSauvegarde: {
+      /** Nom */
+      nom: string
+      /**
+       * Genre
+       * @description quotidienne, manuelle, avant-restauration…
+       */
+      genre: string
+      /**
+       * Nature
+       * @description « automatique », « manuelle », « avant une restauration »…
+       */
+      nature: string
+      /**
+       * Base
+       * @description la base que le fichier contient (lue dans son en-tête)
+       */
+      base: string
+      /** Autre Base */
+      autre_base: boolean
+      /**
+       * Taille
+       * @description octets
+       */
+      taille: number
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /**
+       * Tables
+       * @description tables relues (registre)
+       */
+      tables?: number | null
+      /**
+       * Pieces
+       * @description archive des pièces jointes présente
+       */
+      pieces: boolean
+      /**
+       * Copie
+       * @description présente dans la copie de sécurité
+       */
+      copie: boolean
+    }
+    /**
+     * FilEntree
+     * @description Un fil à monter : la matière, ses mètres, sa part de l'étage, des observations.
+     */
+    FilEntree: {
+      /** Matiere Id */
+      matiere_id: number
+      /**
+       * Metres
+       * @description mètres de laize montés
+       */
+      metres: number | string
+      /**
+       * Pourcentage
+       * @description part du fil (%)
+       * @default 100
+       */
+      pourcentage: number | string
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+    }
+    /**
+     * FilMonteFiche
+     * @description Un fil monté et ce qu'il pèse dans le stock « sur les métiers ».
+     */
+    FilMonteFiche: {
+      /** Id */
+      id: number
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Fournisseur */
+      fournisseur: string
+      /** Etage */
+      etage: number
+      /** Metres */
+      metres: number
+      /** Pourcentage */
+      pourcentage: number
+      /** Commentaire */
+      commentaire: string
+      /** Bobines */
+      bobines: number
+      /**
+       * Poids Bobine
+       * @description kg par bobine au catalogue
+       */
+      poids_bobine: number
+      /**
+       * Poids Bobine Utilise
+       * @description pesé au lot, sinon catalogue (M43)
+       */
+      poids_bobine_utilise: number
+      /** Source Poids */
+      source_poids: string
+      /** Ecart Mesure */
+      ecart_mesure: number | null
+      /** Ecart Hors Tolerance */
+      ecart_hors_tolerance: boolean
+      /**
+       * Poids
+       * @description kg
+       */
+      poids: number
+      /** Valeur Mad */
+      valeur_mad: number | null
+    }
+    /**
+     * FilSurMetier
+     * @description Ce qui est monté de la matière sur un étage d'un métier (sur les métiers).
+     */
+    FilSurMetier: {
+      /** Metier */
+      metier: string
+      /** Etage */
+      etage: number
+      /** Reference */
+      reference: string
+      /** Metres */
+      metres: number
+      /** Pourcentage */
+      pourcentage: number
+      /** Densite */
+      densite: number
+      /** Bobines */
+      bobines: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Poids */
+      poids: number
+    }
+    /**
+     * FournisseurCreation
+     * @description Un fournisseur nouveau (route 66).
+     */
+    FournisseurCreation: {
+      /** Nom */
+      nom: string
+      /**
+       * Code
+       * @default
+       */
+      code: string
+      /**
+       * Pays
+       * @default
+       */
+      pays: string
+      /**
+       * Contact
+       * @default
+       */
+      contact: string
+      /**
+       * Telephone
+       * @default
+       */
+      telephone: string
+      /**
+       * Email
+       * @default
+       */
+      email: string
+      /**
+       * Devise
+       * @default MAD
+       */
+      devise: string
+      /**
+       * Delai Jours
+       * @default 60
+       */
+      delai_jours: number
+      /**
+       * Couverture Commande Jours
+       * @default 0
+       */
+      couverture_commande_jours: number
+      /**
+       * Mode Paiement
+       * @default
+       */
+      mode_paiement: string
+      /**
+       * Delai Paiement Jours
+       * @default 0
+       */
+      delai_paiement_jours: number
+      /**
+       * Conditions Paiement
+       * @default
+       */
+      conditions_paiement: string
+      /**
+       * Incoterm
+       * @default
+       */
+      incoterm: string
+      /**
+       * Port Chargement
+       * @default
+       */
+      port_chargement: string
+      /**
+       * Banque
+       * @default
+       */
+      banque: string
+      /**
+       * Notes
+       * @default
+       */
+      notes: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * FournisseurFiche
+     * @description La fiche d'un fournisseur et ce qui pèse sur lui (routes 64–67).
+     */
+    FournisseurFiche: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Pays */
+      pays: string
+      /** Actif */
+      actif: boolean
+      /** Code */
+      code: string
+      /** Contact */
+      contact: string
+      /** Telephone */
+      telephone: string
+      /** Email */
+      email: string
+      /** Devise */
+      devise: string
+      /** Delai Jours */
+      delai_jours: number
+      /** Couverture Commande Jours */
+      couverture_commande_jours: number
+      /** Mode Paiement */
+      mode_paiement: string
+      /** Delai Paiement Jours */
+      delai_paiement_jours: number
+      /** Conditions Paiement */
+      conditions_paiement: string
+      /** Incoterm */
+      incoterm: string
+      /** Port Chargement */
+      port_chargement: string
+      /** Banque */
+      banque: string
+      /** Notes */
+      notes: string
+      /** Version */
+      version: number
+      /**
+       * Local
+       * @description marocain : pays MAROC, MOROCCO ou MA ; sans pays, en MAD
+       */
+      local: boolean
+      /**
+       * Devises
+       * @description nombre de matières par devise
+       */
+      devises: {
+        [key: string]: number
+      }
+      /** Nb Matieres */
+      nb_matieres: number
+      /** Nb Commandes */
+      nb_commandes: number
+      /** Nb Receptions */
+      nb_receptions: number
+      /** Nb Lots */
+      nb_lots: number
+      /** Nb Operations */
+      nb_operations: number
+      /** Nb Factures */
+      nb_factures: number
+      /** Nb Pieces */
+      nb_pieces: number
+      /**
+       * Delai Mesure Jours
+       * @description commande → réception validée, moyenne sur 365 jours
+       */
+      delai_mesure_jours: number | null
+      /** Livraisons Mesurees */
+      livraisons_mesurees: number
+      /** Utilise */
+      utilise: boolean
+      /**
+       * Empechements
+       * @description ce qui empêche la suppression
+       */
+      empechements: string[]
+      /** Modifie Le */
+      modifie_le: string | null
+    }
+    /**
+     * FournisseurModification
+     * @description Un fournisseur modifié (route 67) : la fiche entière et sa version lue.
+     */
+    FournisseurModification: {
+      /** Nom */
+      nom: string
+      /**
+       * Code
+       * @default
+       */
+      code: string
+      /**
+       * Pays
+       * @default
+       */
+      pays: string
+      /**
+       * Contact
+       * @default
+       */
+      contact: string
+      /**
+       * Telephone
+       * @default
+       */
+      telephone: string
+      /**
+       * Email
+       * @default
+       */
+      email: string
+      /**
+       * Devise
+       * @default MAD
+       */
+      devise: string
+      /**
+       * Delai Jours
+       * @default 60
+       */
+      delai_jours: number
+      /**
+       * Couverture Commande Jours
+       * @default 0
+       */
+      couverture_commande_jours: number
+      /**
+       * Mode Paiement
+       * @default
+       */
+      mode_paiement: string
+      /**
+       * Delai Paiement Jours
+       * @default 0
+       */
+      delai_paiement_jours: number
+      /**
+       * Conditions Paiement
+       * @default
+       */
+      conditions_paiement: string
+      /**
+       * Incoterm
+       * @default
+       */
+      incoterm: string
+      /**
+       * Port Chargement
+       * @default
+       */
+      port_chargement: string
+      /**
+       * Banque
+       * @default
+       */
+      banque: string
+      /**
+       * Notes
+       * @default
+       */
+      notes: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * FournisseurResume
+     * @description Ce que l'alimentation lit d'un fournisseur.
+     */
+    FournisseurResume: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Pays */
+      pays: string
+      /** Actif */
+      actif: boolean
+    }
+    /**
+     * GesteMotive
+     * @description Routes 132, 245 : la version lue et le motif (3 caractères au moins).
+     */
+    GesteMotive: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * GroupeFournisseur
+     * @description Ce qu'il y a à commander chez un fournisseur (montants par devise, jamais additionnés).
+     */
+    GroupeFournisseur: {
+      /** Fournisseur Id */
+      fournisseur_id: number | null
+      /** Fournisseur */
+      fournisseur: string
+      /** Pays */
+      pays: string
+      /** Devise Par Defaut */
+      devise_par_defaut: string
+      /** Devises */
+      devises: string[]
+      /** Delai Jours */
+      delai_jours: number
+      /** Contact */
+      contact: string
+      /** Nb References */
+      nb_references: number
+      /** Quantite */
+      quantite: number
+      /** Montants Par Devise */
+      montants_par_devise: {
+        [key: string]: number
+      }
+      /** Montant Mad */
+      montant_mad: number
+      /** Part Budget */
+      part_budget: number
+      /** Urgence */
+      urgence: string
+      /** Ruptures */
+      ruptures: number
+      /** Critiques */
+      critiques: number
+      /** Urgents */
+      urgents: number
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /**
+     * HistoriqueLot
+     * @description Ce qu'a vécu un lot : entré, sorti (net des retours), dernier mouvement, ordres.
+     */
+    HistoriqueLot: {
+      /** Entre */
+      entre: number
+      /** Sorti */
+      sorti: number
+      /** Dernier Mouvement */
+      dernier_mouvement: string | null
+      /** Ordres */
+      ordres: components['schemas']['OrdreServi'][]
+    }
+    /**
+     * IndicateursPlan
+     * @description Les indicateurs du plan (les ruptures… comptées sur toutes les matières).
+     */
+    IndicateursPlan: {
+      /** References A Commander */
+      references_a_commander: number
+      /** References En Alerte */
+      references_en_alerte: number
+      /** Budget Mad */
+      budget_mad: number
+      /** Quantite Totale */
+      quantite_totale: number
+      /** References Classe A */
+      references_classe_a: number
+      /** Ruptures */
+      ruptures: number
+      /** Critiques */
+      critiques: number
+      /** Urgents */
+      urgents: number
+      /** Attentions */
+      attentions: number
+      /** Ok */
+      ok: number
+      /** Tiers */
+      tiers: {
+        [key: string]: number
+      }
     }
     /**
      * Installation
@@ -713,6 +4748,85 @@ export interface components {
       code: string
     }
     /**
+     * InventaireFiche
+     * @description Routes 127–132, 245 : l'inventaire, ce qui bloquerait sa validation, ses lignes.
+     */
+    InventaireFiche: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+      /** Libelle */
+      libelle: string
+      /** Statut */
+      statut: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number | null
+      /** Magasin */
+      magasin: string
+      /** Tolerance */
+      tolerance: number
+      /** Perimetre */
+      perimetre: string
+      criteres: components['schemas']['CriteresLus']
+      /** Nb Matieres Suspendues */
+      nb_matieres_suspendues: number
+      /** Cree Par */
+      cree_par: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Valide Par */
+      valide_par: string
+      /** Valide Le */
+      valide_le: string | null
+      /** Abandonne Par */
+      abandonne_par: string
+      /** Abandonne Le */
+      abandonne_le: string | null
+      /** Annule Par */
+      annule_par: string
+      /** Annule Le */
+      annule_le: string | null
+      /** Annulation Motif */
+      annulation_motif: string
+      /** Nb Lignes */
+      nb_lignes: number
+      /** Nb Comptees */
+      nb_comptees: number
+      /** Hors Tolerance */
+      hors_tolerance: number
+      /** Sans Justification */
+      sans_justification: number
+      /** A Recompter */
+      a_recompter: number
+      /** Recomptees */
+      recomptees: number
+      /** Recomptes Meme Personne */
+      recomptes_meme_personne: number
+      /** Ecart Total */
+      ecart_total: number
+      /** Ecart Absolu */
+      ecart_absolu: number
+      /** Ecart Valeur Mad */
+      ecart_valeur_mad: number | null
+      /** Ecart Valeur Absolue Mad */
+      ecart_valeur_absolue_mad: number | null
+      /** Version */
+      version: number
+      /** Blocages */
+      blocages: string[]
+      /** Lignes */
+      lignes: components['schemas']['LigneInventaire'][]
+    }
+    /**
      * InventaireOuvert
      * @description Un inventaire ouvert : il suspend son magasin (tous si `null`) pour ses matières.
      */
@@ -730,6 +4844,261 @@ export interface components {
       magasin: string | null
       /** Matieres */
       matieres: number[]
+    }
+    /**
+     * InventaireOuverture
+     * @description Route 128 : date, magasin (vide : tous), libellé, tolérance (vide : le réglage), critères.
+     */
+    InventaireOuverture: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id?: number | null
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /** Tolerance */
+      tolerance?: number | null
+      criteres?: components['schemas']['CriteresEntree']
+    }
+    /**
+     * InventaireResume
+     * @description Route 124 : un inventaire de la liste (sans ses lignes).
+     */
+    InventaireResume: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+      /** Libelle */
+      libelle: string
+      /** Statut */
+      statut: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number | null
+      /** Magasin */
+      magasin: string
+      /** Tolerance */
+      tolerance: number
+      /** Perimetre */
+      perimetre: string
+      criteres: components['schemas']['CriteresLus']
+      /** Nb Matieres Suspendues */
+      nb_matieres_suspendues: number
+      /** Cree Par */
+      cree_par: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Valide Par */
+      valide_par: string
+      /** Valide Le */
+      valide_le: string | null
+      /** Abandonne Par */
+      abandonne_par: string
+      /** Abandonne Le */
+      abandonne_le: string | null
+      /** Annule Par */
+      annule_par: string
+      /** Annule Le */
+      annule_le: string | null
+      /** Annulation Motif */
+      annulation_motif: string
+      /** Nb Lignes */
+      nb_lignes: number
+      /** Nb Comptees */
+      nb_comptees: number
+      /** Hors Tolerance */
+      hors_tolerance: number
+      /** Sans Justification */
+      sans_justification: number
+      /** A Recompter */
+      a_recompter: number
+      /** Recomptees */
+      recomptees: number
+      /** Recomptes Meme Personne */
+      recomptes_meme_personne: number
+      /** Ecart Total */
+      ecart_total: number
+      /** Ecart Absolu */
+      ecart_absolu: number
+      /** Ecart Valeur Mad */
+      ecart_valeur_mad: number | null
+      /** Ecart Valeur Absolue Mad */
+      ecart_valeur_absolue_mad: number | null
+      /** Version */
+      version: number
+    }
+    /**
+     * Issue
+     * @description Ce qu'est devenu un document : validé (numéro), refusé ou ignoré (raison).
+     */
+    Issue: {
+      /** Genre */
+      genre: string
+      /** Type */
+      type: string
+      /** Id */
+      id: number
+      /** Date */
+      date: string | null
+      /** Libelle */
+      libelle: string
+      /** Resume */
+      resume: string
+      /** Lien */
+      lien: string
+      /** Numero */
+      numero: string
+      /** Raison */
+      raison: string
+    }
+    /**
+     * Jalons
+     * @description Le suivi de l'expédition.
+     */
+    Jalons: {
+      /** Proforma Le */
+      proforma_le: string | null
+      /** Acompte Le */
+      acompte_le: string | null
+      /** Embarquee Le */
+      embarquee_le: string | null
+      /** Eta */
+      eta: string | null
+      /** Au Port Le */
+      au_port_le: string | null
+      /** Dedouanee Le */
+      dedouanee_le: string | null
+      /** Arrivee Usine Le */
+      arrivee_usine_le: string | null
+      /** Conteneur */
+      conteneur: string
+      /** Navire */
+      navire: string
+    }
+    /**
+     * Libelle
+     * @description Un code et son libellé.
+     */
+    Libelle: {
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle: string
+    }
+    /**
+     * LigneCommande
+     * @description Une ligne du bon : reçu net, quarantaine, reste, prix et montants.
+     */
+    LigneCommande: {
+      /** Id */
+      id: number
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Unite Prix */
+      unite_prix: string
+      /** Quantite */
+      quantite: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Contenance */
+      contenance: number
+      /** Unites */
+      unites: number
+      /** Metres */
+      metres: number | null
+      /** Prix */
+      prix: number
+      /** Prix Confirme */
+      prix_confirme: boolean
+      /** Prix Catalogue */
+      prix_catalogue: number
+      /** Devise Catalogue */
+      devise_catalogue: string
+      /** Prix Estime */
+      prix_estime: number
+      /** Montant */
+      montant: number
+      /** Montant Estime */
+      montant_estime: number
+      /** Recu */
+      recu: number
+      /** En Quarantaine */
+      en_quarantaine: number
+      /** Reste */
+      reste: number
+      /** Reste Estime */
+      reste_estime: number
+      /** Confirme Par */
+      confirme_par: string | null
+      /** Confirme Le */
+      confirme_le: string | null
+    }
+    /**
+     * LigneCommandeEntree
+     * @description Une ligne saisie : kilos, unité de commande de la fiche et sa contenance.
+     */
+    LigneCommandeEntree: {
+      /** Matiere Id */
+      matiere_id: number
+      /**
+       * Quantite
+       * @description kg
+       */
+      quantite: number | string
+      /**
+       * Unite Achat
+       * @default kg
+       */
+      unite_achat: string
+      /**
+       * Contenance
+       * @description kg par unité
+       * @default 1
+       */
+      contenance: number | string
+      /**
+       * Prix
+       * @description au kg, devise du bon
+       */
+      prix?: number | string | null
+    }
+    /**
+     * LigneComptage
+     * @description Le comptage d'une ligne existante (un champ absent ne change rien ; `null` le vide).
+     */
+    LigneComptage: {
+      /** Ligne Id */
+      ligne_id: number
+      /** Compte */
+      compte?: number | null
+      /** Palettes */
+      palettes?: number | null
+      /** Bobines */
+      bobines?: number | null
+      /** Justification */
+      justification?: string | null
+      /** Second Compte */
+      second_compte?: number | null
     }
     /**
      * LigneHistorique
@@ -761,6 +5130,89 @@ export interface components {
       apres: {
         [key: string]: unknown
       } | null
+    }
+    /**
+     * LigneImport
+     * @description Une ligne lue du tableur.
+     */
+    LigneImport: {
+      /** Ligne */
+      ligne: number
+      /** Reference */
+      reference: string
+      /**
+       * Etat
+       * @description nouvelle, modifiee, inchangee, erreur
+       */
+      etat: string
+      /** Changements */
+      changements: components['schemas']['Changement'][]
+      /** Erreurs */
+      erreurs: string[]
+    }
+    /**
+     * LigneInventaire
+     * @description Une ligne : théorique figé, comptages, compteurs, écart en kilos, en % et en dirhams.
+     */
+    LigneInventaire: {
+      /** Id */
+      id: number
+      /** Lot Id */
+      lot_id: number | null
+      /** Lot */
+      lot: string
+      /** Lot Interne */
+      lot_interne: boolean
+      /** Lot Trouve */
+      lot_trouve: boolean
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Theorique */
+      theorique: number
+      /** Compte */
+      compte: number | null
+      /** Palettes */
+      palettes: number | null
+      /** Bobines */
+      bobines: number | null
+      /** Compte Par */
+      compte_par: string
+      /** Second Compte */
+      second_compte: number | null
+      /** Second Par */
+      second_par: string
+      /** Quatre Yeux */
+      quatre_yeux: string
+      /** Retenu */
+      retenu: number | null
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Pourcent */
+      ecart_pourcent: number | null
+      /** Cmup Mad */
+      cmup_mad: number | null
+      /** Valeur Ecart Mad */
+      valeur_ecart_mad: number | null
+      /** Hors Tolerance */
+      hors_tolerance: boolean
+      /** A Recompter */
+      a_recompter: boolean
+      /** Justification */
+      justification: string
     }
     /**
      * LigneJournal
@@ -798,6 +5250,1369 @@ export interface components {
       apres: {
         [key: string]: unknown
       } | null
+    }
+    /**
+     * LigneOperation
+     * @description Une ligne d'opération (le lot créé, sinon le numéro saisi, sinon « LOT INTERNE »).
+     */
+    LigneOperation: {
+      /** Id */
+      id: number
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Lot Id */
+      lot_id: number | null
+      /** Lot */
+      lot: string
+      /** Lot Interne */
+      lot_interne: boolean
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Magasin Destination Id */
+      magasin_destination_id: number | null
+      /** Magasin Destination */
+      magasin_destination: string
+      /** Quantite */
+      quantite: number
+      /** Prix */
+      prix: number | null
+      /** Devise */
+      devise: string | null
+    }
+    /**
+     * LigneOperationEntree
+     * @description Une ligne saisie : quantité signée (ajustement), son unité ; prix, devise : ouverture.
+     */
+    LigneOperationEntree: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Lot Id */
+      lot_id?: number | null
+      /**
+       * Lot Numero
+       * @default
+       */
+      lot_numero: string
+      /**
+       * Lot Interne
+       * @description numéro LOT-AAAA-NNNN à la validation
+       * @default false
+       */
+      lot_interne: boolean
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin Destination Id */
+      magasin_destination_id?: number | null
+      /** Quantite */
+      quantite: number
+      /**
+       * Unite
+       * @description kg, bobine ou palette
+       * @default kg
+       */
+      unite: string
+      /**
+       * Prix
+       * @default 0
+       */
+      prix: number
+      /**
+       * Devise
+       * @default MAD
+       */
+      devise: string
+    }
+    /**
+     * LignePlan
+     * @description Une matière à commander, dans l'ordre du plan (montant pondéré par la classe ABC).
+     */
+    LignePlan: {
+      /** Matiere Id */
+      matiere_id: number | null
+      /** Fournisseur Id */
+      fournisseur_id: number | null
+      /** Reference */
+      reference: string
+      /** Nature */
+      nature: string
+      /** Designation */
+      designation: string
+      /** Fournisseur */
+      fournisseur: string
+      /** Classe Abc */
+      classe_abc: string
+      /** Statut */
+      statut: string
+      /**
+       * Quantite
+       * @description kg à commander
+       */
+      quantite: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Quantite Achat */
+      quantite_achat: number
+      /** Unite Commande */
+      unite_commande: string
+      /** Unites Commande */
+      unites_commande: number
+      /** Contenance Commande */
+      contenance_commande: number
+      /**
+       * Prix
+       * @description prix du catalogue au kg, devise de la matière
+       */
+      prix: number
+      /** Devise */
+      devise: string
+      /** Montant Devise */
+      montant_devise: number
+      /** Montant Mad */
+      montant_mad: number
+      /** Palettes */
+      palettes: number
+      /** Tier */
+      tier: string
+      /** Risque */
+      risque: string
+      /** Action */
+      action: string
+      /** Relance */
+      relance: string
+      /** En Preparation */
+      en_preparation: number
+      /** Bons En Preparation */
+      bons_en_preparation: components['schemas']['BonEnPreparation'][]
+      /** Stock Disponible */
+      stock_disponible: number
+      /** Stock Net */
+      stock_net: number
+      /** Stock Projete */
+      stock_projete: number
+      /**
+       * Commande Kg
+       * @description bons partis attendus (dans et au-delà du délai)
+       */
+      commande_kg: number
+      /** Couverture Jours */
+      couverture_jours: number | null
+      /** Conso Mensuelle */
+      conso_mensuelle: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Unites Possibles */
+      unites_possibles: components['schemas']['UniteCommande'][]
+    }
+    /**
+     * LignePlanEntree
+     * @description Le plan d'une qualité dans le plan global, avec la version lue de la qualité.
+     */
+    LignePlanEntree: {
+      /** Qualite Id */
+      qualite_id: number
+      /** Base Mensuelle */
+      base_mensuelle: number | string
+      /** Coefficients */
+      coefficients: (number | string)[]
+      /** Version */
+      version: number
+    }
+    /**
+     * LignePreparation
+     * @description Une suggestion du calcul chez le fournisseur.
+     */
+    LignePreparation: {
+      /** Matiere Id */
+      matiere_id: number | null
+      /** Reference */
+      reference: string
+      /** Nature */
+      nature: string
+      /** Designation */
+      designation: string
+      /** Statut */
+      statut: string
+      /** Classe Abc */
+      classe_abc: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Stock Projete */
+      stock_projete: number
+      /** Conso Mensuelle */
+      conso_mensuelle: number
+      /** Couverture Jours */
+      couverture_jours: number | null
+      /** Quantite Suggeree */
+      quantite_suggeree: number
+      /** Palettes Suggerees */
+      palettes_suggerees: number
+      /** Contenance Palette */
+      contenance_palette: number
+      /** Unite Commande */
+      unite_commande: string
+      /** Contenance Commande */
+      contenance_commande: number
+      /** Unites Suggerees */
+      unites_suggerees: number
+      /** Unites Possibles */
+      unites_possibles: components['schemas']['UniteCommande'][]
+      /** Minimum Commande */
+      minimum_commande: number
+      /** Prix Indicatif */
+      prix_indicatif: number
+      /** Devise */
+      devise: string
+      /** Montant Indicatif Mad */
+      montant_indicatif_mad: number
+      /** En Preparation */
+      en_preparation: number
+      /** Bons En Preparation */
+      bons_en_preparation: components['schemas']['BonEnPreparation'][]
+      depart: components['schemas']['Depart']
+    }
+    /**
+     * LigneRecetteEntree
+     * @description Une matière de la recette et sa part dans son rôle.
+     */
+    LigneRecetteEntree: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Pourcentage */
+      pourcentage: number | string
+    }
+    /**
+     * LigneRecetteFiche
+     * @description Une ligne de recette calculée par le moteur (nomenclature).
+     */
+    LigneRecetteFiche: {
+      /** Qualite Id */
+      qualite_id: number | null
+      /** Qualite */
+      qualite: string
+      /** Matiere Id */
+      matiere_id: number | null
+      /** Reference */
+      reference: string
+      /** Role Id */
+      role_id: number | null
+      /**
+       * Role
+       * @description vide : matière inconnue
+       */
+      role: string
+      /** Lineaire */
+      lineaire: boolean
+      /** Nature */
+      nature: string
+      /** Designation */
+      designation: string
+      /** Fournisseur */
+      fournisseur: string
+      /** Pourcentage */
+      pourcentage: number
+      /** Kg M2 */
+      kg_m2: number
+      /**
+       * Ml M2
+       * @description rôle au mètre : poids du rôle (ml/m²) × part
+       */
+      ml_m2: number | null
+      /**
+       * Densite
+       * @description kg/ml
+       */
+      densite: number
+      /** Prix Kg */
+      prix_kg: number | null
+      /**
+       * Prix
+       * @description comme on l'achète : au kilo ou au mètre
+       */
+      prix: number | null
+      /** Unite Prix */
+      unite_prix: string | null
+      /** Devise Prix */
+      devise_prix: string | null
+      /**
+       * Cout M2 Mad
+       * @description kg/m² × prix au kilo × cours × perte
+       */
+      cout_m2_mad: number | null
+    }
+    /**
+     * LigneStock
+     * @description Une matière à la date.
+     */
+    LigneStock: {
+      /** Reference */
+      reference?: string | null
+      /** Nature */
+      nature?: string | null
+      /** Designation */
+      designation?: string | null
+      /** Fournisseur */
+      fournisseur?: string | null
+      /** Composition */
+      composition?: string | null
+      /** Type Fil */
+      type_fil?: string | null
+      /** Couleur */
+      couleur?: string | null
+      /** Titrage */
+      titrage?: string | null
+      /** Titrage Unite */
+      titrage_unite?: string | null
+      /** Unite Achat */
+      unite_achat?: string | null
+      /** Quantite A Commander Achat */
+      quantite_a_commander_achat?: number | null
+      /** Prix Unite */
+      prix_unite?: number | null
+      /** Kg Par Ml */
+      kg_par_ml?: number | null
+      /** Stock Initial */
+      stock_initial?: number | null
+      /** Entrees */
+      entrees?: number | null
+      /** Stock Net */
+      stock_net?: number | null
+      /** Stock Machine */
+      stock_machine?: number | null
+      /** Stock Quarantaine */
+      stock_quarantaine?: number | null
+      /** Stock Disponible */
+      stock_disponible?: number | null
+      /** Bc En Cours */
+      bc_en_cours?: number | null
+      /** Bc Hors Horizon */
+      bc_hors_horizon?: number | null
+      /** Bc Dans Couverture */
+      bc_dans_couverture?: number | null
+      /** Bc En Preparation */
+      bc_en_preparation?: number | null
+      /** Bons En Preparation */
+      bons_en_preparation?: string[] | null
+      /** Sorties Prevues */
+      sorties_prevues?: number | null
+      /** Demande Delai */
+      demande_delai?: number | null
+      /** Stock Projete */
+      stock_projete?: number | null
+      /** Stock Min */
+      stock_min?: number | null
+      /** Stock Min Recalcule */
+      stock_min_recalcule?: number | null
+      /** Stock Min Plafonne */
+      stock_min_plafonne?: number | null
+      /** Statut */
+      statut?: string | null
+      /** Statut Couverture */
+      statut_couverture?: string | null
+      /** Couverture Jours */
+      couverture_jours?: number | null
+      /** Couverture Cible Jours */
+      couverture_cible_jours?: number | null
+      /** Conso Mensuelle */
+      conso_mensuelle?: number | null
+      /** Besoin Annuel */
+      besoin_annuel?: number | null
+      /** Conso Plan */
+      conso_plan?: number | null
+      /** Conso Reelle */
+      conso_reelle?: number | null
+      /** Coefficient Realisation */
+      coefficient_realisation?: number | null
+      /** Conso Horizon */
+      conso_horizon?: number | null
+      /** Realisation Heritee */
+      realisation_heritee?: string[] | null
+      /** Delai Jours */
+      delai_jours?: number | null
+      /** Sans Achat */
+      sans_achat?: string | null
+      /** Quantite A Commander */
+      quantite_a_commander?: number | null
+      /** Quantite Theorique */
+      quantite_theorique?: number | null
+      /** Palettes A Commander */
+      palettes_a_commander?: number | null
+      /** Unite Commande */
+      unite_commande?: string | null
+      /** Contenance Commande */
+      contenance_commande?: number | null
+      /** Unites A Commander */
+      unites_a_commander?: number | null
+      /** Prix Kg */
+      prix_kg?: number | null
+      /** Devise */
+      devise?: string | null
+      /** Montant A Commander */
+      montant_a_commander?: number | null
+      /** Montant A Commander Mad */
+      montant_a_commander_mad?: number | null
+      /** Valeur Conso Annuelle */
+      valeur_conso_annuelle?: number | null
+      /** Valeur Conso Annuelle Mad */
+      valeur_conso_annuelle_mad?: number | null
+      /** Classe Abc */
+      classe_abc?: string | null
+      /** Rang */
+      rang?: number | null
+      /** Pourcentage Cumule */
+      pourcentage_cumule?: number | null
+      /** Cv Demande */
+      cv_demande?: number | null
+      /** Classe Xyz */
+      classe_xyz?: string | null
+      /** Groupe Equiv */
+      groupe_equiv?: string | null
+      /** Sourcing */
+      sourcing?: string | null
+      /** Nb Fournisseurs Groupe */
+      nb_fournisseurs_groupe?: number | null
+      /** Substituts */
+      substituts?: string[] | null
+      /** Date Derniere Sortie */
+      date_derniere_sortie?: string | null
+      /** Jours Sans Mouvement */
+      jours_sans_mouvement?: number | null
+      /** Dormant */
+      dormant?: boolean | null
+      /** Par Magasin */
+      par_magasin?: {
+        [key: string]: number
+      } | null
+      /** Besoins */
+      besoins?: number[] | null
+      /** Action */
+      action?: string | null
+      /** Matiere Id */
+      matiere_id?: number | null
+      /** Valeur Machine Mad */
+      valeur_machine_mad?: number | null
+    }
+    /**
+     * LotDisponible
+     * @description Route 111 : un lot qu'on peut sortir, dans l'ordre FIFO.
+     */
+    LotDisponible: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Quantite */
+      quantite: number
+      /**
+       * Entre Le
+       * Format: date
+       */
+      entre_le: string
+      /** Poids Bobine */
+      poids_bobine: number
+    }
+    /**
+     * LotFiche
+     * @description Route 108 : tout d'un lot (son journal du plus ancien au plus récent).
+     */
+    LotFiche: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Interne */
+      interne: boolean
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Role */
+      role: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Fournisseur */
+      fournisseur: string
+      /**
+       * Entre Le
+       * Format: date
+       */
+      entre_le: string
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Quantite */
+      quantite: number
+      /** Disponible */
+      disponible: number
+      /** Quarantaine */
+      quarantaine: number
+      /** Magasins */
+      magasins: components['schemas']['SoldeMagasin'][]
+      /** Bobines */
+      bobines: number | null
+      /** Statut */
+      statut: string
+      historique: components['schemas']['HistoriqueLot']
+      /** Poids Bobine Le */
+      poids_bobine_le: string | null
+      /** Commentaire */
+      commentaire: string
+      reception: components['schemas']['ReceptionDuLot'] | null
+      /** Mouvements */
+      mouvements: components['schemas']['MouvementLigne'][]
+      /** Version */
+      version: number
+    }
+    /**
+     * LotModification
+     * @description Route 109 : le commentaire du lot et la version lue.
+     */
+    LotModification: {
+      /** Commentaire */
+      commentaire: string
+      /** Version */
+      version: number
+    }
+    /**
+     * LotResume
+     * @description Route 110 : un lot scanné.
+     */
+    LotResume: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+    }
+    /**
+     * LotSolde
+     * @description Route 107 : un lot, ses soldes par magasin, son statut calculé, son histoire.
+     */
+    LotSolde: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Interne */
+      interne: boolean
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Role */
+      role: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Fournisseur */
+      fournisseur: string
+      /**
+       * Entre Le
+       * Format: date
+       */
+      entre_le: string
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Quantite */
+      quantite: number
+      /** Disponible */
+      disponible: number
+      /** Quarantaine */
+      quarantaine: number
+      /** Magasins */
+      magasins: components['schemas']['SoldeMagasin'][]
+      /** Bobines */
+      bobines: number | null
+      /** Statut */
+      statut: string
+      historique: components['schemas']['HistoriqueLot']
+    }
+    /**
+     * LotTrouveEntree
+     * @description Route 130 : un lot trouvé sur place (nommé, ou « Lot interne »).
+     */
+    LotTrouveEntree: {
+      /** Version */
+      version: number
+      /** Matiere Id */
+      matiere_id: number
+      /**
+       * Lot Numero
+       * @default
+       */
+      lot_numero: string
+      /**
+       * Lot Interne
+       * @default false
+       */
+      lot_interne: boolean
+      /** Magasin Id */
+      magasin_id?: number | null
+      /** Compte */
+      compte?: number | null
+      /** Palettes */
+      palettes?: number | null
+      /** Bobines */
+      bobines?: number | null
+      /**
+       * Justification
+       * @default
+       */
+      justification: string
+    }
+    /**
+     * MagasinCreation
+     * @description Un magasin nouveau (route 32) ; type « stock_courant » ou « quarantaine ».
+     */
+    MagasinCreation: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Type
+       * @default stock_courant
+       */
+      type: string
+      /**
+       * Contenu
+       * @default
+       */
+      contenu: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * MagasinFiche
+     * @description Un magasin et les kilos qu'il détient (route 31).
+     */
+    MagasinFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Type */
+      type: string
+      /** Contenu */
+      contenu: string
+      /** Actif */
+      actif: boolean
+      /** Kg Detenus */
+      kg_detenus: number
+      /** Version */
+      version: number
+    }
+    /**
+     * MagasinModification
+     * @description Un magasin modifié (route 33).
+     */
+    MagasinModification: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Type
+       * @default stock_courant
+       */
+      type: string
+      /**
+       * Contenu
+       * @default
+       */
+      contenu: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * MatiereACompter
+     * @description Route 126 : une matière due au tournant.
+     */
+    MatiereACompter: {
+      /** Article Id */
+      article_id: number
+      /** Reference */
+      reference: string
+      /** Role */
+      role: string
+      /** Classe Abc */
+      classe_abc: string | null
+      /** Stock */
+      stock: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Dernier Comptage */
+      dernier_comptage: string | null
+      /** Jours */
+      jours: number | null
+      /** Magasins */
+      magasins: string[]
+    }
+    /**
+     * MatiereCreation
+     * @description Une matière nouvelle (route 72) ; classification, fournisseur, code douanier par id.
+     */
+    MatiereCreation: {
+      /** Reference */
+      reference: string
+      /**
+       * Designation
+       * @default
+       */
+      designation: string
+      /** Role Id */
+      role_id: number
+      /** Composition Id */
+      composition_id?: number | null
+      /** Type Fil Id */
+      type_fil_id?: number | null
+      /** Titrage Id */
+      titrage_id?: number | null
+      /** Couleur Id */
+      couleur_id?: number | null
+      /**
+       * Couleur Code
+       * @default
+       */
+      couleur_code: string
+      /**
+       * Unite Prix
+       * @default kg
+       */
+      unite_prix: string
+      /**
+       * Densite
+       * @default 0
+       */
+      densite: number
+      /** Fournisseur Id */
+      fournisseur_id?: number | null
+      /**
+       * Prix
+       * @default 0
+       */
+      prix: number
+      /**
+       * Devise
+       * @default MAD
+       */
+      devise: string
+      /**
+       * Unite Achat
+       * @default kg
+       */
+      unite_achat: string
+      /**
+       * Contenance Achat
+       * @default 1
+       */
+      contenance_achat: number
+      /**
+       * Minimum Commande
+       * @default 0
+       */
+      minimum_commande: number
+      /**
+       * Poids Bobine
+       * @default 0
+       */
+      poids_bobine: number
+      /**
+       * Bobines Palette
+       * @default 0
+       */
+      bobines_palette: number
+      /**
+       * Stock Min
+       * @default 0
+       */
+      stock_min: number
+      /**
+       * Couv Min Mois
+       * @default 0
+       */
+      couv_min_mois: number
+      /**
+       * Groupe Equiv
+       * @default
+       */
+      groupe_equiv: string
+      /** Priorite Equiv */
+      priorite_equiv?: number | null
+      /** Code Douanier Id */
+      code_douanier_id?: number | null
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * MatiereFiche
+     * @description La fiche d'une matière (route 71) : ses traces et qui l'a modifiée.
+     */
+    MatiereFiche: {
+      /** Id */
+      id: number
+      /** Version */
+      version: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Lineaire */
+      lineaire: boolean
+      /** Composition Id */
+      composition_id: number | null
+      /** Composition */
+      composition: string | null
+      /** Composition Libelle */
+      composition_libelle: string | null
+      /** Type Fil Id */
+      type_fil_id: number | null
+      /** Type Fil */
+      type_fil: string | null
+      /** Titrage Id */
+      titrage_id: number | null
+      /** Titrage */
+      titrage: string | null
+      /** Titrage Unite */
+      titrage_unite: string | null
+      /** Couleur Id */
+      couleur_id: number | null
+      /** Couleur */
+      couleur: string | null
+      /** Couleur Libelle */
+      couleur_libelle: string | null
+      /** Couleur Code */
+      couleur_code: string
+      /** Fournisseur Id */
+      fournisseur_id: number | null
+      /** Fournisseur */
+      fournisseur: string | null
+      /** Prix */
+      prix: number | null
+      /** Unite Prix */
+      unite_prix: string | null
+      /** Prix Kg */
+      prix_kg: number | null
+      /** Devise */
+      devise: string | null
+      /** Densite */
+      densite: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Contenance Achat */
+      contenance_achat: number
+      conditionnement: components['schemas']['Conditionnement']
+      /** Contenance Palette */
+      contenance_palette: number
+      /** Minimum Commande */
+      minimum_commande: number | null
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Stock Min */
+      stock_min: number
+      /** Couv Min Mois */
+      couv_min_mois: number
+      /** Groupe Equiv */
+      groupe_equiv: string
+      /** Priorite Equiv */
+      priorite_equiv: number | null
+      /** Code Douanier Id */
+      code_douanier_id: number | null
+      /** Code Douanier */
+      code_douanier: string | null
+      /** Actif */
+      actif: boolean
+      /**
+       * Stock
+       * @description kg, tous magasins, quarantaine comprise
+       */
+      stock: number
+      /**
+       * Utilisee
+       * @description a des traces : se désactive, ne se supprime pas
+       */
+      utilisee: boolean
+      /** Usages */
+      usages: string[]
+      /** Modifie Le */
+      modifie_le: string | null
+      /** Modifie Par */
+      modifie_par: string | null
+    }
+    /**
+     * MatiereModification
+     * @description Une matière modifiée (route 73) : la fiche entière et sa version lue (désactiver compris).
+     */
+    MatiereModification: {
+      /** Reference */
+      reference: string
+      /**
+       * Designation
+       * @default
+       */
+      designation: string
+      /** Role Id */
+      role_id: number
+      /** Composition Id */
+      composition_id?: number | null
+      /** Type Fil Id */
+      type_fil_id?: number | null
+      /** Titrage Id */
+      titrage_id?: number | null
+      /** Couleur Id */
+      couleur_id?: number | null
+      /**
+       * Couleur Code
+       * @default
+       */
+      couleur_code: string
+      /**
+       * Unite Prix
+       * @default kg
+       */
+      unite_prix: string
+      /**
+       * Densite
+       * @default 0
+       */
+      densite: number
+      /** Fournisseur Id */
+      fournisseur_id?: number | null
+      /**
+       * Prix
+       * @default 0
+       */
+      prix: number
+      /**
+       * Devise
+       * @default MAD
+       */
+      devise: string
+      /**
+       * Unite Achat
+       * @default kg
+       */
+      unite_achat: string
+      /**
+       * Contenance Achat
+       * @default 1
+       */
+      contenance_achat: number
+      /**
+       * Minimum Commande
+       * @default 0
+       */
+      minimum_commande: number
+      /**
+       * Poids Bobine
+       * @default 0
+       */
+      poids_bobine: number
+      /**
+       * Bobines Palette
+       * @default 0
+       */
+      bobines_palette: number
+      /**
+       * Stock Min
+       * @default 0
+       */
+      stock_min: number
+      /**
+       * Couv Min Mois
+       * @default 0
+       */
+      couv_min_mois: number
+      /**
+       * Groupe Equiv
+       * @default
+       */
+      groupe_equiv: string
+      /** Priorite Equiv */
+      priorite_equiv?: number | null
+      /** Code Douanier Id */
+      code_douanier_id?: number | null
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * MatiereMontage
+     * @description Une matière qui se monte : poids de bobine compté, sorti en 30 jours, déjà monté.
+     */
+    MatiereMontage: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Actif */
+      actif: boolean
+      /** Poids Bobine Catalogue */
+      poids_bobine_catalogue: number
+      /** Poids Bobine Compte */
+      poids_bobine_compte: number
+      /** Origine Poids */
+      origine_poids: string
+      /** Sorti 30 J */
+      sorti_30_j: number
+      /** Deja Monte */
+      deja_monte: number
+      /** Jours */
+      jours: number
+    }
+    /**
+     * MatiereResume
+     * @description Une matière du catalogue (route 70).
+     */
+    MatiereResume: {
+      /** Id */
+      id: number
+      /** Version */
+      version: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Lineaire */
+      lineaire: boolean
+      /** Composition Id */
+      composition_id: number | null
+      /** Composition */
+      composition: string | null
+      /** Composition Libelle */
+      composition_libelle: string | null
+      /** Type Fil Id */
+      type_fil_id: number | null
+      /** Type Fil */
+      type_fil: string | null
+      /** Titrage Id */
+      titrage_id: number | null
+      /** Titrage */
+      titrage: string | null
+      /** Titrage Unite */
+      titrage_unite: string | null
+      /** Couleur Id */
+      couleur_id: number | null
+      /** Couleur */
+      couleur: string | null
+      /** Couleur Libelle */
+      couleur_libelle: string | null
+      /** Couleur Code */
+      couleur_code: string
+      /** Fournisseur Id */
+      fournisseur_id: number | null
+      /** Fournisseur */
+      fournisseur: string | null
+      /** Prix */
+      prix: number | null
+      /** Unite Prix */
+      unite_prix: string | null
+      /** Prix Kg */
+      prix_kg: number | null
+      /** Devise */
+      devise: string | null
+      /** Densite */
+      densite: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Contenance Achat */
+      contenance_achat: number
+      conditionnement: components['schemas']['Conditionnement']
+      /** Contenance Palette */
+      contenance_palette: number
+      /** Minimum Commande */
+      minimum_commande: number | null
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Stock Min */
+      stock_min: number
+      /** Couv Min Mois */
+      couv_min_mois: number
+      /** Groupe Equiv */
+      groupe_equiv: string
+      /** Priorite Equiv */
+      priorite_equiv: number | null
+      /** Code Douanier Id */
+      code_douanier_id: number | null
+      /** Code Douanier */
+      code_douanier: string | null
+      /** Actif */
+      actif: boolean
+      /**
+       * Stock
+       * @description kg, tous magasins, quarantaine comprise
+       */
+      stock: number
+      /**
+       * Utilisee
+       * @description a des traces : se désactive, ne se supprime pas
+       */
+      utilisee: boolean
+    }
+    /**
+     * MetierCreation
+     * @description Un métier à tisser : code, nom, laize d'un étage, bobines par mètre, étages.
+     */
+    MetierCreation: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Laize
+       * @description m
+       * @default 4.2
+       */
+      laize: number | string
+      /**
+       * Bobines Par Metre
+       * @default 0
+       */
+      bobines_par_metre: number | string
+      /**
+       * Etages
+       * @default 6
+       */
+      etages: number
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+    }
+    /**
+     * MetierFiche
+     * @description Un métier, ses fils étage par étage, et ce qu'ils pèsent.
+     */
+    MetierFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Laize */
+      laize: number
+      /** Bobines Par Metre */
+      bobines_par_metre: number
+      /** Etages */
+      etages: number
+      /** Actif */
+      actif: boolean
+      /** Commentaire */
+      commentaire: string
+      /** Version */
+      version: number
+      /** Fils */
+      fils: components['schemas']['FilMonteFiche'][]
+      /**
+       * Poids
+       * @description kg montés (comptés seulement si le métier est en service)
+       */
+      poids: number
+      /**
+       * Sur Les Metiers
+       * @description kg comptés dans le stock (0 si arrêté)
+       */
+      sur_les_metiers: number
+      /** Valeur Mad */
+      valeur_mad: number | null
+      /** Bobines */
+      bobines: number
+      /** Metres */
+      metres: number
+      /** Etages Detail */
+      etages_detail: components['schemas']['EtageFiche'][]
+      /** Etages Garnis */
+      etages_garnis: number
+      /** Etages Trop Larges */
+      etages_trop_larges: number[]
+      /** Densite A Saisir */
+      densite_a_saisir: boolean
+      /** Fils Sans Poids */
+      fils_sans_poids: number
+      /**
+       * Ordres
+       * @description ordres de fabrication qui le nomment
+       */
+      ordres: number
+      /** Tolerance Bobine */
+      tolerance_bobine: number
+      dernier_montage: components['schemas']['DernierMontage'] | null
+    }
+    /**
+     * MetierModification
+     * @description Le réglage entier et, facultatif, le montage (une seule transaction).
+     */
+    MetierModification: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Laize
+       * @description m
+       * @default 4.2
+       */
+      laize: number | string
+      /**
+       * Bobines Par Metre
+       * @default 0
+       */
+      bobines_par_metre: number | string
+      /**
+       * Etages
+       * @default 6
+       */
+      etages: number
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /** Version */
+      version: number
+      montage?: components['schemas']['MontageEntree'] | null
+    }
+    /**
+     * MetierModifie
+     * @description La fiche après un réglage ; `montage` : le résultat du montage s'il y en avait un.
+     */
+    MetierModifie: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Laize */
+      laize: number
+      /** Bobines Par Metre */
+      bobines_par_metre: number
+      /** Etages */
+      etages: number
+      /** Actif */
+      actif: boolean
+      /** Commentaire */
+      commentaire: string
+      /** Version */
+      version: number
+      /** Fils */
+      fils: components['schemas']['FilMonteFiche'][]
+      /**
+       * Poids
+       * @description kg montés (comptés seulement si le métier est en service)
+       */
+      poids: number
+      /**
+       * Sur Les Metiers
+       * @description kg comptés dans le stock (0 si arrêté)
+       */
+      sur_les_metiers: number
+      /** Valeur Mad */
+      valeur_mad: number | null
+      /** Bobines */
+      bobines: number
+      /** Metres */
+      metres: number
+      /** Etages Detail */
+      etages_detail: components['schemas']['EtageFiche'][]
+      /** Etages Garnis */
+      etages_garnis: number
+      /** Etages Trop Larges */
+      etages_trop_larges: number[]
+      /** Densite A Saisir */
+      densite_a_saisir: boolean
+      /** Fils Sans Poids */
+      fils_sans_poids: number
+      /**
+       * Ordres
+       * @description ordres de fabrication qui le nomment
+       */
+      ordres: number
+      /** Tolerance Bobine */
+      tolerance_bobine: number
+      dernier_montage: components['schemas']['DernierMontage'] | null
+      montage?: components['schemas']['ResultatMontage'] | null
     }
     /**
      * Moi
@@ -840,6 +6655,158 @@ export interface components {
       email: string
       /** Version */
       version: number
+    }
+    /**
+     * MontageEntree
+     * @description Le montage de plusieurs étages (les étages absents ne bougent pas).
+     */
+    MontageEntree: {
+      /** Etages */
+      etages: components['schemas']['EtageMontage'][]
+      /** Confirme Effet Kg */
+      confirme_effet_kg: number | string
+    }
+    /**
+     * MontageEvenementFiche
+     * @description Un montage confirmé : lignes avant/après, kilos, effet, alerte, origine.
+     */
+    MontageEvenementFiche: {
+      /** Id */
+      id: number
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Par */
+      par: string | null
+      /**
+       * Etage
+       * @description null : plusieurs étages (bureau)
+       */
+      etage: number | null
+      /** Origine */
+      origine: string
+      /** Avant */
+      avant: {
+        [key: string]: unknown
+      }[]
+      /** Apres */
+      apres: {
+        [key: string]: unknown
+      }[]
+      /** Avant Kg */
+      avant_kg: number
+      /** Apres Kg */
+      apres_kg: number
+      /** Effet Kg */
+      effet_kg: number
+      /** Alerte */
+      alerte: string
+    }
+    /**
+     * MotifLu
+     * @description Un motif de mouvement ; `impose_role` : rôle exigé en plus de la direction.
+     */
+    MotifLu: {
+      /** Id */
+      id: number
+      /** Type */
+      type: string
+      /** Libelle */
+      libelle: string
+      /** Code R */
+      code_r: string | null
+      /** Impose Role */
+      impose_role: string | null
+    }
+    /**
+     * Motifs
+     * @description Les listes fermées des mouvements et des réclamations (route 42).
+     */
+    Motifs: {
+      /** Types */
+      types: components['schemas']['TypeOperationLu'][]
+      /** Motifs */
+      motifs: components['schemas']['MotifLu'][]
+      /** Reclamation Motifs */
+      reclamation_motifs: components['schemas']['Libelle'][]
+      /** Reclamation Issues */
+      reclamation_issues: components['schemas']['Libelle'][]
+    }
+    /**
+     * MouvementLigne
+     * @description Une écriture du journal du stock (S64).
+     */
+    MouvementLigne: {
+      /** Id */
+      id: number
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /**
+       * Saisi Le
+       * Format: date-time
+       */
+      saisi_le: string
+      /** Type */
+      type: string
+      /** Libelle */
+      libelle: string
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Quantite */
+      quantite: number
+      /** Prix */
+      prix: number | null
+      /** Devise */
+      devise: string
+      /** Cours */
+      cours: number | null
+      /** Document */
+      document: string
+      /** Document Id */
+      document_id: number | null
+      /** Document Numero */
+      document_numero: string
+      /** Ordre Id */
+      ordre_id: number | null
+      /** Paire Id */
+      paire_id: number | null
+      /** Motif */
+      motif: string
+      /** Commentaire */
+      commentaire: string
+      /** Auteur */
+      auteur: string
+      /** Contrepasse Id */
+      contrepasse_id: number | null
+      /** Cout Mad */
+      cout_mad?: number | null
+      /** Valeur Mad */
+      valeur_mad?: number | null
+    }
+    /**
+     * Nomenclature
+     * @description Chaque matière de chaque qualité, et le contrôle des recettes.
+     */
+    Nomenclature: {
+      /** Lignes */
+      lignes: components['schemas']['LigneRecetteFiche'][]
+      /** Controle */
+      controle: components['schemas']['ControleNomenclature'][]
     }
     /**
      * Notification
@@ -913,6 +6880,157 @@ export interface components {
       | 'reprise'
       | 'systeme'
     /**
+     * OperationCreation
+     * @description Route 117 : un brouillon ; `valider: true` le valide dans la même transaction.
+     */
+    OperationCreation: {
+      type: components['schemas']['TypeOperation']
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /**
+       * Ordre Id
+       * @description retour des machines
+       */
+      ordre_id?: number | null
+      /**
+       * Fournisseur Id
+       * @description ignoré : le fournisseur d'un retour est celui des lots
+       */
+      fournisseur_id?: number | null
+      /** Motif Id */
+      motif_id?: number | null
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /** Lignes */
+      lignes: components['schemas']['LigneOperationEntree'][]
+      /**
+       * Valider
+       * @default false
+       */
+      valider: boolean
+    }
+    /**
+     * OperationFiche
+     * @description Routes 115–121 : une opération, ses lignes, ses auteurs, ses blocages, et ce que le
+     *     lecteur peut en faire (`peut_agir`, sinon `raison`).
+     */
+    OperationFiche: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string | null
+      type: components['schemas']['TypeOperation']
+      /** Type Libelle */
+      type_libelle: string
+      /** Statut */
+      statut: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Ordre Id */
+      ordre_id: number | null
+      /** Ordre */
+      ordre: string
+      /** Fournisseur Id */
+      fournisseur_id: number | null
+      /** Fournisseur */
+      fournisseur: string
+      /** Motif Id */
+      motif_id: number | null
+      /** Motif */
+      motif: string
+      /** Code Motif */
+      code_motif: string
+      /** Commentaire */
+      commentaire: string
+      /** Cree Par */
+      cree_par: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Validee Par */
+      validee_par: string
+      /** Validee Le */
+      validee_le: string | null
+      /** Annulee Par */
+      annulee_par: string
+      /** Annulee Le */
+      annulee_le: string | null
+      /** Annulation Motif */
+      annulation_motif: string
+      /** Total */
+      total: number
+      /** Version */
+      version: number
+      /** Peut Agir */
+      peut_agir: boolean
+      /** Raison */
+      raison: string
+      /** Liberation */
+      liberation: boolean
+      /** Mise En Quarantaine */
+      mise_en_quarantaine: boolean
+      /** Lignes */
+      lignes: components['schemas']['LigneOperation'][]
+      /** Valeurs */
+      valeurs: components['schemas']['ValeurDevise'][] | null
+      /** Blocages */
+      blocages: string[]
+    }
+    /**
+     * OperationModification
+     * @description Route 118 : le brouillon entier (lignes remplacées), à la version lue.
+     */
+    OperationModification: {
+      type: components['schemas']['TypeOperation']
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /**
+       * Ordre Id
+       * @description retour des machines
+       */
+      ordre_id?: number | null
+      /**
+       * Fournisseur Id
+       * @description ignoré : le fournisseur d'un retour est celui des lots
+       */
+      fournisseur_id?: number | null
+      /** Motif Id */
+      motif_id?: number | null
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /** Lignes */
+      lignes: components['schemas']['LigneOperationEntree'][]
+      /** Version */
+      version: number
+    }
+    /**
+     * OrdreServi
+     * @description Un ordre de fabrication qu'un lot a servi.
+     */
+    OrdreServi: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+    }
+    /**
      * PageJournal
      * @description Route 49 : une page du journal, les plus récentes d'abord.
      */
@@ -929,6 +7047,27 @@ export interface components {
        * @description à passer en `?apres=`
        */
       suivant?: string | null
+    }
+    /**
+     * PageMouvements
+     * @description Route 105 : une page du journal, le plus récent d'abord ; `types` : les types présents
+     *     compte tenu des autres filtres (filtres liés).
+     */
+    PageMouvements: {
+      /** Elements */
+      elements: components['schemas']['MouvementLigne'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+      /** Types */
+      types?: string[]
     }
     /**
      * PageNotifications
@@ -951,6 +7090,95 @@ export interface components {
       non_lues: number
     }
     /**
+     * PageOperations
+     * @description Route 115 : une page d'opérations (les plus récentes d'abord) et le total filtré.
+     */
+    PageOperations: {
+      /** Elements */
+      elements: components['schemas']['OperationFiche'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /** Page[CourrielFiche] */
+    Page_CourrielFiche_: {
+      /** Elements */
+      elements: components['schemas']['CourrielFiche'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /** Page[CoursHistorique] */
+    Page_CoursHistorique_: {
+      /** Elements */
+      elements: components['schemas']['CoursHistorique'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /** Page[ReglageHistorique] */
+    Page_ReglageHistorique_: {
+      /** Elements */
+      elements: components['schemas']['ReglageHistorique'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
+    }
+    /**
+     * Periode
+     * @description La période close : jusqu'où, par qui, quand (route 26).
+     */
+    Periode: {
+      /** Date Cloture */
+      date_cloture: string | null
+      /** Par */
+      par: string
+      /** Quand */
+      quand: string | null
+      /** Version */
+      version: number
+    }
+    /**
+     * Personne
+     * @description Un compte, tel qu'on le cite (auteur, destinataire).
+     */
+    Personne: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+      /** Role */
+      role?: string | null
+    }
+    /**
      * PersonneJournal
      * @description Une personne citée par le journal (par son compte).
      */
@@ -959,6 +7187,797 @@ export interface components {
       id: number
       /** Nom */
       nom: string
+    }
+    /**
+     * PlanAchat
+     * @description Route 149 : ce qu'il faut commander, chez qui, et quand.
+     */
+    PlanAchat: {
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      indicateurs: components['schemas']['IndicateursPlan']
+      /** Fournisseurs */
+      fournisseurs: components['schemas']['GroupeFournisseur'][]
+      /** Lignes */
+      lignes: components['schemas']['LignePlan'][]
+    }
+    /**
+     * PlanEtRealise
+     * @description Ce que l'atelier a tissé face au plan, chaque mois clos sur le plan de son époque.
+     */
+    PlanEtRealise: {
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      /** Mois */
+      mois: string[]
+      /** Mois Clos */
+      mois_clos: number
+      /** Lignes */
+      lignes: components['schemas']['RealiseQualite'][]
+      /** Debut Service */
+      debut_service: string | null
+      /** Plan Fige */
+      plan_fige: boolean
+    }
+    /**
+     * PlanGlobalEntree
+     * @description Le plan de plusieurs qualités, enregistré d'un bloc (tout ou rien).
+     */
+    PlanGlobalEntree: {
+      /** Qualites */
+      qualites: components['schemas']['LignePlanEntree'][]
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * PlanProduction
+     * @description Le plan de toutes les qualités (et, après un enregistrement, combien ont changé).
+     */
+    PlanProduction: {
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      /** Mois */
+      mois: string[]
+      /** Croissance Annuelle */
+      croissance_annuelle: number
+      /** Taux Perte */
+      taux_perte: number
+      /** Qualites */
+      qualites: components['schemas']['QualitePlan'][]
+      /** Tisse Hors Plan */
+      tisse_hors_plan: components['schemas']['TisseHorsPlan'][]
+      /** Modifiees */
+      modifiees?: number | null
+    }
+    /**
+     * PlanQualiteEntree
+     * @description Le plan d'une qualité : base (m² par mois ordinaire) et douze coefficients (0 à 20).
+     */
+    PlanQualiteEntree: {
+      /** Base Mensuelle */
+      base_mensuelle: number | string
+      /** Coefficients */
+      coefficients: (number | string)[]
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+      /** Version */
+      version: number
+    }
+    /**
+     * PlanVersionFiche
+     * @description Une version du plan ; la plus ancienne vaut « depuis toujours ».
+     */
+    PlanVersionFiche: {
+      /** Id */
+      id: number
+      /**
+       * Valide Depuis
+       * Format: date-time
+       */
+      valide_depuis: string
+      /** Base Mensuelle */
+      base_mensuelle: number
+      /** Saisonnalite */
+      saisonnalite: number[]
+      /** En Service */
+      en_service: boolean
+      par: components['schemas']['Personne'] | null
+      /** Origine */
+      origine: string
+      /** Motif */
+      motif: string
+      /** En Vigueur */
+      en_vigueur: boolean
+      /** Depuis Toujours */
+      depuis_toujours: boolean
+    }
+    /**
+     * PoidsEntree
+     * @description Le poids d'un m² de tapis pour un rôle : kg/m², ou ml/m² pour un rôle au mètre.
+     */
+    PoidsEntree: {
+      /** Role Id */
+      role_id: number
+      /**
+       * Poids
+       * @description kg/m² (ml/m² pour Cuir, Franges, Ruban)
+       */
+      poids: number | string
+    }
+    /**
+     * PoidsRole
+     * @description Le poids au m² d'un rôle dans une qualité (les rôles à 0 ne sont pas enregistrés).
+     */
+    PoidsRole: {
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Lineaire */
+      lineaire: boolean
+      /** Poids */
+      poids: number
+    }
+    /**
+     * PoidsVersion
+     * @description Le poids au m² d'un rôle avec cette version.
+     */
+    PoidsVersion: {
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Poids */
+      poids: number
+    }
+    /**
+     * PosteCreation
+     * @description Un poste de frais nouveau (route 35).
+     */
+    PosteCreation: {
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle: string
+      /**
+       * Recuperable
+       * @default false
+       */
+      recuperable: boolean
+      /**
+       * Cle
+       * @default valeur
+       */
+      cle: string
+      /** Ordre */
+      ordre?: number | null
+      /**
+       * Nature
+       * @default autre
+       */
+      nature: string
+      /**
+       * Entre Valeur Douane
+       * @default false
+       */
+      entre_valeur_douane: boolean
+    }
+    /**
+     * PosteFiche
+     * @description Un poste de frais et l'usage qu'en font les dossiers (route 34).
+     */
+    PosteFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle: string
+      /** Recuperable */
+      recuperable: boolean
+      /** Nature */
+      nature: string
+      /** Entre Valeur Douane */
+      entre_valeur_douane: boolean
+      /** Cle */
+      cle: string
+      /** Ordre */
+      ordre: number
+      /** Systeme */
+      systeme: boolean
+      /**
+       * Frais Ouverts
+       * @description frais de ce poste dans des dossiers ouverts
+       */
+      frais_ouverts: number
+      /**
+       * Frais Clos
+       * @description frais de ce poste dans des dossiers clos
+       */
+      frais_clos: number
+      /** Dossiers Ouverts */
+      dossiers_ouverts: number
+      /** Dossiers Clos */
+      dossiers_clos: number
+      /** Utilise */
+      utilise: boolean
+      /** Version */
+      version: number
+      /**
+       * Parts Figees
+       * @description après une modification : dossiers clos à répartition figée
+       */
+      parts_figees?: number | null
+    }
+    /**
+     * PosteModification
+     * @description Un poste modifié (route 36) : le code ne change pas.
+     */
+    PosteModification: {
+      /** Libelle */
+      libelle: string
+      /**
+       * Recuperable
+       * @default false
+       */
+      recuperable: boolean
+      /**
+       * Cle
+       * @default valeur
+       */
+      cle: string
+      /** Ordre */
+      ordre?: number | null
+      /**
+       * Nature
+       * @default autre
+       */
+      nature: string
+      /**
+       * Entre Valeur Douane
+       * @default false
+       */
+      entre_valeur_douane: boolean
+      /** Version */
+      version: number
+    }
+    /**
+     * PreparationCommande
+     * @description Route 150 : la préparation d'une commande chez un fournisseur.
+     */
+    PreparationCommande: {
+      /** Fournisseur Id */
+      fournisseur_id: number
+      /** Fournisseur */
+      fournisseur: string
+      /** Pays */
+      pays: string
+      /** Contact */
+      contact: string
+      /** Email */
+      email: string
+      /** Delai Jours */
+      delai_jours: number
+      /** Devise Par Defaut */
+      devise_par_defaut: string
+      /**
+       * Date Reference
+       * Format: date
+       */
+      date_reference: string
+      /** Lignes */
+      lignes: components['schemas']['LignePreparation'][]
+    }
+    /**
+     * PrixLigne
+     * @description Un prix annoncé par le fournisseur, au kilo (ou au mètre pour une matière au mètre).
+     */
+    PrixLigne: {
+      /** Ligne Id */
+      ligne_id: number
+      /** Prix */
+      prix: number | string
+      /**
+       * Unite
+       * @default kg
+       * @enum {string}
+       */
+      unite: 'kg' | 'ml'
+    }
+    /**
+     * PropositionClassement
+     * @description Ce que la référence d'une matière dit, pour ses seuls champs vides.
+     */
+    PropositionClassement: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Version */
+      version: number
+      /** Changements */
+      changements: {
+        [key: string]: string
+      }
+    }
+    /**
+     * QualiteCreation
+     * @description Une nouvelle qualité : code (tel qu'il figure sur les ordres), nom, poids par rôle.
+     */
+    QualiteCreation: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Poids */
+      poids?: components['schemas']['PoidsEntree'][]
+    }
+    /**
+     * QualiteFiche
+     * @description La fiche d'une qualité, avec l'avertissement du dernier geste (rôles sans matière).
+     */
+    QualiteFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /** Base Mensuelle */
+      base_mensuelle: number
+      /** Saisonnalite */
+      saisonnalite: number[]
+      /** Poids */
+      poids: components['schemas']['PoidsRole'][]
+      /** Recette */
+      recette: components['schemas']['LigneRecetteFiche'][]
+      controle: components['schemas']['ControleQualite']
+      /** Kg M2 */
+      kg_m2: number
+      /** Cout M2 Mad */
+      cout_m2_mad: number | null
+      /**
+       * Fabrications
+       * @description ordres de fabrication qui la nomment
+       */
+      fabrications: number
+      facteurs_cout: components['schemas']['FacteursCout']
+      /**
+       * Avertissement
+       * @default
+       */
+      avertissement: string
+    }
+    /**
+     * QualiteModification
+     * @description La fiche entière (remplacement) et, facultative, la recette dans la même transaction.
+     */
+    QualiteModification: {
+      /** Code */
+      code: string
+      /**
+       * Nom
+       * @default
+       */
+      nom: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Poids */
+      poids?: components['schemas']['PoidsEntree'][]
+      /** Version */
+      version: number
+      /** Recette */
+      recette?: components['schemas']['LigneRecetteEntree'][] | null
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * QualitePlan
+     * @description Une qualité du plan de production.
+     */
+    QualitePlan: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /** Base Mensuelle */
+      base_mensuelle: number
+      /** Saisonnalite */
+      saisonnalite: number[]
+      /**
+       * Total Annuel
+       * @description base × saisonnalité sur un an, hors croissance
+       */
+      total_annuel: number
+      /**
+       * Glissant
+       * @description m² des douze mois à venir (M0 = mois en cours)
+       */
+      glissant: number[]
+      /** Total Glissant */
+      total_glissant: number
+      /**
+       * Kg M2
+       * @description kg de matière par m², perte comprise
+       */
+      kg_m2: number
+      /** Lignes Recette */
+      lignes_recette: number
+      /** Recette Conforme */
+      recette_conforme: boolean
+      /** Tisse Mois En Cours */
+      tisse_mois_en_cours: number
+    }
+    /**
+     * QualiteResume
+     * @description Une qualité, sa recette calculée, son contrôle, son coût au m² et son plan.
+     */
+    QualiteResume: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Nom */
+      nom: string
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /** Base Mensuelle */
+      base_mensuelle: number
+      /** Saisonnalite */
+      saisonnalite: number[]
+      /** Poids */
+      poids: components['schemas']['PoidsRole'][]
+      /** Recette */
+      recette: components['schemas']['LigneRecetteFiche'][]
+      controle: components['schemas']['ControleQualite']
+      /** Kg M2 */
+      kg_m2: number
+      /** Cout M2 Mad */
+      cout_m2_mad: number | null
+      /**
+       * Fabrications
+       * @description ordres de fabrication qui la nomment
+       */
+      fabrications: number
+      facteurs_cout: components['schemas']['FacteursCout']
+    }
+    /**
+     * RealiseQualite
+     * @description Le plan et le réalisé d'une qualité sur douze mois écoulés.
+     */
+    RealiseQualite: {
+      /** Qualite Id */
+      qualite_id: number | null
+      /** Qualite */
+      qualite: string
+      /** Plan */
+      plan: number[]
+      /** Realise */
+      realise: number[]
+      /** Total Plan */
+      total_plan: number
+      /** Total Realise */
+      total_realise: number
+      /**
+       * Ecart
+       * @description fraction, sur les mois clos
+       */
+      ecart: number | null
+    }
+    /**
+     * ReceptionDuBon
+     * @description Une réception qui nomme une ligne du bon, et ce qu'elle a pesé pour lui.
+     */
+    ReceptionDuBon: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string | null
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Statut */
+      statut: string
+      /** Pese */
+      pese: number
+    }
+    /**
+     * ReceptionDuLot
+     * @description La première réception validée qui a fait entrer le lot.
+     */
+    ReceptionDuLot: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Bl */
+      bl: string
+      /** Facture */
+      facture: string
+      /** Pesee */
+      pesee: number
+      /** Qualite */
+      qualite: string
+    }
+    /**
+     * RecetteEntree
+     * @description La recette entière d'une qualité (remplacement).
+     */
+    RecetteEntree: {
+      /** Lignes */
+      lignes: components['schemas']['LigneRecetteEntree'][]
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+      /** Version */
+      version: number
+    }
+    /**
+     * RecetteVersionFiche
+     * @description Une version de la recette (la plus récente est « en vigueur »).
+     */
+    RecetteVersionFiche: {
+      /** Id */
+      id: number
+      /** Numero */
+      numero: number
+      /**
+       * Valide Depuis
+       * Format: date-time
+       */
+      valide_depuis: string
+      par: components['schemas']['Personne'] | null
+      /** Origine */
+      origine: string
+      /** Motif */
+      motif: string
+      /**
+       * Restauree De
+       * @description numéro de la version restaurée
+       */
+      restauree_de: number | null
+      /** En Vigueur */
+      en_vigueur: boolean
+      /** Lignes */
+      lignes: components['schemas']['gestion_mp_pro__api__qualites__schemas__LigneVersion'][]
+      /**
+       * Poids
+       * @description null : poids non gardés alors
+       */
+      poids: components['schemas']['PoidsVersion'][] | null
+    }
+    /**
+     * ReferenceComposee
+     * @description La référence écrite à partir de ses parties (route 75).
+     */
+    ReferenceComposee: {
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Existe */
+      existe: boolean
+    }
+    /**
+     * Reglage
+     * @description Un réglage : sa déclaration (registre), sa valeur en base, sa version (route 23).
+     */
+    Reglage: {
+      /** Cle */
+      cle: string
+      /** Libelle */
+      libelle: string
+      /** Famille */
+      famille: string
+      /** Unite */
+      unite: string
+      /** Echelle */
+      echelle: number
+      /** Aide */
+      aide: string
+      /** Bas */
+      bas: number | null
+      /** Haut */
+      haut: number | null
+      /** Texte */
+      texte: boolean
+      /** Defaut */
+      defaut: number | string
+      /** Valeur */
+      valeur: string
+      /** Technique */
+      technique: boolean
+      /** Modifiable */
+      modifiable: boolean
+      /** Version */
+      version: number
+      /**
+       * Version Globale
+       * @description Σ des versions : à renvoyer avec l'écriture
+       */
+      version_globale: number
+    }
+    /**
+     * ReglageHistorique
+     * @description Un changement de réglage (route 25).
+     */
+    ReglageHistorique: {
+      /** Id */
+      id: number
+      /** Cle */
+      cle: string
+      /** Libelle */
+      libelle: string
+      /** Avant */
+      avant: string | null
+      /** Apres */
+      apres: string
+      /** Avant Lisible */
+      avant_lisible: string
+      /** Apres Lisible */
+      apres_lisible: string
+      /**
+       * Quand
+       * Format: date-time
+       */
+      quand: string
+      /** Par */
+      par: string
+      /** Motif */
+      motif: string
+    }
+    /**
+     * ReglagesEcriture
+     * @description Un lot de réglages à écrire, tout ou rien (route 24).
+     */
+    ReglagesEcriture: {
+      /**
+       * Valeurs
+       * @description clé → valeur (nombre en unité rangée : 0,02 pour 2 %, virgule acceptée)
+       */
+      valeurs: {
+        [key: string]: string | number | null
+      }
+      /**
+       * Version Globale
+       * @description lue avec les réglages
+       */
+      version_globale: number
+    }
+    /**
+     * Renvoi
+     * @description Le renvoi aux achats, avec le motif que les achats liront sur le bon.
+     */
+    Renvoi: {
+      /** Version */
+      version: number
+      /** Motif */
+      motif: string
+    }
+    /**
+     * RenvoiLu
+     * @description Le dernier renvoi de la direction (s'il vaut encore).
+     */
+    RenvoiLu: {
+      /** Par */
+      par: string
+      /**
+       * Le
+       * Format: date-time
+       */
+      le: string
+      /** Motif */
+      motif: string
+    }
+    /**
+     * ReseauServeur
+     * @description L'adresse du serveur pour un autre poste (schéma et port de la requête).
+     */
+    ReseauServeur: {
+      /** Adresse */
+      adresse: string
+      /** Ecoute */
+      ecoute: string
+      /** Port */
+      port: number
+      /** Https */
+      https: boolean
+    }
+    /**
+     * ResultatImport
+     * @description Le tableur appliqué (route 80).
+     */
+    ResultatImport: {
+      /** Lignes */
+      lignes: components['schemas']['LigneImport'][]
+      /** Creees */
+      creees: number
+      /** Modifiees */
+      modifiees: number
+      /** Inchangees */
+      inchangees: number
+      /** Erreurs */
+      erreurs: number
+      /** Appliquable */
+      appliquable: boolean
+      /**
+       * Empreinte Apercu
+       * @description à renvoyer avec l'application
+       */
+      empreinte_apercu: string
+    }
+    /**
+     * ResultatMontage
+     * @description Ce que le montage a fait au stock sur les métiers (texte unique) et ses alertes.
+     */
+    ResultatMontage: {
+      metier: components['schemas']['MetierFiche']
+      /** Effet Kg */
+      effet_kg: number
+      /**
+       * Avant Kg
+       * @description kg des étages montés, avant
+       */
+      avant_kg: number
+      /**
+       * Apres Kg
+       * @description kg des étages montés, après
+       */
+      apres_kg: number
+      /** Alertes */
+      alertes: string[]
+      /** Message */
+      message: string
     }
     /**
      * ResultatRecherche
@@ -975,6 +7994,75 @@ export interface components {
       sous_titre: string
       /** Lien */
       lien: string
+    }
+    /**
+     * ResultatValidationGroupee
+     * @description Route 123 : validés ; refusés (restés brouillons, intacts) ; ignorés (le rôle ne peut
+     *     pas les valider, avec la raison — C-17).
+     */
+    ResultatValidationGroupee: {
+      /** Valides */
+      valides: components['schemas']['Issue'][]
+      /** Refuses */
+      refuses: components['schemas']['Issue'][]
+      /** Ignores */
+      ignores: components['schemas']['Issue'][]
+    }
+    /**
+     * RoleCreation
+     * @description Un rôle ajouté (route 58) : compté au poids (seuls Cuir, Franges, Ruban vont au mètre).
+     */
+    RoleCreation: {
+      /** Code */
+      code: string
+      /**
+       * Ordre
+       * @default 0
+       */
+      ordre: number
+    }
+    /**
+     * RoleFiche
+     * @description Un rôle de nomenclature, ses matières et ses qualités (poids > 0).
+     */
+    RoleFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Lineaire */
+      lineaire: boolean
+      /** De Base */
+      de_base: boolean
+      /** Ordre */
+      ordre: number
+      /** Version */
+      version: number
+      /**
+       * Nb Matieres
+       * @default 0
+       */
+      nb_matieres: number
+      /**
+       * Nb Qualites
+       * @default 0
+       */
+      nb_qualites: number
+    }
+    /**
+     * RoleModification
+     * @description Ordre et nom d'un rôle (route 59) ; `version` lue avec la fiche (409 si périmée).
+     */
+    RoleModification: {
+      /** Code */
+      code: string
+      /**
+       * Ordre
+       * @default 0
+       */
+      ordre: number
+      /** Version */
+      version: number
     }
     /**
      * Sante
@@ -1022,6 +8110,176 @@ export interface components {
        * @default 0
        */
       courriels_en_attente: number
+    }
+    /**
+     * SelectionBrouillons
+     * @description Route 123 : les documents choisis, ou `tous: true` (tout ce que ce compte peut valider).
+     */
+    SelectionBrouillons: {
+      /** Documents */
+      documents?: components['schemas']['DocumentChoisi'][]
+      /**
+       * Tous
+       * @default false
+       */
+      tous: boolean
+    }
+    /**
+     * SessionsCompte
+     * @description Les sessions ouvertes d'un compte.
+     */
+    SessionsCompte: {
+      /** Nom */
+      nom: string
+      /** Role */
+      role: string
+      /** Nb */
+      nb: number
+      /** Vu Le */
+      vu_le: string | null
+      /** Expire Le */
+      expire_le: string | null
+      /** Appareils */
+      appareils: number
+    }
+    /**
+     * Solde
+     * @description Solder : on n'attend plus le reste (motif facultatif, au journal).
+     */
+    Solde: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * SoldeMagasin
+     * @description Ce qu'un lot porte dans un magasin.
+     */
+    SoldeMagasin: {
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Type */
+      type: string
+      /** Quantite */
+      quantite: number
+    }
+    /**
+     * StatutDocument
+     * @description Statut d'une réception ou d'une opération (féminin, comme dans Gestion MP).
+     * @enum {string}
+     */
+    StatutDocument: 'brouillon' | 'validee' | 'annulee'
+    /**
+     * StatutInventaire
+     * @description Statut d'un inventaire : abandonné (ouvert puis laissé) ou annulé (validé puis défait).
+     * @enum {string}
+     */
+    StatutInventaire: 'ouvert' | 'valide' | 'abandonne' | 'annule'
+    /**
+     * TacheEtat
+     * @description Route 46 : l'état d'une tâche de fond (partagé par tous les processus).
+     */
+    TacheEtat: {
+      /** Nom */
+      nom: string
+      /**
+       * Etat
+       * @enum {string}
+       */
+      etat: 'ok' | 'echec' | 'jamais'
+      /** Dernier Essai Le */
+      dernier_essai_le: string | null
+      /** Dernier Succes Le */
+      dernier_succes_le: string | null
+      /** Erreur */
+      erreur: string
+      /** Duree Ms */
+      duree_ms: number
+    }
+    /**
+     * TisseHorsPlan
+     * @description Une qualité tissée ce mois-ci alors que son plan du mois est nul.
+     */
+    TisseHorsPlan: {
+      /** Qualite Id */
+      qualite_id: number | null
+      /** Qualite */
+      qualite: string
+      /** M2 */
+      m2: number
+    }
+    /**
+     * Tracabilite
+     * @description Route 112 : le chemin, et ses totaux hors annulations et transferts.
+     */
+    Tracabilite: {
+      /** Lot Id */
+      lot_id: number | null
+      /** Lot */
+      lot: string
+      /** Ordre */
+      ordre: string
+      /** Matiere */
+      matiere: string
+      /** References */
+      references: string[]
+      /** Lots */
+      lots: string[]
+      /** Ordres */
+      ordres: string[]
+      /** Entrees */
+      entrees: number
+      /** Sorties */
+      sorties: number
+      /** Mouvements */
+      mouvements: components['schemas']['EtapeTracee'][]
+    }
+    /**
+     * TypeMouvement
+     * @description Type d'une écriture du journal du stock (le moteur garde sa traduction).
+     * @enum {string}
+     */
+    TypeMouvement:
+      | 'OUVERTURE'
+      | 'RECEPTION'
+      | 'SORTIE'
+      | 'RETOUR_MACHINE'
+      | 'RETOUR_FOURNISSEUR'
+      | 'AJUSTEMENT'
+      | 'TRANSFERT'
+    /**
+     * TypeOperation
+     * @description Type d'une opération de stock (ne change jamais : trigger `tr_operation_type_fige`).
+     * @enum {string}
+     */
+    TypeOperation: 'ouverture' | 'retour_machine' | 'transfert' | 'ajustement' | 'retour_fournisseur'
+    /**
+     * TypeOperationLu
+     * @description Un type d'opération (ou l'inventaire) et les rôles qui le font.
+     */
+    TypeOperationLu: {
+      /** Type */
+      type: string
+      /** Libelle */
+      libelle: string
+      /** Roles */
+      roles: string[]
+    }
+    /**
+     * UniteCommande
+     * @description Un conditionnement où la matière se commande, et sa contenance en kilos.
+     */
+    UniteCommande: {
+      /** Unite */
+      unite: string
+      /** Contenance */
+      contenance: number
     }
     /**
      * UtilisateurCreation
@@ -1099,6 +8357,142 @@ export interface components {
       code?: string | null
     }
     /**
+     * ValeurCreation
+     * @description Une valeur de classification (route 61) ; le code tient dans sa colonne.
+     */
+    ValeurCreation: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /**
+       * Famille
+       * @default
+       */
+      famille: string
+      /**
+       * Composition Detaillee
+       * @default
+       */
+      composition_detaillee: string
+      /**
+       * Valeur
+       * @default
+       */
+      valeur: string
+      /**
+       * Unite
+       * @default
+       */
+      unite: string
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * ValeurDevise
+     * @description La valeur d'une ouverture dans une devise.
+     */
+    ValeurDevise: {
+      /** Devise */
+      devise: string
+      /** Montant */
+      montant: number | null
+    }
+    /**
+     * ValeurFiche
+     * @description Une valeur de classification et le nombre de matières qui la portent.
+     *
+     *     `valeur` (la grosseur d'un titrage : « 2900 ») n'est pas un montant.
+     */
+    ValeurFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle?: string | null
+      /** Famille */
+      famille?: string | null
+      /** Composition Detaillee */
+      composition_detaillee?: string | null
+      /** Valeur */
+      valeur?: string | null
+      /** Unite */
+      unite?: string | null
+      /** Commentaire */
+      commentaire: string
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /**
+       * Nb Matieres
+       * @default 0
+       */
+      nb_matieres: number
+      /**
+       * Avertissement
+       * @description après une désactivation : les matières qui la gardent
+       */
+      avertissement?: string | null
+    }
+    /**
+     * ValeurModification
+     * @description Une valeur modifiée (route 62) ; le code lui-même se corrige.
+     */
+    ValeurModification: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /**
+       * Famille
+       * @default
+       */
+      famille: string
+      /**
+       * Composition Detaillee
+       * @default
+       */
+      composition_detaillee: string
+      /**
+       * Valeur
+       * @default
+       */
+      valeur: string
+      /**
+       * Unite
+       * @default
+       */
+      unite: string
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
+    }
+    /**
      * ValeursJournal
      * @description Route 50 : ce que les filtres du journal proposent.
      */
@@ -1124,6 +8518,31 @@ export interface components {
       ctx?: Record<string, never>
     }
     /**
+     * ValidationVersion
+     * @description Corps d'un geste de document : la version lue avec la fiche (409 si périmée).
+     */
+    ValidationVersion: {
+      /** Version */
+      version: number
+    }
+    /**
+     * VersionPartie
+     * @description La version que le fournisseur a, et son montant de référence (devise du bon).
+     */
+    VersionPartie: {
+      /**
+       * Figee Le
+       * Format: date-time
+       */
+      figee_le: string
+      /** Motif */
+      motif: string
+      /** Montant Reference */
+      montant_reference: number
+      /** Lignes */
+      lignes: components['schemas']['gestion_mp_pro__api__commandes__schemas__LigneVersion'][]
+    }
+    /**
      * Visage
      * @description Un nom à toucher à la connexion (sans identifiant : le compte se désigne par `id`).
      */
@@ -1141,6 +8560,62 @@ export interface components {
        * @description 4 pour l'alimentation (le code part au 4ᵉ chiffre), sinon null
        */
       longueur_code: number | null
+    }
+    /**
+     * LigneVersion
+     * @description Une ligne de la version partie.
+     */
+    gestion_mp_pro__api__commandes__schemas__LigneVersion: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+      /** Unite Achat */
+      unite_achat: string
+      /** Contenance */
+      contenance: number
+      /** Prix */
+      prix: number
+      /** Prix Confirme */
+      prix_confirme: boolean
+    }
+    /**
+     * Restauration
+     * @description Route 45 : la confirmation tapée (« RESTAURER », casse indifférente) et le motif.
+     */
+    gestion_mp_pro__api__exploitation__schemas__Restauration: {
+      /** Confirmation */
+      confirmation: string
+      /** Motif */
+      motif: string
+    }
+    /**
+     * LigneVersion
+     * @description Une matière d'une version de recette, avec son rôle à cette date.
+     */
+    gestion_mp_pro__api__qualites__schemas__LigneVersion: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Role Id */
+      role_id: number
+      /** Role */
+      role: string
+      /** Pourcentage */
+      pourcentage: number
+    }
+    /**
+     * Restauration
+     * @description Revenir à une version : le motif est obligatoire.
+     */
+    gestion_mp_pro__api__qualites__schemas__Restauration: {
+      /** Motif */
+      motif: string
+      /** Version */
+      version: number
     }
   }
   responses: never
@@ -1167,6 +8642,44 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['Sante']
+        }
+      }
+    }
+  }
+  etat_serveur_api_serveur_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatServeur']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
         }
       }
     }
@@ -2035,6 +9548,1419 @@ export interface operations {
       }
     }
   }
+  lire_parametres_api_parametres_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Reglage'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ecrire_parametres_api_parametres_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReglagesEcriture']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Reglage'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  historique_parametres_api_parametres_historique_get: {
+    parameters: {
+      query?: {
+        cle?: string | null
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Page_ReglageHistorique_']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  clore_periode_api_periode_close_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClotureEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Periode']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_devises_api_devises_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DeviseFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_devise_api_devises_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeviseCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DeviseFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  cours_devise_api_devises__code__cours_get: {
+    parameters: {
+      query?: {
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path: {
+        code: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Page_CoursHistorique_']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_devise_api_devises__code__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        code: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeviseModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DeviseFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_magasins_api_magasins_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MagasinFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_magasin_api_magasins_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MagasinCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MagasinFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_magasin_api_magasins__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MagasinModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MagasinFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_postes_api_postes_frais_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PosteFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_poste_api_postes_frais_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PosteCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PosteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_poste_api_postes_frais__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PosteModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PosteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_poste_api_postes_frais__ident__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_codes_api_codes_douaniers_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CodeDouanierFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_code_api_codes_douaniers_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CodeDouanierCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CodeDouanierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_code_api_codes_douaniers__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CodeDouanierModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CodeDouanierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_code_api_codes_douaniers__ident__delete: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_motifs_api_motifs_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Motifs']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_sauvegardes_api_sauvegardes_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatSauvegardes']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  sauvegarder_api_sauvegardes_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatSauvegardes']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Service indisponible */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  restaurer_api_sauvegardes__nom__restaurer_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        nom: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['gestion_mp_pro__api__exploitation__schemas__Restauration']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatRestauration']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Service indisponible */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_taches_api_taches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TacheEtat'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_courriels_api_courriels_get: {
+    parameters: {
+      query?: {
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Page_CourrielFiche_']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_courriel_api_courriel_apercu_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuCourriel']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
   lire_api_journal_get: {
     parameters: {
       query?: {
@@ -2064,6 +10990,63 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['PageJournal']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_journal_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string
+        /** @description id du compte */
+        utilisateur?: number | null
+        action?: string
+        objet?: components['schemas']['ObjetJournal'] | null
+        objet_id?: number | null
+        du?: string | null
+        au?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
         }
       }
       /** @description Non connecté */
@@ -2345,6 +11328,6338 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_classification_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Classification']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ajouter_role_api_classification_roles_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RoleCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RoleFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_role_api_classification_roles__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RoleModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RoleFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_role_api_classification_roles__ident__delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  ajouter_valeur_api_classification__liste__post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        liste: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValeurCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValeurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_valeur_api_classification__liste___ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        liste: string
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValeurModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValeurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_valeur_api_classification__liste___ident__delete: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        liste: string
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_fournisseurs_get: {
+    parameters: {
+      query?: {
+        q?: string | null
+        actif?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': (
+            components['schemas']['FournisseurFiche'] | components['schemas']['FournisseurResume']
+          )[]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_fournisseurs_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FournisseurCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FournisseurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_fournisseurs__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FournisseurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_api_fournisseurs__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FournisseurModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FournisseurFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_fournisseurs__ident__delete: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_fournisseurs_fiches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Classeur Excel */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_matieres_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string | null
+        role?: number | null
+        fournisseur?: number | null
+        actif?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_matieres_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MatiereCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  reference_api_matieres_reference_get: {
+    parameters: {
+      query?: {
+        composition_id?: number | null
+        type_fil_id?: number | null
+        titrage_id?: number | null
+        couleur_id?: number | null
+        couleur_code?: string
+        suffixe?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ReferenceComposee']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_classement_api_matieres_classement_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuClassement']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  appliquer_classement_api_matieres_classement_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClassementEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuClassement']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modele_tableur_api_matieres_tableur_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Classeur Excel */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_tableur_api_matieres_tableur_apercu_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['Body_apercu_tableur_api_matieres_tableur_apercu_post']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuImport']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  appliquer_tableur_api_matieres_tableur_appliquer_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['Body_appliquer_tableur_api_matieres_tableur_appliquer_post']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ResultatImport']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_matieres_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string | null
+        role?: number | null
+        fournisseur?: number | null
+        actif?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Classeur Excel */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_matieres__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_api_matieres__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MatiereModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_matieres__ident__delete: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_qualites_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_qualites_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QualiteCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  fiche_api_qualites__qualite_id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_api_qualites__qualite_id__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QualiteModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_qualites__qualite_id__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ecrire_recette_api_qualites__qualite_id__recette_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RecetteEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  versions_api_qualites__qualite_id__versions_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RecetteVersionFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  restaurer_api_qualites__qualite_id__versions__version_id__restaurer_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+        version_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['gestion_mp_pro__api__qualites__schemas__Restauration']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ecrire_plan_api_qualites__qualite_id__plan_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PlanQualiteEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['QualiteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  versions_plan_api_qualites__qualite_id__plan_versions_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        qualite_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PlanVersionFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  nomenclature_api_nomenclature_get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Nomenclature']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_qualites_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_metiers_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MetierFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_metiers_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MetierCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MetierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  fiche_api_metiers__metier_id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        metier_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MetierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_api_metiers__metier_id__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        metier_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MetierModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MetierModifie']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_metiers__metier_id__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        metier_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  monter_api_metiers__metier_id__montage_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        metier_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MontageEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ResultatMontage']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  monter_etage_api_metiers__metier_id__etages__etage__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        metier_id: number
+        etage: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EtageEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ResultatMontage']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  montages_api_metiers__metier_id__montages_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        metier_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MontageEvenementFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  matieres_api_montage_matieres_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereMontage'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_metiers_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  etat_api_stock_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatStock']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  fiche_matiere_api_stock__matiere_id__get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path: {
+        matiere_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FicheStockMatiere']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_mouvements_api_mouvements_get: {
+    parameters: {
+      query?: {
+        avec_valeur?: boolean
+        /** @description mots, sans accents */
+        q?: string
+        matiere?: number | null
+        lot?: number | null
+        magasin?: number | null
+        type?: components['schemas']['TypeMouvement'] | null
+        document?: components['schemas']['DocumentMouvement'] | null
+        du?: string | null
+        au?: string | null
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageMouvements']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_mouvements_api_export_mouvements_get: {
+    parameters: {
+      query?: {
+        avec_valeur?: boolean
+        /** @description mots, sans accents */
+        q?: string
+        matiere?: number | null
+        lot?: number | null
+        magasin?: number | null
+        type?: components['schemas']['TypeMouvement'] | null
+        document?: components['schemas']['DocumentMouvement'] | null
+        du?: string | null
+        au?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_lots_api_lots_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string
+        matiere?: number | null
+        magasin?: number | null
+        statut?: string | null
+        non_nuls?: boolean
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotSolde'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_lots_api_export_lots_get: {
+    parameters: {
+      query?: {
+        /** @description mots, sans accents */
+        q?: string
+        matiere?: number | null
+        magasin?: number | null
+        statut?: string | null
+        non_nuls?: boolean
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  scanner_api_lots_scan_get: {
+    parameters: {
+      query: {
+        code: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  disponibles_api_lots_disponibles_get: {
+    parameters: {
+      query: {
+        matiere: number
+        magasin?: number | null
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotDisponible'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  fiche_lot_api_lots__lot_id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        lot_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_lot_api_lots__lot_id__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        lot_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LotModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  tracer_api_tracabilite_get: {
+    parameters: {
+      query?: {
+        lot?: number | null
+        ordre?: number | null
+        matiere?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Tracabilite']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  controle_soldes_api_controles_soldes_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ControleSoldes']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_operations_get: {
+    parameters: {
+      query?: {
+        type?: components['schemas']['TypeOperation'] | null
+        statut?: components['schemas']['StatutDocument'] | null
+        /** @description mots, sans accents */
+        q?: string
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageOperations']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_operations_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OperationCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_operations__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_api_operations__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OperationModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_operations__ident__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  valider_api_operations__ident__valider_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValidationVersion']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  annuler_api_operations__ident__annuler_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Annulation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_brouillons_api_brouillons_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Brouillons']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  tout_valider_api_brouillons_valider_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SelectionBrouillons']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ResultatValidationGroupee']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_operations_get: {
+    parameters: {
+      query?: {
+        type?: components['schemas']['TypeOperation'] | null
+        statut?: components['schemas']['StatutDocument'] | null
+        /** @description mots, sans accents */
+        q?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_inventaires_get: {
+    parameters: {
+      query?: {
+        statut?: components['schemas']['StatutInventaire'] | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ouvrir_api_inventaires_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InventaireOuverture']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  defauts_api_inventaires_defauts_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DefautsInventaire']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  a_compter_api_inventaires_a_compter_get: {
+    parameters: {
+      query?: {
+        magasin?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MatiereACompter'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_inventaires__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  compter_api_inventaires__ident__comptages_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Comptages']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lot_trouve_api_inventaires__ident__lots_trouves_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LotTrouveEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  valider_api_inventaires__ident__valider_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValidationVersion']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  abandonner_api_inventaires__ident__abandonner_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GesteMotive']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  annuler_api_inventaires__ident__annuler_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GesteMotive']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['InventaireFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  feuille_api_documents_inventaires__ident__feuille_get: {
+    parameters: {
+      query?: {
+        recomptage?: boolean
+        theorique?: boolean
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_inventaires_get: {
+    parameters: {
+      query?: {
+        statut?: components['schemas']['StatutInventaire'] | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_lignes_api_export_inventaires__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  plan_api_production_plan_get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PlanProduction']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ecrire_plan_api_production_plan_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PlanGlobalEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PlanProduction']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  realise_api_production_realise_get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PlanEtRealise']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  besoins_api_production_besoins_get: {
+    parameters: {
+      query?: {
+        matiere?: number | null
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['BesoinsDetailles']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_api_export_production_get: {
+    parameters: {
+      query?: {
+        onglet?: 'glissant' | 'realise' | 'besoins'
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_plan_api_plan_achat_get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PlanAchat']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  preparer_api_plan_achat_fournisseurs__fournisseur_id__get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path: {
+        fournisseur_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PreparationCommande']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_pilotage_api_export_pilotage_get: {
+    parameters: {
+      query?: {
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  exporter_plan_api_export_plan_achat_get: {
+    parameters: {
+      query?: {
+        onglet?: string
+        /** @description mots, sans accents */
+        q?: string
+        /** @description AAAA-MM-JJ */
+        date?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  imprimer_bon_api_documents_commandes__cid__bon_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  exporter_bon_api_export_commandes__cid__bon_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  exporter_commandes_api_export_commandes_get: {
+    parameters: {
+      query?: {
+        /** @description statut, ou « clos » */
+        statut?: string
+        /** @description « retard » */
+        filtre?: string
+        fournisseur?: number | null
+        /** @description mots, sans accents */
+        q?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_commandes_get: {
+    parameters: {
+      query?: {
+        /** @description statut, ou « clos » */
+        statut?: string
+        /** @description « retard » */
+        filtre?: string
+        fournisseur?: number | null
+        /** @description mots, sans accents */
+        q?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_commandes_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CommandeCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_commandes__cid__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_api_commandes__cid__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CommandeModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_commandes__cid__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  envoyer_api_commandes__cid__envoyer_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Envoi']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  approuver_api_commandes__cid__approuver_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Envoi']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  renvoyer_api_commandes__cid__renvoyer_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Renvoi']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  confirmer_prix_api_commandes__cid__prix_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConfirmationPrix']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  expedition_api_commandes__cid__expedition_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ExpeditionEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  solder_api_commandes__cid__solder_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Solde']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  rouvrir_api_commandes__cid__rouvrir_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cid: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValidationVersion']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  etiquettes_des_lots_api_documents_etiquettes_get: {
+    parameters: {
+      query?: {
+        /** @description identifiants des lots : 1,2,3 */
+        lots?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Aucun lot à étiqueter (page HTML) */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': unknown
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': components['schemas']['ErreurReponse']
         }
       }
     }

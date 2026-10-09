@@ -1,11 +1,11 @@
 /**
- * Écrans du domaine « Qualités et recettes » (lot F7), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F7 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Qualités et recettes » (lot F7), rassemblés par `routes.ts`. La fiche d'une
+ * qualité s'ouvre en fenêtre par-dessus la liste (même page, adresse stable) ; le chemin fixe
+ * `/qualites/nouvelle` passe avant `/qualites/:id`.
  */
 import type { Ecran } from '../../routes'
 
-const aVenir = () => import('../../composants/coque/EcranAVenir')
+const page = () => import('./Qualites')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -18,7 +18,28 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'qualites', libelle: 'Qualités' },
       { cle: 'nomenclature', libelle: 'Nomenclature' },
     ],
-    lot: 'F7',
-    page: aVenir,
+    page,
+  },
+  {
+    chemin: '/qualites/nouvelle',
+    titre: 'Nouvelle qualité',
+    parent: '/qualites',
+    roles: ['direction'],
+    aide: 'qualite',
+    page,
+  },
+  {
+    chemin: '/qualites/:id',
+    titre: 'Qualité',
+    parent: '/qualites',
+    roles: ['direction', 'achats', 'alimentation'],
+    aide: 'qualite',
+    onglets: [
+      { cle: 'recette', libelle: 'Recette' },
+      { cle: 'plan', libelle: 'Plan de production' },
+      { cle: 'versions', libelle: 'Versions' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
+    page,
   },
 ]

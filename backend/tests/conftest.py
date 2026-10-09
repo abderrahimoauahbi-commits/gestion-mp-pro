@@ -6,15 +6,23 @@
 - Schéma : `public` vidé une fois, puis `services.installation.migrer()` (Alembic, lot S1) s'il
   existe ; sans lui, le schéma reste vide. Aucun fichier de S0 à changer quand S1 arrive.
 - `client` : un poste qui envoie l'en-tête de l'écran ; `client_brut` : sans en-tête.
+- Dossiers (G-03) : sauvegardes et pièces jointes de **toute la séance** dans un dossier
+  temporaire (`DOSSIER_DES_ESSAIS`, effacé à la fin), copie de sécurité non réglée : aucun essai
+  n'écrit dans `~/gestion-mp-pro-sauvegardes` ni `~/gestion-mp-pro-pieces`. Un essai qui veut ses
+  propres dossiers les pose lui-même (`fabriques.exploitation.dossiers`).
 """
 
 from __future__ import annotations
 
+import atexit
 import os
+import shutil
+import tempfile
 from collections.abc import Iterator
 from datetime import datetime
 from importlib import import_module
 from importlib.util import find_spec
+from pathlib import Path
 
 import pytest
 from sqlalchemy.engine import make_url
@@ -25,6 +33,11 @@ if not _nom.endswith("_essai"):
     pytest.exit(f"Base d'essai refusée : « {_nom} » ne finit pas par _essai.", returncode=3)
 os.environ["GESTIONMPPRO_BASE"] = BASE_ESSAI
 os.environ["GESTIONMPPRO_TACHES"] = "0"
+DOSSIER_DES_ESSAIS = Path(tempfile.mkdtemp(prefix="gestion-mp-pro-essais-"))
+atexit.register(shutil.rmtree, DOSSIER_DES_ESSAIS, ignore_errors=True)
+os.environ["GESTIONMPPRO_SAUVEGARDES"] = str(DOSSIER_DES_ESSAIS / "sauvegardes")
+os.environ["GESTIONMPPRO_PIECES"] = str(DOSSIER_DES_ESSAIS / "pieces")
+os.environ.pop("GESTIONMPPRO_SAUVEGARDES_COPIE", None)
 
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -36,6 +49,7 @@ from gestion_mp_pro.services import horloge  # noqa: E402
 
 config.reglages.cache_clear()
 assert config.reglages().nom_base.endswith("_essai")
+assert config.reglages().sauvegardes.is_relative_to(DOSSIER_DES_ESSAIS)
 
 JOUR_DES_ESSAIS = datetime(2026, 10, 8, 10, 0, tzinfo=horloge.FUSEAU)
 ENTETE_ECRAN = {config.ENTETE_ANTI_FALSIFICATION: "1"}

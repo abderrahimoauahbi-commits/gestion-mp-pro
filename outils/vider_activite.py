@@ -16,7 +16,8 @@ qualités, recettes et leurs versions, plans versionnés, magasins, métiers, é
 montés, postes de frais, codes douaniers, motifs, pièces des matières et des fournisseurs ;
 le journal (qui reçoit une ligne « activité vidée »), les sessions, les sauvegardes.
 
-1. Sauvegarde complète d'abord (« manuelle »), relue ; sans elle, rien n'est fait.
+1. Sauvegarde complète d'abord (« avant vidage », jamais purgée), relue ; sans elle, rien n'est
+   fait.
 2. Un seul `TRUNCATE` de toutes les tables d'activité (leçon de G-01 : aucune clé étrangère ne
    peut l'arrêter à mi-chemin), sans remise à 1 des identifiants.
 3. Les correspondances de la reprise vers l'activité sont oubliées (une reprise suivante
@@ -48,12 +49,12 @@ CONFIRMATION = "--oui-vider-l-activite"
 def vider_la_base(url: str, sauvegarder: bool = True) -> dict[str, int]:
     """Sauvegarde, vide l'activité, sauvegarde la base vide ; rend les lignes retirées."""
     nom = cible_permise(url)
-    avant = sauvegarde.sauvegarder(url, GenreSauvegarde.manuelle) if sauvegarder else None
+    avant = sauvegarde.sauvegarder(url, GenreSauvegarde.avant_vidage) if sauvegarder else None
     moteur = create_engine(url, poolclass=NullPool)
     with moteur.connect() as c, c.begin():
         verrouiller(c, Verrou.REPRISE)
         if avant:
-            sauvegarde.inscrire(c, avant, GenreSauvegarde.manuelle, nom)
+            sauvegarde.inscrire(c, avant, GenreSauvegarde.avant_vidage, nom)
         retirees = vidage.vider(c)
         c.execute(
             text(

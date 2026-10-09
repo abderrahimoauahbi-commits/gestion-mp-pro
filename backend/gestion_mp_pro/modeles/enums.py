@@ -155,11 +155,13 @@ class StatutDossier(StrEnum):
 
 
 class OrigineCours(StrEnum):
-    """D'où vient le cours d'une marchandise de dossier (`clos_au_jour` : figé à la clôture)."""
+    """D'où vient le cours d'une marchandise de dossier (`clos_au_jour` : figé à la clôture du
+    dossier ; `periode_close` : figé par la clôture d'une période, E-02 ; révision 0004)."""
 
     bon = "bon"
     banque = "banque"
     clos_au_jour = "clos_au_jour"
+    periode_close = "periode_close"
     saisi = "saisi"
     reprise = "reprise"
 
@@ -295,12 +297,14 @@ class GenreCourriel(StrEnum):
 
 
 class GenreSauvegarde(StrEnum):
-    """Genre d'une sauvegarde de la base."""
+    """Genre d'une sauvegarde de la base (`avant_vidage`, `avant_mise_a_jour` : révision 0004)."""
 
     quotidienne = "quotidienne"
     manuelle = "manuelle"
     avant_restauration = "avant_restauration"
     avant_reprise = "avant_reprise"
+    avant_vidage = "avant_vidage"
+    avant_mise_a_jour = "avant_mise_a_jour"
     reference_vide = "reference_vide"
 
 

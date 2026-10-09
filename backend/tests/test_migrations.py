@@ -104,7 +104,7 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002", "0003"]
+    assert installation.migrer() == ["0002", "0003", "0004"]
     assert not installation.schema_en_retard()
 
 
@@ -138,10 +138,47 @@ def test_0003_tolerance_tva_import_aller_retour(base_vide: None) -> None:
         with pytest.raises(SQLAlchemyError):
             c.execute(text("INSERT INTO parametre (cle) VALUES ('toler_tva_import')"))
         refus.rollback()
-        command.upgrade(cfg, "0003")
+        command.upgrade(cfg, "head")
         assert _cles_reglages(c) == (57, 57)
         valeur = "SELECT valeur FROM parametre WHERE cle = 'toler_tva_import'"
         assert c.execute(text(valeur)).scalar() == "0.05"
+    assert not installation.schema_en_retard()
+
+
+def _enum_permis(c: Connection, contrainte: str) -> str:
+    """La définition d'un CHECK de valeurs."""
+    definition = c.execute(
+        text("SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = :n"),
+        {"n": contrainte},
+    ).scalar()
+    return str(definition)
+
+
+def test_0004_versions_et_genres_aller_retour(base_vide: None) -> None:
+    """`role_nomenclature.version`, `periode_close`, `avant_vidage` et `avant_mise_a_jour` :
+    posés par 0004, rangés ou retirés au retour (rien n'empêche de redescendre)."""
+    installation.migrer()
+    cfg = installation.configuration()
+    with moteur().connect() as c, c.begin():
+        assert c.execute(text("SELECT min(version) FROM role_nomenclature")).scalar() == 1
+        assert "'periode_close'" in _enum_permis(c, "ck_dossier_ligne_cours_origine_enum")
+        genres = _enum_permis(c, "ck_sauvegarde_genre_enum")
+        assert "'avant_vidage'" in genres and "'avant_mise_a_jour'" in genres
+        c.execute(
+            text(
+                "INSERT INTO sauvegarde (fichier, genre, base) VALUES"
+                " ('a.dump', 'avant_vidage', 'b'), ('m.dump', 'avant_mise_a_jour', 'b'),"
+                " ('q.dump', 'quotidienne', 'b')"
+            )
+        )
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, "0003")
+        colonnes = "SELECT column_name FROM information_schema.columns WHERE table_name = :t"
+        assert "version" not in set(c.execute(text(colonnes), {"t": "role_nomenclature"}).scalars())
+        assert "periode_close" not in _enum_permis(c, "ck_dossier_ligne_cours_origine_enum")
+        assert list(c.execute(text("SELECT fichier FROM sauvegarde")).scalars()) == ["q.dump"]
+        command.upgrade(cfg, "0004")
+        c.execute(text("DELETE FROM sauvegarde"))
     assert not installation.schema_en_retard()
 
 
