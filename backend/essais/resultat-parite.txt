@@ -1,5 +1,5 @@
 PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
-le 2026-10-09 13:49 · Gestion MP c1133ba · PRO e5d5cc5
+le 2026-10-09 14:07 · Gestion MP c1133ba · PRO c0b1bd2
 source : gestion_mp_comparaison (copie : gestion_mp_pro_r2_source_essai) → PRO gestion_mp_pro_r2_cible_essai
 empreinte gestion_mp : af08c36c24e20ffc… avant, après : identique
 empreinte gestion_mp_comparaison : 476aeea01b88f331… avant, après : identique
