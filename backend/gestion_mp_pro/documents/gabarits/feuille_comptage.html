@@ -1,0 +1,40 @@
+{#- Feuille de comptage ou de recomptage d'un inventaire (route 133, lot D5) : une page A4
+paysage par magasin, sur le papier à en-tête ; à l'aveugle par défaut (sans le théorique). -#}
+{% extends "_papier_a_en_tete.html" %}
+{% block style %}
+.feuille-entete { display: flex; justify-content: space-between; gap: 12mm; margin-bottom: 3mm; }
+.feuille-entete h1 { margin: 0 0 1mm; }
+.signatures { line-height: 2.1; white-space: nowrap; }
+table.comptage td.case { width: 22mm; }
+table.comptage td.large { width: 55mm; }
+table.comptage td.lot { font-weight: 700; font-family: ui-monospace, monospace; }
+table.comptage tr { break-inside: avoid; page-break-inside: avoid; }
+.mention { font-weight: 700; color: var(--alerte); }
+{% endblock %}
+{% block pages %}
+{% for page in feuille.pages %}
+{% call papier.feuille(societe, mots) %}
+<div class="feuille-entete">
+  <div>
+    <h1>{{ 'Feuille de recomptage' if feuille.recomptage else 'Feuille de comptage' }} — {{ feuille.numero }}</h1>
+    <div class="sous-titre">{{ feuille.libelle }} · compté le {{ feuille.date|date }} · magasin <strong>{{ page.magasin }}</strong> · {{ page.lignes|length }} lot(s){% if feuille.theorique %} · avec le théorique{% endif %}{% if feuille.abandonne %} · <span class="mention">Abandonné</span>{% endif %}</div>
+  </div>
+  <div class="signatures">Compté par : ______________________<br>Contrôlé par : ____________________</div>
+</div>
+<table class="donnees comptage">
+  <thead><tr><th class="n">N°</th><th>Référence</th><th>Lot</th><th>Conditionnement</th>{% if feuille.theorique %}<th class="n">Théorique</th>{% endif %}<th>Palettes</th><th>Bobines</th><th>Compté (kg)</th><th>Observations</th></tr></thead>
+  <tbody>
+  {% for x in page.lignes %}
+    <tr><td class="n">{{ x.rang }}</td><td><strong>{{ x.reference }}</strong>{% if x.designation %}<div class="note">{{ x.designation }}</div>{% endif %}</td><td class="lot">{{ x.lot }}</td><td class="note">{{ x.conditionnement }}</td>{% if feuille.theorique %}<td class="n">{{ x.theorique|kg }}</td>{% endif %}<td class="case"></td><td class="case"></td><td class="case"></td><td class="case large"></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="note">Un lot trouvé sur place et absent de la liste : l'écrire au dos (référence, lot, quantité). Un écart se justifie à la saisie, au-delà de la tolérance de {{ feuille.tolerance_pourcent|nombre(0, 2) }} %.</p>
+{% endcall %}
+{% else %}
+{% call papier.feuille(societe, mots) %}
+<h1>{{ feuille.titre }}</h1>
+<p class="vide">Aucun lot figé dans cet inventaire.</p>
+{% endcall %}
+{% endfor %}
+{% endblock %}
