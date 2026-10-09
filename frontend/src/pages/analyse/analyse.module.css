@@ -1,0 +1,150 @@
+/* L'Analyse (lot F8) : seulement des jetons (stylelint). */
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.dessous {
+  display: block;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.fort {
+  font-weight: 600;
+}
+
+.code {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.ref {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.retard {
+  color: var(--ton-critique);
+  font-weight: 600;
+}
+
+.critique {
+  color: var(--ton-critique);
+}
+
+.ok {
+  color: var(--ton-ok);
+}
+
+.attention {
+  color: var(--ton-attention);
+}
+
+.mois {
+  min-width: 52px;
+  text-align: center;
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  font-size: var(--taille-petite);
+}
+
+.case input {
+  width: 16px;
+  height: 16px;
+}
+
+.choix {
+  min-width: 220px;
+}
+
+.bilan {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.bilan input {
+  height: var(--hauteur-bouton);
+  padding: 0 var(--espace-2);
+  color: var(--texte);
+  background: var(--surface);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  font: inherit;
+}
+
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.cellule {
+  display: inline-block;
+  min-width: 52px;
+  padding: 1px var(--espace-1);
+  border-radius: var(--rayon-petit);
+  text-align: right;
+}
+
+.cellule[data-ton='ok'] {
+  color: var(--ton-ok);
+  background: var(--ton-ok-clair);
+}
+
+.cellule[data-ton='attention'] {
+  color: var(--ton-attention);
+  background: var(--ton-attention-clair);
+}
+
+.cellule[data-ton='critique'] {
+  color: var(--ton-critique);
+  background: var(--ton-critique-clair);
+}
+
+.cellule[data-ton='accent'] {
+  color: var(--ton-accent);
+  background: var(--ton-accent-clair);
+}
+
+.texte {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.lignes {
+  margin: 0;
+  padding-left: var(--espace-4);
+}
+
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+}

@@ -413,6 +413,22 @@
       "grandeur": "En retard",
       "texte": "Bons ouverts dont la livraison prévue (ou l’ETA) est dépassée sans être livrés en entier."
     },
+    "controles_anomalies": {
+      "grandeur": "À corriger",
+      "texte": "Les contrôles non conformes, sans ceux « pour information » : c’est le nombre de la pastille du menu."
+    },
+    "controles_bloquants": {
+      "grandeur": "Bloquants",
+      "texte": "Les contrôles bloquants non conformes : tant qu’ils sonnent, le pilotage est faussé."
+    },
+    "controles_score": {
+      "grandeur": "Score des contrôles",
+      "texte": "Contrôles conformes ÷ contrôles vérifiés ; les contrôles garantis par la base (ils ne peuvent pas sonner) ne comptent pas."
+    },
+    "controles_soldes": {
+      "grandeur": "Soldes et journal",
+      "texte": "Le stock tenu lot par lot et magasin par magasin, comparé au journal des mouvements rejoué ; et les soldes négatifs."
+    },
     "cout_hors_tva": {
       "grandeur": "Coût hors TVA d’une marchandise",
       "texte": "Valeur au cours de la banque + sa part des charges non récupérables (droits, fret, transit…), à la valeur ou au poids selon le poste. La TVA est à part (Coût TTC)."
@@ -449,6 +465,22 @@
       "grandeur": "Écart à la recette",
       "texte": "(sorti net − prévu par la recette) ÷ prévu, sur les ordres selon recette ; le prévu est figé à la validation (recette et perte du jour). À 5 % près c’est juste ; un excès est à surveiller, un manque est critique."
     },
+    "echeancier_30_jours": {
+      "grandeur": "Dans les 30 jours",
+      "texte": "Σ des échéances non réglées d’aujourd’hui à dans trente jours."
+    },
+    "echeancier_a_dater": {
+      "grandeur": "À dater",
+      "texte": "Les factures et les frais dus sans date d’échéance : à dater sur la réception ou le dossier."
+    },
+    "echeancier_a_payer": {
+      "grandeur": "À payer",
+      "texte": "Σ des échéances connues non réglées (factures des fournisseurs et frais d’importation), en MAD au cours du jour, selon la nature, la recherche et la période."
+    },
+    "echeancier_echu": {
+      "grandeur": "Échu, non réglé",
+      "texte": "Σ des échéances passées et pas encore réglées, quelle que soit la période choisie."
+    },
     "entre_sorti_lot": {
       "grandeur": "Entré et sorti d’un lot",
       "texte": "Entré : les entrées du lot (réception, stock d’ouverture, matière retrouvée), hors transferts et annulations. Sorti : les sorties vers les machines et les retours au fournisseur, net des retours des machines."
@@ -472,6 +504,26 @@
     "fournisseur_matieres": {
       "grandeur": "Matières d’un fournisseur",
       "texte": "Les matières du catalogue qui le désignent comme fournisseur, désactivées comprises, comptées par devise de leur prix."
+    },
+    "fournisseurs_achete": {
+      "grandeur": "Acheté",
+      "texte": "Σ des bons de commande partis chez ce fournisseur, en MAD au cours de chaque bon."
+    },
+    "fournisseurs_action": {
+      "grandeur": "Action conseillée",
+      "texte": "L’action que dit le classement : fidéliser et négocier (Stratégique), maintenir (Standard), audit qualité et relance (À surveiller), chercher une autre source (À challenger)."
+    },
+    "fournisseurs_notes": {
+      "grandeur": "Fournisseurs notés",
+      "texte": "Les fournisseurs qui ont au moins une réception notée, sur tous ceux du classement ; « Stratégique » à partir du réglage « Score — Stratégique »."
+    },
+    "fournisseurs_receptions_notees": {
+      "grandeur": "Réceptions notées",
+      "texte": "Les réceptions validées qui ont une note OTIF : celles qui devaient quelque chose à un bon de commande."
+    },
+    "fournisseurs_sous_cible": {
+      "grandeur": "Sous la cible",
+      "texte": "Les fournisseurs dont l’OTIF est sous la cible du réglage « Cible OTIF »."
     },
     "inventaire_a_recompter": {
       "grandeur": "À recompter",
@@ -520,6 +572,18 @@
     "opportunite": {
       "grandeur": "Opportunité d’économies",
       "texte": "(prix actuel − prix du comparable le moins cher) × consommation annuelle, entre fils de même composition, type et titrage, payés à la même époque, au coût rendu usine."
+    },
+    "opportunites_ecartees": {
+      "grandeur": "Écartées",
+      "texte": "Les comparaisons non comptées : un des deux prix n’a pas de date (prix de catalogue), ou les deux prix sont plus éloignés dans le temps que la fenêtre."
+    },
+    "opportunites_nombre": {
+      "grandeur": "Opportunités",
+      "texte": "Les matières consommées pour lesquelles une matière comparable s’achète moins cher, à la même époque (fenêtre de jours du réglage ou choisie), au coût rendu usine."
+    },
+    "opportunites_plus_forte": {
+      "grandeur": "La plus forte",
+      "texte": "L’opportunité dont l’économie par an est la plus grande : (prix actuel − prix du comparable) × consommation annuelle."
     },
     "ordres_affiches": {
       "grandeur": "Ordres affichés",
@@ -597,9 +661,25 @@
       "grandeur": "Prévu par la recette",
       "texte": "Σ, matière par matière, kg/m² de la recette × m² tissés × (1 + taux de perte), figé à la validation de l’ordre."
     },
+    "prix_achats": {
+      "grandeur": "Achats enregistrés",
+      "texte": "Le nombre de prix payés (une ligne pesée d’une réception validée, sur son bon) et leur contre-valeur en MAD au cours du jour de la réception."
+    },
+    "prix_baisses": {
+      "grandeur": "Baisses obtenues",
+      "texte": "Les prix payés en dessous du précédent de la même matière chez le même fournisseur, dans la même devise, de plus de 0,5 %."
+    },
+    "prix_hausses": {
+      "grandeur": "Hausses de prix",
+      "texte": "Les prix payés au-dessus du précédent de la même matière chez le même fournisseur, dans la même devise, de plus de 0,5 % ; « forte » au-delà du réglage « Forte hausse de prix à partir de »."
+    },
     "prix_kilo": {
       "grandeur": "Prix au kilo",
       "texte": "Le prix de la fiche s’il est au kilo ; s’il est au mètre, prix ÷ densité (kg / ml). La valeur du stock, le coût moyen, le coût au m² et le budget d’achat le lisent au kilo."
+    },
+    "production_ordres_ecart": {
+      "grandeur": "Ordres au-delà de 5 % d’écart",
+      "texte": "Parmi les ordres qui disent leur qualité, ceux dont (sorti net − prévu par la recette) ÷ prévu dépasse 5 % (seuil fixe, celui des Sorties)."
     },
     "qualite_cout": {
       "grandeur": "Coût matière d’une qualité",
@@ -752,6 +832,18 @@
     "valeur_stock": {
       "grandeur": "Valeur du stock (CMUP)",
       "texte": "Coût moyen unitaire pondéré, recalculé à chaque entrée au Coût hors TVA (frais d’importation compris quand le dossier est saisi), appliqué au stock détenu (magasins et sur les métiers, quarantaine comprise) ; à défaut d’achat, au prix du catalogue. Le Cockpit et la Valorisation disent « dont X sur les métiers »."
+    },
+    "valorisation_ecart": {
+      "grandeur": "Écart avec le catalogue",
+      "texte": "Σ (valeur au coût moyen − stock × prix du catalogue au kilo × cours du jour). Positif : le stock a coûté plus que le catalogue ne le dit (frais d’approche, hausse non reportée). Signalé au-delà de 2 % de la valeur du stock (seuil fixe de l’écran, pas un réglage)."
+    },
+    "valorisation_magasins": {
+      "grandeur": "Dans les magasins",
+      "texte": "Σ (stock courant + quarantaine) × coût moyen pondéré de chaque matière, au soir de la date choisie ; le fil sur les métiers n’y est pas."
+    },
+    "valorisation_matieres": {
+      "grandeur": "Matières en stock",
+      "texte": "Les matières qui ont du stock (magasins ou métiers) au soir de la date, sur toutes celles du catalogue."
     },
     "xyz": {
       "grandeur": "Classe XYZ",
