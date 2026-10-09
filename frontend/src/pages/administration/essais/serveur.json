@@ -1,0 +1,102 @@
+{
+  "application": "0.1.0 (projet)",
+  "python": "3.12.14",
+  "systeme": "Darwin 25.6.0",
+  "machine": "MacBook-Pro-14-Mohamed.local",
+  "base": {
+    "nom": "gestion_mp_pro_f8_essai",
+    "hote": "ce serveur (connexion locale)",
+    "port": 5432,
+    "version": "16.15 (Homebrew)",
+    "taille_octets": 20855831,
+    "schema": "0004",
+    "schema_attendu": "0004"
+  },
+  "reseau": {
+    "adresse": "http://192.168.3.102:8128",
+    "ecoute": "127.0.0.1",
+    "port": 8128,
+    "https": false
+  },
+  "taches_actives": false,
+  "porteur_ici": false,
+  "taches": [
+    {
+      "nom": "sauvegarde",
+      "etat": "jamais",
+      "dernier_essai_le": null,
+      "dernier_succes_le": null,
+      "erreur": "",
+      "duree_ms": 0
+    },
+    {
+      "nom": "photo_indicateurs",
+      "etat": "jamais",
+      "dernier_essai_le": null,
+      "dernier_succes_le": null,
+      "erreur": "",
+      "duree_ms": 0
+    },
+    {
+      "nom": "courriel",
+      "etat": "jamais",
+      "dernier_essai_le": null,
+      "dernier_succes_le": null,
+      "erreur": "",
+      "duree_ms": 0
+    },
+    {
+      "nom": "notifications",
+      "etat": "jamais",
+      "dernier_essai_le": null,
+      "dernier_succes_le": null,
+      "erreur": "",
+      "duree_ms": 0
+    },
+    {
+      "nom": "purges",
+      "etat": "jamais",
+      "dernier_essai_le": null,
+      "dernier_succes_le": null,
+      "erreur": "",
+      "duree_ms": 0
+    },
+    {
+      "nom": "restauration",
+      "etat": "ok",
+      "dernier_essai_le": "2026-10-09T11:34:40.437258Z",
+      "dernier_succes_le": "2026-10-09T11:34:40.437258Z",
+      "erreur": "",
+      "duree_ms": 490
+    }
+  ],
+  "session_jours": 30,
+  "outils": {
+    "pg_dump": "/opt/homebrew/bin/pg_dump",
+    "pg_restore": "/opt/homebrew/bin/pg_restore",
+    "psql": "/opt/homebrew/bin/psql"
+  },
+  "sauvegardes": {
+    "base": "gestion_mp_pro_f8_essai",
+    "derniere": "2026-10-09T11:34:40Z",
+    "age_h": 0.09,
+    "alerte": null,
+    "politique": "Une sauvegarde automatique par jour, relue, gardée 14 jours, puis la première de chaque mois gardée 12 mois ; la copie de sécurité suit la même conservation ; les sauvegardes manuelles et « avant » (restauration, reprise, vidage, mise à jour) ne s'effacent jamais seules.",
+    "dossier": "/private/tmp/claude-501/-Users-mohamed-erp-fil/4e04b189-49c6-4a03-8959-dbff180239bb/scratchpad/f8/sauvegardes/gestion_mp_pro_f8_essai",
+    "copie": null,
+    "nb": 2,
+    "autres": 0,
+    "outils": true,
+    "fichiers": []
+  },
+  "sessions": [
+    {
+      "nom": "Direction",
+      "role": "direction",
+      "nb": 2,
+      "vu_le": "2026-10-09T11:39:54.038692Z",
+      "expire_le": "2026-11-08T11:39:54.038692Z",
+      "appareils": 0
+    }
+  ]
+}

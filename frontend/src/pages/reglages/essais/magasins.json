@@ -1,0 +1,32 @@
+[
+  {
+    "id": 5,
+    "code": "Quarantaine",
+    "nom": "Quarantaine",
+    "type": "quarantaine",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 0.0,
+    "version": 1
+  },
+  {
+    "id": 4,
+    "code": "Morocco",
+    "nom": "Morocco",
+    "type": "stock_courant",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 590831.2,
+    "version": 1
+  },
+  {
+    "id": 3,
+    "code": "Polyfashions",
+    "nom": "Polyfashions Carpet",
+    "type": "stock_courant",
+    "contenu": "",
+    "actif": true,
+    "kg_detenus": 128734.1,
+    "version": 1
+  }
+]

@@ -18,7 +18,7 @@ from gestion_mp_pro.api.communs import ValidationVersion, encoder_curseur, nouve
 from gestion_mp_pro.api.dependances import PaginationDep, SessionDep, VersionDep
 from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.api.operations.schemas import (
-    Annulation,
+    AnnulationOperation,
     Brouillons,
     OperationCreation,
     OperationFiche,
@@ -182,7 +182,7 @@ def valider(ident: int, e: ValidationVersion, qui: QuiDep, s: SessionDep) -> Ope
     summary="Annule une opération validée par contre-passation, une fois.",
     responses=reponses(401, 403, 404, 409, 422),
 )
-def annuler(ident: int, e: Annulation, qui: QuiDep, s: SessionDep) -> OperationFiche:
+def annuler(ident: int, e: AnnulationOperation, qui: QuiDep, s: SessionDep) -> OperationFiche:
     """Route 121."""
     service.annuler(s, qui, ident, e.version, e.motif)
     return _fiche(service.fiche(s, ident, qui.role))

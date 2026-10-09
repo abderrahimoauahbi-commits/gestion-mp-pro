@@ -1,11 +1,9 @@
 /**
- * Écrans du domaine « Administration » (lot F8), rassemblés par `routes.ts`. Pré-rempli par le lot E2 avec
- * les entrées du menu (ECRANS-PRO § 2.1 et § 2.2) ; le lot F8 remplace `page` par ses pages et
- * ajoute ses fiches (docs/lots/E2.md, « Déclarer un écran »).
+ * Écrans du domaine « Administration » (lot F8), rassemblés par `routes.ts` : une page à onglets
+ * (ECRANS-PRO partie 8), pour la direction et l'administrateur technique ; « Données brutes »
+ * (route 7) pour la direction seule. Les fenêtres ont leur adresse sur la page (`&compte=ID`).
  */
 import type { Ecran } from '../../routes'
-
-const aVenir = () => import('../../composants/coque/EcranAVenir')
 
 export const ecrans: readonly Ecran[] = [
   {
@@ -25,8 +23,8 @@ export const ecrans: readonly Ecran[] = [
       { cle: 'telephone', libelle: 'Téléphone' },
       { cle: 'technique', libelle: 'Technique' },
       { cle: 'reprise', libelle: 'Reprise de Gestion MP', court: 'Reprise' },
+      { cle: 'donnees', libelle: 'Données brutes', court: 'Données', roles: ['direction'] },
     ],
-    lot: 'F8',
-    page: aVenir,
+    page: () => import('./Administration'),
   },
 ]

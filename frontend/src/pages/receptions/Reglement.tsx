@@ -14,22 +14,13 @@ import { date } from '../../lib/format'
 import { aujourdhui } from '../../lib/heure'
 import { useEcriture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
+import type { Schema } from '../../lib/types'
 import { ConfirmerMotif } from '../commandes/ConfirmerMotif'
 import styles from '../plan-achat/achats.module.css'
 import type { ReceptionFiche } from './types'
 
-/**
- * Le corps de la route 229 (lot D8). PROVISOIRE : `types.gen.ts` de main ne publie pas encore
- * `Paiement` ; le régénérer casse une page d'un autre lot (nom de schéma `ConsommationOrdre`
- * dédoublé par `BilanMois`, signalé dans docs/lots/F4.md). À remplacer par `Schema<'Paiement'>`.
- */
-interface Paiement {
-  genre: 'facture' | 'frais'
-  id: number
-  payee_le: string | null
-  version: number
-  motif?: string
-}
+/** Le corps de la route 229 (lot D8) : le jour du règlement, ou vide avec un motif pour l'annuler. */
+type Paiement = Schema<'Paiement'>
 type Facture = NonNullable<ReceptionFiche['facture']>
 
 export const RESERVE_DIRECTION =
@@ -37,9 +28,7 @@ export const RESERVE_DIRECTION =
 
 /** Le corps de la route 229 pour une facture. */
 export function corpsPaiement(f: Facture, payeeLe: string | null, motif?: string): Paiement {
-  const c: Paiement = { genre: 'facture', id: f.id, payee_le: payeeLe, version: f.version }
-  if (motif) c.motif = motif
-  return c
+  return { genre: 'facture', id: f.id, payee_le: payeeLe, version: f.version, motif: motif ?? '' }
 }
 
 function MarquerReglee({ f }: { f: Facture }) {

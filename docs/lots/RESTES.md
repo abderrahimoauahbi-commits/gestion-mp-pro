@@ -52,6 +52,20 @@ Points relevés par un lot pour un autre, à traiter avant la recette finale.
 | F4 | D3 | `/export/plan-achat` ignore les filtres liés de l'écran ; la fiche ne dit pas pourquoi la date promise est figée. |
 | F4 | E1 | `Confirmer` : longueur minimale du motif (F4 a écrit `ConfirmerMotif` en attendant). |
 | F4 | F4 | Remplacer le `Paiement` provisoire de `receptions/Reglement.tsx` par `Schema<'Paiement'>` (types régénérés après le lot NOMS). |
+| NOMS | F1, F5, F8 | Schémas homonymes renommés (champs et routes inchangés), `types.gen.ts` régénéré (il prend aussi les routes de D8 : bilan, cockpit, contrôles, échéancier, pièces, signalements…) : après `git merge main`, citer `Schema<'…'>` par le nouveau nom, jamais par `gestion_mp_pro__api__…`. Importations (F5) : `AnnulationDossier`, `ClotureDossier`, `ReouvertureDossier`, `ValeurDeviseDossier` ; réceptions : `AnnulationReception` ; opérations : `AnnulationOperation`, `ValeurDeviseOperation` ; réclamations : `ClotureReclamation`, `ReouvertureReclamation` ; commandes : `LigneVersionBon` ; qualités : `LigneVersionRecette`, `RestaurationVersionRecette` ; exploitation (F8, sauvegardes) : `RestaurationSauvegarde`. `tests/test_noms_openapi.py` refuse désormais tout nom de schéma à `__` et deux classes exposées homonymes. |
 | X2 | docs | ARCHITECTURE § 13.2 et critères X2 : `installer.sh` n'installe le LaunchAgent qu'avec `--demarrage-automatique` (décision : réglage du Mac laissé à Mohamed). |
 | X2 | S0 | Cibles Makefile `poste-installer` et `coexistence`. |
 | X2 | C1 | « Administration › Reprise » (routes 243–244) attendue par le poste : à faire dans C1. |
+| F5 | E1 | `Interrupteur` sans `manque`/`blocages` ; `PiecesJointes` sans mode « joindre seulement » (dossier clos) ; `LienDocument` sans `state` ; `DataTable` : texte de liste vide filtrée générique, pas de lignes de groupe. |
+| F5 | docs | ECRANS-PRO 5.20 : `dossiers_ouverts` et `parts_figees` (et non `dossiers_recalcules`, `dossiers_figes`) ; `commentaire` à l'API, « Observations » à l'écran. |
+| F5 | D7/S2 | Recherche de facture : « FA-2026/117 » ne trouve pas « FA-2026-117 » (ponctuation différente) — normaliser la ponctuation dans la recherche. |
+| F1 | D8 | Notification « besoin signalé » : lien `/accueil?signalement=ID` pour tous, or la direction n'a pas `/accueil` → `/cockpit?signalement=ID` pour elle. |
+| F1 | D3 | Champ `en_retard` (P1-11) ou compte serveur des retards et des arrivées à 7 jours (l'écran filtre lui-même). |
+| F1 | F4 | Fermer une fiche commande ouverte depuis le Cockpit ramène à `/commandes` au lieu du Cockpit (passer `state.retour`). |
+| F1 | E1 | `.masque-accessible` (position absolue) allonge le document au téléphone quand `<main>` défile (F1 contourne par `position: relative`). |
+| F1 | V3 | Recette navigateur : un profil de navigateur à part par passage (cookies de session partagés entre serveurs `localhost`). |
+| F8 | S2/D10 | QR en SVG (routes 6 et 20) sans `xmlns` : ne s'affiche pas dans une `<img>` (l'écran l'ajoute dans `administration/qr.ts`) — produire le SVG avec l'espace de noms (segno `svgns`), puis retirer le contournement. |
+| F8 | D8/D1 | Nombre de brouillons datés de la période à clore : une route (ou un champ) pour l'annoncer avant la fenêtre de clôture. |
+| F8 | E1 | `FenetreConfirmation` sans étapes (F8 a construit la restauration sur `Fenetre`) ; `Onglets` sans garde de saisie. |
+| F8 | docs | ECRANS-PRO : 7 ordres de seuils et non 5 ; note de la Valorisation sur le fil monté à une date passée (fausse depuis D8). |
+| F8 | F5 | En-tête de `pages/importations/ecrans.ts` : retirer la mention des pages provisoires supprimées. |

@@ -1,0 +1,34 @@
+{
+  "elements": [
+    {
+      "id": 2,
+      "quand": "2026-10-09T11:08:21.970307Z",
+      "par": "Alimentation",
+      "par_id": 3,
+      "matiere_id": null,
+      "reference": "",
+      "texte": "Prévoir de la colle pour la semaine prochaine.",
+      "urgence": "normale",
+      "traite": false,
+      "traite_par": "",
+      "traite_le": null,
+      "reponse": ""
+    },
+    {
+      "id": 1,
+      "quand": "2026-10-09T11:08:21.962414Z",
+      "par": "Alimentation",
+      "par_id": 3,
+      "matiere_id": 2,
+      "reference": "PP FRZ-2900 Bleu",
+      "texte": "Plus que deux palettes de bleu, la série Sahara commence lundi.",
+      "urgence": "urgente",
+      "traite": false,
+      "traite_par": "",
+      "traite_le": null,
+      "reponse": ""
+    }
+  ],
+  "total": 2,
+  "suivant": null
+}

@@ -64,7 +64,7 @@ class RecetteEntree(Entree):
     version: int = Field(ge=1)
 
 
-class Restauration(Entree):
+class RestaurationVersionRecette(Entree):
     """Revenir à une version : le motif est obligatoire."""
 
     motif: str = Field(min_length=1, max_length=L.MOTIF)
@@ -174,7 +174,7 @@ class QualiteFiche(QualiteResume):
     avertissement: str = ""
 
 
-class LigneVersion(Sortie):
+class LigneVersionRecette(Sortie):
     """Une matière d'une version de recette, avec son rôle à cette date."""
 
     matiere_id: int
@@ -203,7 +203,7 @@ class RecetteVersionFiche(Sortie):
     motif: str
     restauree_de: int | None = Field(description="numéro de la version restaurée")
     en_vigueur: bool
-    lignes: list[LigneVersion]
+    lignes: list[LigneVersionRecette]
     poids: list[PoidsVersion] | None = Field(description="null : poids non gardés alors")
 
 

@@ -1,0 +1,117 @@
+/* L'Administration (lot F8) : seulement des jetons (stylelint). */
+
+.rangee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.colonne {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}
+
+.pousse {
+  flex: 1;
+}
+
+.note {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.dessous {
+  display: block;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.code {
+  font-family: var(--mono);
+  font-size: var(--taille-petite);
+  word-break: break-all;
+}
+
+.detail {
+  display: inline-block;
+  max-width: 340px;
+  font-size: var(--taille-petite);
+  white-space: normal;
+}
+
+.choix {
+  width: 100%;
+  min-height: var(--hauteur-champ);
+  padding: 6px 10px;
+  color: var(--texte);
+  background: var(--surface);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  font: inherit;
+}
+
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.liste {
+  margin: 0;
+  padding-left: var(--espace-4);
+}
+
+.apercu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  padding: var(--espace-3) var(--espace-4);
+  overflow-y: auto;
+}
+
+.texte {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--taille-petite);
+  white-space: pre-wrap;
+}
+
+.qr {
+  width: 150px;
+  height: 150px;
+  background: var(--sur-accent);
+}
+
+.adresse {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.deux {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espace-3);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.marge {
+  padding: var(--espace-3) var(--espace-4);
+}
+
+@media (width <= 900px) {
+  .deux {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width <= 700px) {
+  .carteListe.carteListe {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+}

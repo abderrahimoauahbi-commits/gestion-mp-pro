@@ -26,7 +26,7 @@ from gestion_mp_pro.api.qualites.schemas import (
     QualiteResume,
     RecetteEntree,
     RecetteVersionFiche,
-    Restauration,
+    RestaurationVersionRecette,
 )
 from gestion_mp_pro.exports import qualites as classeurs
 from gestion_mp_pro.exports.classeur import REPONSES_XLSX, reponse
@@ -171,7 +171,7 @@ def versions(qualite_id: int, s: SessionDep) -> list[RecetteVersionFiche]:
     responses=reponses(401, 403, 404, 409, 422),
 )
 def restaurer(
-    qualite_id: int, version_id: int, corps: Restauration, qui: QuiDep, s: SessionDep
+    qualite_id: int, version_id: int, corps: RestaurationVersionRecette, qui: QuiDep, s: SessionDep
 ) -> QualiteFiche:
     """Route 89 : une seule version nouvelle, signée et motivée."""
     r = qualites.restaurer(s, qui, qualite_id, version_id, motif=corps.motif, version=corps.version)

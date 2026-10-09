@@ -242,7 +242,7 @@ class Actions(Sortie):
     annuler: str | None
 
 
-class ValeurDevise(Sortie):
+class ValeurDeviseDossier(Sortie):
     """Une valeur dans sa devise (les devises ne s'additionnent jamais)."""
 
     devise: str
@@ -268,7 +268,7 @@ class FactureARattacher(Sortie):
     lignes: int
     lots: int
     quantite: float
-    valeurs: list[ValeurDevise]
+    valeurs: list[ValeurDeviseDossier]
     familles: list[FamillePoids]
     local: bool
     dossier_id: int | None
@@ -305,7 +305,7 @@ class ReceptionSansFacture(Sortie):
     lignes: int
     lots: int
     quantite: float
-    valeurs: list[ValeurDevise]
+    valeurs: list[ValeurDeviseDossier]
 
 
 class Locaux(Sortie):

@@ -1,0 +1,18 @@
+{
+  "utilisateurs": [
+    {
+      "id": 7,
+      "nom": "Achats"
+    },
+    {
+      "id": 9,
+      "nom": "Administrateur"
+    },
+    {
+      "id": 6,
+      "nom": "Direction"
+    }
+  ],
+  "actions": ["connexion", "paramètre", "restauration"],
+  "objets": ["parametre", "periode", "sauvegarde", "utilisateur"]
+}

@@ -1,0 +1,13 @@
+{
+  "base": "gestion_mp_pro_f1_essai",
+  "derniere": null,
+  "age_h": null,
+  "alerte": null,
+  "politique": "Une sauvegarde automatique par jour, relue, gardée 14 jours, puis la première de chaque mois gardée 12 mois ; la copie de sécurité suit la même conservation ; les sauvegardes manuelles et « avant » (restauration, reprise, vidage, mise à jour) ne s'effacent jamais seules.",
+  "dossier": "/private/tmp/claude-501/-Users-mohamed-erp-fil/4e04b189-49c6-4a03-8959-dbff180239bb/scratchpad/f1-sauv/gestion_mp_pro_f1_essai",
+  "copie": null,
+  "nb": 0,
+  "autres": 0,
+  "outils": true,
+  "fichiers": []
+}

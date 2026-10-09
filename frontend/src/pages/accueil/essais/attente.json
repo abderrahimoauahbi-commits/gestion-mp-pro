@@ -1,0 +1,59 @@
+{
+  "factures": [
+    {
+      "facture_id": 1,
+      "numero": "INV-2026-114",
+      "fournisseur_id": 4,
+      "fournisseur": "LOMAT",
+      "date": "2026-10-03",
+      "receptions": [
+        {
+          "id": 3,
+          "numero": "REC-2026-0002"
+        }
+      ],
+      "lignes": 1,
+      "lots": 1,
+      "quantite": 200.0,
+      "valeurs": [
+        {
+          "devise": "EUR",
+          "valeur": 620.0
+        }
+      ],
+      "familles": [
+        {
+          "famille": "IMP FRISÉ ROUGE",
+          "quantite": 200.0
+        }
+      ],
+      "local": false,
+      "dossier_id": null,
+      "dossier": null
+    }
+  ],
+  "sans_facture": [
+    {
+      "reception_id": 2,
+      "reception": "REC-2026-0001",
+      "date": "2026-09-29",
+      "fournisseur_id": 4,
+      "fournisseur": "LOMAT",
+      "numero_bl": "TR-5521",
+      "local": false,
+      "lignes": 1,
+      "lots": 1,
+      "quantite": 300.0,
+      "valeurs": [
+        {
+          "devise": "EUR",
+          "valeur": 960.0
+        }
+      ]
+    }
+  ],
+  "locaux": {
+    "factures": 0,
+    "lignes": 2
+  }
+}
