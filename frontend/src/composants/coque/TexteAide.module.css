@@ -1,0 +1,13 @@
+.lien {
+  font-weight: 600;
+}
+
+.sansLien {
+  font-weight: 600;
+}
+
+.reserve {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+  font-weight: 400;
+}

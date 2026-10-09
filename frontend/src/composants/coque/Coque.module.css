@@ -1,0 +1,110 @@
+.coque {
+  display: grid;
+  grid-template-columns: var(--barre) minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.sansBarre {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.colonne {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.haut {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--espace-3);
+  height: var(--entete);
+  padding: 0 var(--espace-4) 0 var(--espace-2);
+  border-bottom: 1px solid var(--bord);
+  background: var(--surface);
+}
+
+.menu {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: var(--rayon);
+  background: none;
+  color: var(--texte-2);
+}
+
+.menu:hover {
+  background: var(--survol);
+  color: var(--texte);
+}
+
+.haut > nav {
+  flex: 1 1 auto;
+}
+
+.outils {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+/* Le <main> borné : la page le remplit, seuls ses cadres défilent (Cadre mesure le reste). */
+.contenu {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.contenu > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (width < 1080px) {
+  .coque {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width <= 700px) {
+  .haut {
+    gap: var(--espace-1);
+    padding: 0 var(--espace-2) 0 var(--espace-1);
+  }
+
+  .haut > nav {
+    display: none;
+  }
+
+  .outils {
+    flex: 1 1 auto;
+  }
+}
+
+@media print {
+  .coque {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .haut {
+    display: none;
+  }
+
+  .contenu {
+    overflow: visible;
+  }
+}

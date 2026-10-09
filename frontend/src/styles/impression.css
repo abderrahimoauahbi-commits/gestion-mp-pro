@@ -1,0 +1,63 @@
+/*
+ * Gestion MP PRO — impression d'un écran (Ctrl P) : A4, la page seule, sans la coque.
+ * Les documents officiels (bon de commande, étiquettes, bilan) sont imprimés par le serveur
+ * (gabarits A4 sur papier à en-tête) ; ceci ne vaut que pour un écran imprimé tel quel.
+ * L'impression se fait toujours dans l'apparence claire (`pages/compte/theme.ts`).
+ */
+@page {
+  size: a4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body,
+  #racine {
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+
+  body {
+    font-size: 11pt;
+  }
+
+  /* La coque : ni menu, ni barre du haut, ni bandeaux, ni messages, ni question de garde. */
+  nav[aria-label='Menu principal'],
+  [role='alertdialog'],
+  [role='status'],
+  button,
+  kbd {
+    display: none !important;
+  }
+
+  main {
+    overflow: visible !important;
+  }
+
+  /* Les cadres qui défilent à l'écran se déplient sur le papier. */
+  [class*='cadre'] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Une fenêtre ouverte s'imprime à plat, sur toute la largeur. */
+  [role='dialog'] {
+    position: static !important;
+    max-height: none !important;
+    box-shadow: none !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
