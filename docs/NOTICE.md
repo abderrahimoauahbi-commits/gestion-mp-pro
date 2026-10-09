@@ -391,6 +391,17 @@ Une matière du catalogue : sa classification et sa référence, son achat (four
 - Si la fiche a été modifiée entre-temps sur un autre poste, l’enregistrement est refusé : « Recharger la fiche » repart de sa dernière version.
 - L’alimentation lit la fiche sans rien de l’achat : ni prix, ni devise, ni minimum de commande.
 
+### Fiche qualité (`/qualites/nouvelle`)
+
+Une qualité de tapis : sa fiche et ses poids au m² en tête de sa recette, la recette rôle par rôle, son plan de production (en lecture), les versions de sa recette et son historique.
+
+- Dans chaque rôle utilisé, les parts des matières font 100 % (à 0,01 point près) ; un rôle qui pèse sans matière manque aux besoins et aux sorties.
+- Le cuir, les franges et le ruban se disent en mètres par m² : leurs kg/m² se calculent par la densité de la matière. Les mètres restent indicatifs, le stock est en kilos.
+- Fiche, poids et recette s’enregistrent ensemble, en une fois ; une qualité arrêtée accepte une recette incomplète, avec un avertissement.
+- Chaque changement de matières ou de poids crée une version signée ; une version vaut à partir de son enregistrement (pas de date d’effet). « Revenir à cette version » demande un motif.
+- Le plan se saisit dans la page Production (`/production?onglet=plan`), toutes qualités ensemble.
+- Les achats lisent la fiche ; l’alimentation la lit sans coût ni prix.
+
 ### Le catalogue par tableur (`/catalogue/tableur`)
 
 Télécharger le catalogue en tableur, le corriger dans Excel, le relire : l’aperçu dit ce qui sera créé, modifié ou refusé, avant toute écriture.

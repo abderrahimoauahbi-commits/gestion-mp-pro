@@ -43,6 +43,13 @@ export const ecrans: readonly Ecran[] = [
     parent: '/catalogue',
     roles: ['direction', 'achats', 'alimentation'],
     aide: 'matiere',
+    onglets: [
+      { cle: 'classification', libelle: 'Classification et référence' },
+      { cle: 'achat', libelle: 'Achat', roles: ['direction', 'achats'] },
+      { cle: 'conditionnement', libelle: 'Conditionnement et stock' },
+      { cle: 'pieces', libelle: 'Pièces jointes', roles: ['direction', 'achats'] },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
     page,
   },
   {
@@ -59,6 +66,11 @@ export const ecrans: readonly Ecran[] = [
     parent: '/catalogue',
     roles: ['direction', 'achats'],
     aide: 'fournisseur',
+    onglets: [
+      { cle: 'fiche', libelle: 'Fiche' },
+      { cle: 'pieces', libelle: 'Pièces jointes' },
+      { cle: 'historique', libelle: 'Historique' },
+    ],
     page,
   },
 ]

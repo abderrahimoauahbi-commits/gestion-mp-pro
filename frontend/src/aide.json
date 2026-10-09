@@ -180,6 +180,18 @@
         "Le besoin d’une matière dit d’où il vient : qualités, mètres carrés, recettes."
       ]
     },
+    "qualite": {
+      "titre": "Fiche qualité",
+      "resume": "Une qualité de tapis : sa fiche et ses poids au m² en tête de sa recette, la recette rôle par rôle, son plan de production (en lecture), les versions de sa recette et son historique.",
+      "points": [
+        "Dans chaque rôle utilisé, les parts des matières font 100 % (à 0,01 point près) ; un rôle qui pèse sans matière manque aux besoins et aux sorties.",
+        "Le cuir, les franges et le ruban se disent en mètres par m² : leurs kg/m² se calculent par la densité de la matière. Les mètres restent indicatifs, le stock est en kilos.",
+        "Fiche, poids et recette s’enregistrent ensemble, en une fois ; une qualité arrêtée accepte une recette incomplète, avec un avertissement.",
+        "Chaque changement de matières ou de poids crée une version signée ; une version vaut à partir de son enregistrement (pas de date d’effet). « Revenir à cette version » demande un motif.",
+        "Le plan se saisit dans la page [Production](/production?onglet=plan), toutes qualités ensemble.",
+        "Les achats lisent la fiche ; l’alimentation la lit sans coût ni prix."
+      ]
+    },
     "qualites": {
       "titre": "Qualités et recettes",
       "resume": "Les qualités de tapis, leur poids par rôle, leur recette à 100 % par rôle, leurs versions et leur coût au m².",
@@ -262,6 +274,14 @@
       "grandeur": "Coût hors TVA d’une marchandise",
       "texte": "Valeur au cours de la banque + sa part des charges non récupérables (droits, fret, transit…), à la valeur ou au poids selon le poste. La TVA est à part (Coût TTC)."
     },
+    "cout_m2_recette": {
+      "grandeur": "Coût au m² d’une matière de la recette",
+      "texte": "Coût au m² = kg/m² × prix au kilo × cours de la devise, perte matière comprise (× (1 + taux de perte)). Cliquer sur une ligne ouvre sa qualité."
+    },
+    "cout_matiere_moyen": {
+      "grandeur": "Coût matière moyen",
+      "texte": "Σ (coût matière au m² × base mensuelle) ÷ Σ base mensuelle, sur les qualités en service : le coût d’un m² pondéré par le plan, perte matière comprise."
+    },
     "couverture": {
       "grandeur": "Couverture",
       "texte": "Stock projeté ÷ consommation journalière. Couverture pondérée (Cockpit) : la même, pondérée par la valeur."
@@ -286,13 +306,41 @@
       "grandeur": "OTIF",
       "texte": "Une réception est parfaite si elle est à l’heure, complète (à la tolérance près) et conforme. À l’heure se juge sur la date promise du bon (l’ETA ne la repousse pas). Score fournisseur = OTIF × 60 + jusqu’à 20 points pour peu de retours (0 dès 5 % renvoyés) + jusqu’à 20 pour un délai court."
     },
+    "plan_mensuel": {
+      "grandeur": "Plan mensuel",
+      "texte": "Σ des bases mensuelles des qualités en service : les m² d’un mois ordinaire, avant saisonnalité et croissance. Il se saisit dans la page Production."
+    },
     "prix_kilo": {
       "grandeur": "Prix au kilo",
       "texte": "Le prix de la fiche s’il est au kilo ; s’il est au mètre, prix ÷ densité (kg / ml). La valeur du stock, le coût moyen, le coût au m² et le budget d’achat le lisent au kilo."
     },
+    "qualite_cout": {
+      "grandeur": "Coût matière d’une qualité",
+      "texte": "Σ, matière par matière, kg/m² × prix au kilo × cours de la devise × (1 + taux de perte). Recalculé à la frappe comme le serveur."
+    },
+    "qualite_plan": {
+      "grandeur": "Plan d’une qualité",
+      "texte": "La base mensuelle : m² d’un mois ordinaire (coefficient 1). Le coût d’un mois = coût matière au m² × base mensuelle."
+    },
+    "qualite_poids": {
+      "grandeur": "Poids de la recette",
+      "texte": "Σ des kg/m² des matières : part / 100 × poids du rôle au m² ; pour un rôle au mètre, part / 100 × ml/m² du rôle × densité de la matière (kg/ml)."
+    },
+    "qualite_recette": {
+      "grandeur": "État de la recette",
+      "texte": "Juste si, dans chaque rôle utilisé, les parts font 100 % à 0,01 point près et si chaque rôle qui pèse a au moins une matière. Faux : la somme d’un rôle s’écarte de 100 %. Sans matière : un rôle a un poids au m² mais aucune matière."
+    },
+    "qualites_fabriquees": {
+      "grandeur": "Qualités fabriquées",
+      "texte": "Les qualités en service (« fabriquées ») ; les arrêtées sont comptées à part et ne comptent plus dans le plan ni les besoins."
+    },
     "quantite_a_commander": {
       "grandeur": "Quantité à commander",
       "texte": "Sorties prévues + le plus grand de (sécurité de la classe sur la période, seuil d’alerte) − stock projeté − commandé arrivant pendant la période couverte − déjà en préparation (bons en brouillon ou à approuver), portée au minimum de commande et arrondie au conditionnement. Sous le gramme : rien. Une matière désactivée, d’un fournisseur désactivé, ou non consommée ne se rachète pas."
+    },
+    "recettes_incompletes": {
+      "grandeur": "Recettes incomplètes",
+      "texte": "Les qualités en service dont un rôle ne fait pas 100 % ou dont un rôle qui pèse n’a pas de matière — la même base que la nomenclature ; les arrêtées sont signalées à part."
     },
     "rotation": {
       "grandeur": "Rotation du stock",
