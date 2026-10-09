@@ -1,0 +1,35 @@
+.fil {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fil ol {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.fil li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  min-width: 0;
+  color: var(--texte-3);
+}
+
+.fil li[aria-current='page'] {
+  overflow: hidden;
+  color: var(--texte);
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+@media (width <= 700px) {
+  .fil li:not([aria-current='page']) {
+    display: none;
+  }
+}

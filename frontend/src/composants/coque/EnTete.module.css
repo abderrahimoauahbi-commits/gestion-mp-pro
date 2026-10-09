@@ -1,0 +1,69 @@
+.entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--espace-3);
+}
+
+.titres {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.fil {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-1);
+  margin-bottom: 2px;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.etape {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+}
+
+.ligne {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  min-width: 0;
+}
+
+.titre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aide {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--texte-3);
+}
+
+.aide:hover {
+  background: var(--survol);
+  color: var(--accent);
+}
+
+.sous {
+  margin: 2px 0 0;
+  color: var(--texte-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espace-2);
+}

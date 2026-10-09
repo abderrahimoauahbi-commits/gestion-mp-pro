@@ -6,6 +6,8 @@ mêmes remplacements successifs, dans le même ordre. PRO ajoute ce qui sortait 
 (incohérence B.13-10 : « valeur incorrecte integer, unable to parse… ») : les types d'erreur
 courants ont leur phrase, le préfixe « Value error, » des validateurs est retiré, et chaque
 champ est aussi rendu à part (`champs`) pour que l'écran l'affiche sous la saisie.
+
+`traduire_refus_base` : le code et la phrase d'une contrainte de la base violée (filet F-07).
 """
 
 from __future__ import annotations
@@ -115,3 +117,75 @@ def traduire_validation(erreurs: Sequence[Mapping[str, Any]]) -> tuple[str, dict
         if champ and champ not in champs:
             champs[champ] = texte
     return " ; ".join(phrases), champs
+
+
+# --- Refus de la base (dernier recours, défaut F-07 de Gestion MP) ----------------------------
+
+RIEN_ENREGISTRE = "Rien n'a été enregistré."
+
+MESSAGE_REFUS_BASE = (
+    "Cette saisie contredit une règle de la base (doublon, valeur hors limites) : la vérifier."
+)
+"""La phrase de Gestion MP corrigé (F-07), pour un refus que rien ne permet de préciser."""
+
+PAR_SQLSTATE: dict[str, tuple[str, str]] = {
+    "23505": (
+        "doublon",
+        "Cette saisie existe déjà (référence, code ou nom déjà pris) : la vérifier.",
+    ),
+    "23P01": ("doublon", "Cette saisie chevauche une fiche existante : la vérifier."),
+    "23502": ("regle_de_la_base", "Une valeur obligatoire manque : la vérifier."),
+    "23514": (
+        "regle_de_la_base",
+        "Cette saisie contredit une règle de la base (valeur hors limites ou non permise) : "
+        "la vérifier.",
+    ),
+    "23001": (
+        "fiche_utilisee",
+        "Cette fiche est utilisée ailleurs : la désactiver plutôt que la supprimer.",
+    ),
+}
+"""Code et phrase par état SQL (classe 23, violations d'intégrité de PostgreSQL)."""
+
+FICHE_UTILISEE = PAR_SQLSTATE["23001"]
+REFERENCE_ABSENTE = (
+    "reference_absente",
+    "Une fiche citée n'existe pas ou vient d'être supprimée : recharger, puis refaire la saisie.",
+)
+PAS_UN_NOMBRE = ("regle_de_la_base", "Une valeur saisie n'est pas un nombre : la vérifier.")
+DONNEE_HORS_LIMITES = (
+    "regle_de_la_base",
+    "Une valeur saisie est hors limites ou mal formée (nombre trop grand, texte trop long) : "
+    "la vérifier.",
+)
+
+
+def traduire_refus_base(
+    sqlstate: str | None,
+    contrainte: str | None = None,
+    detail: str | None = None,
+    instruction: str | None = None,
+) -> tuple[str, str]:
+    """Le code (`api/erreurs.CODES`, tous 409) et la phrase d'un refus de la base.
+
+    `sqlstate` : état SQL de PostgreSQL ; `contrainte` : nom de la contrainte violée ;
+    `detail` : le DETAIL du serveur (anglais) ; `instruction` : le SQL envoyé. Une clé
+    étrangère violée par un `DELETE` (ou « still referenced ») est une fiche utilisée ; par
+    un `INSERT`/`UPDATE`, une fiche citée absente. Le refus de `NaN` (`ck_<table>_<col>_nombre`)
+    a sa phrase. La phrase finit toujours par « Rien n'a été enregistré. ».
+    """
+    code, phrase = "regle_de_la_base", MESSAGE_REFUS_BASE
+    if sqlstate == "23503":
+        supprime = (instruction or "").lstrip().upper().startswith("DELETE")
+        code, phrase = (
+            FICHE_UTILISEE
+            if supprime or "still referenced" in (detail or "")
+            else REFERENCE_ABSENTE
+        )
+    elif sqlstate == "23514" and (contrainte or "").endswith("_nombre"):
+        code, phrase = PAS_UN_NOMBRE
+    elif sqlstate in PAR_SQLSTATE:
+        code, phrase = PAR_SQLSTATE[sqlstate]
+    elif sqlstate is not None and sqlstate.startswith("22"):
+        code, phrase = DONNEE_HORS_LIMITES
+    return code, f"{phrase} {RIEN_ENREGISTRE}"

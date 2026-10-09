@@ -28,7 +28,7 @@ installer: ## Environnement Python (backend/.venv), dépendances figées, écran
 	$(BIN)/python -m pip install -q -r $(BACK)/requirements-dev.lock
 	$(BIN)/python -m pip install -q --no-deps -e $(BACK)
 	if [ -f frontend/package.json ]; then npm --prefix frontend ci; fi
-	if [ -e .git ]; then $(BIN)/pre-commit install; fi
+	if [ -d .git ]; then $(BIN)/pre-commit install; fi  # dépôt principal seulement : un worktree supprimé casserait le crochet partagé
 
 verifier: verifier-serveur verifier-ecran verifier-outils ## Tout : serveur, écran, outils (définition de « fini »)
 

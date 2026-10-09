@@ -1,0 +1,94 @@
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-4);
+  padding: var(--espace-5);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre);
+}
+
+.tete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-1);
+}
+
+.titre {
+  color: var(--marque);
+  font-size: 22px;
+}
+
+.note {
+  margin: 0;
+  color: var(--texte-2);
+}
+
+.visages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--espace-2);
+}
+
+.visage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: var(--cible-tactile);
+  padding: var(--espace-2) var(--espace-3);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  text-align: left;
+}
+
+.visage:hover {
+  border-color: var(--accent);
+}
+
+.visage span {
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.choisi {
+  border-color: var(--accent);
+  background: var(--accent-clair);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+}
+
+.gestes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2);
+}
+
+.bascule {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pied {
+  margin: 0;
+  color: var(--texte-3);
+  font-size: var(--taille-petite);
+}
+
+.erreur {
+  margin: 0;
+  color: var(--ton-critique);
+  font-weight: 600;
+}

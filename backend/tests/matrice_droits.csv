@@ -18,6 +18,7 @@ DELETE;/api/codes-douaniers/{ident};401;ok;403;403;403
 PUT;/api/codes-douaniers/{ident};401;ok;403;403;403
 POST;/api/connexion;ok;ok;ok;ok;ok
 GET;/api/contexte;401;ok;ok;ok;ok
+GET;/api/controles/soldes;401;ok;ok;403;403
 POST;/api/deconnexion;401;ok;ok;ok;ok
 GET;/api/devises;401;ok;ok;403;403
 POST;/api/devises;401;ok;ok;403;403
@@ -25,7 +26,9 @@ PUT;/api/devises/{code};401;ok;ok;403;403
 GET;/api/devises/{code}/cours;401;ok;ok;403;403
 GET;/api/etat;ok;ok;ok;ok;ok
 GET;/api/export/fournisseurs/fiches;401;ok;ok;403;403
+GET;/api/export/lots;401;ok;ok;ok;403
 GET;/api/export/matieres;401;ok;ok;403;403
+GET;/api/export/mouvements;401;ok;ok;ok;403
 GET;/api/fournisseurs;401;ok;ok;ok;403
 POST;/api/fournisseurs;401;ok;ok;403;403
 DELETE;/api/fournisseurs/{ident};401;ok;ok;403;403
@@ -35,6 +38,11 @@ GET;/api/historique/{objet}/{ident};401;ok;ok;ok;ok
 POST;/api/installation;ok;ok;ok;ok;ok
 GET;/api/journal;401;ok;403;403;ok
 GET;/api/journal/valeurs;401;ok;403;403;ok
+GET;/api/lots;401;ok;ok;ok;403
+GET;/api/lots/disponibles;401;ok;ok;ok;403
+GET;/api/lots/scan;401;ok;ok;ok;403
+GET;/api/lots/{lot_id};401;ok;ok;ok;403
+PUT;/api/lots/{lot_id};401;ok;ok;403;403
 GET;/api/magasins;401;ok;ok;ok;403
 POST;/api/magasins;401;ok;403;403;403
 PUT;/api/magasins/{ident};401;ok;403;403;403
@@ -53,6 +61,7 @@ GET;/api/moi;401;ok;ok;ok;ok
 PUT;/api/moi;401;ok;ok;ok;ok
 PUT;/api/moi/code;401;ok;ok;ok;ok
 GET;/api/motifs;401;ok;ok;ok;403
+GET;/api/mouvements;401;ok;ok;ok;403
 GET;/api/notifications;401;ok;ok;ok;ok
 POST;/api/notifications/lues;401;ok;ok;ok;ok
 POST;/api/notifications/{ident}/lue;401;ok;ok;ok;ok
@@ -66,6 +75,9 @@ DELETE;/api/postes-frais/{ident};401;ok;403;403;403
 PUT;/api/postes-frais/{ident};401;ok;403;403;403
 GET;/api/recherche;401;ok;ok;ok;403
 GET;/api/sante;ok;ok;ok;ok;ok
+GET;/api/stock;401;ok;ok;ok;403
+GET;/api/stock/{matiere_id};401;ok;ok;ok;403
+GET;/api/tracabilite;401;ok;ok;ok;403
 GET;/api/utilisateurs;401;ok;403;403;ok
 POST;/api/utilisateurs;401;ok;403;403;ok
 PUT;/api/utilisateurs/{ident};401;ok;403;403;ok
