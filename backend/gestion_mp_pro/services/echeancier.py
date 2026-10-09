@@ -3,7 +3,8 @@
 Le calcul est celui du moteur (`calcul.suivi.echeancier`) : une facture sans montant vaut ce
 que ses réceptions validées ont apporté (« estimé ») ; dont toutes les réceptions sont annulées,
 elle est écartée (réglée : un avoir est à demander) ; qui ne porte que des brouillons, elle
-n'est pas encore due. PRO ajoute : les frais d'un dossier **annulé** sont écartés de même ; la
+n'est pas encore due. PRO ajoute : les frais **dus** d'un dossier annulé sont écartés de même (un
+frais réglé reste réglé, B-01) ; la
 recherche (tous les mots, sans accents) et la nature filtrent au serveur et les indicateurs les
 suivent ; l'échu reste compté quelle que soit la période affichée (une période qui commence
 demain ne le cache pas). Chaque ligne porte sa `version` (règlement, route 229) et la fiche
@@ -11,7 +12,8 @@ qu'elle ouvre (réception ou dossier).
 
 Règlement (229) : une facture passe par `services.factures.regler` (lot D4) ; un frais suit les
 mêmes règles (`verifier_date_reglement`, annulation par la direction seule avec un motif :
-`verifier_annulation_reglement`) et s'écrit au journal du frais.
+`verifier_annulation_reglement`) et s'écrit au journal de **son dossier** (l'historique de la
+fiche le montre ; la version du dossier monte, lot D7).
 """
 
 from __future__ import annotations
@@ -38,11 +40,11 @@ from gestion_mp_pro.modeles import (
 from gestion_mp_pro.modeles.enums import StatutDossier
 from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import audit, factures, horloge
+from gestion_mp_pro.services.importations.socle import noter
 
 Genre = Literal["facture", "frais"]
 DANS_30_JOURS = 30
 RAISON_DOSSIER_ANNULE = "dossier annulé : plus dû"
-RAISON_DOSSIER_ANNULE_REGLE = "réglé, dossier annulé : avoir à demander"
 
 
 @dataclass(frozen=True)
@@ -133,7 +135,8 @@ def _frais(s: Session, p: _Pieces) -> list[suivi.FraisAPayer]:
             echeance=ch.echeance,
             payee_le=ch.payee_le,
         )
-        (p.annules if statut == StatutDossier.annule else resultat).append(x)
+        du_dossier_annule = statut == StatutDossier.annule and ch.payee_le is None
+        (p.annules if du_dossier_annule else resultat).append(x)
     return resultat
 
 
@@ -158,12 +161,12 @@ def _dues(s: Session) -> suivi.FacturesDues:
 
 
 def _ecartes(annules: list[suivi.FraisAPayer]) -> list[suivi.Echeance]:
-    """Les frais d'un dossier annulé : écartés comme une facture dont la réception l'est."""
+    """Les frais dus d'un dossier annulé : écartés (plus dus) ; un frais réglé reste réglé."""
     resultat = []
     for ch in annules:
-        if not (ch.payee_le or ch.montant > 0):
+        if ch.montant <= 0:
             continue
-        raison = RAISON_DOSSIER_ANNULE_REGLE if ch.payee_le else RAISON_DOSSIER_ANNULE
+        raison = RAISON_DOSSIER_ANNULE
         resultat.append(
             suivi.Echeance(
                 id=ch.id,
@@ -256,7 +259,9 @@ def _regler_frais(
     if ch is None:
         raise Refus.introuvable("Pièce introuvable.")
     audit.verifier_version(s, ch, version, "Ce frais", feminin=False)
-    numero = s.scalar(select(Dossier.numero).where(Dossier.id == ch.dossier_id)) or ""
+    d = s.get(Dossier, ch.dossier_id)
+    if d is None:
+        raise Refus.introuvable("Pièce introuvable.")
     if payee_le is None:
         if ch.payee_le is None:
             raise Refus.etat("Ce frais n'est pas réglé : aucun règlement à annuler.")
@@ -265,10 +270,12 @@ def _regler_frais(
     else:
         factures.verifier_date_reglement(s, payee_le, ch.date_piece)
         action, detail = "règlement", f"réglé le {payee_le:%d/%m/%Y}"
-    with audit.suivre(s, qui, action, ch, numero=numero, detail=detail):
-        ch.payee_le = payee_le
-        ch.payee_par_id = qui.id if payee_le is not None else None
-        s.flush()
+    avant = {"frais": ch.id, "payee_le": ch.payee_le}
+    ch.payee_le = payee_le
+    ch.payee_par_id = qui.id if payee_le is not None else None
+    poste = s.scalar(select(PosteFrais.code).where(PosteFrais.id == ch.poste_id)) or ""
+    noter(s, qui, d, action, f"frais {poste} {ch.piece}".strip() + f" · {detail}",
+          avant=avant, apres={"frais": ch.id, "payee_le": payee_le})  # fmt: skip
 
 
 def regler(

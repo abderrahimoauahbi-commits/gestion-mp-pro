@@ -17,7 +17,7 @@ from fastapi.responses import HTMLResponse
 from gestion_mp_pro.api.communs import encoder_curseur
 from gestion_mp_pro.api.dependances import PaginationDep, SessionDep
 from gestion_mp_pro.api.erreurs import reponses
-from gestion_mp_pro.api.pilotage.routeur import PeriodeDep, Q
+from gestion_mp_pro.api.pilotage.routeur import PeriodeAVenirDep, PeriodeDep, Q
 from gestion_mp_pro.api.suivi import routes_pieces  # noqa: F401 — 224–227
 from gestion_mp_pro.api.suivi.routeur import routeur
 from gestion_mp_pro.api.suivi.schemas import (
@@ -88,7 +88,7 @@ def traiter(ident: int, corps: Traitement, qui: QuiDep, s: SessionDep) -> Signal
 
 
 def filtres_echeancier(
-    periode_: PeriodeDep, q: Q = "", nature: Literal["facture", "frais"] | None = None
+    periode_: PeriodeAVenirDep, q: Q = "", nature: Literal["facture", "frais"] | None = None
 ) -> echeancier.Filtres:
     """Les filtres de l'échéancier (liste et classeur)."""
     du, au = periode_

@@ -12,7 +12,7 @@ from typing import Annotated
 from fastapi import Depends, Query
 
 from gestion_mp_pro.api.communs import nouveau_routeur
-from gestion_mp_pro.api.dependances import borner_date
+from gestion_mp_pro.api.dependances import PREMIER_JOUR, borner_date
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.services import pilotage_prix
 
@@ -23,9 +23,12 @@ Jour = Annotated[date | None, Query(description="AAAA-MM-JJ")]
 DateFacultative = Annotated[date | None, Query(alias="date", description="AAAA-MM-JJ")]
 
 
-def periode(du: Jour = None, au: Jour = None) -> tuple[date | None, date | None]:
-    """`?du=&au=` : deux dates bornées, la première au plus la seconde (422 sinon)."""
-    du, au = (borner_date(x) if x is not None else None for x in (du, au))
+def _periode(du: date | None, au: date | None, futur: bool) -> tuple[date | None, date | None]:
+    """Deux dates bornées (2000 au plus tôt ; aujourd'hui au plus tard sauf `futur`), la
+    première au plus la seconde (422 sinon)."""
+    du, au = (
+        None if x is None else borner_date(x) if not futur else _depuis_2000(x) for x in (du, au)
+    )
     if du is not None and au is not None and du > au:
         raise Refus.saisie(
             f"Période vide : du {du:%d/%m/%Y} au {au:%d/%m/%Y}.",
@@ -35,7 +38,30 @@ def periode(du: Jour = None, au: Jour = None) -> tuple[date | None, date | None]
     return du, au
 
 
+def _depuis_2000(jour: date) -> date:
+    """Une date d'échéance : du 01/01/2000 à 2100 (le futur est permis)."""
+    if not PREMIER_JOUR <= jour <= DERNIER_JOUR:
+        raise Refus.saisie(
+            f"Date hors période ({jour:%d/%m/%Y}) : vérifier l'année.",
+            code="date_invalide",
+            champs={"date": "hors période"},
+        )
+    return jour
+
+
+def periode(du: Jour = None, au: Jour = None) -> tuple[date | None, date | None]:
+    """`?du=&au=` des lectures passées : au plus tard aujourd'hui."""
+    return _periode(du, au, futur=False)
+
+
+def periode_a_venir(du: Jour = None, au: Jour = None) -> tuple[date | None, date | None]:
+    """`?du=&au=` de l'échéancier : des échéances à venir se cherchent aussi."""
+    return _periode(du, au, futur=True)
+
+
 PeriodeDep = Annotated[tuple[date | None, date | None], Depends(periode)]
+PeriodeAVenirDep = Annotated[tuple[date | None, date | None], Depends(periode_a_venir)]
+DERNIER_JOUR = date(2100, 12, 31)
 
 
 def criteres(
