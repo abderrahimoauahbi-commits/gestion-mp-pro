@@ -98,7 +98,9 @@ function GestesPeriode({ actuelle, onGeste }: GestesProps) {
         : undefined
   return (
     <div className={styles.rangee}>
-      <DateChamp libelle="Clore jusqu’au" valeur={jour} max={hier} onChange={setJour} />
+      <span className={styles.champDate}>
+        <DateChamp libelle="Clore jusqu’au" valeur={jour} max={hier} onChange={setJour} />
+      </span>
       <Bouton
         variante="principal"
         manque={jour ? [] : ['la date de clôture']}

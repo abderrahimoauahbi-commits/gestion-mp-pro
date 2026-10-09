@@ -148,3 +148,14 @@
     min-height: auto;
   }
 }
+
+.date {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--espace-1);
+}
+
+.date > :last-child {
+  width: 150px;
+}

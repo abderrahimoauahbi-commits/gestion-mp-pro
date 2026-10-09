@@ -1,5 +1,5 @@
 /**
- * Fenêtre « Historique des paramètres et des cours de change » (route 25 ; direction) : chaque
+ * Fenêtre « Historique des paramètres » (route 25 ; direction) : chaque
  * changement, le plus récent d'abord, avant → après **à la française** (« 10,85 », « 2 % » ;
  * P8-13), par qui et pourquoi. Chargée 500 par 500 ; la recherche affine ce qui est chargé.
  */
@@ -20,7 +20,6 @@ const COLONNES: readonly Colonne<Changement>[] = [
     cle: 'libelle',
     titre: 'Paramètre',
     recherche: (c) => [c.cle],
-    rendu: (c) => (c.cle.startsWith('cours_') ? `Cours ${c.cle.slice(6)} → MAD` : c.libelle),
   },
   { cle: 'avant_lisible', titre: 'Avant', droite: true },
   { cle: 'apres_lisible', titre: 'Nouvelle valeur', droite: true },
@@ -31,7 +30,7 @@ const COLONNES: readonly Colonne<Changement>[] = [
 export function HistoriqueParametres({ onFermer }: { onFermer: () => void }) {
   const p = useListePaginee<Changement>('/parametres/historique')
   return (
-    <Fenetre titre="Historique des paramètres et des cours de change" taille="large" onFermer={onFermer}>
+    <Fenetre titre="Historique des paramètres" taille="large" onFermer={onFermer}>
       <Note>Chaque changement, le plus récent d’abord.</Note>
       {p.requete.isError ? (
         <Erreur erreur={p.requete.error} onReessayer={() => void p.requete.refetch()} />

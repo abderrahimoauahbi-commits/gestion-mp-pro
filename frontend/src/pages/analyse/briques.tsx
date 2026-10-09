@@ -110,3 +110,21 @@ export function Deux({
     </>
   )
 }
+
+/** Une date de filtre (« Du », « Au ») avec son libellé, sur une ligne. */
+export function DateFiltre({
+  libelle,
+  titre,
+  children,
+}: {
+  libelle: string
+  titre: string
+  children: ReactNode
+}) {
+  return (
+    <span className={styles.date} title={titre}>
+      <span className={styles.note}>{libelle}</span>
+      {children}
+    </span>
+  )
+}

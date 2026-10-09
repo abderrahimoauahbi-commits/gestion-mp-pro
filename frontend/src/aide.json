@@ -813,6 +813,34 @@
       "grandeur": "Ruptures",
       "texte": "Les matières affichées au statut RUPTURE : stock projeté à zéro ou moins."
     },
+    "sauvegarde_conservees": {
+      "grandeur": "Sauvegardes conservées",
+      "texte": "Les fichiers de cette base dans le dossier des sauvegardes : une automatique par jour gardée 14 jours, puis la première de chaque mois gardée 12 mois ; les manuelles et « avant » ne s’effacent jamais seules."
+    },
+    "sauvegarde_copie": {
+      "grandeur": "Copie de sécurité",
+      "texte": "Chaque sauvegarde recopiée dans un second emplacement (GESTIONMPPRO_SAUVEGARDES_COPIE), vérifiée à la taille."
+    },
+    "sauvegarde_derniere": {
+      "grandeur": "Dernière sauvegarde",
+      "texte": "L’heure de la dernière sauvegarde de cette base, relue (pg_restore --list) ; en rouge si elle a plus de 26 heures ou si la sauvegarde est en défaut."
+    },
+    "serveur_base": {
+      "grandeur": "Base de données",
+      "texte": "La base PostgreSQL de ce serveur, sa version et sa taille ; en rouge si son schéma n’est pas celui qu’attend la version."
+    },
+    "serveur_connectes": {
+      "grandeur": "Connectés",
+      "texte": "Les comptes qui ont une session ouverte (non expirée)."
+    },
+    "serveur_reseau": {
+      "grandeur": "Adresse sur le réseau",
+      "texte": "L’adresse où les postes de l’usine joignent le serveur."
+    },
+    "serveur_version": {
+      "grandeur": "Version",
+      "texte": "La version de Gestion MP PRO qui répond, et le numéro du schéma de sa base."
+    },
     "seuil_alerte": {
       "grandeur": "Seuil d’alerte",
       "texte": "Le plus grand de : stock minimum de la fiche (plafonné à N mois de la consommation à venir ; aucun pour une matière non consommée), couverture minimum de la fiche × (1 + marge de sécurité), jours de sécurité de la classe ABC. Le délai du fournisseur n’y est plus : il est déjà retiré du stock projeté."

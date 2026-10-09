@@ -21,7 +21,7 @@ import { moisCourant } from '../../../lib/heure'
 import { useSession } from '../../../lib/session'
 import { useEtatListe } from '../../catalogue/etatListe'
 import styles from '../analyse.module.css'
-import { ChoixListe, Criteres } from '../briques'
+import { ChoixListe, Criteres, DateFiltre } from '../briques'
 import { useEcheancier } from '../donnees'
 import type { Echeancier as E, EcheanceLigne } from '../types'
 import { colonnesEcheances, type VueEcheancier } from './colonnes'
@@ -104,8 +104,7 @@ function Outils({ etat, n }: { etat: ReturnType<typeof useEtatListe>; n: number 
         ]}
         onChange={(v) => etat.choix.poser('nature', v || null)}
       />
-      <span className={styles.rangee} title="Échéances à partir de ce jour">
-        <span className={styles.note}>Du</span>
+      <DateFiltre libelle="Du" titre="Échéances à partir de ce jour">
         <DateChamp
           libelle="Du"
           valeur={du}
@@ -113,9 +112,8 @@ function Outils({ etat, n }: { etat: ReturnType<typeof useEtatListe>; n: number 
           futurPermis={!au}
           onChange={(v) => etat.choix.poser('du', v || null)}
         />
-      </span>
-      <span className={styles.rangee} title="Échéances jusqu’à ce jour inclus">
-        <span className={styles.note}>Au</span>
+      </DateFiltre>
+      <DateFiltre libelle="Au" titre="Échéances jusqu’à ce jour inclus">
         <DateChamp
           libelle="Au"
           valeur={au}
@@ -123,7 +121,7 @@ function Outils({ etat, n }: { etat: ReturnType<typeof useEtatListe>; n: number 
           futurPermis
           onChange={(v) => etat.choix.poser('au', v || null)}
         />
-      </span>
+      </DateFiltre>
       <Criteres nombre={n} onEffacer={etat.choix.effacer} />
     </>
   )
