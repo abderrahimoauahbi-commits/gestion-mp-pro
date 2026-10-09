@@ -38,9 +38,9 @@ from gestion_mp_pro.modeles import (
     ReceptionLigne,
 )
 from gestion_mp_pro.modeles.enums import StatutDossier
-from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import audit, factures, horloge
 from gestion_mp_pro.services.importations.socle import noter
+from gestion_mp_pro.services.recherche import trouve
 
 Genre = Literal["facture", "frais"]
 DANS_30_JOURS = 30
@@ -187,9 +187,9 @@ def _ecartes(annules: list[suivi.FraisAPayer]) -> list[suivi.Echeance]:
 
 
 def _garde(x: suivi.Echeance, f: Filtres) -> bool:
-    mots = normaliser(f.q).split()
-    texte = normaliser(f"{x.genre} {x.tiers} {x.piece} {x.devise}")
-    return (f.nature is None or x.objet == f.nature) and all(m in texte for m in mots)
+    return (f.nature is None or x.objet == f.nature) and trouve(
+        f.q, x.genre, x.tiers, x.piece, x.devise
+    )
 
 
 def calculer(s: Session, f: Filtres) -> Echeancier:

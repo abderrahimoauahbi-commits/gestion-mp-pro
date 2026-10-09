@@ -10,6 +10,7 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any
 
+from gestion_mp_pro.calcul.constantes import LIBELLES_STATUT
 from gestion_mp_pro.exports.classeur import Colonne, Feuille, classeur, titre
 
 MOIS = 12
@@ -71,7 +72,7 @@ def besoins(vue: dict[str, Any], conseil: bool) -> bytes:
         Colonne("Disponible (kg)", lambda x: x["stock_disponible"], "kg"),
         Colonne("Commandes en cours (kg)", lambda x: x["bc_en_cours"], "kg"),
         Colonne("Projeté (kg)", lambda x: x["stock_projete"], "kg"),
-        Colonne("Statut", lambda x: x["statut"]),
+        Colonne("Statut", lambda x: LIBELLES_STATUT.get(x["statut"], x["statut"])),
     ]
     if conseil:
         colonnes.append(Colonne("À commander (kg)", lambda x: x["quantite_a_commander"], "kg"))

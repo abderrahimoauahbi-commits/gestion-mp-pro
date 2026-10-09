@@ -21,15 +21,13 @@ from fabriques.importations import (
     ouvrir,
     poste,
 )
-from fabriques.receptions import menage, ok  # noqa: F401 — fixture du module
+from fabriques.receptions import ok
 from fabriques.referentiels import code_douanier
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Matiere, PosteFrais
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture(scope="module")
@@ -68,7 +66,7 @@ def test_un_dossier_par_facture(arrivees: dict[str, Any], achats: TestClient) ->
     d = ouvrir(achats, imp.f("FAC-1"))
     assert d["nb_lignes"] == 3 and d["facture"]["numero"] == imp.f("FAC-1") and not d["a_la_main"]
     assert d["pieces"] == [{"facture": imp.f("FAC-1"), "receptions": [arrivees["r1"]["numero"]]}]
-    assert d["numero"].endswith("/25") and d["statut"] == "ouvert" and not d["repris"]
+    assert d["numero"].endswith("/26") and d["statut"] == "ouvert" and not d["repris"]
     r = achats.post("/api/dossiers", json={"facture_id": d["facture"]["id"]})
     assert r.status_code == 409 and d["numero"] in r.json()["detail"]
     assert r.json()["detail"].startswith("Cette facture a déjà son dossier")

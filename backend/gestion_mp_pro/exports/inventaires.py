@@ -38,7 +38,7 @@ COLONNES_LISTE = (
     Colonne("Validé par", lambda x: x.valide_par),
     Colonne("Validé le", lambda x: x.valide_le, "horodatage"),
     Colonne("Abandonné ou annulé par", lambda x: x.abandonne_par or x.annule_par),
-    Colonne("Motif", lambda x: x.annulation_motif),
+    Colonne("Motif", lambda x: x.abandon_motif or x.annulation_motif),
 )
 """Route 239."""
 

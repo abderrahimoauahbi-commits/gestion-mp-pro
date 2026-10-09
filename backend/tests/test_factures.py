@@ -25,7 +25,6 @@ from fabriques.receptions import (
     geste,
     j,
     ligne_du_bon,
-    menage,  # noqa: F401 — fixture du module
     ok,
     parti,
 )
@@ -36,8 +35,6 @@ from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Facture, Journal, Reception
 from gestion_mp_pro.services import factures
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture
@@ -174,7 +171,7 @@ def test_une_reception_ne_reecrit_pas_une_facture_reglee(
     assert r2["facture"]["id"] == fid and r2["facture"]["montant"] == 500
     refus = facture(achats, r, 409, montant=300)
     assert refus["detail"] == (
-        "La facture F-R est réglée le 31/12/2025 : annuler d'abord le règlement (Analyse › "
+        "La facture F-R est réglée le 03/08/2026 : annuler d'abord le règlement (Analyse › "
         "Échéancier), puis la corriger."
     )
     r3 = geste(achats, camion(achats, eur.fournisseur_id, [_hc(m, quai, "R-3", 10)],

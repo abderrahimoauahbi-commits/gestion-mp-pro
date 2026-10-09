@@ -5,6 +5,8 @@ le lot interne numéroté à la validation, l'annulation tracée. Preuves hérit
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 import pytest
 from fabrique import *  # noqa: F403
 from fabriques.achats import Achat
@@ -18,7 +20,6 @@ from fabriques.receptions import (
     j,
     liberer,
     ligne_du_bon,
-    menage,  # noqa: F401 — fixture du module
     motif_operation,
     ok,
     parti,
@@ -28,8 +29,6 @@ from sqlalchemy import select
 
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Lot, Mouvement
-
-pytestmark = pytest.mark.usefixtures("menage")
 
 
 @pytest.fixture
@@ -79,7 +78,7 @@ def test_reception_partielle_avec_une_ligne_sous_reserve(
     assert [x["numero"] for x in r["commandes"]] == [b["numero"]]
     assert r["lignes"][0]["nb_bobines"] == 192 and r["lignes"][0]["prix"] == 3.05
     r = geste(achats, r, "valider")
-    assert r["numero"].startswith("REC-2025-") and r["statut"] == "validee"
+    assert r["numero"].startswith("REC-2026-") and r["statut"] == "validee"
     c = bon_relu(achats, b["id"])
     assert c["statut"] == "confirmee" and c["recu"] == pytest.approx(1438)
     assert c["livree_le"] is None and c["reste_kg"] == pytest.approx(482)
@@ -260,7 +259,7 @@ def test_une_annulation_contrepasse_tout(achats: TestClient, eur: Achat, quai: Q
             select(Mouvement).where(Mouvement.reception_id == r["id"]).order_by(Mouvement.id)
         ).all()
         assert [float(x.quantite) for x in mvts] == [40, -40]
-        assert {x.date_effet for x in mvts} == {JOUR.replace(day=28)}
+        assert {x.date_effet for x in mvts} == {JOUR - timedelta(days=3)}
     lot = ok(achats.get(f"/api/lots/{r['lignes'][0]['lot_id']}"))
     assert lot["disponible"] == 0
     refus = geste(achats, r, "annuler", 409, motif="encore")

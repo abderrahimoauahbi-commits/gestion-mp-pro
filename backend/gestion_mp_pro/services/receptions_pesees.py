@@ -48,6 +48,11 @@ class FiltresPesees:
     magasin: int | None = None
 
 
+BROUILLON = "Brouillon"
+"""Le « numéro » d'une pesée de brouillon (l'écran dit « Brouillon », jamais « brouillon n° 6 »,
+vocabulaire retiré ; RESTES3, F4)."""
+
+
 @dataclass
 class Pesee:
     """Une ligne pesée de l'archive."""
@@ -108,8 +113,9 @@ def _pesee(r: ReceptionResume, x: LigneLue, tol_bobine: float) -> Pesee:
         compare = "bl" if x.quantite_bl else "reste"
     bobine = ecart_bobine(x.poids_moyen_bobine, float(x.poids_bobine_catalogue))
     return Pesee(
-        x.id, r.id, r.libelle, r.date, r.statut, x.commande_id, x.commande, r.fournisseur_id,
-        r.fournisseur, r.cree_par, controle, x.matiere_id, x.reference, x.designation, x.lot_id,
+        x.id, r.id, r.numero or BROUILLON, r.date, r.statut, x.commande_id, x.commande,
+        r.fournisseur_id, r.fournisseur, r.cree_par, controle, x.matiere_id, x.reference,
+        x.designation, x.lot_id,
         x.lot_numero, x.magasin, x.quantite_bl, x.quantite_attendue, x.quantite_pesee, x.ecart,
         x.ecart_relatif, compare, x.hors_tolerance, x.nb_palettes, x.nb_bobines,
         x.poids_moyen_bobine, x.poids_bobine_catalogue, bobine,

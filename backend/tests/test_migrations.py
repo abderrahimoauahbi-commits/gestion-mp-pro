@@ -104,7 +104,7 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002", "0003", "0004"]
+    assert installation.migrer() == ["0002", "0003", "0004", "0005"]
     assert not installation.schema_en_retard()
 
 
@@ -177,8 +177,40 @@ def test_0004_versions_et_genres_aller_retour(base_vide: None) -> None:
         assert "version" not in set(c.execute(text(colonnes), {"t": "role_nomenclature"}).scalars())
         assert "periode_close" not in _enum_permis(c, "ck_dossier_ligne_cours_origine_enum")
         assert list(c.execute(text("SELECT fichier FROM sauvegarde")).scalars()) == ["q.dump"]
-        command.upgrade(cfg, "0004")
+        command.upgrade(cfg, "head")
         c.execute(text("DELETE FROM sauvegarde"))
+    assert not installation.schema_en_retard()
+
+
+def test_0005_motif_d_abandon_aller_retour(base_vide: None) -> None:
+    """`inventaire.abandon_motif` (RESTES3, demande de D5) : le motif d'un inventaire abandonné
+    quitte `annulation_motif` à la montée, y revient au retour."""
+    installation.migrer()
+    cfg = installation.configuration()
+    colonnes = "SELECT column_name FROM information_schema.columns WHERE table_name = 'inventaire'"
+    lire = "SELECT abandon_motif, annulation_motif FROM inventaire ORDER BY numero"
+    with moteur().connect() as c, c.begin():
+        assert "abandon_motif" in set(c.execute(text(colonnes)).scalars())
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, "0004")
+        assert "abandon_motif" not in set(c.execute(text(colonnes)).scalars())
+        c.execute(
+            text(
+                "INSERT INTO inventaire (numero, date, statut, abandonne_le, annulation_motif)"
+                " VALUES ('INV-2026-0901', '2026-10-01', 'abandonne', now(), 'comptage reporté'),"
+                " ('INV-2026-0902', '2026-10-01', 'ouvert', NULL, '')"
+            )
+        )
+        command.upgrade(cfg, "head")
+        assert [tuple(x) for x in c.execute(text(lire))] == [
+            ("comptage reporté", ""),
+            ("", ""),
+        ]
+        command.downgrade(cfg, "0004")
+        relu = "SELECT annulation_motif FROM inventaire ORDER BY numero"
+        assert list(c.execute(text(relu)).scalars()) == ["comptage reporté", ""]
+        command.upgrade(cfg, "head")
+        c.execute(text("DELETE FROM inventaire"))
     assert not installation.schema_en_retard()
 
 

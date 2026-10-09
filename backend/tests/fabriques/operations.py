@@ -32,10 +32,9 @@ from gestion_mp_pro.services import horloge, stock
 from gestion_mp_pro.services.comptes import Acteur
 from gestion_mp_pro.services.operations import SaisieLigne, SaisieOperation
 
-JOUR_DES_INVENTAIRES = date(2025, 12, 31)
-"""La date des inventaires **validés en base** par les essais : une autre année que celle du
-monde de S1 (`modele_monde`, qui pose `INV-2026-0001` à la main), pour ne jamais lui prendre
-son numéro."""
+JOUR_DES_INVENTAIRES = date(2026, 9, 30)
+"""La date des inventaires **validés en base** par les essais (le monde de S1 travaille sur une
+base neuve dans sa transaction : plus besoin d'une autre année, RESTES3)."""
 
 NOMS = {
     Role.direction: "Direction",

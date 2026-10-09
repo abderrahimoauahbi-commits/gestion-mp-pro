@@ -231,6 +231,7 @@ def _fin(i: dict[str, Any], j: jt.Journal, v: dict[str, Any]) -> None:
         fait = j.dernier("inventaire", "abandon inventaire", i["id"])
         v["abandonne_le"] = fait.quand if fait else fin_du_jour(i["date"])
         v["abandonne_par_id"] = fait.par_id if fait else None
+        v["abandon_motif"] = fait.motif if fait else ""
     if i["statut"] == "annule":
         fait = j.dernier("inventaire", "annulation inventaire", i["id"])
         v["annule_le"] = fait.quand if fait else v["valide_le"]

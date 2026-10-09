@@ -10,7 +10,13 @@ from __future__ import annotations
 
 from datetime import date
 
-from gestion_mp_pro.calcul.constantes import HORS_CATALOGUE, MONO_SOURCE, POUSSIERE
+from gestion_mp_pro.calcul.constantes import (
+    ACTION_AUCUNE,
+    ACTION_CREER_BC,
+    HORS_CATALOGUE,
+    MONO_SOURCE,
+    POUSSIERE,
+)
 from gestion_mp_pro.calcul.modele import Article, Donnees
 from gestion_mp_pro.calcul.outils import palettes
 from gestion_mp_pro.calcul.stock.journal import Agregat
@@ -82,7 +88,7 @@ def quantite_a_commander(
     ligne.montant_a_commander_mad = ligne.montant_a_commander * donnees.parametres.taux(
         ligne.devise
     )
-    ligne.action = f"📝 Créer BC - {ligne.fournisseur}" if ligne.quantite_a_commander > 0 else "—"
+    ligne.action = ACTION_CREER_BC if ligne.quantite_a_commander > 0 else ACTION_AUCUNE
 
 
 def sourcing(ligne: LigneStock, fournisseurs_du_groupe: dict[str, set[str]]) -> None:

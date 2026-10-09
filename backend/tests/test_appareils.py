@@ -50,7 +50,9 @@ def test_enrolement_a_usage_unique(application: FastAPI, direction: TestClient) 
     assert fiche["enrole"] is True and fiche["cree_par"] == "Direction"
     with sessions_db()() as s:
         actions = s.scalars(
-            select(Journal.action).where(Journal.objet == "appareil", Journal.objet_id == ident)
+            select(Journal.action)
+            .where(Journal.objet == "appareil", Journal.objet_id == ident)
+            .order_by(Journal.id)
         )
         assert list(actions) == ["appareil à enrôler", "enrôlement d'appareil"]
 

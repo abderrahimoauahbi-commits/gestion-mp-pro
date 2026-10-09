@@ -813,6 +813,7 @@ CK `prix = 0 OR devise IS NOT NULL`.
 | valide_par_id, valide_le | | O | | CK `ck_inventaire_validation_date` : `(statut IN ('valide', 'annule')) = (valide_le IS NOT NULL)` (un inventaire annulé garde sa validation) | | valide_par, valide_le |
 | abandonne_par_id, abandonne_le | | O | | CK `ck_inventaire_abandon_date` : `(statut = 'abandonne') = (abandonne_le IS NOT NULL)` | ouvert puis laissé : rien n'est ajusté | nouveau |
 | annule_par_id, annule_le | | O | | CK `ck_inventaire_annulation_date` : `(statut = 'annule') = (annule_le IS NOT NULL)` | validé puis défait : ses ajustements sont contre-passés (une fois : UQ `mouvement.contrepasse_id`), datés comme eux | GMP corrigé, étape 17 |
+| abandon_motif | VARCHAR(300) | | `''` | | motif de l'abandon (exigé par le service, ≥ 3 caractères) ; révision 0005 (avant : rangé dans `annulation_motif`) | nouveau (RESTES3) |
 | annulation_motif | VARCHAR(300) | | `''` | | motif de l'annulation (exigé par le service, ≥ 3 caractères) | GMP corrigé, étape 17 |
 | version | | | | | | nouveau |
 
@@ -1300,7 +1301,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | | Gestion MP | PRO |
 |---|---|---|
 | Tables | 49 | **71** (70 tables métier et techniques + `alembic_version`) |
-| Colonnes | 405 | **685** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004) |
+| Colonnes | 405 | **686** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
 | Clés étrangères | 73 | **171**, dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
 | CHECK | 39 | **291** : 176 nommés à la main, 41 `…_enum`, 74 `…_nombre` (refus de NaN) |

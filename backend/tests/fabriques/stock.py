@@ -15,13 +15,13 @@ from collections.abc import Iterator
 from datetime import date, timedelta
 from decimal import Decimal
 
+import base_connue
 import pytest
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.db import fabrique
 from gestion_mp_pro.modeles import (
-    Base,
     Fournisseur,
     Inventaire,
     InventaireMatiere,
@@ -38,8 +38,6 @@ from gestion_mp_pro.services import lots, stock
 JOUR = date(2026, 10, 8)
 """Le jour des essais (horloge figée par `conftest`)."""
 
-SEMEES = {"parametre", "devise", "role_nomenclature", "poste_frais", "magasin", "motif"}
-"""Les tables semées par la révision 0002 : gardées par `vider`."""
 
 _RANG = itertools.count(1)
 
@@ -66,17 +64,10 @@ def s() -> Iterator[Session]:
 
 
 def vider(s: Session) -> None:
-    """Vide l'activité et les référentiels non semés, dans la transaction en cours (annulée à la
-    fin de l'essai : les autres essais ne voient rien)."""
-    tables = [
-        t.name
-        for t in Base.metadata.sorted_tables
-        if t.name not in SEMEES and t.name not in {"utilisateur", "alembic_version"}
-    ]
-    s.execute(text("TRUNCATE " + ", ".join(tables) + " CASCADE"))
-    s.execute(
-        text("DELETE FROM magasin WHERE id NOT IN (SELECT min(id) FROM magasin GROUP BY type)")
-    )
+    """La base d'une installation neuve (`base_connue.remettre` : activité et référentiels vidés,
+    semences et réglages à leur défaut, comptes gardés), dans la transaction en cours (annulée à
+    la fin de l'essai : les autres essais ne voient rien)."""
+    base_connue.remettre(s.connection())
 
 
 def utilisateur(s: Session, nom: str = "Karim", role: Role = Role.alimentation) -> Utilisateur:

@@ -54,7 +54,8 @@ def _file() -> list[Courriel]:
         return list(s.scalars(select(Courriel).order_by(Courriel.id)))
 
 
-def test_le_courriel_du_lundi_part_une_fois(boite: list[EmailMessage]) -> None:
+def test_le_courriel_du_lundi_part_une_fois(base_neuve: None, boite: list[EmailMessage]) -> None:
+    """Base neuve (`base_neuve`) : le courriel compte toute la base (bons en retard, brouillons)."""
     horloge.fixer(LUNDI)
     courriels.executer()
     courriels.executer()  # deuxième passage du même lundi : rien de plus

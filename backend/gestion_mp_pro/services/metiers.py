@@ -212,6 +212,7 @@ def _monter(
     *,
     confirme: Decimal,
     avant: tuple[Reglage, list[Fil]],
+    au_telephone: bool = False,
 ) -> ResultatMontage:
     """Vérifie, confirme l'effet, écrit le montage, l'événement et le journal.
 
@@ -236,7 +237,7 @@ def _monter(
     _ecrire_montage(s, qui, x, demandes, lignes)
     kg_avant = mt.peser(avant_touches, r_avant, poids)
     kg_apres = mt.peser(apres_touches, r, poids)
-    for n in touches if len(touches) == 1 else [None]:
+    for n in touches if au_telephone else [None]:  # origine : `etage` = téléphone (route 100)
         s.add(
             MontageEvenement(
                 metier_id=x.id, etage=n, par_id=qui.id, effet_kg=effet,
@@ -264,12 +265,22 @@ def _total_sur_les_metiers(s: Session, sauf: int) -> Decimal:
 
 
 def monter(
-    s: Session, qui: Qui, metier_id: int, demandes: Sequence[EtageMonte], confirme: Decimal
+    s: Session,
+    qui: Qui,
+    metier_id: int,
+    demandes: Sequence[EtageMonte],
+    confirme: Decimal,
+    *,
+    au_telephone: bool = False,
 ) -> ResultatMontage:
-    """Routes 99 et 100 : le montage d'un ou de plusieurs étages (les autres ne bougent pas)."""
+    """Routes 99 et 100 : le montage d'un ou de plusieurs étages (les autres ne bougent pas).
+
+    `au_telephone` (route 100, un étage) : l'événement porte son étage, ce qui le dit
+    « téléphone » dans l'historique (101) ; un montage du bureau (99, 97), même d'un seul étage,
+    n'en porte pas (« bureau » : RESTES3, F3)."""
     x = verrouiller(s, metier_id)
     avant = (Reglage.de(x), mt.fils_du_metier(s, x.id))
-    return _monter(s, qui, x, demandes, confirme=confirme, avant=avant)
+    return _monter(s, qui, x, demandes, confirme=confirme, avant=avant, au_telephone=au_telephone)
 
 
 def modifier(
