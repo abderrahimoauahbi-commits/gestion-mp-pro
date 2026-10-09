@@ -2,7 +2,8 @@
 
 Corps : `{"detail": "<phrase française>", "code": "<code>"}` (+ `"champs"` pour une saisie).
 422 saisie · 409 état · 404 introuvable · 403 droit · 401 non connecté · 429 trop d'essais ·
-503 indisponible ; jamais de 500 pour une saisie, et un 500 imprévu dit sa référence.
+503 indisponible ; jamais de 500 pour une saisie ni pour un refus de la base (contrainte,
+version périmée : 409), et un 500 imprévu dit sa référence.
 
 Les codes sont tous déclarés dans `CODES` (fichier du lot S0 ; un ajout se demande). Ce module
 n'importe FastAPI qu'à l'installation des gestionnaires : les services y prennent `Refus` sans
@@ -11,6 +12,7 @@ charger la couche HTTP.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from http import HTTPStatus
@@ -18,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
-from gestion_mp_pro.api.traduction import traduire_validation
+from gestion_mp_pro.api.traduction import RIEN_ENREGISTRE, traduire_refus_base, traduire_validation
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, Request
@@ -28,6 +30,11 @@ __all__ = ["CODES", "Code", "ErreurReponse", "Refus", "corps_erreur", "reponses"
 
 MESSAGE_ROUTE_INCONNUE = "Route inconnue."
 MESSAGE_CORPS_ILLISIBLE = "Corps de la requête illisible : du JSON est attendu."
+MESSAGE_VERSION_PERIMEE = (
+    "Cette fiche a été modifiée entre-temps par un autre poste : rouvrez-la pour repartir de "
+    f"sa dernière version. {RIEN_ENREGISTRE}"
+)
+"""Le filet de `StaleDataError` ; `services.audit.verifier_version` (S2) nomme l'auteur."""
 
 
 @dataclass(frozen=True)
@@ -89,6 +96,8 @@ CODES: dict[str, Code] = {
             "documents_lies": "des documents liés empêchent le geste (réceptions d'un bon…)",
             "fiche_utilisee": "fiche utilisée ailleurs : désactiver plutôt que supprimer",
             "fiche_inactive": "fiche désactivée",
+            "reference_absente": "une fiche citée n'existe pas ou plus (refus de la base)",
+            "regle_de_la_base": "saisie refusée par une contrainte de la base (dernier recours)",
             "excedent": "réception au-delà de la tolérance de la commande",
             "effet_change": "l'effet du montage a changé depuis son calcul",
             "ordre_des_dates": "date antérieure au dernier ordre (numéros dans l'ordre des dates)",
@@ -323,11 +332,65 @@ async def _sur_http(requete: Request, exc: Exception) -> Response:
     return reponse
 
 
+async def _sur_refus_base(requete: Request, exc: Exception) -> Response:
+    """Dernier recours (défaut F-07) : une contrainte de la base violée → 409 en français.
+
+    Chaque route refuse d'abord elle-même ce qu'elle sait refuser. La session de la requête a
+    déjà été annulée (`db.session`, `rollback` sur toute exception) : rien n'est enregistré.
+    Le détail technique (état SQL, contrainte, table, message) va au journal du serveur,
+    jamais au client.
+    """
+    from sqlalchemy.exc import DBAPIError
+
+    assert isinstance(exc, DBAPIError)  # noqa: S101
+    orig = exc.orig
+    sqlstate = getattr(orig, "sqlstate", None)
+    diag = getattr(orig, "diag", None)
+    contrainte = getattr(diag, "constraint_name", None)
+    code, detail = traduire_refus_base(
+        sqlstate, contrainte, getattr(diag, "message_detail", None), exc.statement
+    )
+    lignes = str(orig if orig is not None else exc).strip().splitlines()
+    logging.getLogger("gestion_mp_pro").warning(
+        "requete=%s refus de la base sur %s %s : %s (etat=%s contrainte=%s table=%s) %s",
+        getattr(requete.state, "requete", "-"),
+        requete.method,
+        requete.url.path,
+        code,
+        sqlstate,
+        contrainte,
+        getattr(diag, "table_name", None),
+        lignes[0] if lignes else type(exc).__name__,
+    )
+    return reponse_erreur(code, detail)
+
+
+async def _sur_version_perimee(requete: Request, exc: Exception) -> Response:
+    """Filet : l'ORM a trouvé une `version` changée au `flush` → 409 `conflit_version`."""
+    logging.getLogger("gestion_mp_pro").warning(
+        "requete=%s version périmée sur %s %s : %s",
+        getattr(requete.state, "requete", "-"),
+        requete.method,
+        requete.url.path,
+        exc,
+    )
+    return reponse_erreur("conflit_version", MESSAGE_VERSION_PERIMEE)
+
+
 def installer_gestionnaires(app: FastAPI) -> None:
-    """Pose les gestionnaires d'erreurs sur l'application (le 500 est tracé par `trace`)."""
+    """Pose les gestionnaires d'erreurs sur l'application (le 500 est tracé par `trace`).
+
+    `IntegrityError` et `DataError` (contrainte de la base) et `StaleDataError` (version
+    périmée) deviennent des 409 : jamais de 500 pour un refus de la base.
+    """
     from fastapi.exceptions import RequestValidationError
+    from sqlalchemy.exc import DataError, IntegrityError
+    from sqlalchemy.orm.exc import StaleDataError
     from starlette.exceptions import HTTPException
 
     app.add_exception_handler(Refus, _sur_refus)
     app.add_exception_handler(RequestValidationError, _sur_validation)
     app.add_exception_handler(HTTPException, _sur_http)
+    app.add_exception_handler(IntegrityError, _sur_refus_base)
+    app.add_exception_handler(DataError, _sur_refus_base)
+    app.add_exception_handler(StaleDataError, _sur_version_perimee)
