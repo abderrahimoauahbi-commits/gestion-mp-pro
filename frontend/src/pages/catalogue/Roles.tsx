@@ -18,12 +18,14 @@ import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
-import { api } from '../../lib/api'
+import { api, ErreurApi } from '../../lib/api'
 import { nombre } from '../../lib/format'
 import { useEcriture } from '../../lib/requetes'
 import { LONGUEURS } from './bornes'
 import styles from './catalogue.module.css'
+import { BandeauConflit } from './Conflit'
 import type { Classification, RoleNomenclature } from './types'
+import { useFiche, type Fiche } from './useFiche'
 
 /** Ce qui empêche de supprimer un rôle (même règle que le serveur). */
 export function blocagesRole(r: RoleNomenclature): string[] {
@@ -105,31 +107,24 @@ function AjoutRole({ prochain }: { prochain: number }) {
     setOrdre(null)
   }
   return (
-    <div className={styles.rangee}>
-      <Saisie
-        libelle="Nouveau rôle"
-        valeur={code}
-        onChange={setCode}
-        max={LONGUEURS.CODE_ROLE}
-        placeholder="Nouveau rôle (compté au kilo) : Velours…"
-      />
-      <Nombre
-        libelle="Ordre"
-        valeur={ordre ?? prochain}
-        onChange={setOrdre}
-        min={0}
-        max={999}
-        decimales={0}
-      />
-      <Bouton
-        variante="principal"
-        manque={code.trim() ? undefined : ['le nom du rôle']}
-        attente="Ajout…"
-        onClick={ajouter}
-      >
-        Ajouter le rôle
-      </Bouton>
-    </div>
+    <Grille colonnes={3}>
+      <Champ libelle="Nouveau rôle" aide="toujours compté au kilo (seuls Cuir, Franges, Ruban vont au mètre)">
+        <Saisie valeur={code} onChange={setCode} max={LONGUEURS.CODE_ROLE} placeholder="Velours…" />
+      </Champ>
+      <Champ libelle="Ordre" aide="l’ordre des listes et des colonnes">
+        <Nombre valeur={ordre ?? prochain} onChange={setOrdre} min={0} max={999} decimales={0} />
+      </Champ>
+      <Champ libelle="Ajout" groupe>
+        <Bouton
+          variante="principal"
+          manque={code.trim() ? undefined : ['le nom du rôle']}
+          attente="Ajout…"
+          onClick={ajouter}
+        >
+          Ajouter le rôle
+        </Bouton>
+      </Champ>
+    </Grille>
   )
 }
 
@@ -162,46 +157,82 @@ function PiedRole({
   )
 }
 
-function FenetreRole({ r, onFermer }: { r: RoleNomenclature; onFermer: () => void }) {
-  const [code, setCode] = useState(r.code)
-  const [ordre, setOrdre] = useState<number | null>(r.ordre)
-  const change = code.trim() !== r.code || ordre !== r.ordre
-  const ecriture = useEcriture(() =>
-    api.put<RoleNomenclature>(`/classification/roles/${r.id}`, { code: code.trim(), ordre: ordre ?? 0 }),
+interface FormeRole {
+  code: string
+  ordre: number | null
+}
+
+const egalRole = (a: FormeRole, b: FormeRole) => a.code.trim() === b.code.trim() && a.ordre === b.ordre
+
+function ChampsRole({ f, deBase }: { f: Fiche<RoleNomenclature, FormeRole>; deBase: boolean }) {
+  return (
+    <Grille colonnes={2}>
+      <Champ
+        libelle="Nom du rôle"
+        obligatoire
+        aide={deBase ? 'rôle du calcul : le nom reste' : 'le renommer le renomme partout'}
+      >
+        <Saisie
+          valeur={f.forme.code}
+          onChange={(v) => f.maj({ code: v })}
+          max={LONGUEURS.CODE_ROLE}
+          desactive={deBase}
+        />
+      </Champ>
+      <Champ libelle="Ordre" aide="l’ordre des listes et des colonnes">
+        <Nombre
+          valeur={f.forme.ordre}
+          onChange={(v) => f.maj({ ordre: v })}
+          min={0}
+          max={999}
+          decimales={0}
+        />
+      </Champ>
+    </Grille>
   )
+}
+
+function FenetreRole({ role, onFermer }: { role: RoleNomenclature; onFermer: () => void }) {
+  const f = useFiche<RoleNomenclature, FormeRole>(
+    role,
+    (x) => ({ code: x?.code ?? '', ordre: x?.ordre ?? 0 }),
+    egalRole,
+  )
+  const r = f.base ?? role
   const enregistrer = async () => {
-    await ecriture.mutateAsync()
-    dire('Rôle enregistré.')
-    onFermer()
+    const corps = { code: f.forme.code.trim(), ordre: f.forme.ordre ?? 0, version: r.version }
+    if (
+      await f.ecrire(
+        () => api.put<RoleNomenclature>(`/classification/roles/${r.id}`, corps),
+        'Rôle enregistré.',
+      )
+    )
+      onFermer()
   }
+  const recharger = () =>
+    f.recharger(async () => {
+      const lu = (await api.get<Classification>('/classification')).roles.find((x) => x.id === r.id)
+      if (!lu) throw new ErreurApi('Rôle introuvable.', 404, 'introuvable')
+      return lu
+    })
   return (
     <Fenetre
       titre={`Rôle « ${r.code} »`}
       onFermer={onFermer}
-      sale={change}
+      sale={f.sale}
       pied={
         <PiedRole
-          change={change}
+          change={f.sale && !f.conflit}
           enregistrer={enregistrer}
-          manque={code.trim() ? undefined : ['le nom du rôle']}
+          manque={f.forme.code.trim() ? undefined : ['le nom du rôle']}
         />
       }
     >
+      <BandeauConflit message={f.conflit} onRecharger={recharger} />
       {r.de_base ? (
         <Note>« {r.code} » est un rôle de base du calcul : il garde son nom ; son ordre se change.</Note>
       ) : null}
-      <Grille colonnes={2}>
-        <Champ
-          libelle="Nom du rôle"
-          obligatoire
-          aide={r.de_base ? 'rôle du calcul : le nom reste' : 'le renommer le renomme partout'}
-        >
-          <Saisie valeur={code} onChange={setCode} max={LONGUEURS.CODE_ROLE} desactive={r.de_base} />
-        </Champ>
-        <Champ libelle="Ordre" aide="l’ordre des listes et des colonnes">
-          <Nombre valeur={ordre} onChange={setOrdre} min={0} max={999} decimales={0} />
-        </Champ>
-      </Grille>
+      <ChampsRole f={f} deBase={r.de_base} />
     </Fenetre>
   )
 }
@@ -227,7 +258,7 @@ export function Roles({ c, direction }: { c: Classification; direction: boolean 
         triInitial={{ cle: 'ordre', sens: 1 }}
         cliquable={direction ? setOuvert : undefined}
       />
-      {ouvert ? <FenetreRole r={ouvert} onFermer={() => setOuvert(null)} /> : null}
+      {ouvert ? <FenetreRole role={ouvert} onFermer={() => setOuvert(null)} /> : null}
     </>
   )
 }
