@@ -5,8 +5,8 @@ ERP des matières premières de l'usine de tapis : achats, réceptions, importat
 Réécriture professionnelle de Gestion MP (`~/gestion-mp`), au standard de GMAO PRO, avec le
 **même métier** et les **mêmes chiffres** (parité prouvée). Gestion MP reste en service à côté.
 
-> Première version du README (lot S0, socle). Les sections « Documents » et « Exploitation »
-> seront complétées par les lots D9, X1, X2 et X3.
+> Installation et exploitation : voir la section « Avant d'ouvrir au réseau » ci-dessous et
+> [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) (lot X3).
 
 ## En bref
 
@@ -90,6 +90,37 @@ Rien n'est partagé : autre dossier, port (8050), base, rôle PostgreSQL, cookie
 (`gestion_mp_pro_session`), en-tête, verrous (7426201–7426209), dossiers de sauvegardes et de
 pièces. PRO ne lit la base `gestion_mp` qu'en lecture seule (reprise, comparaison) et ne
 touche jamais `~/gestion-mp`.
+
+## Avant d'ouvrir au réseau
+
+Le détail de l'installation et de l'exploitation (poste Mac, serveur Linux, sauvegardes,
+restauration, miroir, surveillance) est dans [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md). Avant
+d'ouvrir Gestion MP PRO aux postes et aux téléphones de l'usine, l'informaticien tient cette
+liste :
+
+1. **Premier compte de direction** créé (écran d'installation, `POST /installation`, une seule
+   fois), puis un compte par personne avec son rôle (direction, achats, alimentation,
+   administrateur technique). Le code de l'alimentation fait **exactement 4 chiffres**.
+2. **HTTPS** en place là où les téléphones se connectent : Caddy sur un serveur Linux
+   (`tls internal` pour un nom interne, à installer une fois sur chaque appareil ; ou certificat
+   public), ou Tailscale sur le poste Mac. HTTPS est **nécessaire** pour l'appareil photo (QR des
+   lots) et pour installer PRO comme une application.
+3. **Écoute réseau** assumée : `127.0.0.1` par défaut ; `GESTIONMPPRO_ECOUTE=0.0.0.0` seulement
+   derrière HTTPS (une écoute réseau sans HTTPS est signalée en rouge dans Administration ›
+   Serveur). Sur un serveur, seuls 80/443 de Caddy sont publiés ; le 8050 ne l'est pas.
+4. **Mot de passe fort sur la base** (serveur exposé : `pg_hba` en `scram-sha-256`, mot de passe
+   dans `GESTIONMPPRO_BASE`) — inutile sur le Mac en `trust` local.
+5. **Copie des sauvegardes hors du serveur** : `GESTIONMPPRO_SAUVEGARDES_COPIE` vers un disque ou
+   un partage monté (une sauvegarde sur le même disque que la base ne protège pas d'une panne).
+6. **Surveillance** branchée sur `GET /api/sante` **en lisant `etat`** (pas seulement le code
+   HTTP) : il dit l'âge de la dernière sauvegarde et les alertes.
+7. **Adresse publique** (`GESTIONMPPRO_ADRESSE`) fixée **avant** d'imprimer les QR d'enrôlement des
+   appareils, qui la portent.
+8. **Essai de restauration** réussi sur une base d'essai (`essais/sauvegarde_restauration.sh`),
+   à refaire chaque mois.
+
+Gestion MP PRO est conçu pour tourner **à côté de Gestion MP** (port 8030) sur le même Mac, sans
+rien partager : voir la section « Coexistence » ci-dessus et `docs/EXPLOITATION.md` § 6.
 
 ## Contribuer
 
