@@ -129,10 +129,13 @@ def photo(s: Session, q: Qualite) -> dict[str, object]:
     }
 
 
-def _journal(s: Session, qui: Qui, action: str, q: Qualite, avant: dict[str, object]) -> None:
-    """Une ligne de journal avec les seuls champs changés."""
+def _journal(s: Session, qui: Qui, action: str, q: Qualite, avant: dict[str, object]) -> bool:
+    """Une ligne de journal avec les seuls champs changés ; rien (faux) si rien n'a changé."""
     a, b = audit.differences(avant, photo(s, q))
+    if not a and not b:
+        return False
     audit.journal(s, qui, action, ObjetJournal.qualite, q.id, detail=q.code, avant=a, apres=b)
+    return True
 
 
 def avertir_oublis(s: Session, q: Qualite) -> str:
@@ -192,8 +195,8 @@ def modifier(s: Session, qui: Qui, qualite_id: int, f: FicheSaisie, version: int
     ecrire_poids(s, q, f.poids)
     oublies = recettes.remplacer(s, q, f.recette) if f.recette is not None else []
     avertissement = avertissement_arretee(oublies) or avertir_oublis(s, q)
-    toucher(q, qui)
-    _journal(s, qui, "modification qualité", q, avant)
+    if _journal(s, qui, "modification qualité", q, avant):
+        toucher(q, qui)
     if plan_avant.actif != q.actif:
         etat = "remise en service" if q.actif else "arrêtée"
         plans.noter_plan(s, qui, q, plan_avant, detail=f"{q.code} : {etat}")

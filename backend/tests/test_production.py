@@ -251,8 +251,11 @@ def test_le_mrp_detaille_rejoint_les_besoins(direction: TestClient, achats: Test
 def test_les_besoins_detailles_a_une_date_passee_lisent_le_stock_de_cette_date(
     achats: TestClient, alimentation: TestClient
 ) -> None:
-    """Hérité : test_audit2_achat::test_les_besoins_detailles_a_une_date_passee_lisent_le_stock
-    _de_cette_date ; et l'alimentation ne reçoit pas le conseil d'achat (E-01)."""
+    """Les besoins à une date passée lisent le stock de cette date, et l'alimentation ne
+    reçoit pas le conseil d'achat (E-01).
+    Hérité :
+    test_audit2_achat::test_les_besoins_detailles_a_une_date_passee_lisent_le_stock_de_cette_date
+    """
     hier = (JOUR - timedelta(days=1)).isoformat()
     besoins = ok(achats.get(f"/api/production/besoins?date={hier}"))
     stock = {x["reference"]: x for x in ok(achats.get(f"/api/stock?date={hier}"))["lignes"]}

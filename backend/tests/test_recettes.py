@@ -182,8 +182,10 @@ def test_d05_fiche_poids_sans_matiere(direction: TestClient) -> None:
 
 
 def test_une_recette_qui_oublie_un_role_est_refusee(direction: TestClient) -> None:
-    """Hérité : test_plan_besoins::test_une_recette_qui_oublie_un_role_est_refusee_et_l_atelier
-    _est_prevenu (partie recette ; la proposition d'ordre est au lot D6)."""
+    """La partie recette (la proposition d'ordre est au lot D6) de
+    Hérité :
+    test_plan_besoins::test_une_recette_qui_oublie_un_role_est_refusee_et_l_atelier_est_prevenu
+    """
     poil, frange = matiere(), matiere(role="Franges")
     q = creer_qualite(direction, poids_m2={"Poil": 1, "Franges": 2}, parts={poil: 100, frange: 100})
     r = direction.put(

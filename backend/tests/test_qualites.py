@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import io
 import json
-from decimal import Decimal
 
 import pytest
 from fabrique import *  # noqa: F403
@@ -146,8 +145,10 @@ def test_l_alimentation_lit_les_qualites_sans_prix(
 
 
 def test_d19_export_des_qualites(direction: TestClient, achats: TestClient) -> None:
-    """D-19 (Hérité : test_defauts_d::test_d19_export_des_qualites ; et test_referentiels_complets
-    ::test_les_exports_des_referentiels, partie qualités) : « En service » et « Fabriquée »."""
+    """D-19 : « En service » et « Fabriquée » (vraie) en deux colonnes ; la partie qualités de
+    Hérité : test_referentiels_complets::test_les_exports_des_referentiels ; et
+    Hérité : test_defauts_d::test_d19_export_des_qualites
+    """
     q = creer_qualite(direction, poids_m2={"Poil": 1}, parts={matiere(): 100})
     ordre_valide(q["id"], 5)
     r = achats.get("/api/export/qualites")
@@ -169,4 +170,10 @@ def test_journal_avant_apres_d_une_qualite(direction: TestClient) -> None:
     lignes_histo = histo if isinstance(histo, list) else histo["elements"]
     derniere = next(x for x in reversed(lignes_histo) if x["action"] == "modification qualité")
     assert derniere["avant"] == {"nom": "Essai D2"} and derniere["apres"] == {"nom": "Autre nom"}
-    assert Decimal(1) == Decimal("1.0")
+    # Renvoyer la fiche telle quelle n'écrit rien : ni journal, ni version.
+    lue = lire_qualite(direction, q["id"])
+    assert (
+        ok(direction.put(f"/api/qualites/{q['id']}", json=corps_fiche(lue)))["version"]
+        == (lue["version"])
+    )
+    assert len(ok(direction.get(f"/api/historique/qualite/{q['id']}"))) == len(lignes_histo)
