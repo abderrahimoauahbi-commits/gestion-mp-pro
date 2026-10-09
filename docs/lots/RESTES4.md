@@ -29,6 +29,24 @@ Chaque comportement corrigé a son essai vitest, qui échoue sans la correction.
 | F5 en-tête | `importations/ecrans.ts` ne cite plus `PageAnalyse` / `PageReglages`. | — |
 | V1 réserve | Ligne du bon : « dont X kg reçus sous réserve, en quarantaine : attendus jusqu'à leur libération » sous le reste à livrer (`messages.texteReserve`) ; fiche : note « Reçu : Dont X kg… » + l'explication `formule.commande_reserve` d'`aide.json`, aussi ajoutée à la formule du « Commandé » du Cockpit (`formuleKpi`). X = `LigneCommande.en_quarantaine` (déjà servi). | `Commandes.test.tsx`, `Cockpit.test.tsx` |
 
+## 1 bis. Adaptation à RESTES3 (`make types` après la fusion)
+
+| Changement du serveur | Ce que fait l'écran | Essai |
+|---|---|---|
+| Statuts du stock en codes (`RUPTURE`…, `NON_CONSOMMEE`), `action` `CREER_BC`/`AUCUNE` | `cleStock` ne lit plus que les codes (`CLES_STOCK`, type `CleStock`) ; les jeux d'essai (`*/essais/*.json`, `plan-achat/donneesEssai.ts`) portent les codes. | `lib/statuts.test.ts` |
+| `LigneStock.fournisseur_id`, `role_id` | « Préparer la commande » (Cockpit, Stock, fiche matière) lit `fournisseur_id` de la ligne ; le Cockpit ne lit plus `/matieres`. Le rôle (nom) reste lu dans `/matieres` (la ligne n'a que son id). | `Cockpit.test.tsx` |
+| `EtapeTracee.document_type/document_id`, `matiere_id`, `ordre_id` | Le n° de document d'une étape mène à sa fiche (`lienMouvement`, `permis`) ; matière et ordre se suivent par leur id (plus de table référence → id ni numéro → id). | `Stock.test.tsx` |
+| `MouvementLigne.devise` nulle hors direction et achats | La colonne prix ne s'écrit qu'avec une devise. | (tsc) |
+| `CommandeResume.en_retard`, `arrivee_attendue`, `arrivee_sous_7_jours`, `kg_en_quarantaine` ; `CommandeFiche.promesse_figee` | Ma journée et Cockpit : retards = `en_retard` (plus de `GET /commandes?filtre=retard`), arrivées = `arrivee_sous_7_jours` triées par `arrivee_attendue` (plus de calcul de dates à l'écran) ; fiche du bon : la date promise figée dit `promesse_figee`, la note de réserve lit `kg_en_quarantaine`. | `taches.test.ts`, `Commandes.test.tsx` |
+| Route 246 `GET /periode-close/brouillons` | Réglages › Période : dès la date choisie, les brouillons datés de la période sont annoncés (genres présents) et « Clore la période… » est grisé avec le refus du serveur. | `Reglages.test.tsx` |
+| QR avec `xmlns` | `administration/qr.ts` n'ajoute plus rien (vu au navigateur : l'image s'affiche). | — |
+| `OrdreResume.metier` « CODE · Nom » | L'atelier l'écrit tel quel (liste, fiche, sortie enregistrée) ; `useNomMetier` ne sert plus qu'à la saisie (métier choisi par id). | `Ordres.test.tsx` |
+| `InventaireFiche.abandon_motif` | L'en-tête d'un inventaire abandonné lit son motif là (plus dans `annulation_motif`). | `Inventaire.test.tsx` |
+| Signalements (`Schema<'SignalementFiche'>`) | Déjà lus dans l'OpenAPI (fait par F1) : ligne de RESTES.md retirée. | — |
+| Lien de la cloche selon le rôle | Le filtre `permis` de la cloche reste (règle générale d'E2 : aucun lien que le rôle ne peut ouvrir). | — |
+
+Inchangés à l'écran : filtres du classeur du plan d'achat (l'écran envoyait déjà `statut`, `priorite`, `abc`, `fournisseur`, `urgence`, `devise`, `pays`) ; pesée « Brouillon » (l'écran lisait déjà le statut) ; recherche à la ponctuation près (côté serveur).
+
 ## 2. Décisions
 
 1. **Prises tenues en kilos** dans le moteur unique (choix de F2) : le téléphone envoyait la quantité
