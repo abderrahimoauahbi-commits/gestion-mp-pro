@@ -30,8 +30,8 @@
     "stock_min": 800.0,
     "stock_min_recalcule": 584.4718451612902,
     "stock_min_plafonne": 584.4718451612902,
-    "statut": "🟢 OK",
-    "statut_couverture": "🟢 OK",
+    "statut": "OK",
+    "statut_couverture": "OK",
     "couverture_jours": 220.09183688655725,
     "couverture_cible_jours": 84.26641366223906,
     "conso_mensuelle": 208.08,
@@ -76,7 +76,7 @@
       222.768, 237.456, 149.32799999999997, 178.70399999999998, 193.392, 208.08, 222.768, 237.456, 237.456,
       208.08, 193.392, 208.08
     ],
-    "action": "—",
+    "action": "AUCUNE",
     "matiere_id": 1,
     "valeur_machine_mad": 30.0
   },

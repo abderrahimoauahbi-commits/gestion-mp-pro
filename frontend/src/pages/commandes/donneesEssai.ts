@@ -57,6 +57,10 @@ const RESUME: CommandeResume = {
   solde_par: null,
   solde_le: null,
   renvoi: null,
+  en_retard: false,
+  arrivee_attendue: null,
+  arrivee_sous_7_jours: false,
+  kg_en_quarantaine: 0,
 }
 
 const FICHE: CommandeFiche = {
@@ -112,6 +116,11 @@ const FICHE: CommandeFiche = {
   solde_par: null,
   solde_le: null,
   renvoi: null,
+  en_retard: false,
+  arrivee_attendue: '2026-10-15',
+  arrivee_sous_7_jours: false,
+  kg_en_quarantaine: 505,
+  promesse_figee: null,
   seuil_approbation: 200000.0,
   contact: 'M. Filature',
   email: 'achats@filature.com',
