@@ -156,6 +156,23 @@ describe('Commandes', () => {
     expect(within(fenetre).getByText(/ses lignes sont figées/)).toBeInTheDocument()
   })
 
+  it('reçu sous réserve : la ligne et la fiche disent la part en quarantaine, attendue jusqu’à sa libération', async () => {
+    serveur('achats', ficheEssai())
+    monterApp('/commandes/3')
+    const fenetre = await screen.findByRole('dialog', { name: /Bon de commande BC-2026-0002/ })
+    const tableau = within(fenetre).getByRole('table', { name: 'Lignes du bon' })
+    expect(
+      within(tableau).getByText(
+        'dont 505 kg reçus sous réserve, en quarantaine : attendus jusqu’à leur libération',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      within(fenetre).getByText(
+        /Reçu : Dont 505 kg reçus sous réserve, en quarantaine : attendus jusqu’à leur libération\./,
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('409 à l’enregistrement : le message du serveur et « Recharger la fiche », la saisie reste', async () => {
     serveur('achats', brouillon(), {
       'PUT /commandes/9': {

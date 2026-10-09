@@ -2,11 +2,12 @@
  * Les six indicateurs du Cockpit, **tels que le serveur les envoie** (route 209, `kpi[]`) : valeur,
  * unité, détail, formule, lien, ton. L'écran ne recalcule rien (LOTS F1) : il met la valeur en forme
  * selon son unité, pose la formule dans la bulle « ? » et ouvre l'écran qui la détaille (P1-27).
- * La valeur du stock y est celle de la Valorisation (E-06), fil sur les métiers compris.
+ * La valeur du stock y est celle de la Valorisation (E-06), fil sur les métiers compris ; le
+ * « Commandé » dit qu'une marchandise reçue sous réserve y reste attendue (décision V1).
  */
 import { Indicateurs } from '../../composants/mise-en-page/Indicateurs'
 import { Kpi } from '../../composants/retour/Kpi'
-import { SUR_LES_METIERS } from '../../lib/aide'
+import { formule, SUR_LES_METIERS } from '../../lib/aide'
 import { permis } from '../../lib/droits'
 import { INSECABLE, jours, montant, montantCourt, nombre, part } from '../../lib/format'
 import { useSession } from '../../lib/session'
@@ -28,6 +29,13 @@ export function valeurKpi(k: KpiServeur): { valeur: string; unite?: string; exac
   return { valeur: nombre(k.valeur, 0, 2), unite: k.unite || undefined }
 }
 
+/** La formule du serveur, et le texte unique de l'aide qui l'éclaire (fil monté, réserve). */
+export function formuleKpi(k: KpiServeur): string {
+  if (k.cle === 'valeur') return `${k.formule}. ${SUR_LES_METIERS}`
+  if (k.cle === 'commande') return `${k.formule}. ${formule('commande_reserve')}`
+  return k.formule
+}
+
 export function IndicateursCockpit({ kpi }: { kpi: readonly KpiServeur[] }) {
   const { role } = useSession()
   return (
@@ -41,7 +49,7 @@ export function IndicateursCockpit({ kpi }: { kpi: readonly KpiServeur[] }) {
             valeur={v.valeur}
             unite={v.unite}
             exact={v.exact}
-            formule={k.cle === 'valeur' ? `${k.formule}. ${SUR_LES_METIERS}` : k.formule}
+            formule={formuleKpi(k)}
             detail={k.detail}
             ton={tonDe(k.ton)}
             lien={k.lien && permis(role, k.lien) ? k.lien : undefined}

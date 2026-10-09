@@ -14,7 +14,7 @@ import type { Cockpit, CommandeResume, EtatSauvegardes } from '../accueil/types'
 import { DONNEES, servirJournee } from '../accueil/essaisServeur'
 import { actionsCockpit, tacheSauvegarde, totalAFaire } from './aFaire'
 import { moisProposes } from './BilanDuMois'
-import { valeurKpi } from './IndicateursCockpit'
+import { formuleKpi, valeurKpi } from './IndicateursCockpit'
 
 beforeAll(prechargerPages)
 beforeEach(() => {
@@ -160,5 +160,24 @@ describe('Cockpit — onglets', () => {
     expect(bilan).toHaveAttribute('href', '/api/documents/bilan?mois=2026-09')
     expect(bilan).toHaveAttribute('target', '_blank')
     expect(moisProposes('2026-01', 3)).toEqual(['2026-01', '2025-12', '2025-11'])
+  })
+})
+
+describe('Cockpit › Commandé', () => {
+  it('la formule du « Commandé » explique la marchandise reçue sous réserve, attendue jusqu’à sa libération', () => {
+    const k = {
+      cle: 'commande',
+      libelle: 'Commandé',
+      valeur: 1,
+      unite: 'MAD',
+      detail: '',
+      formule: 'Bons partis',
+      lien: null,
+      ton: 'neutre',
+    }
+    expect(formuleKpi(k as never)).toMatch(
+      /^Bons partis\. Une marchandise reçue sous réserve attend en quarantaine/,
+    )
+    expect(formuleKpi(k as never)).toMatch(/« dont X kg reçus sous réserve, en quarantaine »/)
   })
 })
