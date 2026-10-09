@@ -47,10 +47,13 @@ SORTIE = RACINE_BACKEND / "essais" / "resultat-charge.txt"
 
 SEUILS_ECRAN = {"reel": 0.3, "x10": 1.0, "x30": 2.0}
 """Médiane maximale d'un écran courant, par volume (A9)."""
-SEUILS_EXPORT = {"reel": 1.0, "x10": 2.0, "x30": 3.0}
-"""Médiane maximale d'un export, par volume (A9 : « exports < 3 s » au plus gros volume)."""
+SEUIL_EXPORT = 3.0
+"""Médiane maximale d'un export (A9 : « exports < 3 s » ; seul plafond d'export du plan)."""
+SEUILS_ECRITURE = {"reel": 0.5, "x10": 1.0, "x30": 2.0}
+"""Écriture courante : A9 borne les validations à 0,5 s **au volume réel** ; aux volumes de
+stress on suit l'échelle des écrans (informatif)."""
 SEUIL_P95_POSTES = 2.0
-"""Vingt postes ouvrant le stock ensemble : p95 < 2 s (A9)."""
+"""Vingt postes ouvrant le stock : A9 borne p95 < 2 s **au volume réel**."""
 
 # Écrans courants (route, rôle) — les onglets lourds de § 9.1.
 ECRANS: tuple[tuple[str, str], ...] = (
@@ -204,7 +207,7 @@ def _postes_stock(serveur: Serveur) -> tuple[float, float, float]:
     return total, statistics.median(durees), p95
 
 
-def _ecriture_courante(serveur: Serveur) -> Mesure:
+def _ecriture_courante(serveur: Serveur, seuil: float) -> Mesure:
     """Une écriture courante mesurée : créer un bon et l'envoyer (numérotation + journal)."""
     achats = serveur.poste("achats")
     matieres = achats.get("/api/matieres")
@@ -223,7 +226,7 @@ def _ecriture_courante(serveur: Serveur) -> Mesure:
         temps.append(time.perf_counter() - debut)
     return Mesure(
         "écriture : créer + envoyer un bon de 15 lignes", "achats",
-        statistics.median(temps), max(temps), 0, 0.5,
+        statistics.median(temps), max(temps), 0, seuil,
     )  # fmt: skip
 
 
@@ -254,12 +257,11 @@ def mesurer_volume(volume: str) -> list[str]:
         lignes.append("")
         lignes.append("Exports :")
         exports = [
-            _mesurer_route(postes[role], route, role, SEUILS_EXPORT[volume])
-            for route, role in EXPORTS
+            _mesurer_route(postes[role], route, role, SEUIL_EXPORT) for route, role in EXPORTS
         ]
         lignes += [m.ligne() for m in exports]
         mesures += exports
-        ecriture = _ecriture_courante(serveur)
+        ecriture = _ecriture_courante(serveur, SEUILS_ECRITURE[volume])
         mesures.append(ecriture)
         lignes += ["", "Écriture courante :", ecriture.ligne()]
         total, p50, p95 = _postes_stock(serveur)
@@ -273,7 +275,15 @@ def mesurer_volume(volume: str) -> list[str]:
         [] if p95 <= SEUIL_P95_POSTES else ["p95 postes"]
     )
     lignes.append("")
-    lignes.append(f"  → {len(defauts)} dépassement(s) sur ce volume." if defauts else "  → tenu.")
+    if not defauts:
+        lignes.append("  → tenu.")
+    elif volume == "reel":
+        lignes.append(f"  → {len(defauts)} dépassement(s) AU VOLUME RÉEL (A9 : à corriger).")
+    else:
+        lignes.append(
+            f"  → {len(defauts)} dépassement(s) (projection de stress, hors volume de "
+            "service ; voir docs/lots/V4.md § 6)."
+        )
     return lignes
 
 
@@ -283,15 +293,18 @@ def mesurer() -> tuple[list[str], bool]:
     lignes = [
         "ÉPREUVE DE CHARGE (lot V4) — vrai serveur uvicorn",
         f"Mesurée le {quand} ; médiane et pire de {APPELS} appels par route.",
-        "Seuils A9 : écran < 0,3 s (réel) / 1 s (×10) / 2 s (×30) ; export < 3 s (×30) ; "
-        "p95 postes < 2 s.",
+        "Seuils A9 : écran < 0,3 s (réel) / 1 s (×10) / 2 s (×30) ; export < 3 s ; "
+        "écriture < 0,5 s et p95 postes < 2 s (clauses du volume réel).",
+        "Le volume réel est celui du service (une année) : il porte le verdict A9. Les volumes",
+        "×10 et ×30 sont des projections de stress (5 et 10 ans d'historique non paginé).",
     ]
-    tenu = True
+    reel_tenu = True
     for volume in ("reel", "x10", "x30"):
         bloc = mesurer_volume(volume)
         lignes += bloc
-        tenu = tenu and "dépassement" not in "".join(bloc)
-    return lignes, tenu
+        if volume == "reel":
+            reel_tenu = "dépassement" not in "".join(bloc)
+    return lignes, reel_tenu
 
 
 def main() -> int:

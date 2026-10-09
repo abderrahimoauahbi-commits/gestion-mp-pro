@@ -1,0 +1,146 @@
+ÉPREUVE DE CHARGE (lot V4) — vrai serveur uvicorn
+Mesurée le 2026-10-09 18:55 ; médiane et pire de 5 appels par route.
+Seuils A9 : écran < 0,3 s (réel) / 1 s (×10) / 2 s (×30) ; export < 3 s ; écriture < 0,5 s et p95 postes < 2 s (clauses du volume réel).
+Le volume réel est celui du service (une année) : il porte le verdict A9. Les volumes
+×10 et ×30 sont des projections de stress (5 et 10 ans d'historique non paginé).
+
+==========================================================================================
+VOLUME REEL — postgresql+psycopg:///gestion_mp_pro_v4_charge_reel_essai
+  10438 mouvements, 1684 lots, 335 bons, 90 dossiers, 2 années d'activité
+==========================================================================================
+  (uvicorn, 2 processus, port 8111)
+
+Écrans courants :
+  [  ok  ]      24 ms  (pire    31 ms, seuil 300 ms,   287666 o)  dire /api/stock
+  [  ok  ]      30 ms  (pire    38 ms, seuil 300 ms,   281429 o)  alim /api/stock
+  [  ok  ]      49 ms  (pire    90 ms, seuil 300 ms,      672 o)  dire /api/lots?non_nuls=true
+  [  ok  ]      83 ms  (pire   136 ms, seuil 300 ms,  1161465 o)  dire /api/mouvements?limite=2000
+  [  ok  ]      19 ms  (pire    21 ms, seuil 300 ms,    57743 o)  dire /api/plan-achat
+  [  ok  ]       6 ms  (pire     7 ms, seuil 300 ms,    14472 o)  dire /api/cockpit
+  [  ok  ]      21 ms  (pire    22 ms, seuil 300 ms,    56255 o)  dire /api/valorisation
+  [  ok  ]       9 ms  (pire    10 ms, seuil 300 ms,    51524 o)  dire /api/controles
+  [  ok  ]      20 ms  (pire    70 ms, seuil 300 ms,       61 o)  dire /api/controles/soldes
+  [  ok  ]      96 ms  (pire   145 ms, seuil 300 ms,      335 o)  dire /api/commandes
+  [  ok  ]      93 ms  (pire   145 ms, seuil 300 ms,      317 o)  dire /api/receptions
+  [  ok  ]     109 ms  (pire   160 ms, seuil 300 ms,   426521 o)  dire /api/receptions/pesees
+  [  ok  ]     235 ms  (pire   244 ms, seuil 300 ms,      320 o)  dire /api/ordres
+  [  ok  ]     241 ms  (pire   285 ms, seuil 300 ms,      320 o)  alim /api/ordres
+  [  ok  ]      66 ms  (pire   122 ms, seuil 300 ms,      319 o)  dire /api/ordres/consommation
+  [  ok  ]      89 ms  (pire   140 ms, seuil 300 ms,       90 o)  dire /api/dossiers
+  [  ok  ]      37 ms  (pire    38 ms, seuil 300 ms,       12 o)  dire /api/inventaires
+  [  ok  ]      11 ms  (pire    11 ms, seuil 300 ms,    97469 o)  dire /api/analyse/revient
+  [  ok  ]      20 ms  (pire    20 ms, seuil 300 ms,   152556 o)  dire /api/production/besoins
+  [  ok  ]       8 ms  (pire     8 ms, seuil 300 ms,    50267 o)  dire /api/prix/matrice
+  [  ok  ]      16 ms  (pire    16 ms, seuil 300 ms,    85204 o)  dire /api/fournisseurs/performance
+  [  ok  ]      33 ms  (pire    36 ms, seuil 300 ms,   291955 o)  dire /api/echeancier
+  [  ok  ]      21 ms  (pire    21 ms, seuil 300 ms,   280796 o)  dire /api/stock?date=2026-03-31
+
+Exports :
+  [  ok  ]    1325 ms  (pire  1453 ms, seuil 3000 ms,   971496 o)  dire /api/export/mouvements
+  [  ok  ]     310 ms  (pire   311 ms, seuil 3000 ms,   189009 o)  dire /api/export/journal
+  [  ok  ]     356 ms  (pire   366 ms, seuil 3000 ms,   180977 o)  dire /api/export/commandes
+  [  ok  ]     430 ms  (pire   482 ms, seuil 3000 ms,   200853 o)  dire /api/export/receptions
+  [  ok  ]     319 ms  (pire   334 ms, seuil 3000 ms,   211024 o)  dire /api/export/dossiers
+  [  ok  ]     110 ms  (pire   184 ms, seuil 3000 ms,   150110 o)  dire /api/export/revient
+  [  ok  ]      89 ms  (pire    90 ms, seuil 3000 ms,    51195 o)  dire /api/export/pilotage
+
+Écriture courante :
+  [  ok  ]      80 ms  (pire   131 ms, seuil 500 ms,        0 o)  acha écriture : créer + envoyer un bon de 15 lignes
+
+Vingt postes ouvrent le stock ensemble : total 0.67 s, médiane 650 ms, p95 667 ms  [ok]
+
+  → tenu.
+
+==========================================================================================
+VOLUME X10 — postgresql+psycopg:///gestion_mp_pro_v4_charge_x10_essai
+  104380 mouvements, 16840 lots, 3305 bons, 900 dossiers, 6 années d'activité
+==========================================================================================
+  (uvicorn, 2 processus, port 8111)
+
+Écrans courants :
+  [  ok  ]     111 ms  (pire   113 ms, seuil 1000 ms,   570376 o)  dire /api/stock
+  [  ok  ]     123 ms  (pire   126 ms, seuil 1000 ms,   564246 o)  alim /api/stock
+  [  ok  ]     556 ms  (pire   576 ms, seuil 1000 ms,     6720 o)  dire /api/lots?non_nuls=true
+  [  ok  ]      95 ms  (pire   217 ms, seuil 1000 ms,  1175111 o)  dire /api/mouvements?limite=2000
+  [  ok  ]     102 ms  (pire   104 ms, seuil 1000 ms,      294 o)  dire /api/plan-achat
+  [  ok  ]      12 ms  (pire    23 ms, seuil 1000 ms,     7175 o)  dire /api/cockpit
+  [  ok  ]     186 ms  (pire   298 ms, seuil 1000 ms,   113124 o)  dire /api/valorisation
+  [  ok  ]      29 ms  (pire    36 ms, seuil 1000 ms,   155893 o)  dire /api/controles
+  [  ok  ]     241 ms  (pire   245 ms, seuil 1000 ms,       62 o)  dire /api/controles/soldes
+  [  ok  ]     895 ms  (pire  1021 ms, seuil 1000 ms,     3305 o)  dire /api/commandes
+  [DÉFAUT]    1036 ms  (pire  1062 ms, seuil 1000 ms,     3170 o)  dire /api/receptions
+  [DÉFAUT]    1209 ms  (pire  1223 ms, seuil 1000 ms,   427187 o)  dire /api/receptions/pesees
+  [DÉFAUT]    2320 ms  (pire  2558 ms, seuil 1000 ms,     3200 o)  dire /api/ordres
+  [DÉFAUT]    2479 ms  (pire  2657 ms, seuil 1000 ms,     3200 o)  alim /api/ordres
+  [  ok  ]     986 ms  (pire  1053 ms, seuil 1000 ms,     3190 o)  dire /api/ordres/consommation
+  [  ok  ]     897 ms  (pire   994 ms, seuil 1000 ms,      900 o)  dire /api/dossiers
+  [  ok  ]     399 ms  (pire   457 ms, seuil 1000 ms,      120 o)  dire /api/inventaires
+  [  ok  ]      64 ms  (pire    65 ms, seuil 1000 ms,   270819 o)  dire /api/analyse/revient
+  [  ok  ]     104 ms  (pire   107 ms, seuil 1000 ms,   304990 o)  dire /api/production/besoins
+  [  ok  ]      30 ms  (pire    33 ms, seuil 1000 ms,   156506 o)  dire /api/prix/matrice
+  [  ok  ]     129 ms  (pire   129 ms, seuil 1000 ms,   804705 o)  dire /api/fournisseurs/performance
+  [  ok  ]     439 ms  (pire   454 ms, seuil 1000 ms,  2942743 o)  dire /api/echeancier
+  [  ok  ]     121 ms  (pire   125 ms, seuil 1000 ms,   563626 o)  dire /api/stock?date=2026-03-31
+
+Exports :
+  [DÉFAUT]   13848 ms  (pire 14445 ms, seuil 3000 ms,  9518779 o)  dire /api/export/mouvements
+  [DÉFAUT]    3167 ms  (pire  3274 ms, seuil 3000 ms,  1825119 o)  dire /api/export/journal
+  [DÉFAUT]    3528 ms  (pire  3582 ms, seuil 3000 ms,  1700415 o)  dire /api/export/commandes
+  [DÉFAUT]    4492 ms  (pire  4551 ms, seuil 3000 ms,  1943231 o)  dire /api/export/receptions
+  [DÉFAUT]    3161 ms  (pire  3377 ms, seuil 3000 ms,  1737494 o)  dire /api/export/dossiers
+  [  ok  ]    1226 ms  (pire  1433 ms, seuil 3000 ms,  1052157 o)  dire /api/export/revient
+  [  ok  ]     439 ms  (pire   642 ms, seuil 3000 ms,    62494 o)  dire /api/export/pilotage
+
+Écriture courante :
+  [  ok  ]     334 ms  (pire   372 ms, seuil 1000 ms,        0 o)  acha écriture : créer + envoyer un bon de 15 lignes
+
+Vingt postes ouvrent le stock ensemble : total 4.55 s, médiane 4510 ms, p95 4546 ms  [DÉFAUT]
+
+  → 10 dépassement(s) (projection de stress, hors volume de service ; voir docs/lots/V4.md § 6).
+
+==========================================================================================
+VOLUME X30 — postgresql+psycopg:///gestion_mp_pro_v4_charge_x30_essai
+  313140 mouvements, 50520 lots, 9905 bons, 2700 dossiers, 11 années d'activité
+==========================================================================================
+  (uvicorn, 2 processus, port 8111)
+
+Écrans courants :
+  [  ok  ]     275 ms  (pire   299 ms, seuil 2000 ms,   859529 o)  dire /api/stock
+  [  ok  ]     290 ms  (pire   494 ms, seuil 2000 ms,   850229 o)  alim /api/stock
+  [  ok  ]    1802 ms  (pire  1820 ms, seuil 2000 ms,    20160 o)  dire /api/lots?non_nuls=true
+  [  ok  ]     117 ms  (pire   367 ms, seuil 2000 ms,  1185625 o)  dire /api/mouvements?limite=2000
+  [  ok  ]     265 ms  (pire   275 ms, seuil 2000 ms,      294 o)  dire /api/plan-achat
+  [  ok  ]      12 ms  (pire    28 ms, seuil 2000 ms,     7219 o)  dire /api/cockpit
+  [  ok  ]     807 ms  (pire   893 ms, seuil 2000 ms,   170449 o)  dire /api/valorisation
+  [  ok  ]      87 ms  (pire    90 ms, seuil 2000 ms,   192293 o)  dire /api/controles
+  [  ok  ]     928 ms  (pire   985 ms, seuil 2000 ms,       62 o)  dire /api/controles/soldes
+  [DÉFAUT]    3051 ms  (pire  3085 ms, seuil 2000 ms,     9905 o)  dire /api/commandes
+  [DÉFAUT]    3418 ms  (pire  3527 ms, seuil 2000 ms,     9510 o)  dire /api/receptions
+  [DÉFAUT]    3770 ms  (pire  3980 ms, seuil 2000 ms,   427759 o)  dire /api/receptions/pesees
+  [DÉFAUT]    7910 ms  (pire  8005 ms, seuil 2000 ms,     9600 o)  dire /api/ordres
+  [DÉFAUT]    8142 ms  (pire  8244 ms, seuil 2000 ms,     9600 o)  alim /api/ordres
+  [DÉFAUT]    3276 ms  (pire  3327 ms, seuil 2000 ms,     9570 o)  dire /api/ordres/consommation
+  [DÉFAUT]    2900 ms  (pire  2918 ms, seuil 2000 ms,     2700 o)  dire /api/dossiers
+  [  ok  ]    1093 ms  (pire  1110 ms, seuil 2000 ms,      360 o)  dire /api/inventaires
+  [  ok  ]     153 ms  (pire   155 ms, seuil 2000 ms,   545862 o)  dire /api/analyse/revient
+  [  ok  ]     261 ms  (pire   262 ms, seuil 2000 ms,   458356 o)  dire /api/production/besoins
+  [  ok  ]      64 ms  (pire    65 ms, seuil 2000 ms,   234836 o)  dire /api/prix/matrice
+  [  ok  ]     367 ms  (pire   674 ms, seuil 2000 ms,  2416133 o)  dire /api/fournisseurs/performance
+  [  ok  ]    1212 ms  (pire  1493 ms, seuil 2000 ms,  8871168 o)  dire /api/echeancier
+  [  ok  ]     310 ms  (pire   316 ms, seuil 2000 ms,   849596 o)  dire /api/stock?date=2026-03-31
+
+Exports :
+  [DÉFAUT]   43258 ms  (pire 43358 ms, seuil 3000 ms, 28247495 o)  dire /api/export/mouvements
+  [DÉFAUT]    8487 ms  (pire 10113 ms, seuil 3000 ms,  4765234 o)  dire /api/export/journal
+  [DÉFAUT]   10610 ms  (pire 10689 ms, seuil 3000 ms,  5109974 o)  dire /api/export/commandes
+  [DÉFAUT]   13524 ms  (pire 13621 ms, seuil 3000 ms,  5818249 o)  dire /api/export/receptions
+  [DÉFAUT]    9844 ms  (pire 10161 ms, seuil 3000 ms,  4867606 o)  dire /api/export/dossiers
+  [DÉFAUT]    3826 ms  (pire  3842 ms, seuil 3000 ms,  2811834 o)  dire /api/export/revient
+  [  ok  ]    1201 ms  (pire  1690 ms, seuil 3000 ms,    81453 o)  dire /api/export/pilotage
+
+Écriture courante :
+  [  ok  ]    1080 ms  (pire  1145 ms, seuil 2000 ms,        0 o)  acha écriture : créer + envoyer un bon de 15 lignes
+
+Vingt postes ouvrent le stock ensemble : total 13.30 s, médiane 13230 ms, p95 13285 ms  [DÉFAUT]
+
+  → 14 dépassement(s) (projection de stress, hors volume de service ; voir docs/lots/V4.md § 6).
