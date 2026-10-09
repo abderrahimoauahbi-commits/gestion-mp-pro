@@ -4,7 +4,7 @@
  * garde le sien dans `?liste=`. Fermer la fiche rend la liste telle qu'on l'avait laissée (onglet,
  * recherche, filtres) — c'est ce que faisait F7 pour les qualités.
  */
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 
 /** Vrai si l'adresse est celle de la liste elle-même (pas d'une fiche par-dessus). */
@@ -35,11 +35,28 @@ export function useOngletListe<T extends string>(
   return [actif, choisir]
 }
 
-/** Ouvrir une fiche (avec son volet), fermer vers la liste. `jetables` : paramètres propres à une fenêtre. */
+/** L'adresse où ramène la fermeture d'une fiche ouverte d'ailleurs (`state.retour`, le Cockpit…). */
+export function retourDe(state: unknown): string | null {
+  if (typeof state !== 'object' || state == null || !('retour' in state)) return null
+  const r = state.retour
+  return typeof r === 'string' && r.startsWith('/') ? r : null
+}
+
+/**
+ * Ouvrir une fiche (avec son volet), fermer vers la liste. `jetables` : paramètres propres à une
+ * fenêtre. Une fiche ouverte d'un autre écran avec `state.retour` (« Examiner » du Cockpit) y
+ * revient en se fermant, même après un changement de volet.
+ */
 export function useListeEtFiches(base: string, jetables: readonly string[] = []) {
   const navigate = useNavigate()
-  const { pathname, search } = useLocation()
+  const { pathname, search, state } = useLocation()
   const depuisListe = surLaListe(pathname, base)
+  // Retenu tant que la fiche reste ouverte : un changement de volet (`?onglet=`) perd l'état.
+  const lu = retourDe(state)
+  const [retenu, setRetenu] = useState<string | null>(lu)
+  if (lu && lu !== retenu) setRetenu(lu)
+  if (!lu && depuisListe && retenu) setRetenu(null)
+  const retour = lu ?? (depuisListe ? null : retenu)
   const ouvrir = useCallback(
     (chemin: string, volet?: string, autres: Record<string, string> = {}) => {
       const p = new URLSearchParams(search)
@@ -53,11 +70,15 @@ export function useListeEtFiches(base: string, jetables: readonly string[] = [])
       if (volet) p.set('onglet', volet)
       for (const [k, v] of Object.entries(autres)) p.set(k, v)
       const t = p.toString()
-      navigate(`${chemin}${t ? `?${t}` : ''}`)
+      navigate(`${chemin}${t ? `?${t}` : ''}`, { state: retour ? { retour } : undefined })
     },
-    [navigate, search, depuisListe, jetables],
+    [navigate, search, depuisListe, jetables, retour],
   )
   const fermer = useCallback(() => {
+    if (retour) {
+      navigate(retour)
+      return
+    }
     const p = new URLSearchParams(search)
     const liste = depuisListe ? p.get('onglet') : p.get('liste')
     p.delete('onglet')
@@ -66,7 +87,7 @@ export function useListeEtFiches(base: string, jetables: readonly string[] = [])
     if (liste) p.set('onglet', liste)
     const t = p.toString()
     navigate(`${base}${t ? `?${t}` : ''}`)
-  }, [navigate, search, depuisListe, jetables, base])
+  }, [navigate, search, depuisListe, jetables, base, retour])
   return { ouvrir, fermer }
 }
 
