@@ -2253,6 +2253,178 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/ordres/proposition': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ce que les recettes demandent et les lots à prendre (FIFO à la date) ; n'écrit rien.
+     * @description Route 134 : lecture en POST (corps structuré).
+     */
+    post: operations['proposer_api_ordres_proposition_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Les ordres filtrés, le plus récent d'abord : sorti net, écart, retours, lots.
+     * @description Route 135.
+     */
+    get: operations['lister_api_ordres_get']
+    put?: never
+    /**
+     * Crée un brouillon d'ordre (sans numéro, le stock ne bouge pas).
+     * @description Route 137.
+     */
+    post: operations['creer_api_ordres_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/consommation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ce que chaque ordre validé a consommé, face au prévu de sa recette.
+     * @description Route 143 (les ordres annulés n'ont rien consommé).
+     */
+    get: operations['consommation_api_ordres_consommation_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Un ordre : qualités, lignes, prévu figé, sorti net, retours, blocages.
+     * @description Route 136.
+     */
+    get: operations['lire_api_ordres__ident__get']
+    /**
+     * Modifie un brouillon d'ordre (qualités et lignes remplacées), à sa version.
+     * @description Route 138.
+     */
+    put: operations['modifier_api_ordres__ident__put']
+    post?: never
+    /**
+     * Supprime un brouillon d'ordre (aucun numéro consommé).
+     * @description Route 139.
+     */
+    delete: operations['supprimer_api_ordres__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/{ident}/valider': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Valide un ordre : numéro dans l'ordre des dates, prévu figé, le stock sort.
+     * @description Route 140.
+     */
+    post: operations['valider_api_ordres__ident__valider_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/{ident}/annuler': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Annule un ordre validé et ses retours ; ses retours en brouillon sont supprimés.
+     * @description Route 141 : la réponse dit tout ce qui a été fait (`message`).
+     */
+    post: operations['annuler_api_ordres__ident__annuler_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/ordres/{ident}/lots-sortis': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ce que l'ordre a emporté, lot par lot, net des retours : ce qui peut revenir.
+     * @description Route 142.
+     */
+    get: operations['lots_sortis_api_ordres__ident__lots_sortis_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/ordres': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Le classeur des ordres (mêmes filtres que la liste) ou de leur consommation.
+     * @description Route 144 : `vue=consommation` = l'onglet « Ordres de fabrication » du stock (143).
+     */
+    get: operations['exporter_api_export_ordres_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/production/plan': {
     parameters: {
       query?: never
@@ -2722,6 +2894,19 @@ export interface components {
      * @description Route 121 : la version lue et, si l'on veut, pourquoi on annule.
      */
     Annulation: {
+      /** Version */
+      version: number
+      /**
+       * Motif
+       * @default
+       */
+      motif: string
+    }
+    /**
+     * AnnulationOrdre
+     * @description Route 141 : la version lue ; un motif facultatif.
+     */
+    AnnulationOrdre: {
       /** Version */
       version: number
       /**
@@ -3517,6 +3702,57 @@ export interface components {
       code: string
     }
     /**
+     * ConsommationOrdre
+     * @description Route 143 : ce qu'un ordre validé a consommé, face au prévu de sa recette (kg).
+     */
+    ConsommationOrdre: {
+      /** Ordre Id */
+      ordre_id: number
+      /** Numero */
+      numero: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /**
+       * Debut
+       * Format: date
+       */
+      debut: string
+      /**
+       * Fin
+       * Format: date
+       */
+      fin: string
+      /** Qualites */
+      qualites: components['schemas']['QualiteM2'][]
+      /** Fabrication */
+      fabrication: string
+      /** M2 */
+      m2: number
+      /** Commentaire */
+      commentaire: string
+      /** Consomme */
+      consomme: number
+      /** Retours */
+      retours: number
+      /** Net */
+      net: number
+      /** Prevu */
+      prevu: number
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Relatif */
+      ecart_relatif: number | null
+      /** Taux Perte */
+      taux_perte: number
+      /** References */
+      references: components['schemas']['ParMatiere'][]
+      /** Lots */
+      lots: string[]
+    }
+    /**
      * Contexte
      * @description Route 3 `GET /contexte` : le démarrage de l'écran en un appel.
      */
@@ -3713,6 +3949,20 @@ export interface components {
       cadence_jours: {
         [key: string]: number
       }
+    }
+    /**
+     * DemandeProposition
+     * @description Route 134 : ce qu'on tisse, d'où, à quelle date (aujourd'hui sans date).
+     */
+    DemandeProposition: {
+      /** Date */
+      date?: string | null
+      /** Magasin Id */
+      magasin_id: number
+      /** Metier Id */
+      metier_id?: number | null
+      /** Qualites */
+      qualites: components['schemas']['QualiteSaisie'][]
     }
     /**
      * Depart
@@ -5331,6 +5581,34 @@ export interface components {
       devise: string
     }
     /**
+     * LigneOrdre
+     * @description Un lot sorti (ou à sortir) : kilos, et bobines quand le compte tombe juste.
+     */
+    LigneOrdre: {
+      /** Id */
+      id: number
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Quantite */
+      quantite: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Bobines */
+      bobines: number | null
+    }
+    /**
      * LignePlan
      * @description Une matière à commander, dans l'ordre du plan (montant pondéré par la classe ABC).
      */
@@ -5479,6 +5757,36 @@ export interface components {
       depart: components['schemas']['Depart']
     }
     /**
+     * LigneProposee
+     * @description Une matière demandée : prévu (perte comprise), lots FIFO, manque.
+     */
+    LigneProposee: {
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Role */
+      role: string
+      /** Prevu */
+      prevu: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Par Qualite */
+      par_qualite: components['schemas']['ParQualite'][]
+      /** Lots */
+      lots: components['schemas']['LotPropose'][]
+      /** Disponibles */
+      disponibles: components['schemas']['LotPropose'][]
+      /** Manque */
+      manque: number
+    }
+    /**
      * LigneRecetteEntree
      * @description Une matière de la recette et sa part dans son rôle.
      */
@@ -5546,6 +5854,23 @@ export interface components {
        * @description kg/m² × prix au kilo × cours × perte
        */
       cout_m2_mad: number | null
+    }
+    /**
+     * LigneSaisie
+     * @description Un lot à sortir : quantité en kilos, bobines (entières) ou palettes.
+     */
+    LigneSaisie: {
+      /** Lot Id */
+      lot_id: number
+      /** Quantite */
+      quantite: number
+      /** @default kg */
+      unite: components['schemas']['Unite']
+      /**
+       * Matiere Id
+       * @description contrôle : le lot de cette matière
+       */
+      matiere_id?: number | null
     }
     /**
      * LigneStock
@@ -5788,6 +6113,27 @@ export interface components {
       version: number
     }
     /**
+     * LotPropose
+     * @description Un lot disponible à la date ; `propose` : ce qu'on y prend (0 : pas besoin).
+     */
+    LotPropose: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /**
+       * Entre Le
+       * Format: date
+       */
+      entre_le: string
+      /** Disponible */
+      disponible: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Propose */
+      propose: number
+    }
+    /**
      * LotResume
      * @description Route 110 : un lot scanné.
      */
@@ -5848,6 +6194,32 @@ export interface components {
       /** Statut */
       statut: string
       historique: components['schemas']['HistoriqueLot']
+    }
+    /**
+     * LotSorti
+     * @description Ce qu'un ordre a emporté d'un lot, net des retours (142) : ce qui peut revenir.
+     */
+    LotSorti: {
+      /** Lot Id */
+      lot_id: number
+      /** Lot */
+      lot: string
+      /** Matiere Id */
+      matiere_id: number
+      /** Reference */
+      reference: string
+      /** Designation */
+      designation: string
+      /** Sorti Net */
+      sorti_net: number
+      /** Kg Par Ml */
+      kg_par_ml: number
+      /** Poids Bobine */
+      poids_bobine: number
+      /** Bobines Palette */
+      bobines_palette: number
+      /** Blocage */
+      blocage: string
     }
     /**
      * LotTrouveEntree
@@ -7021,6 +7393,216 @@ export interface components {
       version: number
     }
     /**
+     * OrdreCreation
+     * @description Route 137 : un brouillon ; sans qualité, l'ordre est « hors recette ».
+     */
+    OrdreCreation: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Metier Id */
+      metier_id?: number | null
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /** Qualites */
+      qualites?: components['schemas']['QualiteSaisie'][]
+      /** Lignes */
+      lignes: components['schemas']['LigneSaisie'][]
+    }
+    /**
+     * OrdreFiche
+     * @description Un ordre (136) : ses lignes et, validé, le prévu et le sorti net par matière ;
+     *     `message` : ce qu'un geste vient de faire (l'annulation le dit).
+     */
+    OrdreFiche: {
+      /** Id */
+      id: number
+      /** Version */
+      version: number
+      /** Numero */
+      numero: string | null
+      statut: components['schemas']['StatutOrdre']
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Metier Id */
+      metier_id: number | null
+      /** Metier */
+      metier: string
+      /** Commentaire */
+      commentaire: string
+      /** Cree Par */
+      cree_par: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Valide Par */
+      valide_par: string
+      /** Valide Le */
+      valide_le: string | null
+      /** Annule Par */
+      annule_par: string
+      /** Annule Le */
+      annule_le: string | null
+      /** Annulation Motif */
+      annulation_motif: string
+      /** Prevu Fige */
+      prevu_fige: boolean
+      /** Taux Perte */
+      taux_perte: number
+      /** Qualites */
+      qualites: components['schemas']['QualiteOrdre'][]
+      /** Fabrication */
+      fabrication: string
+      /** M2 */
+      m2: number
+      /** Total */
+      total: number
+      /** Retours */
+      retours: components['schemas']['Retour'][]
+      /** Revenu */
+      revenu: number
+      /** Prevu */
+      prevu: number
+      /** Net */
+      net: number
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Relatif */
+      ecart_relatif: number | null
+      /** Lots */
+      lots: string[]
+      /** Matieres */
+      matieres: string[]
+      /** Blocages */
+      blocages: string[]
+      /** Lignes */
+      lignes: components['schemas']['LigneOrdre'][]
+      /** Par Matiere */
+      par_matiere: components['schemas']['ParMatiere'][]
+      /**
+       * Message
+       * @default
+       */
+      message: string
+    }
+    /**
+     * OrdreModification
+     * @description Route 138 : le brouillon entier, à sa version lue.
+     */
+    OrdreModification: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Metier Id */
+      metier_id?: number | null
+      /**
+       * Commentaire
+       * @default
+       */
+      commentaire: string
+      /** Qualites */
+      qualites?: components['schemas']['QualiteSaisie'][]
+      /** Lignes */
+      lignes: components['schemas']['LigneSaisie'][]
+      /** Version */
+      version: number
+    }
+    /**
+     * OrdreResume
+     * @description Un ordre dans la liste (135) : ce qu'il tisse, sorti net, écart, retours, lots.
+     */
+    OrdreResume: {
+      /** Id */
+      id: number
+      /** Version */
+      version: number
+      /** Numero */
+      numero: string | null
+      statut: components['schemas']['StatutOrdre']
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Magasin */
+      magasin: string
+      /** Metier Id */
+      metier_id: number | null
+      /** Metier */
+      metier: string
+      /** Commentaire */
+      commentaire: string
+      /** Cree Par */
+      cree_par: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Valide Par */
+      valide_par: string
+      /** Valide Le */
+      valide_le: string | null
+      /** Annule Par */
+      annule_par: string
+      /** Annule Le */
+      annule_le: string | null
+      /** Annulation Motif */
+      annulation_motif: string
+      /** Prevu Fige */
+      prevu_fige: boolean
+      /** Taux Perte */
+      taux_perte: number
+      /** Qualites */
+      qualites: components['schemas']['QualiteOrdre'][]
+      /** Fabrication */
+      fabrication: string
+      /** M2 */
+      m2: number
+      /** Total */
+      total: number
+      /** Retours */
+      retours: components['schemas']['Retour'][]
+      /** Revenu */
+      revenu: number
+      /** Prevu */
+      prevu: number
+      /** Net */
+      net: number
+      /** Ecart */
+      ecart: number | null
+      /** Ecart Relatif */
+      ecart_relatif: number | null
+      /** Lots */
+      lots: string[]
+      /** Matieres */
+      matieres: string[]
+      /** Blocages */
+      blocages: string[]
+    }
+    /**
      * OrdreServi
      * @description Un ordre de fabrication qu'un lot a servi.
      */
@@ -7151,6 +7733,38 @@ export interface components {
        * @description à passer en `?apres=`
        */
       suivant?: string | null
+    }
+    /**
+     * ParMatiere
+     * @description Prévu par la recette (perte comprise) et sorti net d'une matière (kg).
+     */
+    ParMatiere: {
+      /** Matiere Id */
+      matiere_id: number | null
+      /** Reference */
+      reference: string
+      /** Quantite */
+      quantite: number
+      /** Prevu */
+      prevu: number
+      /** Ecart */
+      ecart: number | null
+      /** Hors Recette */
+      hors_recette: boolean
+      /** Kg Par Ml */
+      kg_par_ml: number
+    }
+    /**
+     * ParQualite
+     * @description Ce qu'une qualité demande d'une matière, perte comprise (kg).
+     */
+    ParQualite: {
+      /** Qualite Id */
+      qualite_id: number
+      /** Qualite */
+      qualite: string
+      /** Kg */
+      kg: number
     }
     /**
      * Periode
@@ -7500,6 +8114,33 @@ export interface components {
       unite: 'kg' | 'ml'
     }
     /**
+     * Proposition
+     * @description Route 134 : les lignes, les totaux, ce qui manque, la recette incomplète, les blocages.
+     */
+    Proposition: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Magasin Id */
+      magasin_id: number
+      /** Taux Perte */
+      taux_perte: number
+      /** Prevu */
+      prevu: number
+      /** Manque */
+      manque: number
+      /** Lignes */
+      lignes: components['schemas']['LigneProposee'][]
+      /** Manques */
+      manques: components['schemas']['LigneProposee'][]
+      /** Recettes Incompletes */
+      recettes_incompletes: string[]
+      /** Blocages */
+      blocages: string[]
+    }
+    /**
      * PropositionClassement
      * @description Ce que la référence d'une matière dit, pour ses seuls champs vides.
      */
@@ -7576,6 +8217,18 @@ export interface components {
       avertissement: string
     }
     /**
+     * QualiteM2
+     * @description Une qualité de l'ordre et ses m².
+     */
+    QualiteM2: {
+      /** Qualite Id */
+      qualite_id: number
+      /** Qualite */
+      qualite: string
+      /** M2 */
+      m2: number
+    }
+    /**
      * QualiteModification
      * @description La fiche entière (remplacement) et, facultative, la recette dans la même transaction.
      */
@@ -7603,6 +8256,20 @@ export interface components {
        * @default
        */
       motif: string
+    }
+    /**
+     * QualiteOrdre
+     * @description Une qualité tissée par l'ordre.
+     */
+    QualiteOrdre: {
+      /** Qualite Id */
+      qualite_id: number
+      /** Qualite */
+      qualite: string
+      /** Nom */
+      nom: string
+      /** M2 */
+      m2: number
     }
     /**
      * QualitePlan
@@ -7681,6 +8348,16 @@ export interface components {
        */
       fabrications: number
       facteurs_cout: components['schemas']['FacteursCout']
+    }
+    /**
+     * QualiteSaisie
+     * @description Une qualité tissée et ses m² (une fois par ordre).
+     */
+    QualiteSaisie: {
+      /** Qualite Id */
+      qualite_id: number
+      /** M2 */
+      m2: number
     }
     /**
      * RealiseQualite
@@ -8009,6 +8686,23 @@ export interface components {
       ignores: components['schemas']['Issue'][]
     }
     /**
+     * Retour
+     * @description Un retour des machines : l'opération (`id`) ou la reprise de l'ERP Fil (`id` nul).
+     */
+    Retour: {
+      /** Id */
+      id: number | null
+      /** Numero */
+      numero: string
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Quantite */
+      quantite: number
+    }
+    /**
      * RoleCreation
      * @description Un rôle ajouté (route 58) : compté au poids (seuls Cuir, Franges, Ruban vont au mètre).
      */
@@ -8182,6 +8876,12 @@ export interface components {
      */
     StatutInventaire: 'ouvert' | 'valide' | 'abandonne' | 'annule'
     /**
+     * StatutOrdre
+     * @description Statut d'un ordre de fabrication (masculin : un ordre).
+     * @enum {string}
+     */
+    StatutOrdre: 'brouillon' | 'valide' | 'annule'
+    /**
      * TacheEtat
      * @description Route 46 : l'état d'une tâche de fond (partagé par tous les processus).
      */
@@ -8271,6 +8971,12 @@ export interface components {
       /** Roles */
       roles: string[]
     }
+    /**
+     * Unite
+     * @description Unité d'une saisie de quantité.
+     * @enum {string}
+     */
+    Unite: 'kg' | 'bobine' | 'palette'
     /**
      * UniteCommande
      * @description Un conditionnement où la matière se commande, et sa contenance en kilos.
@@ -16127,6 +16833,705 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  proposer_api_ordres_proposition_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DemandeProposition']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Proposition']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lister_api_ordres_get: {
+    parameters: {
+      query?: {
+        statut?: components['schemas']['StatutOrdre'] | null
+        /** @description mots, sans accents */
+        q?: string
+        du?: string | null
+        au?: string | null
+        metier?: number | null
+        magasin?: number | null
+        qualite?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  creer_api_ordres_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OrdreCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  consommation_api_ordres_consommation_get: {
+    parameters: {
+      query?: {
+        du?: string | null
+        au?: string | null
+        qualite?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ConsommationOrdre'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lire_api_ordres__ident__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  modifier_api_ordres__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OrdreModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_api_ordres__ident__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  valider_api_ordres__ident__valider_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ValidationVersion']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  annuler_api_ordres__ident__annuler_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AnnulationOrdre']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OrdreFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  lots_sortis_api_ordres__ident__lots_sortis_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LotSorti'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  exporter_api_export_ordres_get: {
+    parameters: {
+      query?: {
+        vue?: 'ordres' | 'consommation'
+        statut?: components['schemas']['StatutOrdre'] | null
+        /** @description mots, sans accents */
+        q?: string
+        du?: string | null
+        au?: string | null
+        metier?: number | null
+        magasin?: number | null
+        qualite?: number | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': unknown
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
         }
       }
     }
