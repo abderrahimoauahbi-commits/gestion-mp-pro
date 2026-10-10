@@ -46,7 +46,7 @@ from gestion_mp_pro.documents.format import a_l_usine, date_fr
 TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 FORMATS = {
-    "kg": "#,##0.0",
+    "kg": "#,##0.##",
     "kg_precis": "#,##0.000",
     "entier": "#,##0",
     "m2": "#,##0",

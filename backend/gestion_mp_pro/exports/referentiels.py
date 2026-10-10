@@ -20,7 +20,8 @@ from gestion_mp_pro.services.matieres_lecture import Ligne
 from gestion_mp_pro.services.tableur_referentiels import COLONNES, SE_COMMANDE, VERSION, VIDER
 
 TYPE_XLSX = conventions.TYPE_XLSX
-ENTIER, KG, PRIX = "#,##0", "#,##0.0", "#,##0.000"
+ENTIER, KG, PRIX = "#,##0", "#,##0.##", "#,##0.000"
+UNE_DEC = "#,##0.0"  # non pondéral, resté à une décimale (mois de couverture, priorité)
 
 Colonne = tuple[str, str | None]
 
@@ -61,8 +62,8 @@ def matieres(lignes: Sequence[Ligne]) -> bytes:
         ("Prix / kg", PRIX), ("Densité (kg/ml)", "0.00000"), ("Unité d'achat", None),
         ("Contenance", KG), ("Unité d'achat déclarée ou déduite", None),
         ("Minimum de commande", KG), ("kg / bobine", PRIX), ("Bobines / palette", ENTIER),
-        ("Stock minimum", KG), ("Couverture minimum (mois)", KG), ("Groupe", None),
-        ("Priorité dans le groupe", KG), ("Code douanier", None), ("En stock", KG),
+        ("Stock minimum", KG), ("Couverture minimum (mois)", UNE_DEC), ("Groupe", None),
+        ("Priorité dans le groupe", UNE_DEC), ("Code douanier", None), ("En stock", KG),
         ("Active", None),
     ]  # fmt: skip
     rangees = [

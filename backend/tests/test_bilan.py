@@ -172,7 +172,7 @@ def test_le_bilan_detaille_les_annulations_en_kilos(usine: Usine) -> None:
     assert (b["sorties_kg"], b["annulations_kg"], b["annulations"]) == (30, 30, {"SORTIE": 30})
     page = u.achats.get("/api/documents/bilan", params={"mois": MOIS}).text
     assert "Annulations (contre-passations) datées du mois" in page
-    assert "sorties vers les machines 30,0 kg" in page
+    assert "sorties vers les machines 30 kg" in page
 
 
 def test_api_le_bilan_d_un_mois_passe_compte_ses_ruptures_a_la_fin_du_mois(usine: Usine) -> None:

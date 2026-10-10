@@ -71,8 +71,9 @@ def _avec_unite(texte: str, unite: str) -> str:
 
 
 def kg(valeur: Nombre, langue: Langue = "fr") -> str:
-    """Kilos au bureau : une décimale (« 1 234,5 kg ») ; Excel `#,##0.0`."""
-    return _avec_unite(nombre(valeur, 1, langue=langue), "kg")
+    """Kilos au bureau : jusqu'à deux décimales, zéros inutiles enlevés (« 3,15 kg », « 52,4 kg »,
+    « 26 000 kg ») ; Excel `#,##0.##`."""
+    return _avec_unite(nombre(valeur, 0, 2, langue=langue), "kg")
 
 
 def kg_entier(valeur: Nombre, langue: Langue = "fr") -> str:
