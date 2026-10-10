@@ -18,6 +18,18 @@ Réécriture professionnelle de Gestion MP (`~/gestion-mp`), au standard de GMAO
 | Base | `gestion_mp_pro` ; essais : `gestion_mp_pro_essai` (jamais une autre) |
 | API | `/api`, documentation OpenAPI sur `/api/docs` |
 | Conception | `docs/ARCHITECTURE.md`, `MODELE-DONNEES.md`, `API-PRO.md`, `ECRANS-PRO.md`, `LOTS-DE-TRAVAIL.md`, héritage dans `docs/heritage/` |
+| Référence et recette | `docs/CAHIER-DES-CHARGES.md`, `RECETTE.md`, `COMPARAISON-GESTION-MP.md`, `EXPLOITATION.md`, `LIVRAISON.md` |
+
+## Les documents
+
+| Pour | Document |
+|---|---|
+| Comprendre ce que fait le logiciel (par domaine, par rôle, les décisions de métier) | [`docs/CAHIER-DES-CHARGES.md`](docs/CAHIER-DES-CHARGES.md) |
+| Le rapport de recette : verdict critère par critère (A1–A14), anomalies corrigées, état des défauts de Gestion MP, questions ouvertes | [`docs/RECETTE.md`](docs/RECETTE.md) |
+| La preuve que PRO dit les mêmes chiffres que Gestion MP, et comment le vérifier soi-même | [`docs/COMPARAISON-GESTION-MP.md`](docs/COMPARAISON-GESTION-MP.md) |
+| Installer, sauvegarder, restaurer, surveiller (poste Mac et serveur Linux) | [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) |
+| Le rapport de livraison, en une page (pour Mohamed) | [`docs/LIVRAISON.md`](docs/LIVRAISON.md) |
+| Comment c'est fait (couches, modèle de données, API, écrans) | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
 ## Démarrer en développement
 

@@ -1,0 +1,4 @@
+# Robustesse (critère A13) — 2026-10-10
+# python -m essais.robustesse (en mémoire, 4 rôles)
+115 routes d'écriture, 2969 corps générés, 5775 envois.
+Erreurs 500 : 0.
