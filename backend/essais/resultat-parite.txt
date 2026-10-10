@@ -1,18 +1,18 @@
 PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
-le 2026-10-10 00:11 · Gestion MP d10180e · PRO bada7a2
+le 2026-10-10 12:40 · Gestion MP 88a66b3 · PRO 0caef5a
 source : gestion_mp_comparaison (copie : gestion_mp_pro_parite_source_essai) → PRO gestion_mp_pro_parite_cible_essai
-empreinte gestion_mp : f2dce859a7ae61ba… avant, après : identique
-empreinte gestion_mp_comparaison : 9e5934b0a949e0ed… avant, après : identique
+empreinte gestion_mp : b35fb671bf213c99… avant, après : identique
+empreinte gestion_mp_comparaison : cd75bb4b5aae61f0… avant, après : identique
 
 CONTRÔLE D'IMPORT (REPRISE R1)
 ------------------------------
   REPRISE DE GESTION MP DANS GESTION MP PRO
   source : gestion_mp_pro_parite_source_essai (erp_fil) — lecture seule vérifiée : oui
   cible  : gestion_mp_pro_parite_cible_essai — mode tout
-  empreinte de la source avant : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4
-  empreinte de la source après : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4 (identique)
+  empreinte de la source avant : cd75bb4b5aae61f067f43d69506ad57dc5001e58cd3c9f734de8f1606e8e9b1c
+  empreinte de la source après : cd75bb4b5aae61f067f43d69506ad57dc5001e58cd3c9f734de8f1606e8e9b1c (identique)
   activité : reprise
-  durée : 4.3 s
+  durée : 4.8 s
   
   CONTRÔLES
   [tenu] Comptes de lignes par table (source → cible)

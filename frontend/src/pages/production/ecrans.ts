@@ -10,7 +10,7 @@ export const ecrans: readonly Ecran[] = [
   {
     chemin: '/production',
     titre: 'Production & besoins',
-    groupe: 'Tous les jours',
+    groupe: 'Référentiels',
     roles: ['direction', 'achats', 'alimentation'],
     aide: 'production',
     onglets: [
