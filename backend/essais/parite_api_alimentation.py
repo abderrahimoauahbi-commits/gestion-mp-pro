@@ -25,6 +25,7 @@ from typing import Any
 from parite_api import Ecart, Liste, Resultat, Route, comparer_route
 from parite_api_documents import _formes
 from parite_api_formes import nul, type_magasin
+from parite_api_passe import _liste_ou_pages
 from parite_serveurs import Serveurs
 
 MONETAIRES = (
@@ -126,7 +127,9 @@ def passe(s: Serveurs, direction: list[Resultat]) -> Alimentation:
     a = Alimentation()
     gmp, pro = s.gestion_mp["alimentation"], s.pro["alimentation"]
     for route in ROUTES:
-        g, p = gmp.get(route.gmp), pro.get(route.pro)
+        g = gmp.get(route.gmp)
+        # PRO peut paginer (Page[T]) : on recompose la liste entière (curseur) avant de comparer.
+        p = _liste_ou_pages(pro, route.pro, pro.get(route.pro), route.champ_pro)
         a.prix_gestion_mp += [(route.nom, c, v) for c, v in prix_vus(g)]
         a.prix_pro += [(route.nom, c, v) for c, v in prix_vus(p)]
         r = comparer_route(route, sans_prix(g), sans_prix(p))

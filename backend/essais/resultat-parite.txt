@@ -1,7 +1,7 @@
 PARITÉ DE CALCUL GESTION MP PRO = GESTION MP — ANNÉE D'ESSAI (critère A6)
-le 2026-10-09 22:17 · Gestion MP d10180e · PRO 7e01b22
+le 2026-10-10 00:11 · Gestion MP d10180e · PRO bada7a2
 source : gestion_mp_comparaison (copie : gestion_mp_pro_parite_source_essai) → PRO gestion_mp_pro_parite_cible_essai
-empreinte gestion_mp : af08c36c24e20ffc… avant, après : identique
+empreinte gestion_mp : f2dce859a7ae61ba… avant, après : identique
 empreinte gestion_mp_comparaison : 9e5934b0a949e0ed… avant, après : identique
 
 CONTRÔLE D'IMPORT (REPRISE R1)
@@ -12,7 +12,7 @@ CONTRÔLE D'IMPORT (REPRISE R1)
   empreinte de la source avant : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4
   empreinte de la source après : 9e5934b0a949e0ed2ca2566653a264ae069f1dc00b6acd2f126e88e7e64133b4 (identique)
   activité : reprise
-  durée : 4.5 s
+  durée : 4.3 s
   
   CONTRÔLES
   [tenu] Comptes de lignes par table (source → cible)
@@ -224,7 +224,7 @@ PAR L'API : 155 PAIRES DE ROUTES (DIRECTION)
   bobines                                         5956 | — | 0
   cockpit                                         4917 | K1 169 (36.1) | 0
   commandes                                      53372 | K8b 8, K8d 3, K8h 1934 | 0
-  controles                                      20174 | K1 140 (0.1) | 0
+  controles                                      20182 | K1 140 (0.1) | 0
   dossiers                                       62480 | K1 3896 (0.551), K8b 23 (177) | 0
   factures                                        2844 | — | 0
   inventaires                                     8880 | K1 33 (0.000211), K8f 360 | 0
@@ -235,7 +235,7 @@ PAR L'API : 155 PAIRES DE ROUTES (DIRECTION)
   ordres                                        196018 | K1 208 (0.00239), K8d 1, K8e 319 | 0
   performance                                     3064 | K8b 12 (4) | 0
   pesées                                         37700 | K8b 5, K8d 38 | 0
-  plan-achat                                     18711 | — | 0
+  plan-achat                                     18733 | — | 0
   prix                                           23075 | — | 0
   production                                      9741 | K1 3 (0.00253) | 0
   receptions                                     59268 | K8b 24 (1.48e+04), K8d 1 | 0
@@ -243,7 +243,7 @@ PAR L'API : 155 PAIRES DE ROUTES (DIRECTION)
   stock                                         200960 | — | 0
   valorisation                                   34880 | K1 2002 (0.409) | 0
   échéancier                                      8068 | K1 35 (0.144) | 0
-  valeurs traduites (formes déclarées) : 48087 (saisi_le 10438, cours 9674, codes du stock 9299, document 8586, confirme_par 1604, (vue de l'élément) 1508, statut_reception 1508, cree_le 967, type 672, second_par 360, cree_par 342, livraison 330…)
+  valeurs traduites (formes déclarées) : 48089 (saisi_le 10438, cours 9674, codes du stock 9301, document 8586, confirme_par 1604, (vue de l'élément) 1508, statut_reception 1508, cree_le 967, type 672, second_par 360, cree_par 342, livraison 330…)
   champs ajoutés par PRO (excusés) : 1183
   réciproque — champs de Gestion MP rendus ailleurs par PRO (14) :
     besoins.plan : m² du plan par qualité : PRO les rend dans `/production/plan` (`qualites[].glissant`), comparés par la route « production (plan) »
@@ -268,9 +268,9 @@ PAR L'API : ÉCRANS DE L'ALIMENTATION
   alimentation : inventaires                       216 | — | 0
   alimentation : lots                            13440 | — | 0
   alimentation : ordres                           5120 | K1 52 (0.00239) | 0
-  alimentation : stock                            9180 | — | 0
+  alimentation : stock                            9176 | — | 0
   valeurs traduites (formes déclarées) : 1401 (type 672, cree_le 320, codes du stock 248, action 124, valide_par 13, cree_par 12, valide_le 12…)
-  champs ajoutés par PRO (excusés) : 31
+  champs ajoutés par PRO (excusés) : 30
   réciproque — champs de Gestion MP rendus ailleurs par PRO (8) :
     alimentation : ordres.fabrications : comparé par la direction (« ordres »)
     alimentation : ordres.lignes : comparé par la direction (« ordres »)
