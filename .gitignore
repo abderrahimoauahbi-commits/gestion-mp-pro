@@ -19,3 +19,4 @@ frontend/dist/
 *.dump
 *.log
 .claude/worktrees/
+frontend/tsconfig.tsbuildinfo
