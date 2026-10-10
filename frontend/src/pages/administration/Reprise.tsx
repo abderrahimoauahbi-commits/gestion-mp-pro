@@ -96,6 +96,33 @@ export function verdict(e: Etat): { ton: 'ok' | 'attention' | 'critique' | 'info
   }
 }
 
+/** Le pied de la fenêtre : « Annuler » et « Rafraîchir maintenant » (grisé avec sa raison). */
+function PiedRafraichir({
+  remplacer,
+  manque,
+  onLancer,
+  onFermer,
+}: {
+  remplacer: boolean
+  manque: string[]
+  onLancer: () => Promise<void>
+  onFermer: () => void
+}) {
+  return (
+    <>
+      <Bouton onClick={onFermer}>Annuler</Bouton>
+      <Bouton
+        variante={remplacer ? 'danger' : 'principal'}
+        manque={manque}
+        attente="Reprise demandée…"
+        onClick={onLancer}
+      >
+        Rafraîchir maintenant
+      </Bouton>
+    </>
+  )
+}
+
 function FenetreRafraichir({ e, onFermer }: { e: Etat; onFermer: () => void }) {
   const [remplacer, setRemplacer] = useState(false)
   const [mot, setMot] = useState('')
@@ -110,8 +137,19 @@ function FenetreRafraichir({ e, onFermer }: { e: Etat; onFermer: () => void }) {
     ...(e.activite_propre && !remplacer ? ['cocher « Remplacer l’activité saisie dans PRO »'] : []),
     ...(remplacer && mot.trim().toUpperCase() !== MOT_REMPLACER ? [`le mot ${MOT_REMPLACER}`] : []),
   ]
+  const lancerReprise = async () => {
+    await lancer.mutateAsync()
+    dire('Reprise commencée : sauvegarde « avant reprise », puis la reprise.')
+    onFermer()
+  }
   return (
-    <Fenetre titre="Rafraîchir le miroir de Gestion MP" onFermer={onFermer}>
+    <Fenetre
+      titre="Rafraîchir le miroir de Gestion MP"
+      onFermer={onFermer}
+      pied={
+        <PiedRafraichir remplacer={remplacer} manque={manque} onLancer={lancerReprise} onFermer={onFermer} />
+      }
+    >
       <ul className={styles.liste}>
         <li>{`Les référentiels et toute l’activité de « ${e.base_source} » sont repris dans « ${e.base} » (Gestion MP n’est que lu).`}</li>
         <li>
@@ -134,22 +172,6 @@ function FenetreRafraichir({ e, onFermer }: { e: Etat; onFermer: () => void }) {
           <Saisie valeur={mot} max={20} onChange={setMot} autoFocus />
         </Champ>
       ) : null}
-      <div className={styles.rangee}>
-        <span className={styles.pousse} />
-        <Bouton onClick={onFermer}>Annuler</Bouton>
-        <Bouton
-          variante={remplacer ? 'danger' : 'principal'}
-          manque={manque}
-          attente="Reprise demandée…"
-          onClick={async () => {
-            await lancer.mutateAsync()
-            dire('Reprise commencée : sauvegarde « avant reprise », puis la reprise.')
-            onFermer()
-          }}
-        >
-          Rafraîchir maintenant
-        </Bouton>
-      </div>
     </Fenetre>
   )
 }

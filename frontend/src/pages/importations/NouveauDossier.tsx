@@ -123,16 +123,16 @@ function ChampsMain({
   )
 }
 
-function ALaMain({ page, s, setS }: { page: EtatPage; s: SaisieMain; setS: (s: SaisieMain) => void }) {
-  const ecrire = useEcriture((corps: SaisieMain) => api.post<DossierFiche>('/dossiers', corps))
-  const poser = (cle: keyof SaisieMain) => (v: string) => setS({ ...s, [cle]: v })
-  const ouvrir = async () => {
-    const d = await ecrire.mutateAsync({ ...s, numero: s.numero.trim() })
-    setS(VIDE)
-    dire(`Dossier ${d.numero} ouvert : ses marchandises se saisissent à la main.`)
-    page.remplacerPar(d.id, 'main')
-  }
-  const refus = ecrire.error
+/** La saisie à la main : la note et les champs. L'action « Ouvrir le dossier… » est au pied de la fenêtre. */
+function ALaMain({
+  s,
+  poser,
+  refus,
+}: {
+  s: SaisieMain
+  poser: (cle: keyof SaisieMain) => (v: string) => void
+  refus: unknown
+}) {
   return (
     <div className={styles.pile}>
       <Note>
@@ -141,17 +141,6 @@ function ALaMain({ page, s, setS }: { page: EtatPage; s: SaisieMain; setS: (s: S
         elle s’ouvre « Depuis la facture reçue ».
       </Note>
       <ChampsMain s={s} poser={poser} refus={refus} />
-      <div className={styles.rangee}>
-        <span className={styles.pousse} />
-        <Bouton
-          variante="principal"
-          manque={s.date_arrivee ? [] : ['la date d’arrivée']}
-          attente="Ouverture…"
-          onClick={ouvrir}
-        >
-          Ouvrir le dossier à saisir à la main
-        </Bouton>
-      </div>
     </div>
   )
 }
@@ -166,13 +155,35 @@ export function NouveauDossier({ page, clos }: { page: EtatPage; clos: (id: numb
   const [s, setS] = useState<SaisieMain>(VIDE)
   const sale = estSale(s)
   const attente = useLecture<EnAttente>('/dossiers/a-rattacher')
+  const ecrire = useEcriture((corps: SaisieMain) => api.post<DossierFiche>('/dossiers', corps))
+  const poser = (cle: keyof SaisieMain) => (v: string) => setS({ ...s, [cle]: v })
+  const ouvrir = async () => {
+    const d = await ecrire.mutateAsync({ ...s, numero: s.numero.trim() })
+    setS(VIDE)
+    dire(`Dossier ${d.numero} ouvert : ses marchandises se saisissent à la main.`)
+    page.remplacerPar(d.id, 'main')
+  }
   return (
     <Fenetre
       titre="Nouveau dossier d’importation"
       taille="tresLarge"
       sale={sale}
       onFermer={() => page.fermer()}
-      pied={<Annuler />}
+      pied={
+        <>
+          <Annuler />
+          {onglet === 'main' ? (
+            <Bouton
+              variante="principal"
+              manque={s.date_arrivee ? [] : ['la date d’arrivée']}
+              attente="Ouverture…"
+              onClick={ouvrir}
+            >
+              Ouvrir le dossier à saisir à la main
+            </Bouton>
+          ) : null}
+        </>
+      }
     >
       <Onglets
         libelle="Ouvrir un dossier"
@@ -190,7 +201,7 @@ export function NouveauDossier({ page, clos }: { page: EtatPage; clos: (id: numb
       {onglet === 'facture' ? (
         <DepuisLaFacture page={page} clos={clos} />
       ) : (
-        <ALaMain page={page} s={s} setS={setS} />
+        <ALaMain s={s} poser={poser} refus={ecrire.error} />
       )}
     </Fenetre>
   )
