@@ -107,7 +107,7 @@ function quantite(type: TypeOperation): C {
     droite: true,
     unite: 'kg',
     valeur: (o) => o.total,
-    rendu: (o) => (type === 'ajustement' ? `${nombreSigne(o.total, 1)} kg` : kg(o.total)),
+    rendu: (o) => (type === 'ajustement' ? `${nombreSigne(o.total, 0, 2)} kg` : kg(o.total)),
   }
 }
 

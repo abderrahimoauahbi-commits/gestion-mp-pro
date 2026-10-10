@@ -30,7 +30,7 @@ function Magasins({ l }: { l: LotSolde }) {
       {l.magasins.map((g) => (
         <span key={g.magasin_id} className={styles.dessous}>
           {estQuarantaine(g.type) ? <Badge ton="critique">{g.magasin}</Badge> : g.magasin}{' '}
-          {nombre(g.quantite, 1)}
+          {nombre(g.quantite, 0, 2)}
         </span>
       ))}
     </span>

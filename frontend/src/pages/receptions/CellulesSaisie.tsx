@@ -120,7 +120,7 @@ export function Pese({ l, x }: { l: LigneSaisie; x: ContexteTable }) {
       {e ? (
         <span className={styles.note} title="Pesé moins annoncé BL (à défaut, moins le reste à livrer)">
           <Badge ton={e.hors ? 'critique' : 'ok'}>{partSignee(e.relatif)}</Badge> {e.kg > 0 ? '+' : ''}
-          {nombre(e.kg, 1)} kg
+          {nombre(e.kg, 0, 2)} kg
         </span>
       ) : null}
     </span>

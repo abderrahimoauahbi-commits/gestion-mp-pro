@@ -102,7 +102,7 @@ describe('blocages annoncés dès la saisie', () => {
       ordre_id: null,
       lignes: [ligneSaisieEssai({ quantite: 500 })],
     }
-    expect(depassements(s)).toEqual(['« IMP FRISÉ ROUGE », lot L24-100 : plus que les 420,0 kg du lot'])
+    expect(depassements(s)).toEqual(['« IMP FRISÉ ROUGE », lot L24-100 : plus que les 420 kg du lot'])
     expect(depassements({ ...s, type: 'ajustement', lignes: [ligneSaisieEssai({ quantite: 500 })] })).toEqual(
       [],
     )
@@ -157,7 +157,7 @@ describe('l’encart de ligne', () => {
   it('un retour des machines ne rend pas plus que ce qui est parti pour l’ordre', () => {
     const e = { ...ENCART_VIERGE, matiere: 1, place: '11', magasin: 1, kg: 31 }
     expect(manqueEncart('retour_machine', e, undefined, 30)).toEqual([
-      'une quantité qui ne dépasse pas les 30,0 kg partis pour l’ordre',
+      'une quantité qui ne dépasse pas les 30 kg partis pour l’ordre',
     ])
     expect(manqueEncart('retour_machine', { ...e, kg: 30 }, undefined, 30)).toEqual([])
   })
@@ -167,7 +167,7 @@ describe('l’encart de ligne', () => {
     const e = { ...ENCART_VIERGE, matiere: 1, place: place?.cle ?? null, kg: 500 }
     expect(manqueEncart('transfert', e, place)).toEqual([
       'le magasin de destination',
-      'une quantité qui ne dépasse pas les 420,0 kg du lot',
+      'une quantité qui ne dépasse pas les 420 kg du lot',
     ])
     expect(manqueEncart('ouverture', { ...ENCART_VIERGE, matiere: 1 }, undefined)).toEqual([
       'le numéro de lot (ou cocher « Lot interne »)',

@@ -86,7 +86,7 @@ function TeteFil({ f, s, n }: { f: Fil; s: SaisieOrdre; n: number }) {
         className={styles.droite}
         title={parQualite.map((q) => `${q.qualite} : ${kg(q.kg)}`).join(' · ')}
       >
-        {f.besoin ? nombre(f.besoin.prevu, 1) : VIDE}
+        {f.besoin ? nombre(f.besoin.prevu, 0, 2) : VIDE}
         {parQualite.length > 1 ? <span className={styles.dessous}>{parQualite.length} qualités</span> : null}
       </td>
     </>
@@ -99,7 +99,7 @@ function EcartFil({ f, n }: { f: Fil; n: number }) {
       {f.besoin ? (
         <>
           <EcartRecette relatif={ecartRelatif(f.sorti, f.besoin.prevu)} />
-          <span className={styles.dessous}>{nombreSigne(f.ecart, 1)} kg</span>
+          <span className={styles.dessous}>{nombreSigne(f.ecart, 0, 2)} kg</span>
         </>
       ) : null}
     </td>
@@ -183,7 +183,7 @@ export function LignesSaisie({ s }: { s: SaisieOrdre }) {
           <tfoot>
             <tr>
               <td>Total</td>
-              <td className={styles.droite}>{totalPrevu ? nombre(totalPrevu, 1) : VIDE}</td>
+              <td className={styles.droite}>{totalPrevu ? nombre(totalPrevu, 0, 2) : VIDE}</td>
               <td colSpan={2} />
               <td>{kg(totalSorti)}</td>
               <td className={styles.droite}>

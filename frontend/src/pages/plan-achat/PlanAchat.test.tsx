@@ -117,7 +117,7 @@ describe('Plan d’achat', () => {
   })
 
   it('libellés de création : un bon, ou un par devise ; message et adresse après création', () => {
-    expect(libelleCreer(['USD'], 1234)).toBe('Créer le bon en brouillon · 1 234,0 kg')
+    expect(libelleCreer(['USD'], 1234)).toBe('Créer le bon en brouillon · 1 234 kg')
     expect(libelleCreer(['EUR', 'USD'], 10)).toMatch(/^Créer 2 bons \(un par devise : EUR, USD\)/)
     expect(apresCreation([ficheEssai({ id: 7 })]).adresse).toBe('/commandes/7')
     expect(apresCreation([ficheEssai({ id: 7 }), ficheEssai({ id: 8, devise: 'EUR' })]).adresse).toBe(

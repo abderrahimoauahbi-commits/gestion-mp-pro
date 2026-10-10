@@ -59,20 +59,22 @@ export function nombre(valeur: Valeur, decimales = 0, decimalesMax = decimales):
   return r < 0 ? `${MOINS}${texte}` : texte
 }
 
-/** Un écart se lit avec son signe : « +12,5 », « −3,0 », « 0,0 » (zéro sans signe). */
-export function nombreSigne(valeur: Valeur, decimales = 0): string {
+/** Un écart se lit avec son signe : « +12,5 », « −3,0 », « 0,0 » (zéro sans signe). Comme
+ * `nombre`, `decimalesMax` autorise des décimales supplémentaires, zéros au-delà non écrits. */
+export function nombreSigne(valeur: Valeur, decimales = 0, decimalesMax = decimales): string {
   if (!estAffichable(valeur)) return VIDE
-  const texte = nombre(valeur, decimales)
-  return arrondi(valeur, decimales) > 0 ? `+${texte}` : texte
+  const texte = nombre(valeur, decimales, decimalesMax)
+  return arrondi(valeur, Math.max(decimales, decimalesMax)) > 0 ? `+${texte}` : texte
 }
 
 const avecUnite = (texte: string, unite: string) => (texte === VIDE ? VIDE : `${texte}${INSECABLE}${unite}`)
 
 // ─── Kilos et mètres ──────────────────────────────────────────────────────────────────────────
 
-/** Kilos au bureau : une décimale (« 1 234,5 kg ») ; Excel `#,##0.0`. */
+/** Kilos au bureau : jusqu'à deux décimales, zéros inutiles enlevés (« 3,15 kg », « 52,4 kg »,
+ * « 26 000 kg ») ; Excel `#,##0.##`. */
 export function kg(valeur: Valeur): string {
-  return avecUnite(nombre(valeur, 1), 'kg')
+  return avecUnite(nombre(valeur, 0, 2), 'kg')
 }
 
 /** Les décimales des kilos au téléphone : entier dès 100 kg, une de 10 à 100, deux sous 10. */
@@ -113,10 +115,10 @@ export function kgEtMetres(kilos: Valeur, kgParMl?: Valeur, telephone = false): 
   return m ? `${k} ${m}` : k
 }
 
-/** Poids d'une bobine : jusqu'à quatre décimales, sans zéros (« 2,4952 kg / bobine »). */
+/** Poids d'une bobine : jusqu'à deux décimales, sans zéros (« 3,15 kg / bobine », « 2,5 kg / bobine »). */
 export function poidsBobine(valeur: Valeur): string {
   if (!estAffichable(valeur)) return VIDE
-  return `${nombre(valeur, 0, 4)}${INSECABLE}kg / bobine`
+  return `${nombre(valeur, 0, 2)}${INSECABLE}kg / bobine`
 }
 
 /** Surface : entière (« 1 200 m² »). */

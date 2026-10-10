@@ -37,7 +37,7 @@ export function IndicateursComptage({ t, voitPrix }: { t: Totaux; voitPrix: bool
       />
       <Kpi
         titre="Écart total"
-        valeur={nombreSigne(t.ecart, 1)}
+        valeur={nombreSigne(t.ecart, 0, 2)}
         unite="kg"
         detail="retenu − théorique, lots comptés"
         formule={formule('inventaire_ecart')}

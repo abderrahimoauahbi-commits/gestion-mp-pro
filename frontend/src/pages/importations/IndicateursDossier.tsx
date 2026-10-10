@@ -32,7 +32,7 @@ export function IndicateursDossier({ d, versFrais }: { d: DossierFiche; versFrai
     <Indicateurs libelle="Indicateurs du dossier">
       <Kpi
         titre="Poids"
-        valeur={nombre(d.poids, 1)}
+        valeur={nombre(d.poids, 0, 2)}
         unite="kg"
         detail={`${nombre(lotsDistincts(d))} lot(s)`}
         formule={formule('import_poids')}

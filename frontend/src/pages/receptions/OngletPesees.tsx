@@ -106,7 +106,7 @@ const COLONNES: Colonne<Pesee>[] = [
         ? VIDE
         : deux(
             <Badge ton={p.hors_tolerance ? 'critique' : 'ok'}>{partSignee(p.ecart_relatif)}</Badge>,
-            `${p.ecart > 0 ? '+' : ''}${nombre(p.ecart, 1)} kg${p.compare_au === 'reste' ? ' vs reste à livrer' : ''}`,
+            `${p.ecart > 0 ? '+' : ''}${nombre(p.ecart, 0, 2)} kg${p.compare_au === 'reste' ? ' vs reste à livrer' : ''}`,
           ),
   },
   {

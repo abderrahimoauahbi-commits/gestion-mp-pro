@@ -37,7 +37,7 @@ function Paire({
   )
 }
 
-const kgFixe = (v: number) => nombre(v, 1)
+const kgFixe = (v: number) => nombre(v, 0, 2)
 const n = (v: number | null | undefined) => v ?? 0
 
 /**
@@ -65,8 +65,8 @@ function noteRealisation(l: LigneStock): string | undefined {
   if (l.coefficient_realisation == null) return undefined
   const k = nombre(l.coefficient_realisation, 2)
   if (l.realisation_heritee?.length)
-    return `plan ${nombre(l.conso_plan, 1)} · corrigé × ${k}, le taux de réalisation de ${l.realisation_heritee.join(', ')} qu’il remplace`
-  return `plan ${nombre(l.conso_plan, 1)} · réel ${l.conso_reelle != null ? nombre(l.conso_reelle, 1) : VIDE} · plan corrigé × ${k}`
+    return `plan ${nombre(l.conso_plan, 0, 2)} · corrigé × ${k}, le taux de réalisation de ${l.realisation_heritee.join(', ')} qu’il remplace`
+  return `plan ${nombre(l.conso_plan, 0, 2)} · réel ${l.conso_reelle != null ? nombre(l.conso_reelle, 0, 2) : VIDE} · plan corrigé × ${k}`
 }
 
 /** Prix, déjà en préparation, montant à commander : direction et achats. */
@@ -84,7 +84,7 @@ function PairesAchats({ l }: { l: LigneStock }) {
             </>
           }
         >
-          {nombre(l.bc_en_preparation, 1)}
+          {nombre(l.bc_en_preparation, 0, 2)}
         </Paire>
       ) : null}
       <Paire
@@ -106,11 +106,11 @@ function PaireStockMinimum({ l }: { l: LigneStock }) {
       libelle="Stock minimum (catalogue)"
       note={
         plafonne
-          ? `retenu : ${nombre(l.stock_min_plafonne, 1)} — ramené à ce que la consommation justifie`
+          ? `retenu : ${nombre(l.stock_min_plafonne, 0, 2)} — ramené à ce que la consommation justifie`
           : undefined
       }
     >
-      {nombre(l.stock_min, 1)}
+      {nombre(l.stock_min, 0, 2)}
     </Paire>
   )
 }
@@ -137,10 +137,10 @@ export function CarteAppro({ l, voitPrix }: { l: LigneStock; voitPrix: boolean }
             libelle="Seuil d’alerte"
             note={`sécurité et stock minimum, soit ${jours(l.couverture_cible_jours)} de consommation — comparé au stock projeté`}
           >
-            {nombre(l.stock_min_recalcule, 1)}
+            {nombre(l.stock_min_recalcule, 0, 2)}
           </Paire>
           <Paire libelle="Consommation retenue / mois" note={noteRealisation(l)}>
-            {nombre(l.conso_mensuelle, 1)}
+            {nombre(l.conso_mensuelle, 0, 2)}
           </Paire>
           <Paire
             libelle="Besoin annuel retenu"
@@ -150,7 +150,7 @@ export function CarteAppro({ l, voitPrix }: { l: LigneStock; voitPrix: boolean }
                 : undefined
             }
           >
-            {nombre(l.besoin_annuel, 1)}
+            {nombre(l.besoin_annuel, 0, 2)}
           </Paire>
           {voitPrix ? <PairesAchats l={l} /> : null}
         </tbody>

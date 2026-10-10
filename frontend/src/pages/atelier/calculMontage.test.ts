@@ -54,7 +54,7 @@ describe('Calculs du montage', () => {
     expect(effetDe({ avant: m, apres: m }, [], [fil()], () => 2.4952)).toBe(798.464)
     expect(messageMontage(true, 1000, 1798.464)).toBe(
       'Monter n’écrit aucun mouvement : ce fil est déjà sorti par un ordre. Le stock sur les métiers passe de ' +
-        '1 000,0 à 1 798,5 kg (+798,5 kg) ; il compte dans le stock global, sa valeur, le disponible et le projeté.',
+        '1 000 à 1 798,46 kg (+798,46 kg) ; il compte dans le stock global, sa valeur, le disponible et le projeté.',
     )
     expect(messageMontage(true, 10, 10.04)).toBe('Le stock sur les métiers ne change pas.')
     expect(messageMontage(false, 10, 50)).toBe('Métier arrêté : rien n’est compté sur lui.')
@@ -83,7 +83,7 @@ describe('Calculs du montage', () => {
       () => 2.5,
     )
     expect(alerte).toBe(
-      'POIL ROUGE 2900 : 800,0 kg sur les métiers pour 100,0 kg partis aux machines en 30 jours : vérifier ' +
+      'POIL ROUGE 2900 : 800 kg sur les métiers pour 100 kg partis aux machines en 30 jours : vérifier ' +
         'qu’il est bien sorti par un ordre avant de le monter.',
     )
   })

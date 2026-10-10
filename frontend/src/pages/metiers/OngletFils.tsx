@@ -202,7 +202,7 @@ function LigneEtage({
       <td>{texte.join(' ')}</td>
       <td colSpan={2} className={styles.droite}>{`${nombre(occupe, 2)} / ${nombre(laize, 2)} m`}</td>
       <td className={styles.droite}>{nombre(b)}</td>
-      <td className={styles.droite}>{nombre(p, 1)}</td>
+      <td className={styles.droite}>{nombre(p, 0, 2)}</td>
       <td colSpan={3} />
     </tr>
   )

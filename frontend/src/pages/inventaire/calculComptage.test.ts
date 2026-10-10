@@ -134,7 +134,7 @@ describe('Valider', () => {
     const b = changer({}, fiche.lignes[0]!, { compte: 400, second_compte: 402, justification: 'casse' })
     const t = totaux(fiche.lignes.map((l) => etatLigne(l, b[l.id], 0.02, KARIM)))
     expect(questionValider(t)).toBe(
-      'Valider ? 1 lot(s) comptés, 1 écart(s) ajusté(s) (−18,0 kg), 1 non comptés restent au théorique, 1 recomptage(s) faits par la même personne. Seule une annulation (contre-passation, avec un motif) la défait.',
+      'Valider ? 1 lot(s) comptés, 1 écart(s) ajusté(s) (−18 kg), 1 non comptés restent au théorique, 1 recomptage(s) faits par la même personne. Seule une annulation (contre-passation, avec un motif) la défait.',
     )
   })
 })

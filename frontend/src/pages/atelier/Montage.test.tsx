@@ -69,9 +69,9 @@ describe('Monter les fils', () => {
     await u.click(screen.getByRole('button', { name: 'Enregistrer l’étage 1…' }))
     const carte = screen.getByRole('region', { name: 'Confirmation du montage' })
     expect(carte.textContent).toMatch(
-      /Monter n’écrit aucun mouvement : ce fil est déjà sorti par un ordre\. Le stock sur les métiers passe de 1\s197,7 à 1\s996,2 kg \(\+798,5 kg\) ; il compte dans le stock global, sa valeur, le disponible et le projeté\./,
+      /Monter n’écrit aucun mouvement : ce fil est déjà sorti par un ordre\. Le stock sur les métiers passe de 1\s197,7 à 1\s996,16 kg \(\+798,46 kg\) ; il compte dans le stock global, sa valeur, le disponible et le projeté\./,
     )
-    expect(carte.textContent).toMatch(/Attention : POIL ROUGE 2900 : 1\s996,2 kg sur les métiers/)
+    expect(carte.textContent).toMatch(/Attention : POIL ROUGE 2900 : 1\s996,16 kg sur les métiers/)
     await u.click(within(carte).getByRole('button', { name: 'Oui, enregistrer' }))
     expect(
       await screen.findByText(/Étage 1 enregistré : 1 fil\(s\).*Message du serveur\./),

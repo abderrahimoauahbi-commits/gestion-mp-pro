@@ -73,7 +73,7 @@ const theorique: C = {
   valeur: (e) => e.ligne.theorique,
   rendu: (e) => (
     <span className={styles.enLigne}>
-      <span className="nombre">{nombre(e.ligne.theorique, 1)}</span>
+      <span className="nombre">{nombre(e.ligne.theorique, 0, 2)}</span>
       <span className={styles.note}>
         {[
           metres(e.ligne.theorique, e.ligne.kg_par_ml),

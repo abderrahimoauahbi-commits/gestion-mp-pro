@@ -138,7 +138,7 @@ const COLONNES_ORDRE: readonly Colonne<ParMatiere>[] = [
       ) : r.ecart == null ? (
         VIDE
       ) : (
-        nombreSigne(r.ecart, 1)
+        nombreSigne(r.ecart, 0, 2)
       ),
   },
 ]
@@ -171,7 +171,7 @@ function FenetreOrdre({ o, onFermer }: { o: ConsommationOrdre; onFermer: () => v
         <Kpi
           titre="Écart"
           valeur={<EcartRecette relatif={o.ecart_relatif} />}
-          detail={o.ecart == null ? undefined : `${nombreSigne(o.ecart, 1)} kg`}
+          detail={o.ecart == null ? undefined : `${nombreSigne(o.ecart, 0, 2)} kg`}
           formule={formule('ecart_recette')}
         />
       </Indicateurs>

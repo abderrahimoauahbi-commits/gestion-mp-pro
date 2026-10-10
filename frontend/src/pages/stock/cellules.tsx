@@ -11,30 +11,24 @@ import { metres, nombre, VIDE } from '../../lib/format'
 import styles from './stock.module.css'
 import { POUSSIERE } from './types'
 
-/** Des kilos dans une cellule : « 1 234,5 », « 0 » grisé, « −3,2 » en rouge, « ≈ 1 020 ml » dessous. */
-export function Kg({
-  v,
-  kgParMl,
-  d = 1,
-}: {
-  v: number | null | undefined
-  kgParMl?: number | null
-  d?: number
-}) {
+/** Des kilos dans une cellule : jusqu'à deux décimales sans zéros inutiles (« 1 234,5 », « 3,15 »),
+ * « 0 » grisé, « −3,2 » en rouge, « ≈ 1 020 ml » dessous. `d` fige un nombre exact de décimales
+ * (le cockpit arrondit à l'entier, `d={0}`). */
+export function Kg({ v, kgParMl, d }: { v: number | null | undefined; kgParMl?: number | null; d?: number }) {
   if (v == null) return <span className={styles.nul}>{VIDE}</span>
   if (Math.abs(v) < POUSSIERE) return <span className={styles.nul}>0</span>
   const m = kgParMl ? metres(v, kgParMl) : ''
   return (
     <span className={classes(v < 0 && styles.negatif)}>
-      {nombre(v, d)}
+      {d == null ? nombre(v, 0, 2) : nombre(v, d)}
       {m ? <span className={styles.dessous}>{m}</span> : null}
     </span>
   )
 }
 
-/** Une quantité signée : « +12,5 » en vert, « −3,0 » en rouge ; un transfert reste neutre. */
+/** Une quantité signée : « +12,5 » en vert, « −3,15 » en rouge ; un transfert reste neutre. */
 export function Signe({ v, neutre }: { v: number; neutre?: boolean }) {
-  const texte = nombre(v, 1)
+  const texte = nombre(v, 0, 2)
   return (
     <span className={classes(!neutre && (v < 0 ? styles.negatif : styles.positif))}>
       {v > 0 && !neutre ? `+${texte}` : texte}

@@ -138,11 +138,17 @@ describe('Vide : « — »', () => {
 })
 
 describe('Kilos', () => {
-  it('au bureau : une décimale', () => {
+  it('au bureau : jusqu’à deux décimales, zéros inutiles enlevés', () => {
+    expect(kg(3.15)).toBe(n('3,15~kg'))
+    expect(kg(3.152)).toBe(n('3,15~kg'))
+    expect(kg(52.4)).toBe(n('52,4~kg'))
+    expect(kg(3)).toBe(n('3~kg'))
+    expect(kg(26000)).toBe(n('26~000~kg'))
+    expect(kg(26000.15)).toBe(n('26~000,15~kg'))
     expect(kg(1234.5)).toBe(n('1~234,5~kg'))
-    expect(kg(1234.56)).toBe(n('1~234,6~kg'))
-    expect(kg(2.49)).toBe(n('2,5~kg'))
-    expect(kg(0)).toBe(n('0,0~kg'))
+    expect(kg(1234.56)).toBe(n('1~234,56~kg'))
+    expect(kg(2.496)).toBe(n('2,5~kg'))
+    expect(kg(0)).toBe(n('0~kg'))
   })
 
   it.each([
@@ -166,14 +172,14 @@ describe('Kilos', () => {
 })
 
 describe('Mètres indicatifs (cuir, franges, ruban)', () => {
-  it('« 14,3 kg ≈ 1 020 ml »', () => {
-    expect(kgEtMetres(14.28, 0.014)).toBe(n('14,3~kg ≈~1~020~ml'))
+  it('« 14,28 kg ≈ 1 020 ml »', () => {
+    expect(kgEtMetres(14.28, 0.014)).toBe(n('14,28~kg ≈~1~020~ml'))
     expect(metres(14.28, 0.014)).toBe(n('≈~1~020~ml'))
   })
 
   it('rien pour une matière au poids, sans densité, ou un reste d’arrondi', () => {
-    expect(kgEtMetres(14.28)).toBe(n('14,3~kg'))
-    expect(kgEtMetres(14.28, 0)).toBe(n('14,3~kg'))
+    expect(kgEtMetres(14.28)).toBe(n('14,28~kg'))
+    expect(kgEtMetres(14.28, 0)).toBe(n('14,28~kg'))
     expect(metres(14.28, null)).toBe('')
     expect(metres(0.0001, 0.014)).toBe('')
   })
@@ -231,8 +237,9 @@ describe('Prix unitaire, cours, pourcentage, bobine, m²', () => {
     expect(part(0.07)).toBe(n('7,0~%'))
   })
 
-  it('poids de bobine : jusqu’à quatre décimales sans zéros', () => {
-    expect(poidsBobine(2.49524)).toBe(n('2,4952~kg / bobine'))
+  it('poids de bobine : jusqu’à deux décimales sans zéros', () => {
+    expect(poidsBobine(3.15)).toBe(n('3,15~kg / bobine'))
+    expect(poidsBobine(3.152)).toBe(n('3,15~kg / bobine'))
     expect(poidsBobine(2.5)).toBe(n('2,5~kg / bobine'))
   })
 

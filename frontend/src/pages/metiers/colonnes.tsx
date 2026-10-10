@@ -87,7 +87,7 @@ export const COLONNES: Colonne<MetierFiche>[] = [
     droite: true,
     unite: 'kg',
     valeur: (m) => m.sur_les_metiers,
-    rendu: (m) => nombre(m.sur_les_metiers, 1),
+    rendu: (m) => nombre(m.sur_les_metiers, 0, 2),
     total: true,
   },
   {

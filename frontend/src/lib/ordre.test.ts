@@ -100,7 +100,7 @@ describe('blocagesSaisie : les mots du serveur, avant l’envoi', () => {
   it('un lot qui ne porte pas ce qu’on lui demande à la date, toutes ses lignes additionnées', () => {
     const deux = [prise({ cle: 'a', kg: 30 }), prise({ cle: 'b', kg: 30 })]
     expect(blocagesSaisie(deux, contexte()).map((x) => x.replace(/\u00a0/g, ' '))).toEqual([
-      'lot L-900 de REF À LA MAIN : 50,0 kg seulement dans « MP », 60,0 kg demandés',
+      'lot L-900 de REF À LA MAIN : 50 kg seulement dans « MP », 60 kg demandés',
     ])
     expect(blocagesSaisie([prise({})], contexte({ dispo: new Map() }))[0]).toContain('épuisé')
     // Le disponible ne s'est pas encore lu : rien n'est annoncé à tort.

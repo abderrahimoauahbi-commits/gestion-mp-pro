@@ -57,7 +57,7 @@ function quantite(type: TypeOperation): C {
     rendu: (l) =>
       type === 'ajustement' ? (
         <span className={classes('nombre', l.quantite < 0 ? styles.negatif : styles.positif)}>
-          {nombreSigne(l.quantite, 2)}&nbsp;kg
+          {nombreSigne(l.quantite, 0, 2)}&nbsp;kg
         </span>
       ) : (
         <span className="nombre">{kgEtMetres(l.quantite, l.kg_par_ml)}</span>

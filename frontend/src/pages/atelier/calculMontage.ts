@@ -73,7 +73,7 @@ export function peser(m: ReglagePese, fils: readonly FilPese[], poids: (id: numb
 }
 
 /** « +40,0 », « −3,5 » (comme `montage.signe` du serveur). */
-export const signe = (v: number) => `${v >= 0 ? '+' : '−'}${nombre(Math.abs(v), 1)}`
+export const signe = (v: number) => `${v >= 0 ? '+' : '−'}${nombre(Math.abs(v), 0, 2)}`
 
 /** Le texte unique de l'effet d'un montage sur le stock sur les métiers ((a)). */
 export function messageMontage(actif: boolean, avant: number, apres: number): string {
@@ -81,7 +81,7 @@ export function messageMontage(actif: boolean, avant: number, apres: number): st
   if (Math.abs(apres - avant) < TOLERANCE_EFFET) return 'Le stock sur les métiers ne change pas.'
   return (
     'Monter n’écrit aucun mouvement : ce fil est déjà sorti par un ordre. Le stock sur les métiers passe de ' +
-    `${nombre(avant, 1)} à ${nombre(apres, 1)} kg (${signe(apres - avant)} kg) ; il compte dans le stock ` +
+    `${nombre(avant, 0, 2)} à ${nombre(apres, 0, 2)} kg (${signe(apres - avant)} kg) ; il compte dans le stock ` +
     'global, sa valeur, le disponible et le projeté.'
   )
 }
@@ -105,7 +105,7 @@ export function alertesMontage(
     const total = lu.deja_monte - peser(m.avant, seul(avant), poids) + peser(m.apres, seul(apres), poids)
     if (total > 1.1 * lu.sorti_30_j + 1)
       textes.push(
-        `${lu.reference} : ${nombre(total, 1)} kg sur les métiers pour ${nombre(lu.sorti_30_j, 1)} kg partis ` +
+        `${lu.reference} : ${nombre(total, 0, 2)} kg sur les métiers pour ${nombre(lu.sorti_30_j, 0, 2)} kg partis ` +
           `aux machines en ${lu.jours} jours : vérifier qu’il est bien sorti par un ordre avant de le monter.`,
       )
   }

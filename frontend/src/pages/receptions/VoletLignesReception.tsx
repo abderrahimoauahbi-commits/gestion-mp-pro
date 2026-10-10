@@ -91,7 +91,7 @@ function colonnes2(_r: ReceptionFiche): Colonne<LigneReception>[] {
           ? VIDE
           : deux(
               <Badge ton={l.hors_tolerance ? 'critique' : 'ok'}>{partSignee(l.ecart_relatif)}</Badge>,
-              `${l.ecart > 0 ? '+' : ''}${nombre(l.ecart, 1)} kg`,
+              `${l.ecart > 0 ? '+' : ''}${nombre(l.ecart, 0, 2)} kg`,
             ),
     },
   ]

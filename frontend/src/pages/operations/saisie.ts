@@ -176,7 +176,7 @@ export function retrait(type: TypeOperation, l: Pick<LigneSaisie, 'quantite'>): 
 export function depassements(s: SaisieOperation): string[] {
   return s.lignes
     .filter((l) => l.disponible != null && retrait(s.type, l) > l.disponible + 0.001)
-    .map((l) => `« ${l.reference} », lot ${l.lot} : plus que les ${nombre(l.disponible, 1)} kg du lot`)
+    .map((l) => `« ${l.reference} », lot ${l.lot} : plus que les ${nombre(l.disponible, 0, 2)} kg du lot`)
 }
 
 /** La question de « Valider ». */

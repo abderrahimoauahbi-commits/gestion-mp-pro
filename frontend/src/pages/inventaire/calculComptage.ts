@@ -276,7 +276,7 @@ export function raisonsDeValider(fiche: InventaireFiche, t: Totaux): string[] {
 export function questionValider(t: Totaux): string {
   const morceaux = [
     `${nombre(t.comptees)} lot(s) comptés`,
-    `${nombre(t.ajustes)} écart(s) ajusté(s) (${nombreSigne(t.ecart, 1)} kg)`,
+    `${nombre(t.ajustes)} écart(s) ajusté(s) (${nombreSigne(t.ecart, 0, 2)} kg)`,
   ]
   const nonComptes = t.lignes - t.comptees
   if (nonComptes) morceaux.push(`${nombre(nonComptes)} non comptés restent au théorique`)

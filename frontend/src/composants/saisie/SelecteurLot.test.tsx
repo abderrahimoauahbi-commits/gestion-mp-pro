@@ -74,7 +74,7 @@ describe('SelecteurLot', () => {
     expect(String(appel.mock.calls[0]?.[0])).toBe('/api/lots/disponibles?matiere=3&date=2026-10-08')
     expect(optionsDeLots(lignes).map((o) => o.sous)).toEqual([
       '120,5\u00a0kg restants · entré le 02/09/2026 · MP1, MP2',
-      '300,0\u00a0kg restants · entré le 01/10/2026 · MP1',
+      '300\u00a0kg restants · entré le 01/10/2026 · MP1',
     ])
     await userEvent.click(champ)
     await userEvent.click(screen.getByRole('option', { name: /0007/ }))

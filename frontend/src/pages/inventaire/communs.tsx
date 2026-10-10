@@ -13,7 +13,7 @@ import { POUSSIERE, tonHorsTolerance } from './types'
 export function EcartKg({ valeur, colore = true }: { valeur: number | null | undefined; colore?: boolean }) {
   if (valeur == null) return <span className="nombre">{VIDE}</span>
   const signe = valeur <= -POUSSIERE ? styles.negatif : valeur >= POUSSIERE ? styles.positif : undefined
-  return <span className={classes('nombre', colore && signe)}>{nombreSigne(valeur, 1)}</span>
+  return <span className={classes('nombre', colore && signe)}>{nombreSigne(valeur, 0, 2)}</span>
 }
 
 /** La valeur nette de l'écart en MAD, et « {abs} sans signe » dessous. */

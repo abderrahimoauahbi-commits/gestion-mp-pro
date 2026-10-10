@@ -78,7 +78,7 @@ const DEBUT: Colonne<OrdreResume>[] = [
     unite: 'kg',
     total: true,
     valeur: (o) => o.prevu || null,
-    rendu: (o) => (o.prevu ? nombre(o.prevu, 1) : <span className={styles.nul}>{VIDE}</span>),
+    rendu: (o) => (o.prevu ? nombre(o.prevu, 0, 2) : <span className={styles.nul}>{VIDE}</span>),
   },
 ]
 
@@ -103,7 +103,7 @@ export function colonnesOrdres(brouillons: boolean, role: Role): Colonne<OrdreRe
     rendu: (o) => (
       <Double
         haut={<Kg v={sortiOuASortir(o)} />}
-        bas={o.revenu ? `dont ${nombre(o.revenu, 1)} revenus` : undefined}
+        bas={o.revenu ? `dont ${nombre(o.revenu, 0, 2)} revenus` : undefined}
       />
     ),
   }

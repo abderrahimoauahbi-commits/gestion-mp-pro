@@ -519,7 +519,7 @@ gabarits (`documents/rendu.py`, filtres Jinja2) et les formats Excel (`exports/c
 |---|---|---|
 | Arrondi | ARRONDI d'Excel (demi loin de zéro) sur la valeur brute, jamais d'arrondi en cascade | |
 | Milliers, décimales | espace insécable U+00A0, virgule ; « − » ; jamais « -0 » ni « −0,0 % » | 17 398 184 |
-| Kilos (bureau) | 1 décimale ; Excel `#,##0.0` | 1 234,5 kg |
+| Kilos (bureau) | jusqu'à 2 décimales, zéros inutiles enlevés ; Excel `#,##0.##` | 3,15 kg ; 52,4 kg ; 26 000 kg |
 | Kilos (téléphone) | entier ≥ 100 kg ; 1 décimale de 10 à 100 ; 2 sous 10 | 445 kg ; 52,4 kg ; 2,49 kg |
 | Kilos commandés au kilo | entier | 5 029 kg |
 | Mètres indicatifs | `≈ N ml` entier, kg ÷ densité, cuir/franges/ruban | 14,3 kg ≈ 1 020 ml |
@@ -527,7 +527,7 @@ gabarits (`documents/rendu.py`, filtres Jinja2) et les formats Excel (`exports/c
 | Prix unitaire | 2 décimales ; jusqu'à 4 si 0 < \|p\| < 0,1 ; unité dite | 2,80 USD / kg ; 0,0011 USD / ml |
 | Cours | 4 décimales | 10,0500 |
 | Pourcentage | 1 décimale, espace insécable | 12,5 % |
-| Poids de bobine | jusqu'à 4 décimales sans zéros | 2,4952 kg / bobine |
+| Poids de bobine | jusqu'à 2 décimales sans zéros | 3,15 kg / bobine |
 | m² | entier | 1 200 m² |
 | Dates | JJ/MM/AAAA ; horodatage JJ/MM/AAAA HH:MM ; « aujourd'hui », « hier » selon l'heure du serveur | 08/10/2026 |
 | Vide | « — » | |

@@ -97,9 +97,9 @@ export function TablePrevuSorti({
               <td>
                 <NomMatiere f={f} onSuivre={onSuivre} />
               </td>
-              <td className={styles.droite}>{f.prevu ? nombre(f.prevu, 1) : VIDE}</td>
-              <td className={styles.droite}>{nombre(f.quantite, 1)}</td>
-              <td className={styles.droite}>{f.ecart == null ? VIDE : nombreSigne(f.ecart, 1)}</td>
+              <td className={styles.droite}>{f.prevu ? nombre(f.prevu, 0, 2) : VIDE}</td>
+              <td className={styles.droite}>{nombre(f.quantite, 0, 2)}</td>
+              <td className={styles.droite}>{f.ecart == null ? VIDE : nombreSigne(f.ecart, 0, 2)}</td>
               <td className={styles.droite}>
                 <EcartRecette relatif={f.ecart != null && f.prevu ? f.ecart / f.prevu : null} />
               </td>
@@ -109,9 +109,9 @@ export function TablePrevuSorti({
         <tfoot>
           <tr>
             <td>Total</td>
-            <td className={styles.droite}>{nombre(totaux.prevu, 1)}</td>
-            <td className={styles.droite}>{nombre(totaux.net, 1)}</td>
-            <td className={styles.droite}>{totaux.ecart == null ? VIDE : nombreSigne(totaux.ecart, 1)}</td>
+            <td className={styles.droite}>{nombre(totaux.prevu, 0, 2)}</td>
+            <td className={styles.droite}>{nombre(totaux.net, 0, 2)}</td>
+            <td className={styles.droite}>{totaux.ecart == null ? VIDE : nombreSigne(totaux.ecart, 0, 2)}</td>
             <td className={styles.droite}>
               <EcartRecette relatif={totaux.ecart_relatif} />
             </td>

@@ -74,7 +74,7 @@ function Contenu({ fiche, role, onFermer }: { fiche: MetierFiche; role: Role; on
         {noteMetier(e)}
         {e.forme.actif ? '' : ' Métier arrêté : ce poids ne compte pas dans le stock.'}
         {d
-          ? ` Dernier montage : ${d.par ?? '—'}, le ${horodatage(d.quand)} (${nombreSigne(d.effet_kg, 1)} kg).`
+          ? ` Dernier montage : ${d.par ?? '—'}, le ${horodatage(d.quand)} (${nombreSigne(d.effet_kg, 0, 2)} kg).`
           : ''}
       </Note>
       <Onglets<Volet>

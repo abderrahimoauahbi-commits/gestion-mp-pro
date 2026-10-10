@@ -81,7 +81,10 @@ const COLONNES: Colonne<Consommation>[] = [
     total: true,
     valeur: (o) => o.net,
     rendu: (o) => (
-      <Double haut={<Kg v={o.net} />} bas={o.retours ? `dont ${nombre(o.retours, 1)} revenus` : undefined} />
+      <Double
+        haut={<Kg v={o.net} />}
+        bas={o.retours ? `dont ${nombre(o.retours, 0, 2)} revenus` : undefined}
+      />
     ),
   },
   {

@@ -93,9 +93,9 @@ export function manqueEncart(
   const sort =
     type === 'transfert' || type === 'retour_fournisseur' || (type === 'ajustement' && e.sens === '-')
   if (sort && place && e.kg != null && e.kg > place.quantite + 0.001)
-    manque.push(`une quantité qui ne dépasse pas les ${nombre(place.quantite, 1)} kg du lot`)
+    manque.push(`une quantité qui ne dépasse pas les ${nombre(place.quantite, 0, 2)} kg du lot`)
   if (type === 'retour_machine' && sortiNet != null && e.kg != null && e.kg > sortiNet + 0.001)
-    manque.push(`une quantité qui ne dépasse pas les ${nombre(sortiNet, 1)} kg partis pour l’ordre`)
+    manque.push(`une quantité qui ne dépasse pas les ${nombre(sortiNet, 0, 2)} kg partis pour l’ordre`)
   if (type === 'ouverture' && e.prix == null) manque.push('le prix au kilo')
   return manque
 }
