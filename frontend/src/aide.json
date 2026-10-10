@@ -359,7 +359,7 @@
     },
     "bobines_montees": {
       "grandeur": "Bobines montées",
-      "texte": "Σ mètres × bobines par mètre du métier × part du fil, sur les métiers en service."
+      "texte": "Σ mètres × bobines par mètre du métier, sur les métiers en service (le remplissage des bobines n’entre pas dans le nombre de bobines)."
     },
     "bobines_suivies": {
       "grandeur": "Poids de la bobine",
@@ -1211,8 +1211,8 @@
         {
           "etapes": [
             "Métiers à tisser : choisir le métier (laize d’un étage, nombre d’étages, densité, réglés par la direction).",
-            "Choisir l’étage, chercher le fil, saisir les mètres montés et le pourcentage.",
-            "L’écran calcule bobines = mètres × densité × pourcentage, poids = bobines × kg / bobine. {{sur_les_metiers}} Deux fils qui se partagent les mêmes mètres (60 et 40 %) n’occupent qu’une fois la laize.",
+            "Choisir l’étage, chercher le fil, saisir les mètres montés et à quel pourcentage les bobines sont pleines (remplissage).",
+            "L’écran calcule bobines = mètres × densité, poids = bobines × kg / bobine × remplissage des bobines. {{sur_les_metiers}} Le remplissage des bobines ne change pas la largeur occupée.",
             "Le fil monté doit avoir été sorti vers les machines : sinon le magasin le compte encore (contrôle C25)."
           ],
           "titre": "Monter un fil sur un métier",

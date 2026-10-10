@@ -70,12 +70,14 @@ def test_poids_de_bobine_mesure() -> None:
         )
     ]
     premier, second = fils_en_machine(d)
+    # Le remplissage des bobines (second : 50 %) n'entre pas dans le nombre de bobines :
+    # second = 1,5 m × 10 = 15. Il agit sur le poids (× 50 %).
     assert premier.poids_bobine == 2.3 and premier.poids == pytest.approx(premier.bobines * 2.3)
-    assert (premier.bobines, second.bobines) == (20, 7.5)
-    assert stock_en_machine(d) == {"REF POIL BLEU": pytest.approx((20 + 7.5) * 2.3)}
+    assert (premier.bobines, second.bobines) == (20, 15)
+    assert stock_en_machine(d) == {"REF POIL BLEU": pytest.approx(20 * 2.3 + 15 * 2.3 * 0.5)}
     # Sans pesée connue, le poids du catalogue.
     d.metiers[0].fils[1].poids_bobine = 0
-    assert stock_en_machine(d) == {"REF POIL BLEU": pytest.approx(20 * 2.3 + 7.5 * 2.0)}
+    assert stock_en_machine(d) == {"REF POIL BLEU": pytest.approx(20 * 2.3 + 15 * 2.0 * 0.5)}
 
 
 def test_l_evolution_du_poids_des_bobines() -> None:

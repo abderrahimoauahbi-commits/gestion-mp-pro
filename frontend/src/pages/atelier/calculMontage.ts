@@ -1,8 +1,9 @@
 /**
  * Les calculs du montage d'un étage, **comme le serveur** (services/montage.py, lot D2) :
- * largeur occupée = Σ mètres × part ; bobines = mètres × bobines par mètre × part ; poids =
- * bobines × poids de bobine retenu (pesé au lot, sinon catalogue — le même au bureau et au
- * téléphone, an. 11) ; un métier arrêté ne compte rien. L'effet annoncé est envoyé pour
+ * largeur occupée = Σ mètres ; bobines = mètres × bobines par mètre (le remplissage des bobines
+ * n'y entre pas) ; poids = bobines × poids de bobine retenu (pesé au lot, sinon catalogue — le
+ * même au bureau et au téléphone, an. 11) × remplissage des bobines / 100 ; un métier arrêté ne
+ * compte rien. L'effet annoncé est envoyé pour
  * confirmation (`confirme_effet_kg`) ; le texte unique « sur les métiers » ((a)) et l'alerte
  * 30 jours sont ceux du serveur.
  */
@@ -60,16 +61,15 @@ export type FilPese = Pick<FilSaisi, 'matiere_id' | 'metres' | 'pourcentage'>
 /** Ce qu'il faut d'un métier pour peser ses fils. */
 export type ReglagePese = Pick<MetierFiche, 'actif' | 'bobines_par_metre'>
 
-export const largeurDe = (fils: readonly FilPese[]) =>
-  fils.reduce((t, f) => t + (f.metres * f.pourcentage) / 100, 0)
+export const largeurDe = (fils: readonly FilPese[]) => fils.reduce((t, f) => t + f.metres, 0)
 
-export const bobinesDe = (m: ReglagePese, f: FilPese) =>
-  (f.metres * m.bobines_par_metre * f.pourcentage) / 100
+export const bobinesDe = (m: ReglagePese, f: FilPese) => f.metres * m.bobines_par_metre
 
-/** Ce que pèsent ces fils sur ce métier (0 s'il est arrêté). */
+/** Ce que pèsent ces fils sur ce métier (0 s'il est arrêté). Poids = bobines × poids de
+ * bobine retenu × remplissage des bobines / 100. */
 export function peser(m: ReglagePese, fils: readonly FilPese[], poids: (id: number) => number): number {
   if (!m.actif) return 0
-  return fils.reduce((t, f) => t + bobinesDe(m, f) * poids(f.matiere_id), 0)
+  return fils.reduce((t, f) => t + bobinesDe(m, f) * poids(f.matiere_id) * (f.pourcentage / 100), 0)
 }
 
 /** « +40,0 », « −3,5 » (comme `montage.signe` du serveur). */

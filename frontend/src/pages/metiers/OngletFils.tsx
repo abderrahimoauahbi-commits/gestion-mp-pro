@@ -1,7 +1,7 @@
 /**
  * Onglet « Fils montés » de la fiche d'un métier (`/metiers/:id?onglet=fils`) : une ligne par
- * étage (occupé / laize, bobines, kilos) et ses fils (référence, mètres, part bornée 0…100, bobines,
- * poids, étage, observations) ; pied « Toute la machine » en largeur occupée (an. 13) ; ajout d'un
+ * étage (occupé / laize, bobines, kilos) et ses fils (référence, mètres, remplissage des bobines
+ * borné 0…100, bobines, poids, étage, observations) ; pied « Toute la machine » en largeur occupée (an. 13) ; ajout d'un
  * fil au poids de bobine retenu par le montage (an. 11). Lecture seule pour les achats.
  */
 import { Fragment } from 'react'
@@ -26,6 +26,10 @@ interface Props {
   /** Le lien « ouvrir la matière » (direction, achats). */
   lienMatiere: boolean
 }
+
+/** Le poids d'un fil monté : bobines × poids d'une bobine × remplissage des bobines / 100. */
+const poidsFil = (bobines: number, poidsBobine: number, pourcentage: number | null) =>
+  (bobines * poidsBobine * (pourcentage ?? 0)) / 100
 
 /** Les étiquettes d'un fil : sans poids de bobine, ou pesé loin du catalogue. */
 function Alertes({ e, f, poids }: { e: FicheMetierEtat; f: FilForme; poids: number }) {
@@ -65,7 +69,7 @@ function CelluleReference({ e, f, lienMatiere }: { e: FicheMetierEtat; f: FilFor
   )
 }
 
-/** Les mètres montés (0…1000) et la part du fil (0…100 %, bornée à la frappe, an. 12). */
+/** Les mètres montés (0…1000) et le remplissage des bobines (0…100 %, borné à la frappe, an. 12). */
 function CellulesLargeur({
   f,
   ecrit,
@@ -90,7 +94,7 @@ function CellulesLargeur({
       </td>
       <td className={styles.etroit}>
         <Nombre
-          libelle={`Part de ${f.reference} (%)`}
+          libelle={`Bobines pleines de ${f.reference} (%)`}
           valeur={f.pourcentage}
           min={0}
           max={100}
@@ -119,7 +123,7 @@ function LigneFil({ e, f, ecrit, lienMatiere, nbEtages }: Props & { f: FilForme;
       <CelluleReference e={e} f={f} lienMatiere={lienMatiere} />
       <CellulesLargeur f={f} ecrit={ecrit} changer={changer} />
       <td className={styles.droite}>{nombre(bobines)}</td>
-      <td className={styles.droite}>{nombre(bobines * poids, 1)}</td>
+      <td className={styles.droite}>{nombre(poidsFil(bobines, poids, f.pourcentage), 1)}</td>
       <td>
         <Selecteur
           libelle={`Étage de ${f.reference}`}
@@ -180,8 +184,11 @@ function LigneEtage({
   const p = fils.reduce(
     (t, f) =>
       t +
-      bobinesDe(reglage, { matiere_id: 0, metres: f.metres ?? 0, pourcentage: f.pourcentage ?? 0 }) *
+      poidsFil(
+        bobinesDe(reglage, { matiere_id: 0, metres: f.metres ?? 0, pourcentage: f.pourcentage ?? 0 }),
         poidsRetenu(e.m, e.matieres, f.matiere_id),
+        f.pourcentage,
+      ),
     0,
   )
   const trop = laize > 0 && occupe > laize + 1e-6
@@ -211,6 +218,7 @@ export function OngletFils(props: Props) {
     b: bobinesDe(reglage, { matiere_id: 0, metres: f.metres ?? 0, pourcentage: f.pourcentage ?? 0 }),
   }))
   const totalLargeur = [...largeurs(e.forme).values()].reduce((t, l) => t + l, 0)
+  const totalPoids = tous.reduce((t, x) => t + poidsFil(x.b, poidsRetenu(e.m, e.matieres, x.f.matiere_id), x.f.pourcentage), 0) // prettier-ignore
   return (
     <>
       <Cadre hauteur="fenetre">
@@ -219,7 +227,9 @@ export function OngletFils(props: Props) {
             <tr>
               <th>Référence</th>
               <th className={styles.droite}>Mètres</th>
-              <th className={styles.droite}>Part (%)</th>
+              <th className={styles.droite} title="À quel pourcentage les bobines sont pleines">
+                Bobines pleines (%)
+              </th>
               <th className={styles.droite}>Bobines</th>
               <th className={styles.droite}>Poids (kg)</th>
               <th>Étage</th>
@@ -245,9 +255,7 @@ export function OngletFils(props: Props) {
               <td>Toute la machine</td>
               <td colSpan={2} className={styles.droite}>{`${nombre(totalLargeur, 2)} m occupés`}</td>
               <td className={styles.droite}>{nombre(tous.reduce((t, x) => t + x.b, 0))}</td>
-              <td className={styles.droite}>
-                {kg(tous.reduce((t, x) => t + x.b * poidsRetenu(e.m, e.matieres, x.f.matiere_id), 0))}
-              </td>
+              <td className={styles.droite}>{kg(totalPoids)}</td>
               <td colSpan={3} />
             </tr>
           </tfoot>

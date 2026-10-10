@@ -81,7 +81,8 @@ def _fil(f: Fil, ident: int, r: Reglage, ctx: Contexte) -> dict[str, Any]:
         else None
     )  # fmt: skip
     bobines = mt.bobines_du_fil(f, r)
-    poids = float(bobines * bobine.poids)
+    # Le remplissage des bobines (`pourcentage`) pèse sur le poids, pas sur le nombre de bobines.
+    poids = float(bobines * bobine.poids * f.pourcentage / mt.CENT)
     return {
         "id": ident, "matiere_id": m.id, "reference": m.reference,
         "designation": m.designation,
@@ -98,8 +99,8 @@ def _fil(f: Fil, ident: int, r: Reglage, ctx: Contexte) -> dict[str, Any]:
 def _etage(
     n: int, fils: list[dict[str, Any]], r: Reglage, ligne: MetierEtage | None, ctx: Contexte
 ) -> dict[str, Any]:
-    """Un étage : fils, largeur occupée (mètres × part), bobines, poids, version."""
-    metres = sum((Decimal(str(f["metres"])) * Decimal(str(f["pourcentage"])) / mt.CENT
+    """Un étage : fils, largeur occupée (Σ mètres montés), bobines, poids, version."""
+    metres = sum((Decimal(str(f["metres"]))
                   for f in fils), start=Decimal(0))  # fmt: skip
     return {
         "etage": n, "version": ligne.version if ligne else 1, "fils": len(fils),

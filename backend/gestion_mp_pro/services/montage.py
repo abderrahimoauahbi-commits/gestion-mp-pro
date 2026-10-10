@@ -5,9 +5,12 @@ global, sa valeur, le disponible et le projeté. **Monter n'écrit aucun mouveme
 déjà été sorti par un ordre (ARCHITECTURE T1). Chaque montage confirmé s'écrit dans
 `montage_evenement` (avant, après, effet, alerte) et au journal (« montage »).
 
-- Poids d'un fil = mètres × bobines par mètre du métier × part / 100 × poids d'une bobine
-  retenu (pesé au lot : le dernier sorti vers les machines, sinon le dernier reçu ; à défaut
-  le catalogue — M43). Un métier arrêté ne compte pas (0).
+- Bobines d'un fil = mètres × bobines par mètre du métier (le remplissage des bobines n'y
+  entre pas). Poids = bobines × poids d'une bobine retenu (pesé au lot : le dernier sorti vers
+  les machines, sinon le dernier reçu ; à défaut le catalogue — M43) × remplissage des bobines
+  (`pourcentage`) / 100. Le remplissage dit à quel point les bobines sont pleines : il pèse sur
+  le poids, pas sur le nombre de bobines ni sur la largeur occupée. Un métier arrêté ne compte
+  pas (0).
 - L'effet annoncé à l'écran est **confirmé** (`confirme_effet_kg`) : si le calcul du serveur en
   diffère de plus de 0,05 kg (un poids de bobine pesé entre-temps, un autre étage monté), 409
   `effet_change` : l'écran relit l'effet et redemande.
@@ -43,7 +46,8 @@ LONGUEUR_ALERTE = 300
 
 @dataclass(frozen=True)
 class Fil:
-    """Un fil monté (ou à monter) : étage, matière, mètres, part de l'étage, observations."""
+    """Un fil monté (ou à monter) : étage, matière, mètres, remplissage des bobines
+    (`pourcentage`), observations."""
 
     etage: int
     matiere_id: int
@@ -63,8 +67,8 @@ class Fil:
 
     @property
     def largeur(self) -> Decimal:
-        """La largeur occupée : mètres × part (deux fils à 60 et 40 % sur 4 m en occupent 4)."""
-        return self.metres * self.pourcentage / CENT
+        """La largeur occupée : les mètres montés (le remplissage des bobines ne la change pas)."""
+        return self.metres
 
 
 @dataclass(frozen=True)
@@ -121,15 +125,21 @@ def bobines(s: Session, matieres: Iterable[Matiere]) -> dict[int, Bobine]:
 
 
 def bobines_du_fil(f: Fil, r: Reglage) -> Decimal:
-    """Les bobines d'un fil : mètres × bobines par mètre × part."""
-    return f.metres * r.bobines_par_metre * f.pourcentage / CENT
+    """Les bobines d'un fil : mètres × bobines par mètre (le remplissage des bobines n'y
+    entre pas, il n'agit que sur le poids)."""
+    return f.metres * r.bobines_par_metre
 
 
 def peser(fils: Iterable[Fil], r: Reglage, poids: dict[int, Bobine]) -> Decimal:
-    """Ce que pèsent ces fils sur ce métier, comme le compte le stock (0 s'il est arrêté)."""
+    """Ce que pèsent ces fils sur ce métier, comme le compte le stock (0 s'il est arrêté).
+
+    Poids = bobines × poids d'une bobine × remplissage des bobines (`pourcentage`) / 100."""
     if not r.actif:
         return Decimal(0)
-    return sum((bobines_du_fil(f, r) * poids[f.matiere_id].poids for f in fils), start=Decimal(0))
+    return sum(
+        (bobines_du_fil(f, r) * poids[f.matiere_id].poids * f.pourcentage / CENT for f in fils),
+        start=Decimal(0),
+    )
 
 
 def verifier(s: Session, r: Reglage, fils: Sequence[Fil]) -> dict[int, Matiere]:
@@ -164,7 +174,7 @@ def verifier(s: Session, r: Reglage, fils: Sequence[Fil]) -> dict[int, Matiere]:
     if trop:
         n = trop[0]
         raise Refus.saisie(
-            f"Étage {n} : {texte(largeur[n])} m montés (mètres × part de chaque fil) pour une "
+            f"Étage {n} : {texte(largeur[n])} m montés (mètres de chaque fil) pour une "
             f"laize de {texte(r.laize)} m."
         )
     return matieres

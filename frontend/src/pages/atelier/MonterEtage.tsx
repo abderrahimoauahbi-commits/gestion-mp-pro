@@ -1,6 +1,6 @@
 /**
  * Monter un étage (`/atelier/montage?metier=ID&etage=N`) : la largeur montée, les fils (mètres,
- * part bornée 0…100 à la frappe, observations), l'ajout d'un fil au poids de bobine retenu, puis
+ * remplissage des bobines borné 0…100 à la frappe, observations), l'ajout d'un fil au poids de bobine retenu, puis
  * la carte de confirmation qui annonce l'effet sur le stock sur les métiers (texte unique (a),
  * alerte 30 jours). La saisie est gardée avec la version lue (an. 17) ; un conflit se recharge.
  */
@@ -164,10 +164,10 @@ function Etage({ m, etage, matieres }: { m: MetierFiche; etage: number; matieres
       ) : null}
       <Largeur m={m} t={t} />
       <NoteAtelier>
-        <strong>Mètres montés</strong> : la largeur de l’étage que ce fil garnit. <strong>Part du fil</strong>{' '}
-        : quand deux fils se partagent les mêmes mètres (retors, mélange), la part de celui-ci ; 100 % sinon.
-        Bobines = mètres × {nombre(m.bobines_par_metre)} par mètre × part ; poids = bobines × kg par bobine
-        pesé au lot.
+        <strong>Mètres montés</strong> : la largeur de l’étage que ce fil garnit.{' '}
+        <strong>Bobines pleines (%)</strong> : à quel pourcentage les bobines sont pleines ; 100 % = pleines.
+        Bobines = mètres × {nombre(m.bobines_par_metre)} par mètre ; poids = bobines × kg par bobine pesé au
+        lot × remplissage des bobines.
       </NoteAtelier>
       {!t.s.fils.length ? (
         <NoteAtelier>{`L’étage ${etage} est vide : monter un fil ci-dessous.`}</NoteAtelier>

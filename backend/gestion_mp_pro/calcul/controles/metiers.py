@@ -6,9 +6,6 @@ from gestion_mp_pro.calcul.constantes import EPSILON
 from gestion_mp_pro.calcul.controles.base import Contexte, Ligne, colonne, controle
 from gestion_mp_pro.calcul.controles.textes import GARANTI_C24
 
-CENT = 100
-"""Le pourcentage d'un fil sur ses mètres."""
-
 _METIER = colonne("metier", "texte")
 _ETAGE = colonne("etage", "nombre")
 _REFERENCE = colonne("reference", "texte")
@@ -27,15 +24,15 @@ _REFERENCE = colonne("reference", "texte")
     ),
 )
 def etage_trop_large(ctx: Contexte) -> tuple[str, list[Ligne]]:
-    """Ce qui est monté à un étage doit tenir dans la laize ; chaque fil pour sa part (deux
-    fils à 60 et 40 % sur les mêmes mètres les occupent une fois)."""
+    """Ce qui est monté à un étage doit tenir dans la laize ; la largeur occupée est la somme
+    des mètres montés (le remplissage des bobines ne la change pas)."""
     lignes: list[Ligne] = []
     for machine in ctx.donnees.metiers:
         if not machine.actif or machine.laize <= 0:
             continue
         for etage in sorted({f.etage for f in machine.fils}):
             fils_etage = [f for f in machine.fils if f.etage == etage]
-            largeur = sum(f.metres * f.pourcentage / CENT for f in fils_etage)
+            largeur = sum(f.metres for f in fils_etage)
             if largeur > machine.laize + EPSILON:
                 lignes.append(
                     {

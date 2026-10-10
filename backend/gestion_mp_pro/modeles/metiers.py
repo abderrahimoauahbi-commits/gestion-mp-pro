@@ -81,7 +81,8 @@ class MetierEtage(AvecVersion, Base):
 
 
 class Montage(Base):
-    """Un fil monté sur un étage (← `fil_monte`) : mètres et part de l'étage."""
+    """Un fil monté sur un étage (← `fil_monte`) : mètres et remplissage des bobines
+    (`pourcentage`)."""
 
     __tablename__ = "montage"
     __table_args__ = (

@@ -2508,8 +2508,8 @@ Aucun écran de l'atelier n'affiche de prix ni de montant.
   trop. » et « La densité de ce métier n'est pas saisie : le poids reste à zéro (direction). ».
 - **Note d'aide** : « **Mètres montés** : la largeur de l'étage que ce fil garnit. **Part du fil** : quand
   deux fils se partagent les mêmes mètres (retors, mélange), la part de celui-ci ; 100 % sinon. Bobines =
-  mètres × {densité} par mètre × part ; poids = bobines × kg par bobine pesé au lot. »
-- **Formules** : largeur occupée = Σ mètres × part/100 ; bobines d'un fil = mètres × densité × part/100 ;
+  mètres × {densité} par mètre ; poids = bobines × kg par bobine pesé au lot × remplissage des bobines. »
+- **Formules** : largeur occupée = Σ mètres ; bobines d'un fil = mètres × densité ; poids = bobines × kg/bobine × remplissage des bobines / 100 ;
   poids = bobines × kg/bobine retenu (pesé au lot — dernier sorti, sinon dernier reçu —, à défaut catalogue).
 - Vide : « L'étage {n} est vide : monter un fil ci-dessous. »
 - **Une carte par fil** (rouge si mètres ≤ 0) : titre référence ; note « {désignation} · {X,XXX} kg / bobine ·
@@ -2547,7 +2547,7 @@ Aucun écran de l'atelier n'affiche de prix ni de montant.
   poste : rechargez pour repartir de sa dernière version, puis refaites la modification. » (409) ; « Étage
   {n} : ce métier n'en a que {N}. » (404) ; « Matière inconnue. » ; « « {réf} » ({rôle}) se pose au mètre
   linéaire : elle ne se monte pas en bobines sur un métier. » ; « « {réf} » est monté deux fois à l'étage
-  {n}. » ; « « {réf} » à l'étage {n} : saisir les mètres montés. » ; « Étage {n} : {x} m montés (mètres × part
+  {n}. » ; « « {réf} » à l'étage {n} : saisir les mètres montés. » ; « Étage {n} : {x} m montés (mètres de chaque fil
   de chaque fil) pour une laize de {L} m. » ; bornes Pydantic : mètres 0…1000, part 0…100, commentaire 300.
 - Journal serveur : action « montage », détail « {CODE}, étage {n} : étage n {réf} {m} m ({p} %), … — sur
   les métiers {avant} → {après} kg ({±écart} kg) ».
@@ -2641,7 +2641,7 @@ de l'ordre | épuisé[ au …] | {x} kg seulement[ au …]} dans « {mag} », {y
 - **Adresse** : lit et écrit `?metier=` (ID → la fiche s'ouvre ; `nouveau` → la fenêtre de création) ; écrit
   en `replace`. Fermer une fenêtre efface le paramètre. Pas de `?onglet=`.
 - **En-tête** (`Page`) : titre « Métiers à tisser » ; sous-titre : « Chaque métier porte plusieurs étages, et
-  chaque étage se garnit sur toute sa laize. Bobines = mètres × densité ; poids = bobines × kg / bobine × part
+  chaque étage se garnit sur toute sa laize. Bobines = mètres × densité ; poids = bobines × kg / bobine × remplissage des bobines
   du fil. Ce poids, « Sur les métiers », est du stock en machine : il compte dans le stock de l'usine et sa
   valeur, et dans ce qu'on a avant de commander — ces bobines tisseront les prochains tapis. » + selon le rôle :
   alimentation « Vous montez les fils ; la direction règle les métiers. » ; achats « Lecture seule :
@@ -2717,7 +2717,7 @@ de l'ordre | épuisé[ au …] | {x} kg seulement[ au …]} dans « {mag} », {y
 - **Onglets** (dans la fenêtre, non portés par l'adresse) : « Fils montés » (« Fils montés • » si modifié),
   compteur = nombre de fils ; « Réglages du métier » (« Réglages du métier • »).
 - **Note** : « Laize {L} m par étage · densité {d} bobines par mètre (ou « à saisir (réglages) ») · bobines
-  d'un fil = mètres × densité × part du fil ; poids = bobines × kg / bobine pesé au lot (à défaut, le
+  d'un fil = mètres × densité ; poids = bobines × kg / bobine pesé au lot (à défaut, le
   catalogue). « Part du fil » : quand deux fils se partagent les mêmes mètres (retors, mélange), la part de
   celui-ci ; 100 % sinon. Monté : **{kg} kg**, {n} bobines. » + « Métier arrêté : ce poids ne compte pas dans le
   stock. » si décoché.
@@ -2731,7 +2731,7 @@ de l'ordre | épuisé[ au …] | {x} kg seulement[ au …]} dans « {mag} », {y
 | « Fil » | « Étage {n} · {f} fil(s) » ou « vide », + « — au-delà du dernier étage » / « — plus large que la laize » | référence ; note « {désignation} · {X,XXX} kg / bobine · {source} » + « (catalogue X,XXX kg) » si la source n'est pas le catalogue ; étiquette critique « aucun poids de bobine (ni pesé, ni au catalogue) : ce fil ne pèse rien dans le stock » ou attention « pesé ±X % au catalogue : le catalogue est à revoir » ; lien « ouvrir la matière » (→ `/catalogue?matiere={article_id}`, achats/direction, seulement dans ces deux cas) |
 | « Mètres » (110 px) | « {occupé} / {laize} m » (rouge si trop) | `ChampNombre` (figé hors monteur) |
 | « Part (%) » (100 px) | — | `ChampNombre` (figé hors monteur ; **pas de plafond** côté écran) |
-| « Bobines » | Σ | mètres × densité × part, entier |
+| « Bobines » | Σ | mètres × densité, entier |
 | « Poids (kg) » | Σ, 1 déc. | bobines × kg/bobine retenu, 1 déc. |
 | « Étage » | — | liste « Étage {n} » (option grisée « (déjà monté) » si ce fil est déjà à cet étage) + « Étage {n} (hors machine) » ; infobulle « Déplacer ce fil à un autre étage » |
 | « Commentaire » | — | texte max 300 |
@@ -2767,7 +2767,7 @@ de l'ordre | épuisé[ au …] | {x} kg seulement[ au …]} dans « {mag} », {y
 | Fermer la fenêtre (×, Échap, fond) | tous | si modifié : « Abandonner les modifications ? » | | | | |
 
 - **Notions** : laize (largeur utile d'un étage, m) ; densité (bobines par mètre de laize) ; étage ; part du
-  fil (retors, mélange) ; largeur occupée = Σ mètres × part ; poids de bobine retenu (pesé au lot : dernier
+  fil ; largeur occupée = Σ mètres ; poids de bobine retenu (pesé au lot : dernier
   sorti, sinon dernier reçu ; à défaut catalogue — M43) ; tolérance de bobine (= tolérance de réception) ;
   métier en service / arrêté (un arrêté ne compte pas) ; « Sur les métiers » (stock en machine) ; empreinte
   (verrou optimiste) ; dernier montage (journal) ; « sorti récent » = 30 jours.

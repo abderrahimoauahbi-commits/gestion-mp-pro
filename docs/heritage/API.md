@@ -635,7 +635,7 @@ float 0–1000 défaut 0 ; `pourcentage` float 0–100 défaut 100 (part du fil 
 partagent les mêmes mètres) ; `commentaire` ≤ 300 "".
 Corps `EtageEntree` (l.1129-1134) : `fils` liste de `FilEntree` (défaut []) ; `empreinte`.
 
-Calculs : bobines d'un fil = mètres × densité du métier × part/100 ; poids = bobines × poids de
+Calculs : bobines d'un fil = mètres × densité du métier (le remplissage des bobines n'y entre pas) ; poids = bobines × poids de
 bobine **utilisé** (`_bobine_utilisee`, l.1160-1166 : poids du lot pesé — dernier lot sorti
 vers les machines, sinon dernier reçu, `depot.poids_bobine_mesures` — sinon catalogue, M43) ;
 `source_poids` = « lot N (sorti|reçu) », « catalogue » ou "". Écart mesuré = pesé/catalogue − 1
@@ -649,7 +649,7 @@ poids_bobine_utilise, source_poids, ecart_mesure, ecart_hors_tolerance, poids` (
 valeur_mad` (poids × coût moyen pondéré de la référence, `moteur.cmup_par_reference` ; null
 pour l'alimentation)), `poids` (total kg), `valeur_mad` (total ; null alimentation),
 `bobines, metres` (totaux), `etages_detail` (pour chaque étage 1..N : `etage, fils` (nombre),
-`metres` (Σ mètres × part), `bobines, poids, trop_large` (mètres > laize)),
+`metres` (Σ mètres), `bobines, poids, trop_large` (mètres > laize)),
 `etages_garnis`, `etages_trop_larges` (numéros), `densite_a_saisir` (densité nulle),
 `fils_sans_poids` (fils sans poids de bobine), `bons` (bons de sortie qui nomment le métier),
 `tolerance_bobine`, `dernier_montage` ({par, quand, detail} — dernière ligne de journal
@@ -684,7 +684,7 @@ Refus : 404 ; 409 « Le montage de ce métier a été modifié(e) entre-temps…
 (l.1343-1368), 422 : « Matière inconnue. » ; « « Réf » (Rôle) se pose au mètre linéaire : elle ne se
 monte pas en bobines sur un métier. » ; « Étage N : ce métier n'en a que E. » ; « « Réf » est monté
 deux fois à l'étage N. » ; « « Réf » à l'étage N : saisir les mètres montés. » (mètres ≤ 0) ;
-« Étage N : M m montés (mètres × part de chaque fil) pour une laize de L m. »
+« Étage N : M m montés (mètres de chaque fil) pour une laize de L m. »
 Effets : montage entier remplacé ; journal `montage` / `metier` / détail « CODE : étage 1 REF 4,2 m
 (60 %), … — sur les métiers A → B kg (+C kg) » (kilos à la française, une décimale).
 **Aucun mouvement de stock** : le stock « en machine » se lit du montage.

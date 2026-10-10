@@ -42,7 +42,7 @@ export function ficheDe(chemin: string): number | 'nouveau' | null {
 export function sousTitre(role: Role): string {
   const debut =
     'Chaque métier porte plusieurs étages, et chaque étage se garnit sur toute sa laize. Bobines = mètres × ' +
-    'densité × part du fil ; poids = bobines × kg / bobine. Ce poids, « Sur les métiers », est du stock : il compte ' +
+    'densité ; poids = bobines × kg / bobine × remplissage des bobines. Ce poids, « Sur les métiers », est du stock : il compte ' +
     'dans le stock global, sa valeur, le disponible et le projeté. Monter n’écrit aucun mouvement : le fil a déjà ' +
     'été sorti par un ordre.'
   if (role === 'alimentation') return `${debut} Vous montez les fils ; la direction règle les métiers.`

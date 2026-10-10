@@ -215,6 +215,8 @@ def test_c21_prix_sans_devise():
 
 
 def test_c22_etage_plus_large_que_la_laize():
+    # Le remplissage des bobines (60/40 %) ne change pas la largeur occupée : deux fils de 3 m
+    # à l'étage 2 occupent 6 m, pas 3.
     fils = [
         FilMonte("A", etage=1, metres=3),
         FilMonte("B", etage=1, metres=2),
@@ -223,11 +225,16 @@ def test_c22_etage_plus_large_que_la_laize():
     ]
     arrete = Metier("M2", laize=1, actif=False, fils=[FilMonte("A", metres=9)])
     donnees = D(metiers=[Metier("M1", laize=4, fils=fils), arrete])
-    c22 = _sonne("C22", donnees, 1)
-    assert c22.detail == [{"metier": "M1", "etage": 1, "laize": 4, "metres_montes": 5.0, "fils": 2}]
+    c22 = _sonne("C22", donnees, 2)
+    assert c22.detail == [
+        {"metier": "M1", "etage": 1, "laize": 4, "metres_montes": 5.0, "fils": 2},
+        {"metier": "M1", "etage": 2, "laize": 4, "metres_montes": 6.0, "fils": 2},
+    ]
     assert c22.gravite == "avertissement" and c22.lien == "/metiers"
     assert next(c.libelle for c in c22.colonnes if c.cle == "fils") == "Matières"
-    fils[1].metres = 1
+    fils[1].metres = 1  # étage 1 : 3 + 1 = 4 m ≤ laize
+    fils[2].metres = 2  # étage 2 : 2 + 2 = 4 m ≤ laize (le remplissage n'y change rien)
+    fils[3].metres = 2
     _conforme("C22", donnees)
 
 

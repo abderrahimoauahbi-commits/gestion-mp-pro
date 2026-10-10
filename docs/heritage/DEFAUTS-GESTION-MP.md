@@ -1639,7 +1639,7 @@ Fichiers : `components/referentiels/MetiersTisser.tsx:187`, `:350`, `:393-400`, 
 Correction :
 - afficher `poids_bobine_utilise` ;
 - `max=100` ;
-- pied = Σ mètres × part ;
+- pied = Σ mètres ;
 - message « fils enregistrés, réglage refusé » si le second appel échoue ;
 - création réservée à la direction.
 

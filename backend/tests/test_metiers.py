@@ -90,8 +90,9 @@ def test_monter_un_etage_au_telephone(
     x = lire_metier(alimentation, x["id"])
     assert x["etages_garnis"] == 2 and x["fils"][0]["commentaire"] == "bobines neuves"
     assert x["poids"] == pytest.approx(2 * 10 * 2.0 + 1.5 * 10 * 2.0 * 0.5)
-    # Les bobines d'un fil qui partage ses mètres (50 %) : 1,5 m × 10 × 50 % = 7,5.
-    assert x["bobines"] == pytest.approx(20 + 7.5)
+    # Les bobines ne dépendent pas du remplissage : 1,5 m × 10 = 15 (le remplissage à 50 %
+    # agit sur le poids, pas sur le nombre de bobines).
+    assert x["bobines"] == pytest.approx(20 + 15)
     assert x["etages_detail"][0]["poids"] == pytest.approx(40)
     assert x["dernier_montage"]["par"] == "Alimentation" and x["dernier_montage"]["etage"] == 2
     refs = {m["matiere_id"]: m for m in ok(alimentation.get("/api/montage/matieres"))}
@@ -288,12 +289,13 @@ def test_le_stock_est_en_magasin_ou_sur_les_metiers(
     la valorisation et le cockpit sont au lot D8)."""
     monte, autre = matiere(poids_bobine="2", prix="10"), matiere(poids_bobine="1")
     x = creer_metier(direction, laize="4.2", etages=2)
-    # Deux fils qui se partagent les mêmes 4 m à 60 et 40 % tiennent dans 4,2 m.
-    r = ok(_etage(alimentation, x, 1, [_fil(monte, 4, 60), _fil(autre, 4, 40)], 64))
+    # Le remplissage des bobines (60 %) ne change pas la largeur occupée : 4 m montés occupent 4 m.
+    r = ok(_etage(alimentation, x, 1, [_fil(monte, 4, 60)], 48))
     assert r["metier"]["etages_detail"][0]["metres"] == pytest.approx(4)
     assert not r["metier"]["etages_trop_larges"]
     refus(_etage(alimentation, r["metier"], 2, [_fil(monte, 3), _fil(autre, 2)], 0), 422, "laize")
     ligne = next(x for x in ok(achats.get("/api/stock"))["lignes"] if x["matiere_id"] == monte)
+    # 4 m × 10 bobines × 2 kg × 60 % de remplissage = 48 kg.
     assert ligne["stock_machine"] == pytest.approx(48)
     assert ligne["stock_disponible"] == pytest.approx(48)
     assert ligne["stock_projete"] == pytest.approx(48)

@@ -6822,7 +6822,7 @@ export interface components {
       fils: number
       /**
        * Metres
-       * @description largeur occupée : Σ mètres × part
+       * @description largeur occupée : Σ mètres
        */
       metres: number
       /** Bobines */
@@ -7550,7 +7550,7 @@ export interface components {
     }
     /**
      * FilEntree
-     * @description Un fil à monter : la matière, ses mètres, sa part de l'étage, des observations.
+     * @description Un fil à monter : la matière, ses mètres, le remplissage des bobines, des observations.
      */
     FilEntree: {
       /** Matiere Id */

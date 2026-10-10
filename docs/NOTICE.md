@@ -83,8 +83,8 @@ Les règles, qui fait quoi, les gestes pas à pas, les calculs, et où est pass�
 #### Monter un fil sur un métier (`/metiers`)
 
 1. Métiers à tisser : choisir le métier (laize d’un étage, nombre d’étages, densité, réglés par la direction).
-2. Choisir l’étage, chercher le fil, saisir les mètres montés et le pourcentage.
-3. L’écran calcule bobines = mètres × densité × pourcentage, poids = bobines × kg / bobine. Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre. Deux fils qui se partagent les mêmes mètres (60 et 40 %) n’occupent qu’une fois la laize.
+2. Choisir l’étage, chercher le fil, saisir les mètres montés et à quel pourcentage les bobines sont pleines (remplissage).
+3. L’écran calcule bobines = mètres × densité, poids = bobines × kg / bobine × remplissage des bobines. Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre. Le remplissage des bobines ne change pas la largeur occupée.
 4. Le fil monté doit avoir été sorti vers les machines : sinon le magasin le compte encore (contrôle C25).
 
 #### Sortir de la matière pour un ordre (`/ordres/nouveau`)

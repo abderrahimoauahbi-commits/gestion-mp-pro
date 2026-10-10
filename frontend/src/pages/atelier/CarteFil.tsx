@@ -1,6 +1,6 @@
 /**
  * Un fil monté sur l'étage : son poids de bobine retenu (et d'où il vient), les mètres montés
- * (0…1000, pas 0,1), la part du fil (0…100 %, pas 5, bornée aussi à la frappe, an. 12), les
+ * (0…1000, pas 0,1), le remplissage des bobines (0…100 %, pas 5, borné aussi à la frappe, an. 12), les
  * observations, ce qu'il fait en bobines et en kilos ; « Retirer ce fil ».
  */
 import { Compteur } from '../../composants/atelier/Compteur'
@@ -37,7 +37,7 @@ export function CarteFil({
   const changer = (c: Partial<FilSaisi>) =>
     t.poserFils(t.s.fils.map((x) => (x.matiere_id === f.matiere_id ? { ...x, ...c } : x)))
   const origine = matieres?.find((x) => x.matiere_id === f.matiere_id)?.origine_poids ?? ''
-  const bobines = bobinesDe(m, f)
+  const kgFil = (bobinesDe(m, f) * poids * f.pourcentage) / 100
   return (
     <Fiche titre={f.reference} ton={f.metres > 0 ? undefined : 'alerte'} libelle={f.reference}>
       <NoteAtelier>{detailFil(f, poids, origine)}</NoteAtelier>
@@ -53,9 +53,9 @@ export function CarteFil({
           onChange={(v) => changer({ metres: v ?? 0 })}
         />
       </Champ>
-      <Champ groupe libelle="Part du fil (%)">
+      <Champ groupe libelle="Bobines pleines (%)">
         <Compteur
-          libelle={`Part du fil ${f.reference} (%)`}
+          libelle={`Bobines pleines de ${f.reference} (%)`}
           valeur={f.pourcentage}
           uniteDite="%"
           pas={5}
@@ -68,7 +68,7 @@ export function CarteFil({
       <Champ libelle="Observations">
         <Saisie valeur={f.commentaire} max={300} onChange={(commentaire) => changer({ commentaire })} />
       </Champ>
-      <Ligne libelle={`${nombre(bobines)} bobines`}>{kgTelephone(bobines * poids)}</Ligne>
+      <Ligne libelle={`${nombre(bobinesDe(m, f))} bobines`}>{kgTelephone(kgFil)}</Ligne>
       <div className={styles.adroite}>
         <Bouton
           taille="atelier"

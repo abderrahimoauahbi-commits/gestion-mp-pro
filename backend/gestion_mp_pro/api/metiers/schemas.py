@@ -22,7 +22,7 @@ EFFET_MAXI = Decimal(100_000_000)
 
 
 class FilEntree(Entree):
-    """Un fil à monter : la matière, ses mètres, sa part de l'étage, des observations."""
+    """Un fil à monter : la matière, ses mètres, le remplissage des bobines, des observations."""
 
     matiere_id: int = Field(ge=1)
     metres: Fini = Field(ge=0, le=1000, description="mètres de laize montés")
@@ -100,7 +100,7 @@ class EtageFiche(Sortie):
     etage: int
     version: int
     fils: int
-    metres: float = Field(description="largeur occupée : Σ mètres × part")
+    metres: float = Field(description="largeur occupée : Σ mètres")
     bobines: float
     poids: float
     trop_large: bool

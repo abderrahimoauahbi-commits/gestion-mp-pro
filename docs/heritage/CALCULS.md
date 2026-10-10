@@ -1363,7 +1363,7 @@ recalculé depuis le journal par le moteur (partie B).
 4. **Fil monté compté deux fois ?** La sortie vers les machines compte comme **consommée** (réel
    du coefficient de réalisation, XYZ, historique) **et** le fil monté revient dans le disponible, le
    projeté et la valeur (`moteur.py:1157`, `:1188` ; partie B). Le montage est déclaré (mètres ×
-   densité du métier × part × poids de bobine), sans lien avec les sorties du journal : il peut
+   densité du métier × poids de bobine × remplissage des bobines / 100), sans lien avec les sorties du journal : il peut
    excéder ce qui est réellement sorti. Historique de la décision contradictoire dans les commits :
    `202d1a0` « hors du disponible… et de la valeur », `f33a428` « dans le disponible, valeur à
    part », `169dfdc` « compté et valorisé » (état actuel).

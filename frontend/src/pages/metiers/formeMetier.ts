@@ -81,7 +81,7 @@ export function etagesTouches(avant: FormeMetier, apres: FormeMetier): number[] 
     .sort((a, b) => a - b)
 }
 
-/** La largeur occupée de chaque étage (mètres × part). */
+/** La largeur occupée de chaque étage (Σ mètres montés ; le remplissage des bobines n'y entre pas). */
 export function largeurs(f: FormeMetier): Map<number, number> {
   const m = new Map<number, number>()
   for (const fil of f.fils)

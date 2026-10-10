@@ -34,8 +34,8 @@ export function noteMetier(e: FicheMetierEtat): string {
     ? `densité ${nombre(f.bobines_par_metre)} bobines par mètre`
     : 'densité à saisir (réglages)'
   return (
-    `Laize ${nombre(f.laize, 2)} m par étage · ${densite} · bobines = mètres × densité × part ; poids = bobines × kg / ` +
-    `bobine pesé au lot (à défaut, le catalogue). Sur les métiers : ${kg(e.m.sur_les_metiers)}, ${nombre(e.m.bobines)} bobines.`
+    `Laize ${nombre(f.laize, 2)} m par étage · ${densite} · bobines = mètres × densité ; poids = bobines × kg / ` +
+    `bobine pesé au lot (à défaut, le catalogue) × remplissage des bobines. Sur les métiers : ${kg(e.m.sur_les_metiers)}, ${nombre(e.m.bobines)} bobines.`
   )
 }
 

@@ -1112,7 +1112,7 @@ Un fil monté sur un étage d'un métier.
 | etage | INTEGER | | 1 | — | (pas de CK ; 1–40 par l'API ; ≤ `metier.etages` : contrôle C24) | | 432 |
 | article_id | INTEGER | | — | — | FK → `article.id` | | 433 |
 | metres | FLOAT | | 0 | `'0'` | CK `fil_monte_check` : `metres >= 0 AND pourcentage BETWEEN 0 AND 100` | mètres de laize occupés | 434 |
-| pourcentage | FLOAT | | 100 | `'100'` | (idem) | part du fil sur ces mètres | 435 |
+| pourcentage | FLOAT | | 100 | `'100'` | (idem) | remplissage des bobines (à quel point elles sont pleines) | 435 |
 | commentaire | VARCHAR(300) | | `''` | `''` | | | 436 |
 
 Bobines d'un fil = `metres × metier.densite × pourcentage / 100` ; poids = bobines × poids d'une

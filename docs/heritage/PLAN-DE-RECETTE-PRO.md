@@ -195,7 +195,7 @@ réception, ordre ou dossier, **à la date du jour et aux 13 dates de référenc
 
 | Domaine | Indicateurs recalculés depuis la base brute |
 |---|---|
-| Stock | Stock par lot et magasin = Σ journal ; par matière (magasin + machine) ; quarantaine à part ; disponible ; stock en machine = Σ mètres × bobines/m × part × poids de bobine mesuré du lot (sinon le catalogue) ; aucun lot sous zéro à aucune date |
+| Stock | Stock par lot et magasin = Σ journal ; par matière (magasin + machine) ; quarantaine à part ; disponible ; stock en machine = Σ mètres × bobines/m × poids de bobine mesuré du lot (sinon le catalogue) × remplissage des bobines / 100 ; aucun lot sous zéro à aucune date |
 | Valeur | CMUP rejoué depuis le journal, avec ses règles : annulation à son coût, retour au fournisseur au coût du lot, ré-entrée au dernier coût connu, coût nul = 0, cours figé du mouvement, entrée importée au coût de revient de sa ligne de réception. Valeur magasin + machine. Les 5 invariants du vérificateur (7a à 7e). Écart au catalogue. Valeur à une date passée |
 | Achats | Reçu net de chaque ligne (retours au prorata des pesées du lot) ; reste ; part livrée ; statut de livraison (Attendu, En retard selon la tolérance, Reçu sous réserve, Livré) ; montant estimé au cours figé ; montant à approuver ; engagé du Cockpit |
 | Fournisseurs | Ponctualité (date promise, camion de plusieurs bons), complétude (lignes dues, tolérance), OTIF par réception, moyennes sur les réceptions notées, taux de retours, délai mesuré, score = OTIF × 60 + retours (20 → 0 entre 0 et 5 %) + délai (20 jusqu'à 15 j), classement et action |

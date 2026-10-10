@@ -1,7 +1,9 @@
 /**
- * Les calculs du montage, comme le serveur (lot D2) : poids = mètres × bobines par mètre × part ×
- * poids de bobine retenu ; métier arrêté = rien ; effet au gramme ; texte unique « sur les
- * métiers » ((a)) mot pour mot ; alerte 30 jours (1,1 × sorti + 1 kg) ; raisons sous le bouton.
+ * Les calculs du montage, comme le serveur (lot D2) : bobines = mètres × bobines par mètre
+ * (le remplissage des bobines n'y entre pas) ; poids = bobines × poids de bobine retenu ×
+ * remplissage des bobines / 100 ; largeur occupée = Σ mètres ; métier arrêté = rien ; effet au
+ * gramme ; texte unique « sur les métiers » ((a)) mot pour mot ; alerte 30 jours (1,1 × sorti +
+ * 1 kg) ; raisons sous le bouton.
  */
 import { describe, expect, it } from 'vitest'
 
@@ -32,7 +34,8 @@ const fil = (m: Partial<FilSaisi> = {}): FilSaisi => ({
 describe('Calculs du montage', () => {
   it('poids et largeur comme le serveur ; un métier arrêté ne pèse rien', () => {
     const reglage = { actif: true, bobines_par_metre: 320 }
-    expect(largeurDe([fil(), fil({ matiere_id: 2 })])).toBe(2)
+    // Largeur = Σ mètres : le remplissage des bobines ne la change pas (deux fils de 2 m = 4 m).
+    expect(largeurDe([fil(), fil({ matiere_id: 2 })])).toBe(4)
     expect(peser(reglage, [fil()], () => 2.5)).toBe(800)
     expect(peser({ ...reglage, actif: false }, [fil()], () => 2.5)).toBe(0)
   })

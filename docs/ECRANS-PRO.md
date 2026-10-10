@@ -2131,8 +2131,8 @@ Gestion MP : `Montage.tsx:96-374` (`MonterEtage`) → PRO : même adresse, `Ecra
 | Données `GET /metiers`, `GET /articles` (prix masqués), `GET /montage/references` (poids retenu, sorti 30 j, déjà monté) | `GET metiers/{id}` (avec `version`), `GET montage/matieres` (matières montables, poids retenu, sorti 30 j, déjà monté) | — |
 | Titre « {CODE} · étage {n} » | « {CODE · Nom} · étage {n} » | an. 20 |
 | Carte « Largeur montée » « {m} / {laize} m » ; barre 10 px (rouge si trop, plafond 100 %) ; « {n} bobines » / « {kg} » ; « Plus large que la laize : {x} m de trop. » ; « La densité de ce métier n'est pas saisie : le poids reste à zéro (direction). » | `Progression` + mêmes textes | — |
-| Note d'aide « **Mètres montés** … **Part du fil** … Bobines = mètres × {densité} × part ; poids = bobines × kg par bobine pesé au lot. » | idem | — |
-| Formules : largeur = Σ mètres × part ; bobines = mètres × densité × part ; poids = bobines × kg/bobine retenu (pesé au lot : dernier sorti, sinon dernier reçu ; à défaut catalogue) | idem (aide.json, une seule source) | — |
+| Note d'aide « **Mètres montés** … **Bobines pleines (%)** … Bobines = mètres × {densité} ; poids = bobines × kg par bobine pesé au lot × remplissage des bobines. » | idem | — |
+| Formules : largeur = Σ mètres ; bobines = mètres × densité ; poids = bobines × kg/bobine retenu (pesé au lot : dernier sorti, sinon dernier reçu ; à défaut catalogue) × remplissage des bobines / 100 | idem (aide.json, une seule source) | — |
 | Vide « L'étage {n} est vide : monter un fil ci-dessous. » | idem | — |
 | Carte par fil (rouge si mètres ≤ 0) : référence ; « {désignation} · {X,XXX} kg / bobine · {lot … (sorti) / (reçu) / catalogue} » ou « poids de bobine inconnu : ce fil ne pèse rien » ; « Mètres montés » (pas 0,1) ; « Part du fil (%) » (pas 5, ≤ 100) ; « Commentaire » 300 ; « {n} bobines » / « {kg} » ; « Retirer ce fil » | idem ; « Part du fil (%) » bornée 0…100 aussi à la frappe ; « Observations » | an. 12, an. 8 |
 | Ajout « Monter un fil à l'étage {n} » : matières actives hors rôles au mètre (Cuir, Franges, Ruban), pas déjà là ; « {réf} — {désignation} » ; détail « {X,XX} kg / bobine » (poids retenu) ; « Taper : rouge 2900, beige… » ; prend les mètres restants (≥ 0), 100 % | `SelecteurMatiere` tactile, **même poids retenu qu'au bureau** | an. 11 |
@@ -2153,7 +2153,7 @@ Gestion MP : `Montage.tsx:96-374` (`MonterEtage`) → PRO : même adresse, `Ecra
 Refus serveur repris : version 409 (texte ci-dessus, « modifié » sans « (e) ») ; « Étage {n} : ce métier n'en a que {N}. » (404) ;
 « Matière inconnue. » ; « « {réf} » ({rôle}) se pose au mètre linéaire : elle ne se monte pas en bobines sur un métier. » ;
 « « {réf} » est monté deux fois à l'étage {n}. » ; « « {réf} » à l'étage {n} : saisir les mètres montés. » ; « Étage {n} : {x} m
-montés (mètres × part de chaque fil) pour une laize de {L} m. » ; bornes mètres 0…1000, part 0…100, observations 300. Trace : journal
+montés (mètres de chaque fil) pour une laize de {L} m. » ; bornes mètres 0…1000, remplissage des bobines 0…100, observations 300. Trace : journal
 (action « montage ») **et** table d'historique des montages (métier, étage, par, le, fils avant/après, kg avant → après, écart,
 origine téléphone/bureau).
 
@@ -2265,7 +2265,7 @@ Gestion MP : `MetiersTisser.tsx:320-723` (`FicheMetier`), `?metier=ID` → PRO :
 | Garde si (monteur et fils modifiés) ou (D et réglage modifié) | `Fenetre({sale})` | — |
 | Achats : « Lecture seule : l'alimentation monte les fils, la direction règle le métier. » ; tout figé, pas de pied | idem | — |
 | Onglets « Fils montés » (compteur, « • » si modifié) / « Réglages du métier » ; **hors adresse** | `Onglets` `?onglet=fils|reglages|historique` (« • » si modifié) ; 3ᵉ onglet « Historique » | an. 29, (a) |
-| Note « Laize {L} m par étage · densité {d} bobines par mètre (ou « à saisir (réglages) ») · bobines = mètres × densité × part ; poids = bobines × kg / bobine pesé au lot … Monté : **{kg} kg**, {n} bobines. » + « Métier arrêté : ce poids ne compte pas dans le stock. » | « … Sur les métiers : **{kg} kg**, {n} bobines. » ; même note d'arrêt | an. 7 |
+| Note « Laize {L} m par étage · densité {d} bobines par mètre (ou « à saisir (réglages) ») · bobines = mètres × densité ; poids = bobines × kg / bobine pesé au lot × remplissage des bobines … Monté : **{kg} kg**, {n} bobines. » + « Métier arrêté : ce poids ne compte pas dans le stock. » | « … Sur les métiers : **{kg} kg**, {n} bobines. » ; même note d'arrêt | an. 7 |
 | « Dernier montage : {nom}, le {date} — {détail du journal} » | lu dans l'historique des montages ; lien vers l'onglet « Historique » | (a) |
 | Erreur de catalogue (message rouge) | `Erreur` | — |
 | Ligne d'étage : « Étage {n} · {f} fil(s) » / « vide » + « — au-delà du dernier étage » / « — plus large que la laize » ; « {occupé} / {laize} m » (rouge si trop) ; Σ bobines ; Σ poids (1 déc.) | idem | — |
@@ -2277,7 +2277,7 @@ Gestion MP : `MetiersTisser.tsx:320-723` (`FicheMetier`), `?metier=ID` → PRO :
 | « Commentaire » 300 | « Observations » | an. 8 |
 | Bouton « Retirer » (« Retirer ce fil du métier ») | idem | — |
 | Ligne de fil rouge si mètres ≤ 0 | idem | — |
-| Pied « Toute la machine » : Σ mètres **bruts**, Σ bobines, Σ kg | Σ **largeur occupée** (mètres × part), Σ bobines, Σ kg | an. 13 |
+| Pied « Toute la machine » : Σ mètres **bruts**, Σ bobines, Σ kg | Σ **largeur occupée** (Σ mètres), Σ bobines, Σ kg | an. 13 |
 | Ajout : « Monter à l'étage {n} ({occupé} / {laize} m) » + recherche (matières actives hors rôles au mètre, pas déjà là) ; « {réf} — {désignation} · {fournisseur} » ; détail poids **catalogue** ou « poids de bobine inconnu » ; « Taper quelques mots : référence, couleur, fournisseur… » ; mètres restants, 100 % | `Selecteur` d'étage + `SelecteurMatiere` ; détail = **poids retenu par le montage** (comme au téléphone) | an. 11 |
 | Alertes « Des fils sont montés au-delà du dernier étage : les déplacer ou les retirer. » ; « Saisir les mètres montés de : {réf, …}. » | `Blocages` | — |
 
@@ -2322,7 +2322,7 @@ Gestion MP : `MetiersTisser.tsx` § 3.5 → PRO : pied de `Fenetre`, `Bouton({ma
 | « Recharger le métier » | D, L | `GET metiers/{id}` | après conflit | « Métier rechargé dans sa dernière version : refaire la modification. » |
 | Fermer la fenêtre (×, Échap, fond) | C | — | garde `sale` | retour à `/metiers` (filtres gardés) |
 
-Notions reprises : laize, densité, étage, part du fil, largeur occupée = Σ mètres × part, poids de bobine retenu (pesé au lot :
+Notions reprises : laize, densité, étage, remplissage des bobines, largeur occupée = Σ mètres, poids de bobine retenu (pesé au lot :
 dernier sorti, sinon dernier reçu ; à défaut catalogue — M43), tolérance de bobine (= tolérance de réception), métier en service /
 arrêté (un arrêté ne compte pas), « Sur les métiers » (a), **`version`** (remplace l'empreinte), historique des montages, « sorti
 récent » = 30 jours.

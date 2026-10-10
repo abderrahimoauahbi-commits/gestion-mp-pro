@@ -31,8 +31,10 @@ class FilEnMachine:
 def fils_en_machine(donnees: Donnees) -> list[FilEnMachine]:
     """Le détail de ce qui est monté sur les métiers actifs, ligne par ligne.
 
-    bobines = mètres × densité du métier × part du fil ; poids = bobines × poids d'une bobine
-    (pesé au lot quand il est connu, sinon celui du catalogue — M43).
+    bobines = mètres × densité du métier (le remplissage des bobines n'y entre pas) ;
+    poids = bobines × poids d'une bobine (pesé au lot quand il est connu, sinon celui du
+    catalogue — M43) × remplissage des bobines / 100. Le remplissage (`pourcentage`) dit à
+    quel point les bobines sont pleines : il pèse sur le poids, pas sur le nombre de bobines.
     """
     resultat = []
     for metier in donnees.metiers:
@@ -41,7 +43,7 @@ def fils_en_machine(donnees: Donnees) -> list[FilEnMachine]:
         for fil in metier.fils:
             article = donnees.article(fil.reference)
             poids_bobine = fil.poids_bobine or (article.poids_bobine if article else 0.0)
-            bobines = fil.metres * metier.densite * fil.pourcentage / CENT
+            bobines = fil.metres * metier.densite
             resultat.append(
                 FilEnMachine(
                     metier=metier.code,
@@ -52,7 +54,7 @@ def fils_en_machine(donnees: Donnees) -> list[FilEnMachine]:
                     densite=metier.densite,
                     bobines=bobines,
                     poids_bobine=poids_bobine,
-                    poids=bobines * poids_bobine,
+                    poids=bobines * poids_bobine * fil.pourcentage / CENT,
                 )
             )
     return resultat
