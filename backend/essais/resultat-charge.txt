@@ -187,3 +187,31 @@ exposé par /dossiers/apercu (comme le veut V4 § 6). Au volume de service réel
 identiques (essais verts, recherche SQL prouvée équivalente à l'ancienne) : aucune régression.
 Reste /commandes (152), non paginée : sa recherche porte sur l'état de livraison calculé par le
 moteur, non reproductible en SQL (docs/lots/PAGINATION3.md § 3).
+
+================================================================================
+Pagination — lot PAGINATION4 (2026-10-10) : GET /commandes (152)
+================================================================================
+Micro-mesure au niveau service (3 appels, meilleur/médiane), base synthétique de 9 000 bons
+(~×30 d'une année), chacun une ligne ; scratchpad/bench_pag4.py, base
+gestion_mp_pro_pag4_mesure_essai (supprimée après). Jeu volontairement « pénible » : 3/5 des bons
+ouverts (en service, les bons ouverts ne s'accumulent pas ainsi — seuls les clos le font).
+
+  Volume : 9 000 bons
+  /commandes (152)
+    ANCIEN  — tous les résumés (liste entière)       730 ms (médiane 750)   ← O(N), croît avec l'historique
+    NOUVEAU — lister() une page (≤ 500)               48 ms (médiane  49)   ← borné (~×15), ne croît plus
+  /commandes/apercu (251)
+    sans onglet (parent : indicateurs + comptes)     411 ms (médiane 435)   ← O(bons ouverts) + comptes SQL
+    avec onglet (liste : pied de l'onglet + comptes)  173 ms (envoyée) … 293 ms (clos, le plus lourd)
+
+Le gain tient à ce que la route 152 ne construit plus que la page demandée (≤ 500 résumés + état
+de livraison du moteur) au lieu de tout l'historique. L'aperçu (251) fait l'agrégat O(N) dédié
+(comme /ordres et /dossiers, V4 § 6), appelé une fois par changement de filtre (non à chaque
+défilement) : chaque appel ne calcule que ce qu'il sert — les indicateurs (sur les bons ouverts)
+SANS onglet, le pied de l'onglet AVEC onglet. Le filtre « en retard » reste borné (pré-filtre SQL
+grossier des bons partis non clos à échéance dépassée, puis affinage du moteur). Les lecteurs hors
+écran (saisie des réceptions, Ma journée, Cockpit) lisent /commandes/ouverts (252), borné : les
+bons clos, qui s'accumulent, ne sont plus lus hors de l'écran Commandes. Au volume de service réel
+les chiffres sont identiques (essais verts ; recherche SQL prouvée équivalente à l'ancienne SAUF
+l'état de livraison, retiré de la recherche libre et documenté — convention PAGINATION4) : aucune
+régression. Toutes les grandes listes sont désormais paginées.

@@ -16,7 +16,10 @@ import type {
 } from './types'
 
 export const useCockpit = () => useLecture<Cockpit>('/cockpit', undefined, { refetchInterval: 180_000 })
-export const useCommandesToutes = (lire = true) => useLecture<CommandeResume[]>(lire ? '/commandes' : null)
+/** Les bons ouverts (bornés) : Ma journée et le Cockpit comptent retards, arrivées et prix dessus
+ * (les bons clos, qui s'accumulent, ne sont plus lus hors de l'écran Commandes). */
+export const useCommandesToutes = (lire = true) =>
+  useLecture<CommandeResume[]>(lire ? '/commandes/ouverts' : null)
 export const useBrouillons = () => useLecture<Brouillons>('/brouillons')
 export const useAttente = (lire = true) => useLecture<EnAttente>(lire ? '/dossiers/a-rattacher' : null)
 /** Les besoins signalés en attente, le plus récent d'abord (route 221). */

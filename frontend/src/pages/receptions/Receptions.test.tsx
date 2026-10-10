@@ -106,7 +106,7 @@ function serveur(role: 'direction' | 'achats' | 'alimentation', autres: Record<s
     'GET /receptions/pesees': { corps: PESEES },
     'GET /receptions/bobines': { corps: BOBINES },
     'GET /motifs': { corps: MOTIFS },
-    'GET /commandes': {
+    'GET /commandes/ouverts': {
       corps: [
         resumeEssai({
           id: 3,

@@ -8,11 +8,13 @@ document imprimable (164) et les classeurs (165, 166) sont dans `routes_document
 
 from __future__ import annotations
 
+import datetime as dt
 from dataclasses import asdict
 
 from gestion_mp_pro.api.commandes import routes_documents  # noqa: F401 — routes 164–166
 from gestion_mp_pro.api.commandes.routeur import FiltresDep, routeur
 from gestion_mp_pro.api.commandes.schemas import (
+    ApercuCommandes,
     CommandeCreation,
     CommandeFiche,
     CommandeModification,
@@ -21,15 +23,22 @@ from gestion_mp_pro.api.commandes.schemas import (
     Envoi,
     ExpeditionEntree,
     LigneCommandeEntree,
+    PageCommandes,
     Renvoi,
     Solde,
 )
-from gestion_mp_pro.api.communs import ValidationVersion
-from gestion_mp_pro.api.dependances import SessionDep, VersionDep
-from gestion_mp_pro.api.erreurs import reponses
+from gestion_mp_pro.api.communs import ValidationVersion, encoder_curseur
+from gestion_mp_pro.api.dependances import PaginationDep, SessionDep, VersionDep
+from gestion_mp_pro.api.erreurs import Refus, reponses
 from gestion_mp_pro.securite import A, D, QuiDep, droit
-from gestion_mp_pro.services import approbation, commandes, commandes_suivi, contexte
-from gestion_mp_pro.services.commandes_fiche import fiche, liste
+from gestion_mp_pro.services import (
+    approbation,
+    commandes,
+    commandes_liste,
+    commandes_suivi,
+    contexte,
+)
+from gestion_mp_pro.services.commandes_fiche import fiche
 from gestion_mp_pro.services.commandes_saisie import LigneSaisie
 
 __all__ = ["routeur"]
@@ -52,16 +61,60 @@ def _lignes(lignes: list[LigneCommandeEntree]) -> list[LigneSaisie]:
     ]
 
 
+def _curseur(pagination: PaginationDep) -> tuple[dt.date, int] | None:
+    """La clé (date du bon, n° d'entrée) du dernier bon rendu (curseur de pagination)."""
+    if not pagination.apres:
+        return None
+    try:
+        jour, ident = pagination.apres
+        return dt.date.fromisoformat(str(jour)), int(str(ident))
+    except (ValueError, TypeError) as exc:
+        raise Refus.saisie(
+            "Curseur de pagination illisible : recharger la liste.", code="curseur_invalide"
+        ) from exc
+
+
 @routeur.get(
     "/commandes",
-    response_model=list[CommandeResume],
+    response_model=PageCommandes,
     dependencies=[droit(D, A)],
-    summary="Les bons de commande, du plus récent au plus ancien, filtrés au serveur.",
+    summary="Les bons de commande, du plus récent au plus ancien, par pages ; filtrés au serveur.",
     responses=reponses(401, 403, 422),
 )
-def lister(f: FiltresDep, s: SessionDep) -> list[CommandeResume]:
-    """Route 152."""
-    return [CommandeResume.model_validate(asdict(r)) for r in liste(s, f)]
+def lister(f: FiltresDep, pagination: PaginationDep, s: SessionDep) -> PageCommandes:
+    """Route 152 (recherche et filtres poussés en SQL ; « en retard » calculé, borné ; curseur
+    date du bon puis n° d'entrée)."""
+    page = commandes_liste.lister(s, f, _curseur(pagination), pagination.limite)
+    suivant = encoder_curseur(list(page.dernier)) if page.dernier is not None else None
+    return PageCommandes(
+        elements=[CommandeResume.model_validate(asdict(r)) for r in page.elements],
+        total=page.total,
+        suivant=suivant,
+    )
+
+
+@routeur.get(
+    "/commandes/apercu",
+    response_model=ApercuCommandes,
+    dependencies=[droit(D, A)],
+    summary="Comptes par onglet, indicateurs, pied de totaux et options des filtres de la liste.",
+    responses=reponses(401, 403, 422),
+)
+def apercu(f: FiltresDep, s: SessionDep) -> ApercuCommandes:
+    """Route 251 : nourrit les onglets, les indicateurs, le pied et les filtres liés de l'écran."""
+    return ApercuCommandes.model_validate(asdict(commandes_liste.apercu(s, f)))
+
+
+@routeur.get(
+    "/commandes/ouverts",
+    response_model=list[CommandeResume],
+    dependencies=[droit(D, A)],
+    summary="Tous les bons ouverts (ni soldés ni annulés), plafonnés : saisie, Ma journée.",
+    responses=reponses(401, 403, 422),
+)
+def ouverts(s: SessionDep) -> list[CommandeResume]:
+    """Route 252 : accès borné « tous les bons ouverts » (filtrés par les appelants)."""
+    return [CommandeResume.model_validate(asdict(r)) for r in commandes_liste.ouverts(s)]
 
 
 @routeur.get(

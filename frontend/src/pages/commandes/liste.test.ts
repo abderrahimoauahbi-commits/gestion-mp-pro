@@ -7,45 +7,24 @@ import { describe, expect, it } from 'vitest'
 
 import { ficheEssai, resumeEssai } from './donneesEssai'
 import { corpsLignes, ligneAjoutee, manquesLignes, versFormeLignes } from './formeLignes'
-import { enRetard, indicateurs, ongletDe, premierOnglet } from './liste'
+import { enRetard, ongletDe, prixAConfirmer } from './liste'
 import { apresEnvoi, apresModification, apresPrix, apresSuivi } from './messages'
 import { corpsExpedition, versFormeExpedition } from './VoletExpedition'
 import { corpsPrix, questionPrix, reprendreCatalogue, versFormePrix } from './VoletPrix'
 
 describe('Liste des bons', () => {
-  it('onglet d’un bon ; soldé et annulé ensemble ; le premier onglet non vide par défaut', () => {
+  it('onglet d’un bon ; soldé et annulé ensemble (les comptes et indicateurs sont au serveur)', () => {
     expect(ongletDe({ statut: 'soldee' })).toBe('clos')
     expect(ongletDe({ statut: 'annulee' })).toBe('clos')
     expect(ongletDe({ statut: 'a_approuver' })).toBe('a_approuver')
-    expect(premierOnglet([resumeEssai({ statut: 'confirmee' })])).toBe('confirmee')
-    expect(premierOnglet([])).toBe('brouillon')
   })
 
-  it('indicateurs sur tous les bons : ouverts, engagé (partis), prix à confirmer, retard', () => {
-    const i = indicateurs([
-      resumeEssai({ statut: 'brouillon', parti: false, montant_estime_mad: 1000, reste_estime_mad: 1000 }),
-      resumeEssai({ statut: 'a_approuver', parti: false }),
-      resumeEssai({
-        statut: 'envoyee',
-        parti: true,
-        montant_estime_mad: 500,
-        reste_estime_mad: 400,
-        prix_a_confirmer: 1,
-        livraison: 'en_retard',
-      }),
-      resumeEssai({ statut: 'soldee', parti: true, montant_estime_mad: 9999, reste_estime_mad: 0 }),
-    ])
-    expect(i).toMatchObject({
-      ouverts: 3,
-      brouillons: 1,
-      aApprouver: 1,
-      engage: 500,
-      partis: 1,
-      reste: 400,
-      aConfirmer: 1,
-      retard: 1,
-    })
+  it('retard et « prix à confirmer » : les prédicats que Ma journée et le Cockpit comptent', () => {
     expect(enRetard({ livraison: 'partiel_retard' })).toBe(true)
+    expect(enRetard({ livraison: 'en_retard' })).toBe(true)
+    expect(enRetard({ livraison: 'en_cours' })).toBe(false)
+    expect(prixAConfirmer(resumeEssai({ parti: true, statut: 'envoyee', prix_a_confirmer: 1 }))).toBe(true)
+    expect(prixAConfirmer(resumeEssai({ parti: true, statut: 'soldee', prix_a_confirmer: 1 }))).toBe(false)
   })
 })
 

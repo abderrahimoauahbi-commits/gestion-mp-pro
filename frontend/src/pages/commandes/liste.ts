@@ -1,6 +1,8 @@
 /**
- * La liste des bons, sans écran : l'onglet d'un bon, le retard, le reste « en prix à confirmer »,
- * et les indicateurs comptés sur **tous** les bons (ECRANS-PRO 4.5).
+ * La liste des bons, sans écran : l'onglet d'un bon, le retard, le reste « en prix à confirmer »
+ * (ECRANS-PRO 4.5). Les indicateurs et les comptes par onglet sont comptés par le serveur
+ * (`/commandes/apercu`) ; ces fonctions servent encore Ma journée et le Cockpit, qui lisent les
+ * bons ouverts (`/commandes/ouverts`) et les classent avec `ongletDe`, `enRetard`, `prixAConfirmer`.
  */
 import type { CommandeResume } from './types'
 
@@ -33,36 +35,3 @@ export const enRetard = (c: Pick<CommandeResume, 'livraison'>) =>
 
 /** Un bon parti, pas clos, avec au moins un prix à confirmer. */
 export const prixAConfirmer = (c: CommandeResume) => c.parti && !estClos(c) && c.prix_a_confirmer > 0
-
-export interface IndicateursCommandes {
-  ouverts: number
-  brouillons: number
-  aApprouver: number
-  engage: number
-  partis: number
-  partisEstimes: number
-  reste: number
-  aConfirmer: number
-  retard: number
-}
-
-export function indicateurs(bons: readonly CommandeResume[]): IndicateursCommandes {
-  const ouverts = bons.filter((c) => !estClos(c))
-  const partis = ouverts.filter((c) => c.statut === 'envoyee' || c.statut === 'confirmee')
-  return {
-    ouverts: ouverts.length,
-    brouillons: ouverts.filter((c) => c.statut === 'brouillon').length,
-    aApprouver: ouverts.filter((c) => c.statut === 'a_approuver').length,
-    engage: partis.reduce((s, c) => s + c.montant_estime_mad, 0),
-    partis: partis.length,
-    partisEstimes: partis.filter((c) => c.prix_a_confirmer > 0).length,
-    reste: ouverts.filter((c) => c.parti).reduce((s, c) => s + c.reste_estime_mad, 0),
-    aConfirmer: bons.filter(prixAConfirmer).length,
-    retard: ouverts.filter(enRetard).length,
-  }
-}
-
-/** Le premier onglet qui a des bons (défaut de la liste), sinon les brouillons. */
-export function premierOnglet(bons: readonly CommandeResume[]): OngletCommandes {
-  return ONGLETS_COMMANDES.find((o) => bons.some((c) => ongletDe(c) === o)) ?? 'brouillon'
-}

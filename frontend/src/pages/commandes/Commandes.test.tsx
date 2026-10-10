@@ -55,15 +55,45 @@ function brouillon(autres: Partial<CommandeFiche> = {}): CommandeFiche {
   })
 }
 
+const APERCU = {
+  brouillon: 1,
+  a_approuver: 0,
+  envoyee: 0,
+  confirmee: 1,
+  clos: 0,
+  total: 2,
+  indicateurs: {
+    ouverts: 2,
+    brouillons: 1,
+    a_approuver: 0,
+    engage: 0,
+    partis: 1,
+    partis_estimes: 0,
+    reste: 0,
+    a_confirmer: 0,
+    retard: 0,
+  },
+  quantite: 0,
+  montant_estime_mad: 0,
+  montants: [],
+  fournisseurs: [{ id: 2, nom: 'Polyfil Industries' }],
+  devises: ['EUR'],
+}
+
 function serveur(role: 'direction' | 'achats', fiche: CommandeFiche, autres: Record<string, Reponse> = {}) {
   return fauxServeur({
     ...reponsesConnecte(role),
     'GET /commandes': {
-      corps: [
-        resumeEssai({ id: 9, numero: null, statut: fiche.statut, parti: false }),
-        resumeEssai({ id: 3 }),
-      ],
+      corps: {
+        elements: [
+          resumeEssai({ id: 9, numero: null, statut: fiche.statut, parti: false }),
+          resumeEssai({ id: 3 }),
+        ],
+        total: 2,
+        suivant: null,
+      },
     },
+    'GET /commandes/apercu': { corps: APERCU },
     [`GET /commandes/${fiche.id}`]: { corps: fiche },
     'GET /matieres': { corps: [] },
     ...autres,
@@ -81,7 +111,7 @@ describe('Commandes', () => {
     serveur('achats', brouillon())
     monterApp('/commandes')
     const tableau = await screen.findByRole('table', { name: /Commandes — Brouillons/ })
-    expect(within(tableau).getAllByText('Brouillon').length).toBeGreaterThan(0)
+    expect((await within(tableau).findAllByText('Brouillon')).length).toBeGreaterThan(0)
     expect(screen.getByRole('tab', { name: /Brouillons/ })).toHaveTextContent('Brouillons1')
     expect(screen.getByRole('tab', { name: /Confirmées/ })).toHaveTextContent('Confirmées1')
     expect(screen.getAllByText('Bons ouverts').length).toBeGreaterThan(0)

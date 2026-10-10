@@ -31,8 +31,12 @@ est la forme exécutable de ce document ; l'essai `test_catalogue_api.py` compar
 - Listes : tableau complet pour les référentiels et les documents (la recherche multi-mots
   `?q=` et les filtres s'appliquent au serveur) ; **`Page[T]` = `{elements, total, suivant}`**
   (curseur opaque `?apres=`, `?limite=` ≤ 5 000, défaut 500) pour `mouvements`, `journal`,
-  `notifications`, `operations`, `signalements`, `receptions/pesees`, `receptions`. Plus aucune liste n'est
-  coupée sans le dire (incohérence B.13-19).
+  `notifications`, `operations`, `signalements`, `receptions/pesees`, `receptions`, `ordres`,
+  `dossiers`, `commandes`. Plus aucune liste n'est coupée sans le dire (incohérence B.13-19).
+  Chaque grande liste paginée a son `/<domaine>/apercu` (comptes par onglet, totaux, options des
+  filtres) ; une colonne ou un état calculé par le moteur (non reproductible en SQL) sort de la
+  recherche libre et reste accessible par les onglets et un filtre dédié (p. ex. l'état de
+  livraison des commandes : filtre « en retard », convention PAGINATION4).
 - Date de référence : `?date=AAAA-MM-JJ` sur les lectures calculées (stock, plan d'achat,
   cockpit, valorisation, contrôles, besoins, exports) ; bornée 2000-01-01 … aujourd'hui → 422.
 
@@ -357,8 +361,10 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 152 | GET | `/commandes` | D, A | `?statut=&filtre=retard&fournisseur=&q=` (`statut` : un statut, ou `clos` = soldés et annulés, onglet « Soldées / annulées ») | `[CommandeResume]` (état de livraison, montants estimés, reçu, reste, jalons, renvoi… : détail dans `api/commandes/schemas.py` ; `en_retard` (bool, la règle de `?filtre=retard`), `arrivee_attendue` (ETA sinon livraison prévue, pour un bon parti ni soldé ni annulé ; sinon null)) | A48 |
+| 152 | GET | `/commandes` | D, A | `?statut=&filtre=retard&fournisseur=&devise=&q=&apres=&limite=` (`statut` : un statut, ou `clos` = soldés et annulés ; `q` : mots sans accents poussés en SQL sur numéro, fournisseur (nom, pays), devise, statut libellé, créateur, remarques, conteneur, navire, références et désignations des lignes — **SANS l'état de livraison**, calculé par le moteur : il reste accessible par les onglets et `filtre=retard`, convention PAGINATION4 ; `filtre=retard` : bons en retard — drapeau par bon, pré-filtre SQL grossier puis affinage du moteur, borné) | `PageCommandes` = `Page[CommandeResume]`, le plus récent d'abord (curseur date du bon puis n° d'entrée ; `CommandeResume` : état de livraison, montants estimés, reçu, reste, jalons, renvoi… détail dans `api/commandes/schemas.py` ; `en_retard`, `arrivee_attendue`) | A48 |
 | 153 | GET | `/commandes/{id}` | D, A | — | `CommandeFiche` = `CommandeResume` + lignes (reçu net, `kg_en_quarantaine` : reçu sous réserve encore en quarantaine, attendu jusqu'à sa libération ; reste), `promesse_figee` (la phrase qui dit pourquoi la date promise ne se change plus, ou null), `actions` (geste → null ou phrase du refus), `fin_possible`, `modifiable`, `raison_sociale_reglee`, `decisions`, `version_partie`, `renvoi`, `receptions` [{id, numero, date, statut, pese}], contact du fournisseur, `seuil_approbation` | nouveau |
+| 251 | GET | `/commandes/apercu` | D, A | mêmes filtres que 152 (sans `apres`/`limite`) | `ApercuCommandes` {brouillon, a_approuver, envoyee, confirmee, clos, total (comptes par onglet suivant la recherche, les filtres liés et « en retard », tous onglets), `indicateurs` {ouverts, brouillons, a_approuver, engage, partis, partis_estimes, reste, a_confirmer, retard — sur TOUS les bons ouverts, hors recherche et filtres}, quantite, montant_estime_mad, montants `[{devise, montant_estime}]` (pied de l'onglet), fournisseurs `[{id, nom}]`, devises `[str]` (options des filtres liés)} | nouveau (pagination, lot PAGINATION4) |
+| 252 | GET | `/commandes/ouverts` | D, A | — | `[CommandeResume]` — tous les bons ni soldés ni annulés, **plafonnés** (saisie des réceptions, Ma journée, Cockpit : ils les filtrent eux-mêmes ; les bons clos, qui s'accumulent, ne sont plus lus hors de l'écran Commandes) | nouveau (pagination, lot PAGINATION4) |
 | 154 | POST | `/commandes` | D, A | `CommandeCreation` {fournisseur_id, date_livraison_prevue, prix_catalogue_a_confirmer: bool, observations, lignes [{matiere_id, quantite, unite_achat, contenance, prix}]} | `[CommandeFiche]` (un bon par devise) | A49 |
 | 155 | PUT | `/commandes/{id}` | D, A | `CommandeModification` (+version) | `CommandeFiche` | A50 |
 | 156 | DELETE | `/commandes/{id}` | D, A | `?version=` | 204 | A58 |

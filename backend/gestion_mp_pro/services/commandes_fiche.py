@@ -13,7 +13,6 @@ from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul.achats import echeance_commande
 from gestion_mp_pro.modeles import Commande
 from gestion_mp_pro.modeles.enums import StatutCommande
-from gestion_mp_pro.modeles.recherche import normaliser
 from gestion_mp_pro.services import commandes_gestes as gestes
 from gestion_mp_pro.services import horloge, reglages
 from gestion_mp_pro.services.commandes_lecture import (
@@ -243,31 +242,15 @@ def resume(c: Commande, ctx: Lecture, lues: list[LigneLue] | None = None) -> Com
 
 @dataclass(frozen=True)
 class FiltresCommandes:
-    """Les filtres de la liste et de son classeur (mêmes que l'écran)."""
+    """Les filtres de la liste et de son classeur (mêmes que l'écran). La liste paginée pousse
+    `statut`, `fournisseur_id`, `devise` et la recherche (`q`) en SQL (`commandes_liste`) ;
+    `retard` est le drapeau calculé par le moteur (borné)."""
 
     statut: str = ""
     retard: bool = False
     fournisseur_id: int | None = None
+    devise: str = ""
     q: str = ""
-
-
-def _texte(r: CommandeResume, c: Commande, ctx: Lecture) -> str:
-    """Ce que la recherche lit d'un bon (champs de l'écran, références des lignes)."""
-    morceaux = [
-        r.numero or "brouillon",
-        r.fournisseur,
-        r.pays,
-        r.devise,
-        r.livraison_libelle,
-        r.statut_libelle,
-        r.cree_par or "",
-        r.observations,
-        r.expedition.conteneur,
-        r.expedition.navire,
-        *(f"{ctx.matieres[x.matiere_id].reference} {ctx.matieres[x.matiere_id].designation}"
-          for x in c.lignes),
-    ]  # fmt: skip
-    return normaliser(" ".join(morceaux))
 
 
 @dataclass
@@ -279,44 +262,11 @@ class BonDetaille:
     retard_jours: int | None
 
 
-def detailler(s: Session, f: FiltresCommandes) -> list[BonDetaille]:
-    """Les bons filtrés comme l'écran, du plus récent au plus ancien, avec leurs lignes ; un bon
-    en retard dit de combien de jours, depuis son échéance (ETA, promesse, sinon date + délai)."""
-    if f.statut and f.statut not in ONGLETS:
-        raise Refus.saisie(
-            f"Statut inconnu : « {f.statut} ».",
-            code="valeur_inconnue",
-            champs={"statut": "inconnu"},
-        )
-    s.flush()
-    commandes = charger_commandes(s)
-    if f.statut:
-        commandes = [c for c in commandes if c.statut in ONGLETS[f.statut]]
-    if f.fournisseur_id is not None:
-        commandes = [c for c in commandes if c.fournisseur_id == f.fournisseur_id]
-    ctx = lecture(s, commandes)
-    mots = normaliser(f.q).split()
-    resultat = []
-    for c in commandes:
-        lues = lignes(c, ctx)
-        r = resume(c, ctx, lues)
-        en_retard = bool(c.numero) and c.statut not in CLOS and r.livraison in EN_RETARD
-        if (f.retard and not en_retard) or (mots and not all(m in _texte(r, c, ctx) for m in mots)):
-            continue
-        resultat.append(BonDetaille(r, lues, _retard(c, ctx) if en_retard else None))
-    return resultat
-
-
 def _retard(c: Commande, ctx: Lecture) -> int | None:
     """Les jours de retard d'un bon en retard (la règle de la liste, du courriel et de C06)."""
     delai = ctx.fournisseurs[c.fournisseur_id].delai_jours
     prevue = echeance_commande(c.eta, c.date_livraison_prevue, c.date_commande, delai)
     return (horloge.aujourd_hui() - prevue).days if prevue else None
-
-
-def liste(s: Session, f: FiltresCommandes) -> list[CommandeResume]:
-    """Route 152 : les bons du plus récent au plus ancien, filtrés au serveur."""
-    return [x.resume for x in detailler(s, f)]
 
 
 def fiche(s: Session, cid: int, role: str) -> CommandeFiche:

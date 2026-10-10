@@ -53,7 +53,7 @@ def test_retard_et_arrivees_a_7_jours_comptes_au_serveur(usine: Usine) -> None:
     retard = u.commande(f, m, 100, le=jour(-40), promise=jour(-10))
     proche = u.commande(f, m, 100, le=jour(-5), promise=jour(3))
     loin = u.commande(f, m, 100, le=jour(-5), promise=jour(30))
-    liste = {c["id"]: c for c in u.get(u.achats, "/api/commandes")}
+    liste = {c["id"]: c for c in u.get(u.achats, "/api/commandes")["elements"]}
     vus = {i: (liste[i]["en_retard"], liste[i]["arrivee_attendue"],
                liste[i]["arrivee_sous_7_jours"]) for i in (retard, proche, loin)}  # fmt: skip
     assert vus == {
@@ -61,7 +61,7 @@ def test_retard_et_arrivees_a_7_jours_comptes_au_serveur(usine: Usine) -> None:
         proche: (False, jour(3).isoformat(), True),
         loin: (False, jour(30).isoformat(), False),
     }
-    en_retard = {c["id"] for c in u.get(u.achats, "/api/commandes", filtre="retard")}
+    en_retard = {c["id"] for c in u.get(u.achats, "/api/commandes", filtre="retard")["elements"]}
     assert {i for i, c in liste.items() if c["en_retard"]} == en_retard
     fiche = u.get(u.achats, f"/api/commandes/{retard}")
     assert fiche["promesse_figee"] == (

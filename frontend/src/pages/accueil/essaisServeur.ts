@@ -28,9 +28,7 @@ export function servirJournee(role: Role, autres: Record<string, Reponse> = {}) 
   return fauxServeur({
     ...reponsesConnecte(role),
     'GET /cockpit': { corps: cockpit },
-    'GET /commandes': (_c, url) => ({
-      corps: url.searchParams.get('filtre') === 'retard' ? retards : commandes,
-    }),
+    'GET /commandes/ouverts': { corps: commandes },
     'GET /brouillons': { corps: role === 'administrateur' ? brouillonsD : brouillons[role] },
     'GET /dossiers/a-rattacher': { corps: attente },
     'GET /signalements': { corps: signalements },

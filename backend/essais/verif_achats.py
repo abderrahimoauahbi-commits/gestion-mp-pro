@@ -94,7 +94,7 @@ def _recu_des_commandes(a: Acces, r: Releve, taux: dict[str, float]) -> None:
     recu = recu_net(a)
     base = {x[0]: x for x in a.sql("SELECT id, commande_id, quantite, prix FROM commande_ligne")}
     tolerance = float(dict(a.sql("SELECT cle, valeur FROM parametre")).get("toler_in_full", 0.02))
-    for c in a.get("/commandes"):
+    for c in a.get("/commandes")["elements"]:
         lignes = a.get(f"/commandes/{c['id']}")["lignes"]
         sujet = c["numero"] or f"brouillon {c['id']}"
         for x in lignes:

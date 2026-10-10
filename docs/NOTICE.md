@@ -275,6 +275,7 @@ Les bons de commande, du brouillon au solde : approbation, envoi, prix confirmé
 - Un brouillon n’a pas de numéro ; il le reçoit à l’envoi. Au-delà du seuil, la direction approuve d’abord.
 - Le bon fournisseur s’imprime en anglais, sans prix, sur le papier à en-tête.
 - « Confirmer ces prix » fige le cours et met à jour le catalogue.
+- La recherche porte sur le numéro, le fournisseur, la devise, les références et les remarques ; l’état de livraison (« en retard », « livré »…) se lit dans sa colonne et se filtre par « En retard seulement » et les onglets, pas en le tapant dans la recherche.
 
 ### Réceptions (`/receptions`)
 

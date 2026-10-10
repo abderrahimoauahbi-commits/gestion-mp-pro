@@ -18,10 +18,11 @@ def filtres_commandes(
     statut: Annotated[str, Query(max_length=20, description="statut, ou « clos »")] = "",
     filtre: Annotated[str, Query(pattern="^(retard)?$", description="« retard »")] = "",
     fournisseur: Annotated[int | None, Query(ge=1)] = None,
+    devise: Annotated[str, Query(max_length=3, description="code de la devise du bon")] = "",
     q: Annotated[str, Query(max_length=200, description="mots, sans accents")] = "",
 ) -> FiltresCommandes:
-    """`?statut=&filtre=retard&fournisseur=&q=` de la liste des bons et de son classeur."""
-    return FiltresCommandes(statut, filtre == "retard", fournisseur, q)
+    """`?statut=&filtre=retard&fournisseur=&devise=&q=` de la liste des bons et de son classeur."""
+    return FiltresCommandes(statut, filtre == "retard", fournisseur, devise, q)
 
 
 FiltresDep = Annotated[FiltresCommandes, Depends(filtres_commandes)]

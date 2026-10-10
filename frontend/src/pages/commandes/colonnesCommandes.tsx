@@ -6,7 +6,6 @@
 import { Badge } from '../../composants/retour/Badge'
 import { Bouton } from '../../composants/saisie/Bouton'
 import type { Colonne } from '../../composants/tableaux/colonnes'
-import type { Filtre } from '../../composants/tableaux/filtrage'
 import { date, montant, nombre, part, VIDE } from '../../lib/format'
 import { statut } from '../../lib/statuts'
 import styles from '../plan-achat/achats.module.css'
@@ -170,36 +169,4 @@ export function colonnesCommandes(
   ouvrir: (c: CommandeResume, onglet?: string) => void,
 ): Colonne<CommandeResume>[] {
   return [...colonnesCommandes1(ouvrir), ...colonnesCommandes2(ouvrir), ...colonnesCommandes3(ouvrir)]
-}
-
-/** Les champs cherchés sans être affichés (N°, pays, conteneur, remarques, références…). */
-export const CHERCHES = (c: CommandeResume) => [
-  c.numero ?? 'Brouillon',
-  c.pays,
-  c.devise,
-  c.statut_libelle,
-  c.livraison_libelle,
-  c.cree_par,
-  c.observations,
-  c.expedition.conteneur,
-  c.expedition.navire,
-  ...c.references,
-]
-
-export function filtresCommandes(noms: ReadonlyMap<string, string>): Filtre<CommandeResume>[] {
-  return [
-    {
-      cle: 'fournisseur',
-      libelle: 'Fournisseur',
-      valeur: (c) => String(c.fournisseur_id),
-      libelleValeur: (v) => noms.get(v) ?? v,
-    },
-    { cle: 'devise', libelle: 'Devise', valeur: (c) => c.devise },
-    {
-      cle: 'livraison',
-      libelle: 'État de livraison',
-      valeur: (c) => c.livraison,
-      libelleValeur: (v) => statut('livraison', v).libelle,
-    },
-  ]
 }

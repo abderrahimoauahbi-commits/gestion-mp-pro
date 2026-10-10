@@ -326,7 +326,7 @@ def _cockpit_achats(a: Acces, r: Releve, c: dict[str, Any], s: str) -> None:
     tolerance = float(reglages.get("toler_in_full", 0.02))
     taux = {code: float(t) for code, t in a.sql("SELECT code, cours FROM devise")}
     actifs, montant = 0, 0.0
-    for bon in a.get("/commandes"):
+    for bon in a.get("/commandes")["elements"]:
         if not bon["parti"] or bon["statut"] in ("soldee", "annulee"):
             continue
         cours = bon["cours"] or (1.0 if bon["devise"] == "MAD" else taux.get(bon["devise"], 1.0))

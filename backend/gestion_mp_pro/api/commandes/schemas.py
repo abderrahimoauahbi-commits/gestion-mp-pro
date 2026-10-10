@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from gestion_mp_pro.api.communs import Entree, Sortie
+from gestion_mp_pro.api.communs import Entree, Page, Sortie
 from gestion_mp_pro.modeles import longueurs as L
 
 MAX_KG = Decimal(10**9)
@@ -185,6 +185,60 @@ class CommandeResume(Sortie):
     kg_en_quarantaine: float = Field(
         description="reçu sous réserve encore en quarantaine : attendu jusqu'à sa libération"
     )
+
+
+class PageCommandes(Page[CommandeResume]):
+    """Route 152 : une page de bons, le plus récent d'abord (curseur date puis n° d'entrée)."""
+
+
+class IndicateursCommandes(Sortie):
+    """Les indicateurs de l'écran, comptés sur TOUS les bons ouverts (hors onglet, recherche et
+    filtres) : la rangée d'indicateurs ne suit ni la recherche ni les filtres (ECRANS-PRO 4.5)."""
+
+    ouverts: int
+    brouillons: int
+    a_approuver: int
+    engage: float = Field(description="Σ montant estimé MAD des bons partis")
+    partis: int
+    partis_estimes: int
+    reste: float = Field(description="Σ reste estimé MAD des bons partis ouverts")
+    a_confirmer: int
+    retard: int
+
+
+class TotalDevise(Sortie):
+    """Un total de montant estimé dans sa devise (jamais additionné entre devises)."""
+
+    devise: str
+    montant_estime: float
+
+
+class OptionFournisseur(Sortie):
+    """Un fournisseur du filtre lié (identifiant et nom)."""
+
+    id: int
+    nom: str
+
+
+class ApercuCommandes(Sortie):
+    """Route 251 : ce que l'écran calculait sur la liste entière.
+
+    Comptes par onglet (suivant la recherche, les filtres liés et « en retard », tous onglets),
+    indicateurs (sur tous les bons ouverts), pied de l'onglet (Σ kg, Σ MAD, Σ par devise), et
+    options des filtres liés (fournisseurs, devises)."""
+
+    brouillon: int
+    a_approuver: int
+    envoyee: int
+    confirmee: int
+    clos: int
+    total: int
+    indicateurs: IndicateursCommandes
+    quantite: float = Field(description="Σ kg de l'onglet (recherche et filtres compris)")
+    montant_estime_mad: float
+    montants: list[TotalDevise]
+    fournisseurs: list[OptionFournisseur]
+    devises: list[str]
 
 
 class LigneCommande(Sortie):

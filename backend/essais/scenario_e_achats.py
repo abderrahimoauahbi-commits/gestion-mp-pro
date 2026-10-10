@@ -195,7 +195,7 @@ def numero_suivant(m: Monde, serie: str, liste: list[dict[str, Any]], cle: str =
 def etape_approbation(m: Monde) -> None:
     """Étape 3 (10 novembre) : le bon EUR part ; le bon USD attend la direction, revient, part."""
     v, a, d = m.verif, m.A, m.D
-    tous = a.get("/commandes?statut=clos") + a.get("/commandes")
+    tous = a.get("/commandes?statut=clos")["elements"] + a.get("/commandes")["elements"]
     premier = numero_suivant(m, "BC", tous)
     second = premier[:-4] + f"{int(premier[-4:]) + 1:04d}"
     eur, usd = m.ids["BC_EUR"], m.ids["BC_USD"]

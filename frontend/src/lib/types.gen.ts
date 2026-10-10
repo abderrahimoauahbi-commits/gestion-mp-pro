@@ -2717,8 +2717,9 @@ export interface paths {
       cookie?: never
     }
     /**
-     * Les bons de commande, du plus récent au plus ancien, filtrés au serveur.
-     * @description Route 152.
+     * Les bons de commande, du plus récent au plus ancien, par pages ; filtrés au serveur.
+     * @description Route 152 (recherche et filtres poussés en SQL ; « en retard » calculé, borné ; curseur
+     *     date du bon puis n° d'entrée).
      */
     get: operations['lister_api_commandes_get']
     put?: never
@@ -2727,6 +2728,46 @@ export interface paths {
      * @description Route 154.
      */
     post: operations['creer_api_commandes_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/apercu': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Comptes par onglet, indicateurs, pied de totaux et options des filtres de la liste.
+     * @description Route 251 : nourrit les onglets, les indicateurs, le pied et les filtres liés de l'écran.
+     */
+    get: operations['apercu_api_commandes_apercu_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/commandes/ouverts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tous les bons ouverts (ni soldés ni annulés), plafonnés : saisie, Ma journée.
+     * @description Route 252 : accès borné « tous les bons ouverts » (filtrés par les appelants).
+     */
+    get: operations['ouverts_api_commandes_ouverts_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -4428,6 +4469,42 @@ export interface components {
       a_creer: {
         [key: string]: string[]
       }
+    }
+    /**
+     * ApercuCommandes
+     * @description Route 251 : ce que l'écran calculait sur la liste entière.
+     *
+     *     Comptes par onglet (suivant la recherche, les filtres liés et « en retard », tous onglets),
+     *     indicateurs (sur tous les bons ouverts), pied de l'onglet (Σ kg, Σ MAD, Σ par devise), et
+     *     options des filtres liés (fournisseurs, devises).
+     */
+    ApercuCommandes: {
+      /** Brouillon */
+      brouillon: number
+      /** A Approuver */
+      a_approuver: number
+      /** Envoyee */
+      envoyee: number
+      /** Confirmee */
+      confirmee: number
+      /** Clos */
+      clos: number
+      /** Total */
+      total: number
+      indicateurs: components['schemas']['IndicateursCommandes']
+      /**
+       * Quantite
+       * @description Σ kg de l'onglet (recherche et filtres compris)
+       */
+      quantite: number
+      /** Montant Estime Mad */
+      montant_estime_mad: number
+      /** Montants */
+      montants: components['schemas']['TotalDevise'][]
+      /** Fournisseurs */
+      fournisseurs: components['schemas']['OptionFournisseur'][]
+      /** Devises */
+      devises: string[]
     }
     /**
      * ApercuCourriel
@@ -8157,6 +8234,37 @@ export interface components {
       otif_moyen: number | null
     }
     /**
+     * IndicateursCommandes
+     * @description Les indicateurs de l'écran, comptés sur TOUS les bons ouverts (hors onglet, recherche et
+     *     filtres) : la rangée d'indicateurs ne suit ni la recherche ni les filtres (ECRANS-PRO 4.5).
+     */
+    IndicateursCommandes: {
+      /** Ouverts */
+      ouverts: number
+      /** Brouillons */
+      brouillons: number
+      /** A Approuver */
+      a_approuver: number
+      /**
+       * Engage
+       * @description Σ montant estimé MAD des bons partis
+       */
+      engage: number
+      /** Partis */
+      partis: number
+      /** Partis Estimes */
+      partis_estimes: number
+      /**
+       * Reste
+       * @description Σ reste estimé MAD des bons partis ouverts
+       */
+      reste: number
+      /** A Confirmer */
+      a_confirmer: number
+      /** Retard */
+      retard: number
+    }
+    /**
      * IndicateursPlan
      * @description Les indicateurs du plan (les ruptures… comptées sur toutes les matières).
      */
@@ -11236,6 +11344,16 @@ export interface components {
       lignes: components['schemas']['OpportuniteLigne'][]
     }
     /**
+     * OptionFournisseur
+     * @description Un fournisseur du filtre lié (identifiant et nom).
+     */
+    OptionFournisseur: {
+      /** Id */
+      id: number
+      /** Nom */
+      nom: string
+    }
+    /**
      * OptionOrdres
      * @description Une option d'un filtre lié de la liste : code envoyé à la route, libellé affiché.
      */
@@ -11464,6 +11582,24 @@ export interface components {
       id: number
       /** Numero */
       numero: string
+    }
+    /**
+     * PageCommandes
+     * @description Route 152 : une page de bons, le plus récent d'abord (curseur date puis n° d'entrée).
+     */
+    PageCommandes: {
+      /** Elements */
+      elements: components['schemas']['CommandeResume'][]
+      /**
+       * Total
+       * @description nombre total d'éléments qui passent les filtres
+       */
+      total: number
+      /**
+       * Suivant
+       * @description à passer en `?apres=`
+       */
+      suivant?: string | null
     }
     /**
      * PageControle
@@ -13931,6 +14067,16 @@ export interface components {
       poids_bobine: number
       /** Excedent */
       excedent: number
+    }
+    /**
+     * TotalDevise
+     * @description Un total de montant estimé dans sa devise (jamais additionné entre devises).
+     */
+    TotalDevise: {
+      /** Devise */
+      devise: string
+      /** Montant Estime */
+      montant_estime: number
     }
     /**
      * Tracabilite
@@ -23365,6 +23511,8 @@ export interface operations {
         /** @description « retard » */
         filtre?: string
         fournisseur?: number | null
+        /** @description code de la devise du bon */
+        devise?: string
         /** @description mots, sans accents */
         q?: string
       }
@@ -23420,8 +23568,13 @@ export interface operations {
         /** @description « retard » */
         filtre?: string
         fournisseur?: number | null
+        /** @description code de la devise du bon */
+        devise?: string
         /** @description mots, sans accents */
         q?: string
+        /** @description curseur rendu dans `suivant` */
+        apres?: string | null
+        limite?: number
       }
       header?: never
       path?: never
@@ -23435,7 +23588,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['CommandeResume'][]
+          'application/json': components['schemas']['PageCommandes']
         }
       }
       /** @description Non connecté */
@@ -23509,6 +23662,110 @@ export interface operations {
       }
       /** @description Conflit ou état */
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  apercu_api_commandes_apercu_get: {
+    parameters: {
+      query?: {
+        /** @description statut, ou « clos » */
+        statut?: string
+        /** @description « retard » */
+        filtre?: string
+        fournisseur?: number | null
+        /** @description code de la devise du bon */
+        devise?: string
+        /** @description mots, sans accents */
+        q?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApercuCommandes']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ouverts_api_commandes_ouverts_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CommandeResume'][]
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
         headers: {
           [name: string]: unknown
         }

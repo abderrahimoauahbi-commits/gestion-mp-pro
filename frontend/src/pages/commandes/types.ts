@@ -6,6 +6,9 @@ import type { Schema } from '../../lib/types'
 
 export type CommandeResume = Schema<'CommandeResume'>
 export type CommandeFiche = Schema<'CommandeFiche'>
+export type ApercuCommandes = Schema<'ApercuCommandes'>
+export type IndicateursServeur = Schema<'IndicateursCommandes'>
+export type OptionFournisseur = Schema<'OptionFournisseur'>
 export type LigneCommande = Schema<'LigneCommande'>
 export type Decision = Schema<'Decision'>
 export type ReceptionDuBon = Schema<'ReceptionDuBon'>

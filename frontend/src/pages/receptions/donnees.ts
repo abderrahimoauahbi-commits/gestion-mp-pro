@@ -50,5 +50,5 @@ export const useFournisseursActifs = () => useLecture<Fournisseur[]>('/fournisse
 
 export const useMatieresActives = () => useLecture<Matiere[]>('/matieres', { actif: true })
 
-/** Tous les bons (la saisie y cherche ceux qui attendent une livraison). */
-export const useBons = () => useLecture<CommandeResume[]>('/commandes')
+/** Les bons ouverts (bornés) : la saisie y cherche ceux qui attendent encore une livraison. */
+export const useBons = () => useLecture<CommandeResume[]>('/commandes/ouverts')

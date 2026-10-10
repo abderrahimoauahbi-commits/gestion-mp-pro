@@ -1,37 +1,35 @@
 /**
- * Les indicateurs des commandes (ECRANS-PRO 4.5), comptés sur **tous** les bons, quels que soient
- * l'onglet, la recherche et les filtres (la rangée le dit) ; chacun mène à ce qu'il compte.
+ * Les indicateurs des commandes (ECRANS-PRO 4.5), comptés par le serveur sur **tous** les bons
+ * ouverts, quels que soient l'onglet, la recherche et les filtres (la rangée le dit) ; chacun mène
+ * à ce qu'il compte. L'écran ne recompte rien : les nombres viennent de `/commandes/apercu`.
  */
 import { Indicateurs } from '../../composants/mise-en-page/Indicateurs'
 import { Kpi } from '../../composants/retour/Kpi'
 import { formule } from '../../lib/aide'
 import { montant, montantCourt, nombre } from '../../lib/format'
 import type { Role } from '../../lib/types'
-import { indicateurs } from './liste'
-import type { CommandeResume } from './types'
-
-type Ind = ReturnType<typeof indicateurs>
+import type { IndicateursServeur } from './types'
 
 /** Les deux premiers : ce qui est ouvert, et ce qui est engagé chez les fournisseurs. */
-function Ouverts({ i, direction }: { i: Ind; direction: boolean }) {
+function Ouverts({ i, direction }: { i: IndicateursServeur; direction: boolean }) {
   return (
     <>
       <Kpi
         titre="Bons ouverts"
         valeur={nombre(i.ouverts)}
         formule={formule('commandes_ouvertes')}
-        ton={direction && i.aApprouver ? 'urgent' : undefined}
+        ton={direction && i.a_approuver ? 'urgent' : undefined}
         detail={
           <span
             title={
-              i.aApprouver
+              i.a_approuver
                 ? direction
                   ? 'Votre accord est attendu'
                   : 'En attente de la direction'
                 : undefined
             }
           >
-            {nombre(i.brouillons)} brouillon(s) · {nombre(i.aApprouver)} à approuver
+            {nombre(i.brouillons)} brouillon(s) · {nombre(i.a_approuver)} à approuver
           </span>
         }
         lien="/commandes?onglet=a_approuver"
@@ -44,8 +42,8 @@ function Ouverts({ i, direction }: { i: Ind; direction: boolean }) {
         detail={
           <span
             title={
-              i.partisEstimes
-                ? `dont ${nombre(i.partisEstimes)} bon(s) estimé(s) au prix du catalogue, prix à confirmer`
+              i.partis_estimes
+                ? `dont ${nombre(i.partis_estimes)} bon(s) estimé(s) au prix du catalogue, prix à confirmer`
                 : undefined
             }
           >
@@ -64,16 +62,15 @@ function Ouverts({ i, direction }: { i: Ind; direction: boolean }) {
   )
 }
 
-export function IndicateursCommandes({ bons, role }: { bons: readonly CommandeResume[]; role: Role }) {
-  const i = indicateurs(bons)
+export function IndicateursCommandes({ i, role }: { i: IndicateursServeur; role: Role }) {
   return (
     <Indicateurs libelle="Indicateurs des commandes (tous les bons)">
       <Ouverts i={i} direction={role === 'direction'} />
       <Kpi
         titre="Prix à confirmer"
-        valeur={nombre(i.aConfirmer)}
+        valeur={nombre(i.a_confirmer)}
         formule={formule('commandes_prix_a_confirmer')}
-        ton={i.aConfirmer ? 'attention' : 'ok'}
+        ton={i.a_confirmer ? 'attention' : 'ok'}
         detail="bons partis"
         lien="/commandes?onglet=envoyee"
       />

@@ -14,7 +14,7 @@ from gestion_mp_pro.exports import achats as classeurs
 from gestion_mp_pro.exports.classeur import REPONSES_XLSX, TYPE_XLSX, reponse
 from gestion_mp_pro.securite import A, D, droit
 from gestion_mp_pro.services import horloge
-from gestion_mp_pro.services.commandes_fiche import detailler
+from gestion_mp_pro.services.commandes_liste import detailler
 
 __all__ = ["routeur"]
 

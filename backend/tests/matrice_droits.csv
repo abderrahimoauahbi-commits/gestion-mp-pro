@@ -24,6 +24,8 @@ DELETE;/api/codes-douaniers/{ident};401;ok;403;403;403
 PUT;/api/codes-douaniers/{ident};401;ok;403;403;403
 GET;/api/commandes;401;ok;ok;403;403
 POST;/api/commandes;401;ok;ok;403;403
+GET;/api/commandes/apercu;401;ok;ok;403;403
+GET;/api/commandes/ouverts;401;ok;ok;403;403
 DELETE;/api/commandes/{cid};401;ok;ok;403;403
 GET;/api/commandes/{cid};401;ok;ok;403;403
 PUT;/api/commandes/{cid};401;ok;ok;403;403
