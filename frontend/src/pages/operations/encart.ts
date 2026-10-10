@@ -12,8 +12,15 @@ import { MATIERE_RETROUVEE, type MatiereResume, type MotifLu, type TypeOperation
 /** La place choisie pour un lot qui n'est pas en stock (ajustement « matière retrouvée »). */
 export const NOUVEAU_LOT = 'nouveau'
 
+/** Un type qui part d'un lot déjà en stock : on peut alors chercher par dépôt de départ (an. 2). */
+export const partDunLot = (type: TypeOperation) =>
+  type === 'transfert' || type === 'ajustement' || type === 'retour_fournisseur'
+
 export interface EtatEncart {
   matiere: number | null
+  /** Le dépôt de départ, critère de recherche facultatif : voir les lots d'un magasin, toutes
+   * matières, pour choisir ce qui bouge (an. 2, « partir du dépôt »). `null` : tous les dépôts. */
+  depart: number | null
   /** `lot-magasin`, `nouveau`, ou un identifiant de lot (retour des machines). */
   place: string | null
   lot_numero: string
@@ -29,6 +36,7 @@ export interface EtatEncart {
 
 export const ENCART_VIERGE: EtatEncart = {
   matiere: null,
+  depart: null,
   place: null,
   lot_numero: '',
   lot_interne: false,
@@ -46,6 +54,7 @@ export function encartDe(l: LigneSaisie, type: TypeOperation): EtatEncart {
   const nouveau = l.lot_id == null
   return {
     matiere: l.matiere_id,
+    depart: null,
     place:
       type === 'ouverture'
         ? null

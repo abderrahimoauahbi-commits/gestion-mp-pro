@@ -33,6 +33,7 @@ import {
   sensImpose,
   type EtatEncart,
 } from './encart'
+import { ChampDepart } from './ChampDepart'
 import styles from './Operations.module.css'
 import { aucunLot, destinations, optionDePlace, placesDeLots, placesProposees } from './places'
 import type { LigneSaisie } from './saisie'
@@ -70,10 +71,13 @@ function useEncart(p: EncartProps) {
   const [e, setE] = useState<EtatEncart>(() => (p.ligne ? encartDe(p.ligne, p.type) : ENCART_VIERGE))
   const m = p.matieres.find((x) => x.id === e.matiere)
   const retour = p.type === 'retour_machine'
+  // Dépôt de départ posé : on lit tout le dépôt (toutes matières) ; sinon, les lots de la matière.
+  const parDepot = e.depart != null
   const lots = useLecture<LotSolde[]>(
-    e.matiere == null || p.type === 'ouverture' || retour ? null : '/lots',
+    (e.matiere == null && !parDepot) || p.type === 'ouverture' || retour ? null : '/lots',
     {
-      matiere: e.matiere,
+      matiere: parDepot ? undefined : e.matiere,
+      magasin: parDepot ? e.depart : undefined,
       date: p.date || undefined,
       non_nuls: true,
     },
@@ -81,8 +85,14 @@ function useEncart(p: EncartProps) {
   // Un retour des machines rend ce qui est parti pour son ordre (route 142), jamais plus.
   const sortis = useLecture<LotSorti[]>(retour && p.ordre ? `/ordres/${p.ordre}/lots-sortis` : null)
   const sorti = sortis.data?.find((l) => String(l.lot_id) === e.place)
-  const toutes = placesDeLots(lots.data ?? [])
+  const brut = placesDeLots(lots.data ?? [])
+  // En mode dépôt : ce dépôt seul (le lot peut porter ailleurs), puis la matière si elle est posée.
+  const dansDepot = parDepot ? brut.filter((pl) => pl.magasin_id === e.depart) : brut
+  const toutes =
+    parDepot && e.matiere != null ? dansDepot.filter((pl) => pl.matiere_id === e.matiere) : dansDepot
   const places = placesProposees(toutes, p.type, p.motif, p.fournisseur)
+  // Les matières présentes dans le dépôt (pour y restreindre le choix de matière, et inversement).
+  const matieresDuDepot = parDepot ? new Set(dansDepot.map((pl) => pl.matiere_id)) : null
   const place = places.find((x) => x.cle === e.place)
   const rempli = encartRempli(e)
   const { onRempli } = p
@@ -96,7 +106,7 @@ function useEncart(p: EncartProps) {
       (lots.data?.find((l) => l.lot_id === id) ?? sortis.data?.find((l) => l.lot_id === id))?.lot ?? ''
     p.onPoser(ligneDeLEncart(p.type, e, m, place, { magasin: nom, lot }, cle))
   }
-  return { e, poser, m, lots, sortis, sorti, toutes, places, place, rempli, poserLigne }
+  return { e, poser, m, lots, sortis, sorti, toutes, places, place, matieresDuDepot, rempli, poserLigne }
 }
 
 type Encart = ReturnType<typeof useEncart>
@@ -105,6 +115,8 @@ type Encart = ReturnType<typeof useEncart>
 function ChampLot({ p, x }: { p: EncartProps; x: Encart }) {
   const { e, poser } = x
   if (p.type === 'ouverture') return null
+  // Avec un dépôt de départ, on parcourt les lots toutes matières : montrer la matière, cherchable.
+  const parDepot = e.depart != null
   const options =
     p.type === 'retour_machine'
       ? (x.sortis.data ?? [])
@@ -114,22 +126,25 @@ function ChampLot({ p, x }: { p: EncartProps; x: Encart }) {
             titre: `Lot ${l.lot}`,
             sous: `${kg(l.sorti_net)} partis pour l’ordre`,
           }))
-      : x.places.map((pl) => optionDePlace(pl, p.type))
+      : x.places.map((pl) => optionDePlace(pl, p.type, parDepot))
   const avecNouveau =
     p.type === 'ajustement'
       ? [{ id: NOUVEAU_LOT, titre: 'Un lot qui n’est pas en stock (matière retrouvée)' }]
       : []
   const libelle = p.type === 'transfert' ? 'Lot et magasin de départ' : 'Lot'
+  const riensaisi = e.matiere == null && !parDepot
   return (
     <Champ
       libelle={libelle}
       aide={
-        e.matiere == null
-          ? 'Choisir d’abord la matière'
+        riensaisi
+          ? 'Choisir d’abord la matière ou le dépôt de départ'
           : x.lots.isPending
             ? 'Lecture des lots…'
             : options.length
-              ? undefined
+              ? parDepot && e.matiere == null
+                ? 'Tous les lots du dépôt : choisir un lot fixe sa matière'
+                : undefined
               : aucunLot(p.type, p.motif, x.toutes)
       }
     >
@@ -140,10 +155,18 @@ function ChampLot({ p, x }: { p: EncartProps; x: Encart }) {
         onChange={(id) => {
           const pl = x.places.find((y) => y.cle === id)
           const vers = destinations(p.magasins, pl?.magasin_id ?? null, p.motif)[0]?.id ?? null
-          poser({ place: id, kg: null, unite: 'kg', vers, sens: id === NOUVEAU_LOT ? '+' : e.sens })
+          // Choisir un lot fixe aussi la matière (choix par dépôt, toutes matières).
+          poser({
+            place: id,
+            matiere: pl?.matiere_id ?? e.matiere,
+            kg: null,
+            unite: 'kg',
+            vers,
+            sens: id === NOUVEAU_LOT ? '+' : e.sens,
+          })
         }}
-        placeholder={e.matiere == null ? 'Choisir d’abord la matière' : 'Choisir le lot…'}
-        desactive={e.matiere == null}
+        placeholder={riensaisi ? 'Choisir d’abord la matière ou le dépôt' : 'Choisir le lot…'}
+        desactive={riensaisi}
       />
     </Champ>
   )
@@ -303,15 +326,23 @@ function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
   )
 }
 
+/**
+ * Les matières proposées : restreintes au dépôt de départ s'il est posé (celles qui y sont),
+ * sinon selon le type (tout pour une ouverture/un ajustement, les lots sortis pour un retour des
+ * machines, les matières en stock pour un transfert ou un retour au fournisseur).
+ */
+function matieresProposees(p: EncartProps, x: Encart): readonly MatiereResume[] {
+  if (x.matieresDuDepot) return p.matieres.filter((m) => x.matieresDuDepot!.has(m.id))
+  if (p.type === 'ouverture' || p.type === 'ajustement') return p.matieres
+  if (p.type === 'retour_machine')
+    return p.matieres.filter((m) => x.sortis.data?.some((l) => l.matiere_id === m.id))
+  return p.matieres.filter((m) => (m.stock ?? 0) > 0)
+}
+
 export function EncartLigne(p: EncartProps) {
   const x = useEncart(p)
   const { e, poser } = x
-  const proposees =
-    p.type === 'ouverture' || p.type === 'ajustement'
-      ? p.matieres
-      : p.type === 'retour_machine'
-        ? p.matieres.filter((m) => x.sortis.data?.some((l) => l.matiere_id === m.id))
-        : p.matieres.filter((m) => (m.stock ?? 0) > 0)
+  const proposees = matieresProposees(p, x)
   return (
     <Carte
       className={styles.encart}
@@ -345,6 +376,7 @@ export function EncartLigne(p: EncartProps) {
               poser({
                 ...ENCART_VIERGE,
                 matiere: id,
+                depart: e.depart,
                 prix: mat?.prix_kg ?? null,
                 devise: mat?.devise ?? 'MAD',
                 sens: e.sens,
@@ -352,6 +384,12 @@ export function EncartLigne(p: EncartProps) {
             }}
           />
         </Champ>
+        <ChampDepart
+          type={p.type}
+          magasins={p.magasins}
+          valeur={e.depart}
+          onChange={(id) => poser({ depart: id, place: null, kg: null, unite: 'kg', vers: null })}
+        />
         <ChampLot p={p} x={x} />
         <ChampsLotACreer p={p} x={x} />
         <ChampsSens p={p} x={x} />

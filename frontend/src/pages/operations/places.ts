@@ -13,6 +13,9 @@ export interface Place {
   cle: string
   lot_id: number
   lot: string
+  matiere_id: number
+  reference: string
+  designation: string
   magasin_id: number
   magasin: string
   quantite: number
@@ -33,6 +36,9 @@ export function placesDeLots(lots: readonly LotSolde[]): Place[] {
         cle: `${l.lot_id}-${g.magasin_id}`,
         lot_id: l.lot_id,
         lot: l.lot,
+        matiere_id: l.matiere_id,
+        reference: l.reference,
+        designation: l.designation,
         magasin_id: g.magasin_id,
         magasin: g.magasin,
         quantite: g.quantite,
@@ -61,11 +67,12 @@ export function placesProposees(
   return [...places]
 }
 
-/** « Lot L-12 · MAG[ (quarantaine)] · 120,0 kg · entré le … »[ · fournisseur]. */
-export function optionDePlace(p: Place, type: TypeOperation) {
+/** « [MATIÈRE · ]Lot L-12 · MAG[ (quarantaine)] · 120,0 kg · entré le … »[ · fournisseur].
+ * `avecMatiere` (choix par dépôt, toutes matières) montre la matière et la rend cherchable. */
+export function optionDePlace(p: Place, type: TypeOperation, avecMatiere = false) {
   return {
     id: p.cle,
-    titre: `Lot ${p.lot} · ${p.magasin}${p.quarantaine ? ' (quarantaine)' : ''}`,
+    titre: `${avecMatiere ? `${p.reference} · ` : ''}Lot ${p.lot} · ${p.magasin}${p.quarantaine ? ' (quarantaine)' : ''}`,
     sous: [
       kgEtMetres(p.quantite, p.kg_par_ml),
       p.entre_le ? `entré le ${dateLisible(p.entre_le)}` : '',
@@ -73,6 +80,7 @@ export function optionDePlace(p: Place, type: TypeOperation) {
     ]
       .filter(Boolean)
       .join(' · '),
+    recherche: avecMatiere ? `${p.reference} ${p.designation}` : undefined,
   }
 }
 

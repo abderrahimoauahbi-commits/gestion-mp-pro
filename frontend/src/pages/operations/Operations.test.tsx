@@ -71,6 +71,40 @@ function serveur(role: Role, autres: Record<string, Reponse> = {}) {
   })
 }
 
+// Deux matières et deux dépôts (PRINCIPAL id 1, ATELIER id 3) pour la recherche par dépôt de départ.
+const MAT_BLEU = matiereEssai({ id: 2, reference: 'IMP LISSE BLEU', stock: 100 })
+const lotBleuPrincipal = lotEssai({
+  lot_id: 20,
+  lot: 'L24-200',
+  matiere_id: 2,
+  reference: 'IMP LISSE BLEU',
+  quantite: 100,
+  disponible: 100,
+  magasins: [{ magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 100 }],
+})
+const lotRougeAtelier = lotEssai({
+  lot_id: 30,
+  lot: 'L24-300',
+  quantite: 50,
+  disponible: 50,
+  magasins: [{ magasin_id: 3, magasin: 'ATELIER', type: 'stock_courant', quantite: 50 }],
+})
+
+/** `/lots` rendu comme le serveur : par dépôt (`magasin`, toutes matières) ou par matière. */
+function depots(): Record<string, Reponse> {
+  return {
+    'GET /matieres': { corps: [matiereEssai(), MAT_BLEU] },
+    'GET /lots': (_c, url) => {
+      const magasin = url.searchParams.get('magasin')
+      const matiere = url.searchParams.get('matiere')
+      if (magasin === '1') return { corps: [lotEssai(), lotBleuPrincipal] }
+      if (magasin === '3') return { corps: [lotRougeAtelier] }
+      if (matiere === '2') return { corps: [lotBleuPrincipal] }
+      return { corps: [lotEssai()] }
+    },
+  }
+}
+
 describe('Opérations : la liste', () => {
   it('l’alimentation ne voit que les transferts et les retours des machines, sans aucun prix', async () => {
     serveur('alimentation')
@@ -213,6 +247,60 @@ describe('Opérations : la fenêtre', () => {
         { matiere_id: 1, lot_id: 11, magasin_id: 1, magasin_destination_id: 2, quantite: 40, unite: 'kg' },
       ],
     })
+  })
+
+  it('un transfert par dépôt de départ : le choix de lot ne montre que les lots de ce dépôt, toutes matières', async () => {
+    const appels = serveur('achats', depots())
+    monterApp('/operations/nouvelle?type=transfert')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Dépôt de départ' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'PRINCIPAL' }))
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Lot et magasin de départ' }))
+    expect(
+      await screen.findByRole('option', { name: /IMP FRISÉ ROUGE · Lot L24-100 · PRINCIPAL/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /IMP LISSE BLEU · Lot L24-200 · PRINCIPAL/ }),
+    ).toBeInTheDocument()
+    // Le lot qui n'est qu'à l'ATELIER n'est pas proposé pour un départ de PRINCIPAL.
+    expect(screen.queryByRole('option', { name: /L24-300/ })).not.toBeInTheDocument()
+    // Les lots sont partis par magasin (toutes matières), pas par matière.
+    await waitFor(() =>
+      expect(
+        appels.some(
+          (a) =>
+            a.chemin.includes('/lots?') && a.chemin.includes('magasin=1') && !a.chemin.includes('matiere='),
+        ),
+      ).toBe(true),
+    )
+  })
+
+  it('dépôt de départ et matière se combinent : les lots se limitent à cette matière dans ce dépôt', async () => {
+    serveur('achats', depots())
+    monterApp('/operations/nouvelle?type=transfert')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Dépôt de départ' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'PRINCIPAL' }))
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Matière' }))
+    await userEvent.click(await screen.findByRole('option', { name: /IMP LISSE BLEU/ }))
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Lot et magasin de départ' }))
+    expect(await screen.findByRole('option', { name: /Lot L24-200 · PRINCIPAL/ })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Lot L24-100/ })).not.toBeInTheDocument()
+  })
+
+  it('sans dépôt de départ, le chemin « matière d’abord » reste : les lots partent par matière', async () => {
+    const appels = serveur('achats', depots())
+    monterApp('/operations/nouvelle?type=transfert')
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Matière' }))
+    await userEvent.click(await screen.findByRole('option', { name: /IMP FRISÉ ROUGE/ }))
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Lot et magasin de départ' }))
+    expect(await screen.findByRole('option', { name: /Lot L24-100 · PRINCIPAL/ })).toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        appels.some(
+          (a) =>
+            a.chemin.includes('/lots?') && a.chemin.includes('matiere=1') && !a.chemin.includes('magasin='),
+        ),
+      ).toBe(true),
+    )
   })
 
   it('un stock d’ouverture validé d’un coup : lot interne, prix et devise, en une transaction (E10)', async () => {
