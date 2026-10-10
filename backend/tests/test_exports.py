@@ -86,8 +86,8 @@ def test_les_conventions_communes() -> None:
     assert all(c.font.bold and c.fill.fgColor.rgb.endswith("E8ECF3") for c in ws[1])
     assert ws.freeze_panes == "B2" and ws.auto_filter.ref == "A1:G3"
     assert ws["A2"].number_format == FORMATS["horodatage"] == "DD/MM/YYYY HH:MM"
-    assert ws["B2"].number_format == "DD/MM/YYYY" and ws["C2"].number_format == "#,##0.0"
-    assert ws["C2"].value == 1234.567 and ws["C3"].value == 0
+    assert ws["B2"].number_format == "DD/MM/YYYY" and ws["C2"].number_format == "#,##0.##"
+    assert ws["C2"].value == 1234.567 and ws["C3"].value == 0  # la cellule reste numérique
     assert ws["E2"].number_format == "#,##0.00##" and ws["E2"].value == 2.55
     assert ws.column_dimensions["A"].width == 17 and ws.column_dimensions["D"].width >= 10
     assert (ws["F2"].value, ws["F3"].value, ws["G2"].value) == ("oui", None, "rouge")

@@ -124,7 +124,7 @@ def test_feuille_de_comptage(m: Monde, achats: TestClient, alimentation: TestCli
     )
     recompte = achats.get(url, params={"recomptage": True}).text
     assert "Feuille de recomptage" in recompte and "Théorique" in recompte
-    assert "1 000,0" in recompte.replace(" ", " ").replace("\xa0", " ")
+    assert "1 000" in recompte.replace(" ", " ").replace("\xa0", " ")
     a = _ok(
         achats.post(
             f"/api/inventaires/{i['id']}/abandonner",

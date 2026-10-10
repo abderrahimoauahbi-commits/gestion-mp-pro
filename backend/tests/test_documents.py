@@ -86,9 +86,9 @@ def test_le_bon_fournisseur_a_son_papier_en_anglais() -> None:
     assert "HEAD OFFICE" in textes(html, "entete-societe")[0]
     assert textes(html, "banques")[0].startswith("BANKS ")
     assert "SIÈGE" not in html and "BANQUES" not in html
-    assert textes(html, "poids") == ["1,234.6 kg"] and textes(html, "jour") == ["08 Oct 2026"]
+    assert textes(html, "poids") == ["1,234.55 kg"] and textes(html, "jour") == ["08 Oct 2026"]
     fr = _papier()
-    assert textes(fr, "poids") == [f"1{NSP}234,6{NSP}kg"] and textes(fr, "jour") == ["08/10/2026"]
+    assert textes(fr, "poids") == [f"1{NSP}234,55{NSP}kg"] and textes(fr, "jour") == ["08/10/2026"]
 
 
 def test_un_en_tete_non_regle_se_dit_a_l_ecran_seulement() -> None:
@@ -177,7 +177,11 @@ def test_les_nombres_s_ecrivent_comme_a_l_ecran(valeur: tuple[object, ...], atte
 
 def test_les_grandeurs_ont_leur_regle() -> None:
     """Kilos, montants, prix, cours, parts, dates (ARCHITECTURE § 9.3)."""
-    assert fmt.kg(1234.56) == f"1{NSP}234,6{NSP}kg"
+    assert fmt.kg(1234.56) == f"1{NSP}234,56{NSP}kg"
+    # Kilos : jusqu'à deux décimales, zéros inutiles enlevés, plafonné à deux (comme l'écran).
+    assert fmt.kg(3.15) == f"3,15{NSP}kg" and fmt.kg(3.2) == f"3,2{NSP}kg"
+    assert fmt.kg(3) == f"3{NSP}kg" and fmt.kg(26000) == f"26{NSP}000{NSP}kg"
+    assert fmt.kg(3.152) == f"3,15{NSP}kg"
     assert fmt.kg_entier(5029.4) == f"5{NSP}029{NSP}kg"
     assert fmt.montant_precis(1234.5, "MAD") == f"1{NSP}234,50{NSP}MAD"
     assert fmt.montant(1234.5, "MAD") == f"1{NSP}235{NSP}MAD"
@@ -249,14 +253,14 @@ def test_un_lot_en_quarantaine_ne_sort_pas(base: Session, achats: TestClient) ->
     assert statut == 200
     assert textes(html, "quarantaine") == [
         "QUARANTAINE — NE PAS SORTIR",
-        f"QUARANTAINE — NE PAS SORTIR (dont 30,0{NSP}kg en quarantaine)",
+        f"QUARANTAINE — NE PAS SORTIR (dont 30{NSP}kg en quarantaine)",
     ]
 
 
 def test_etiquette_kilos_a_la_regle_et_bobines(base: Session, achats: TestClient) -> None:
-    """ECRANS-PRO « Étiquettes » (an. 28) et § 9.3 : kilos des documents (une décimale, espaces
-    insécables), mètres indicatifs d'un ruban, « ≈ N bobines » au poids de bobine du lot (sinon
-    du catalogue) ; rien sans poids de bobine."""
+    """ECRANS-PRO « Étiquettes » (an. 28) et § 9.3 : kilos des documents (jusqu'à deux décimales,
+    zéros inutiles enlevés, espaces insécables), mètres indicatifs d'un ruban, « ≈ N bobines » au
+    poids de bobine du lot (sinon du catalogue) ; rien sans poids de bobine."""
     fil = matiere(base, unique("Fil bobiné"), poids_bobine=Decimal("2.5"))
     mesure = lot(base, fil, numero=unique("BB"), poids_bobine=Decimal("2.4952"))
     catalogue = lot(base, fil, numero=unique("BC"))
@@ -270,8 +274,8 @@ def test_etiquette_kilos_a_la_regle_et_bobines(base: Session, achats: TestClient
     assert statut == 200
     reste = [t for x in textes(html, "texte") for t in [x.split("Reste ", 1)[1].split(" N° ")[0]]]
     assert reste == [
-        f"1{NSP}234,6{NSP}kg à l'impression ≈{NSP}495{NSP}bobines",
-        f"5,0{NSP}kg à l'impression ≈{NSP}2{NSP}bobines",
+        f"1{NSP}234,56{NSP}kg à l'impression ≈{NSP}495{NSP}bobines",
+        f"5{NSP}kg à l'impression ≈{NSP}2{NSP}bobines",
         f"14,3{NSP}kg ≈{NSP}1{NSP}021{NSP}ml à l'impression",
     ]
     assert textes(html, "bobines") == [f"≈{NSP}495{NSP}bobines", f"≈{NSP}2{NSP}bobines"]
