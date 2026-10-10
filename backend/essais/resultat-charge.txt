@@ -163,3 +163,27 @@ pesé de l'onglet par des agrégats SQL. Le coût par appel cesse de croître av
 patron que /operations, qui tient déjà ×30 en V4) ; la charge utile passe de 9 000 à ≤ 500
 éléments. Au volume de service réel, les chiffres sont identiques (essais verts) : aucune
 régression. /ordres, /commandes, /dossiers restent à paginer (voir docs/lots/PAGINATION2.md § 2).
+
+================================================================================
+Pagination — lot PAGINATION3 (2026-10-10) : GET /ordres (135), GET /dossiers (187)
+================================================================================
+Micro-mesure au niveau service (3 appels, meilleur/médiane), base synthétique de
+9 000 ordres (brouillons) et 9 000 dossiers (~×30 d'une année), chacun avec sa/ses
+ligne(s) ; scratchpad/bench_pag3.py, base gestion_mp_pro_pag3_mesure_essai (supprimée après).
+
+  Volume : 9 000 ordres (brouillons), 9 000 dossiers
+  /ordres (135)
+    ANCIEN  — toutes() construit tout + blocages   16367 ms (médiane 16424)  ← O(N), une requête de blocages par ordre
+    NOUVEAU — lister() une page (≤ 500)              885 ms (médiane  914)    ← borné (~×18), ne croît plus
+  /dossiers (187)
+    ANCIEN  — tous les résumés (coût de revient)     618 ms (médiane  743)    ← O(N), le revient de chaque dossier
+    NOUVEAU — lister() une page (≤ 500)               37 ms (médiane   37)    ← borné (~×17), ne croît plus
+
+/ordres : le gain vient des blocages (une requête par ordre : « sera refusé… ») qui ne sont plus
+calculés que pour la page et les brouillons de la période ; le moteur de consommation reste global
+(partagé liste + aperçu). /dossiers : le coût de revient par dossier (calcul.revient_dossier) n'est
+plus assemblé que pour la page ; les sommes du pied et des indicateurs sont un agrégat O(N) dédié
+exposé par /dossiers/apercu (comme le veut V4 § 6). Au volume de service réel, les chiffres sont
+identiques (essais verts, recherche SQL prouvée équivalente à l'ancienne) : aucune régression.
+Reste /commandes (152), non paginée : sa recherche porte sur l'état de livraison calculé par le
+moteur, non reproductible en SQL (docs/lots/PAGINATION3.md § 3).
