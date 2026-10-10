@@ -95,6 +95,24 @@ export function debutCompte(r: Pick<PlanEtRealise, 'mois' | 'debut_service'>): n
   return i < 0 ? r.mois.length : i
 }
 
+/**
+ * Le rang du premier mois à afficher (affichage seulement, l'écart garde `debutCompte`).
+ *
+ * Tant qu'un mois est AVANT le mois en cours (le dernier de la série) et que toutes les
+ * qualités y ont plan = 0 et réalisé = 0, on le masque. On s'arrête au premier mois qui
+ * porte une donnée, ou au mois en cours : celui-ci et les suivants ne sont jamais masqués.
+ * Sur la base neuve l'historique vide d'avant le démarrage disparaît ; avec un historique,
+ * le premier mois non vide ramène toute la série.
+ */
+export function debutAffiche(r: Pick<PlanEtRealise, 'mois' | 'lignes'>): number {
+  const dernier = r.mois.length - 1
+  let i = 0
+  while (i < dernier && r.lignes.every((x) => !(x.plan[i] ?? 0) && !(x.realise[i] ?? 0))) {
+    i++
+  }
+  return Math.max(0, i)
+}
+
 /** L'écart des mois clos, toutes qualités : (tissé − prévu) ÷ prévu, ou `null`. */
 export function ecartClos(r: PlanEtRealise): {
   ecart: number | null

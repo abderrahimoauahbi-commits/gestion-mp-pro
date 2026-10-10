@@ -8,6 +8,7 @@ import realise from './essais/realise.json'
 import { prorata } from './IndicateursProduction'
 import { teinteMois } from './OngletRealise'
 import {
+  debutAffiche,
   debutCompte,
   depuisM2,
   ecartClos,
@@ -18,6 +19,7 @@ import {
   saisieDe,
   type PlanEtRealise,
   type QualitePlan,
+  type RealiseQualite,
 } from './plan'
 
 const q = (p: Partial<QualitePlan> = {}) =>
@@ -90,5 +92,49 @@ describe('plan et réalisé', () => {
   it('la part du mois écoulée', () => {
     expect(prorata('2026-10-15')).toBeCloseTo(15 / 31)
     expect(prorata('2026-02-28')).toBe(1)
+  })
+})
+
+describe('mois affichés (masquage des mois vides d’avant)', () => {
+  const mois = (n: number) => Array.from({ length: n }, (_, i) => `2026-${String(i + 1).padStart(2, '0')}-01`)
+  const ligne = (plan: number[], realise: number[]): RealiseQualite =>
+    ({ qualite: 'Q', plan, realise, total_plan: 0, total_realise: 0, ecart: null }) as RealiseQualite
+  const faire = (plans: number[][], realises: number[][]): PlanEtRealise =>
+    ({
+      mois: mois(plans[0]!.length),
+      mois_clos: plans[0]!.length - 1,
+      lignes: plans.map((p, k) => ligne(p, realises[k]!)),
+    }) as PlanEtRealise
+
+  it('masque les mois d’avant vides pour toutes les qualités et s’arrête au premier mois avec donnée', () => {
+    // Base d'essai : la première donnée (toutes qualités confondues) est au mois 10.
+    expect(debutAffiche(realise as PlanEtRealise)).toBe(10)
+    // Le premier mois non vide ramène toute la série depuis ce mois.
+    const r = faire(
+      [
+        [0, 0, 5, 0],
+        [0, 0, 0, 7],
+      ],
+      [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+      ],
+    )
+    expect(debutAffiche(r)).toBe(2)
+  })
+
+  it('tout vide avant le mois en cours : on commence au mois en cours, jamais au-delà', () => {
+    const r = faire([[0, 0, 0, 3]], [[0, 0, 0, 0]])
+    expect(debutAffiche(r)).toBe(3) // dernier index = mois en cours
+  })
+
+  it('ne masque jamais le mois en cours même s’il est vide', () => {
+    const r = faire([[0, 0, 0, 0]], [[0, 0, 0, 0]])
+    expect(debutAffiche(r)).toBe(3)
+  })
+
+  it('un historique dès le premier mois ne masque rien', () => {
+    const r = faire([[2, 0, 0, 3]], [[1, 0, 0, 0]])
+    expect(debutAffiche(r)).toBe(0)
   })
 })

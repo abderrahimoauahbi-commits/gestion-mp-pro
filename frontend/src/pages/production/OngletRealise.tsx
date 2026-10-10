@@ -23,7 +23,14 @@ import { Double } from '../stock/cellules'
 import stock from '../stock/stock.module.css'
 import { VUES } from './OngletGlissant'
 import styles from './production.module.css'
-import { debutCompte, somme, tonEcartPlan, type PlanEtRealise, type RealiseQualite } from './plan'
+import {
+  debutAffiche,
+  debutCompte,
+  somme,
+  tonEcartPlan,
+  type PlanEtRealise,
+  type RealiseQualite,
+} from './plan'
 
 const SEUIL = 0.1
 
@@ -43,30 +50,35 @@ export function teinteMois(
 function colonnes(r: PlanEtRealise): Colonne<RealiseQualite>[] {
   const debut = debutCompte(r)
   const clos = r.mois_clos
-  const mois: Colonne<RealiseQualite>[] = r.mois.map((m, i) => ({
-    cle: `m${i}`,
-    titre: `${moisCourt(m)}${i >= clos ? ' (en cours)' : i < debut ? ' (non compté)' : ''}`,
-    aide:
-      i < debut
-        ? 'Avant la mise en service : hors écart'
-        : 'Tissé, et dessous le prévu du plan en vigueur ce mois-là',
-    droite: true,
-    triable: false,
-    valeur: (x) => x.realise[i] ?? null,
-    rendu: (x) => {
-      const t = teinteMois(x.plan[i] ?? 0, x.realise[i] ?? 0, i, debut, clos)
-      return (
-        <Double
-          haut={
-            <span className={classes(t === 'bas' && styles.bas, t === 'haut' && styles.haut)}>
-              {x.realise[i] ? nombre(x.realise[i]) : VIDE}
-            </span>
-          }
-          bas={`prévu ${nombre(x.plan[i] ?? 0)}`}
-        />
-      )
-    },
-  }))
+  const affiche = debutAffiche(r)
+  // Masquage d'affichage : on filtre les colonnes par leur index `i` (les données
+  // restent lues en `realise[i]`/`plan[i]`), sans jamais ré-indexer les tableaux.
+  const mois: Colonne<RealiseQualite>[] = r.mois
+    .map((m, i) => ({
+      cle: `m${i}`,
+      titre: `${moisCourt(m)}${i >= clos ? ' (en cours)' : i < debut ? ' (non compté)' : ''}`,
+      aide:
+        i < debut
+          ? 'Avant la mise en service : hors écart'
+          : 'Tissé, et dessous le prévu du plan en vigueur ce mois-là',
+      droite: true,
+      triable: false,
+      valeur: (x: RealiseQualite) => x.realise[i] ?? null,
+      rendu: (x: RealiseQualite) => {
+        const t = teinteMois(x.plan[i] ?? 0, x.realise[i] ?? 0, i, debut, clos)
+        return (
+          <Double
+            haut={
+              <span className={classes(t === 'bas' && styles.bas, t === 'haut' && styles.haut)}>
+                {x.realise[i] ? nombre(x.realise[i]) : VIDE}
+              </span>
+            }
+            bas={`prévu ${nombre(x.plan[i] ?? 0)}`}
+          />
+        )
+      },
+    }))
+    .filter((_, i) => i >= affiche)
   return [
     {
       cle: 'qualite',
@@ -98,13 +110,16 @@ function colonnes(r: PlanEtRealise): Colonne<RealiseQualite>[] {
 
 function GraphiqueRealise({ realise, choisie }: { realise: PlanEtRealise; choisie: string }) {
   const focus = realise.lignes.find((x) => x.qualite === choisie)
+  const affiche = debutAffiche(realise)
+  // Même début que le tableau : on garde les mois d'index `i >= affiche`.
+  const indices = realise.mois.map((_, i) => i).filter((i) => i >= affiche)
   const serie = (f: (x: RealiseQualite) => readonly number[]) =>
-    realise.mois.map((_, i) => (focus ? (f(focus)[i] ?? 0) : somme(realise.lignes.map((x) => f(x)[i] ?? 0))))
+    indices.map((i) => (focus ? (f(focus)[i] ?? 0) : somme(realise.lignes.map((x) => f(x)[i] ?? 0))))
   return (
     <div className={styles.graphique}>
       <Barres
         libelle={focus ? `Plan et tissé de ${focus.qualite}` : 'Plan et tissé, toutes les qualités'}
-        etiquettes={realise.mois.map((m) => moisCourt(m))}
+        etiquettes={indices.map((i) => moisCourt(realise.mois[i] ?? ''))}
         series={[
           { nom: 'Plan', unite: 'm²', valeurs: serie((x) => x.plan) },
           { nom: 'Tissé', unite: 'm²', valeurs: serie((x) => x.realise) },
