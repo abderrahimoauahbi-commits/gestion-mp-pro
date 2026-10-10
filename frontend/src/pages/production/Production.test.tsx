@@ -135,6 +135,20 @@ describe('Production › Besoins matière', () => {
     const ligne = besoins.lignes.find((x) => x.matiere_id === 1)
     expect(pied.at(-1)).toBe(Math.round(ligne?.total ?? 0))
   })
+
+  it('filtrer par qualité : la quantité devient la consommation de cette seule qualité', async () => {
+    servir('direction')
+    monterApp('/production?onglet=besoins')
+    const ref = 'COTON CHAINE 12/6' // tirée par ATLAS (440,64) et SAHARA (220,32) → total 660,96
+    const tableau = await screen.findByRole('table', { name: 'Besoins matière' })
+    expect(within(tableau).getByText(ref).closest('tr')?.textContent).toContain('660,96')
+
+    await userEvent.selectOptions(screen.getByLabelText('Qualité'), 'ATLAS')
+    const ligne = within(tableau).getByText(ref).closest('tr')!
+    const cellules = [...ligne.querySelectorAll('td')].map((td) => lire(td.textContent))
+    expect(cellules.some((v) => Math.abs(v - 440.64) < 0.01)).toBe(true) // la part d'ATLAS
+    expect(cellules.some((v) => Math.abs(v - 660.96) < 0.01)).toBe(false) // plus le total de toutes
+  })
 })
 
 describe('Production › Plan et réalisé', () => {

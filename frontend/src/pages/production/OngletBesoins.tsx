@@ -180,20 +180,35 @@ const explication = (b: BesoinsDetailles, lecture: Lecture) =>
       : `Retenu par le plan d’achat : le besoin du plan corrigé par le rapport entre le consommé et le prévu des derniers mois clos (fenêtre de ${nombre(b.fenetre_realisation_jours)} jours, entre × 0,5 et × 1,5).`
   } Cliquer sur une référence pour voir les qualités qui la tirent.`
 
+/**
+ * La ligne vue à travers une qualité : le besoin (mois et total, plan comme retenu) se réduit à
+ * la consommation de CETTE qualité ; le retenu garde la part mensuelle de la qualité dans le plan.
+ * Le stock reste celui de la matière (disponible, couverture, à commander servent toutes les
+ * qualités). `null` si la qualité ne tire pas cette matière.
+ */
+function parQualite(x: BesoinMatiere, qualite: string): BesoinMatiere | null {
+  const q = x.qualites.find((q) => q.qualite === qualite)
+  if (!q) return null
+  const retenu = x.kg.map((k, i) => (k > 0 ? ((x.retenu[i] ?? 0) * (q.kg[i] ?? 0)) / k : 0))
+  return {
+    ...x,
+    kg: q.kg,
+    total: q.total,
+    retenu,
+    total_retenu: retenu.reduce((s, v) => s + v, 0),
+    qualites: [q],
+  }
+}
+
 /** Les lignes affichées : avec besoin (sauf « tous »), de la qualité choisie, les plus lourdes d'abord. */
 function useLignes(besoins: BesoinsDetailles, lecture: Lecture, table: EtatTable) {
   const { tous, qualite } = table.choix.valeurs
-  return useMemo(
-    () =>
-      besoins.lignes
-        .filter(
-          (x) =>
-            (tous === '1' || x.total > 0 || x.total_retenu > 0) &&
-            (!qualite || x.qualites.some((q) => q.qualite === qualite)),
-        )
-        .sort((a, b) => totalDe(b, lecture) - totalDe(a, lecture)),
-    [besoins.lignes, tous, qualite, lecture],
-  )
+  return useMemo(() => {
+    const vues = qualite ? besoins.lignes.flatMap((x) => parQualite(x, qualite) ?? []) : besoins.lignes
+    return vues
+      .filter((x) => tous === '1' || x.total > 0 || x.total_retenu > 0)
+      .sort((a, b) => totalDe(b, lecture) - totalDe(a, lecture))
+  }, [besoins.lignes, tous, qualite, lecture])
 }
 
 function Titre({ lecture, onLecture }: { lecture: Lecture; onLecture: (l: Lecture) => void }) {
