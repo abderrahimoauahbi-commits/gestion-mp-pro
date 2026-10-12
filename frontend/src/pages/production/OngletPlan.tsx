@@ -227,7 +227,7 @@ function lignesPlan(plan: PlanProduction, brouillon: BrouillonPlan, params: URLS
 const VIDE_PLAN = 'Aucune qualité : créez-les dans l’écran Qualités et recettes.'
 
 const sousPlan = (plan: PlanProduction, mode: ModePlan, modifiable: boolean) =>
-  `${mode === 'coef' ? 'Un coefficient de 1,2 en janvier veut dire « 20 % de plus que la base en janvier ».' : 'En m² par mois, la base devient la moyenne des douze mois et les coefficients en découlent.'} Le plan glissant lit les mois dans l’ordre des mois à venir${plan.croissance_annuelle ? `, avec la croissance annuelle de ${nombre(plan.croissance_annuelle * 100, 1)} %` : ''}.${modifiable ? ' Une ligne modifiée reste marquée tant qu’elle n’est pas enregistrée.' : ' Lecture seule : seule la direction modifie le plan.'}`
+  `${mode === 'coef' ? 'Un coefficient de 1,2 en janvier veut dire « 20 % de plus que la base en janvier ».' : 'En m² par mois, les m² d’un mois donnent son coefficient (m² ÷ base) ; la base ne change que si vous la saisissez.'} Le plan glissant lit les mois dans l’ordre des mois à venir${plan.croissance_annuelle ? `, avec la croissance annuelle de ${nombre(plan.croissance_annuelle * 100, 1)} %` : ''}.${modifiable ? ' Une ligne modifiée reste marquée tant qu’elle n’est pas enregistrée.' : ' Lecture seule : seule la direction modifie le plan.'}`
 
 export function OngletPlan({
   plan,

@@ -1,7 +1,8 @@
 /**
  * Le plan de production à la frappe (`VoletPlan` de Gestion MP) : une qualité se planifie par une
  * base mensuelle (un mois ordinaire) et douze coefficients de saisonnalité ; taper les m² d'un mois
- * fait de la base la moyenne des douze mois, et les coefficients en découlent. Le serveur refuse un
+ * en donne le coefficient (m² ÷ base), taper un coefficient en donne les m² : **la base ne change
+ * jamais d'elle-même**, seulement quand on la saisit (décision de Mohamed, 12/10/2026). Le serveur refuse un
  * coefficient hors de 0 à 20 : l'écran ne laisse pas cliquer (P2-12).
  */
 import { arrondi } from '../../lib/format'
@@ -58,13 +59,20 @@ export function egales(a: SaisiePlan, b: SaisiePlan): boolean {
 
 export const horsBornes = (s: SaisiePlan) => s.saisonnalite.some((c) => c < COEF_MIN || c > COEF_MAX)
 
-/** Les m² d'un mois changent : la base devient la moyenne des douze mois (0,01 près), coefficients à 6 décimales. */
+/**
+ * Les m² d'un mois changent : seul le coefficient de ce mois suit (m² ÷ base, 6 décimales) ; la
+ * base et les autres mois ne bougent pas. Sans base, les m² ne donnent pas de coefficient : rien
+ * ne change (l'écran grise alors la cellule, `SANS_BASE`).
+ */
 export function depuisM2(s: SaisiePlan, mois: number, m2: number): SaisiePlan {
-  const valeurs = s.saisonnalite.map((c, i) => (i === mois ? m2 : s.base_mensuelle * c))
-  const base = arrondi(somme(valeurs) / 12, 2)
-  if (base <= 0) return { base_mensuelle: 0, saisonnalite: Array<number>(12).fill(1) }
-  return { base_mensuelle: base, saisonnalite: valeurs.map((v) => arrondi(v / base, 6)) }
+  if (s.base_mensuelle <= 0) return s
+  const coef = arrondi(m2 / s.base_mensuelle, 6)
+  return { ...s, saisonnalite: s.saisonnalite.map((c, i) => (i === mois ? coef : c)) }
 }
+
+/** Pourquoi un mois ne se saisit pas en m² : sans base, pas de coefficient. */
+export const SANS_BASE =
+  'Saisir d’abord la base / mois : les m² d’un mois donnent son coefficient (m² ÷ base).'
 
 /** Le brouillon après une saisie : une ligne revenue à son état enregistré n'est plus modifiée. */
 export function modifier(b: BrouillonPlan, q: QualitePlan, s: SaisiePlan): BrouillonPlan {

@@ -37,15 +37,14 @@ const q = (p: Partial<QualitePlan> = {}) =>
   }) as QualitePlan
 
 describe('plan à la frappe', () => {
-  it('les m² d’un mois font de la base la moyenne des douze mois', () => {
+  it('les m² d’un mois donnent son coefficient : la base et les autres mois ne bougent jamais', () => {
     const s = depuisM2(saisieDe(q()), 0, 220)
-    expect(s.base_mensuelle).toBe(110)
-    expect(s.saisonnalite[0]).toBe(2)
-    expect(s.saisonnalite[1]).toBe(0.909091)
-    expect(depuisM2({ base_mensuelle: 0, saisonnalite: Array(12).fill(0) }, 0, 0)).toEqual({
-      base_mensuelle: 0,
-      saisonnalite: Array(12).fill(1),
-    })
+    expect(s.base_mensuelle).toBe(100)
+    expect(s.saisonnalite[0]).toBe(2.2)
+    expect(s.saisonnalite.slice(1)).toEqual(Array(11).fill(1))
+    // Sans base, les m² ne donnent pas de coefficient : rien ne change.
+    const sans = { base_mensuelle: 0, saisonnalite: Array<number>(12).fill(1) }
+    expect(depuisM2(sans, 0, 500)).toBe(sans)
   })
 
   it('une ligne revenue à son état enregistré n’est plus modifiée ; oublier la retire', () => {

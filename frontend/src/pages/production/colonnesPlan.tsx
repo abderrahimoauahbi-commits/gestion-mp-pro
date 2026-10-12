@@ -1,6 +1,7 @@
 /**
  * Les colonnes du plan de production : la qualité (et, modifiée, « Enregistrer » · « Annuler »),
- * la base mensuelle, les douze mois de l'année (coefficients ou m²), le total de l'année, l'état.
+ * la base mensuelle (saisie seule : les mois ne la changent jamais), les douze mois de l'année
+ * (coefficients ou m², l'un donnant l'autre sur la base), le total de l'année, l'état.
  * Un coefficient hors de 0 à 20 est dit dans sa cellule et grise « Enregistrer » avec la raison.
  */
 import { Link } from 'react-router'
@@ -19,6 +20,7 @@ import {
   etatAuPlan,
   horsBornes,
   MOIS_CALENDAIRES,
+  SANS_BASE,
   somme,
   type QualitePlan,
   type SaisiePlan,
@@ -78,14 +80,17 @@ function Mois({ q, i, c }: { q: QualitePlan; i: number; c: ContextePlan }) {
     )
   if (c.mode === 'm2')
     return (
-      <Nombre
-        className={styles.cellule}
-        valeur={Math.round(m2)}
-        min={0}
-        decimales={0}
-        libelle={`${q.code}, ${MOIS_CALENDAIRES[i]} (m²)`}
-        onChange={(x) => c.modifier(q, depuisM2(v, i, Math.max(0, x ?? 0)))}
-      />
+      <span title={v.base_mensuelle > 0 ? `coefficient ${nombre(coef, 2)}` : SANS_BASE}>
+        <Nombre
+          className={styles.cellule}
+          valeur={Math.round(m2)}
+          min={0}
+          decimales={0}
+          desactive={v.base_mensuelle <= 0}
+          libelle={`${q.code}, ${MOIS_CALENDAIRES[i]} (m²)`}
+          onChange={(x) => c.modifier(q, depuisM2(v, i, Math.max(0, x ?? 0)))}
+        />
+      </span>
     )
   return (
     <Nombre
@@ -127,7 +132,7 @@ function colonnesMois(c: ContextePlan): Colonne<QualitePlan>[] {
 
 function Base({ q, c }: { q: QualitePlan; c: ContextePlan }) {
   const v = c.valeurs(q)
-  if (!c.modifiable || c.mode !== 'coef') return <>{nombre(v.base_mensuelle)}</>
+  if (!c.modifiable) return <>{nombre(v.base_mensuelle)}</>
   return (
     <Nombre
       className={styles.cellule}
@@ -163,8 +168,8 @@ export function colonnesPlan(c: ContextePlan): Colonne<QualitePlan>[] {
     },
     {
       cle: 'base',
-      titre: c.mode === 'm2' ? 'Base (moyenne)' : 'Base / mois (m²)',
-      aide: c.mode === 'm2' ? 'La moyenne des douze mois' : 'Les m² d’un mois ordinaire (coefficient 1)',
+      titre: 'Base / mois (m²)',
+      aide: 'Les m² d’un mois ordinaire (coefficient 1) : ils ne changent que si vous les saisissez',
       droite: true,
       valeur: (q) => c.valeurs(q).base_mensuelle,
       rendu: (q) => <Base q={q} c={c} />,

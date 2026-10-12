@@ -1479,11 +1479,11 @@ figée, pied figé), `Nombre`, `Confirmer`, C (écriture D).
 | Carte « Plan de production — m² par qualité » + Bascule « Coefficients » / « m² par mois » | identique (`?vue=`) | — |
 | Recherche « Qualité, nom… » ; case « Inactives (N) » ; D en saisie : « Tout annuler », « Enregistrer tout (N) » | `Recherche`, `Interrupteur`, `Bouton`s | — |
 | Lignes : actives, + inactives si cochées, + modifiées | identique | — |
-| Colonnes Qualité (code, nom ; D : « Enregistrer » · « Annuler » ; filet bleu si modifiée ; inactive grisée), Base / mois (« m² »/« moyenne »), Janv.…Déc. (« coef. »/« m² », mois courant surligné ; pas 0,05 / 1 ; rouge hors [0 ; 20] « Un coefficient reste entre 0 et 20 »), Total / an (« coef. moyen 1,08 », infobulle), État (« inactive, hors plan », « sans recette », « recette incomplète », « au plan », « pas de plan ») | identiques ; `Badge` État ; « recette incomplète » → lien `/qualites/{id}?onglet=recette` | lien vers la recette |
-| `depuisM2` (base = moyenne arrondie 0,01 ; coef = m² ÷ base, 6 déc. ; base ≤ 0 → 0 et 1) | identique (`lib/production.ts`) | — |
+| Colonnes Qualité (code, nom ; D : « Enregistrer » · « Annuler » ; filet bleu si modifiée ; inactive grisée), Base / mois (« m² », saisissable dans les deux vues), Janv.…Déc. (« coef. »/« m² », mois courant surligné ; pas 0,05 / 1 ; rouge hors [0 ; 20] « Un coefficient reste entre 0 et 20 »), Total / an (« coef. moyen 1,08 », infobulle), État (« inactive, hors plan », « sans recette », « recette incomplète », « au plan », « pas de plan ») | identiques ; `Badge` État ; « recette incomplète » → lien `/qualites/{id}?onglet=recette` | lien vers la recette |
+| `depuisM2` (base = moyenne arrondie 0,01 ; coef = m² ÷ base, 6 déc. ; base ≤ 0 → 0 et 1) | **changé le 12/10/2026 (Mohamed)** : les m² d'un mois donnent son seul coefficient (m² ÷ base, 6 déc.) ; la base ne change jamais d'elle-même ; base ≤ 0 → cellules m² grisées (« Saisir d'abord la base / mois… ») | la base n'est plus la moyenne |
 | Pied « Total (m²) » ; note « qualités actives affichées » | pied de totaux | — |
 | Vides « Aucune qualité ne correspond. » / « Aucune qualité : créez-les dans l'écran Qualités & recettes. » | « … dans l'écran Qualités et recettes. » (lien `/qualites/nouvelle`, D) | P2-22 |
-| Notes (coefficient 1,2 ; m² → base moyenne ; plan glissant + croissance ; filet bleu) | `Note` identiques | — |
+| Notes (coefficient 1,2 ; m² → base moyenne ; plan glissant + croissance ; filet bleu) | `Note` ; en m² : « les m² d'un mois donnent son coefficient (m² ÷ base) ; la base ne change que si vous la saisissez » | — |
 | Lecture (non-D) : valeurs, note « Lecture seule… » | identique | — |
 | Version du plan tracée au journal (passé jugé sur le plan de son époque) | identique ; `Historique` + GET `qualites/{id}/plan/versions` | — |
 
