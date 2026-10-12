@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
@@ -33,6 +33,7 @@ from gestion_mp_pro.services.importations.parties import refus_saisie
 from gestion_mp_pro.services.importations.socle import (
     DIRHAM,
     bons,
+    factures_vives,
     mad,
     noter,
     ouvert,
@@ -96,8 +97,8 @@ def _devise_et_fournisseur(s: Session, e: LigneManuelle, m: Matiere) -> tuple[st
 def saisir(s: Session, qui: audit.Qui, did: int, version: int, e: LigneManuelle) -> Dossier:
     """Une marchandise saisie à la main, comme un stock d'ouverture (R-IMP-31 à 33)."""
     d = ouvert(s, did, version)
-    facture = s.get(Facture, d.facture_id) if d.facture_id else None
-    refus = refus_saisie(d, facture.numero if facture else None)
+    numeros = [f.numero for x in factures_vives(d) if (f := s.get(Facture, x.facture_id))]
+    refus = refus_saisie(d, numeros)
     if refus:
         raise Refus.etat(refus)
     m = _matiere(s, e.matiere_id)
@@ -231,7 +232,7 @@ def cours_des_bons(s: Session, qui: audit.Qui, did: int, version: int) -> Dossie
     return d
 
 
-def _sans_parts_sur(d: Dossier, sortantes: set[int]) -> None:
+def sans_parts_sur(d: Dossier, sortantes: set[int]) -> None:
     """Un frais à répartition figée qui avait une part sur une marchandise sortante la perd
     tout entière : il se répartit de nouveau à la clé de son poste (R-IMP-40)."""
     for frais in d.frais:
@@ -261,7 +262,7 @@ def retirer(s: Session, qui: audit.Qui, did: int, lid: int, version: int) -> Dos
         )
     periode.cout_hors_periode_close(s, d, "retrait d'une marchandise")
     reference = _reference(s, x)
-    _sans_parts_sur(d, {x.id})
+    sans_parts_sur(d, {x.id})
     s.flush()
     d.lignes.remove(x)
     s.flush()
@@ -269,9 +270,30 @@ def retirer(s: Session, qui: audit.Qui, did: int, lid: int, version: int) -> Dos
     return d
 
 
+def _facture_sortie(s: Session, d: Dossier, r: Reception) -> str:
+    """Si la réception détachée était tout ce que sa facture avait apporté au dossier, la
+    facture le quitte et attend de nouveau (décision du 12/10/2026) : « · facture X sortie »."""
+    lien = next((x for x in factures_vives(d) if x.facture_id == r.facture_id), None)
+    if lien is None:
+        return ""
+    restantes = s.scalar(
+        select(func.count())
+        .select_from(DossierLigne)
+        .join(ReceptionLigne, ReceptionLigne.id == DossierLigne.reception_ligne_id)
+        .join(Reception, Reception.id == ReceptionLigne.reception_id)
+        .where(DossierLigne.dossier_id == d.id, Reception.facture_id == lien.facture_id)
+    )
+    if restantes:
+        return ""
+    d.factures.remove(lien)
+    s.flush()
+    f = s.get(Facture, lien.facture_id)
+    return f" · facture {f.numero if f else lien.facture_id} sortie du dossier"
+
+
 def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: int) -> Dossier:
     """Détache toute une réception du dossier : sa marchandise attend de nouveau son dossier,
-    les frais restent ici (R-IMP-39, 40)."""
+    les frais restent ici (R-IMP-39, 40) ; la facture qui n'y a plus rien le quitte."""
     d = ouvert(s, did, version)
     r = s.get(Reception, reception_id)
     if r is None:
@@ -289,7 +311,7 @@ def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: i
             "sinon ils sortiraient avec elle."
         )
     periode.cout_hors_periode_close(s, d, "détachement d'une réception")
-    _sans_parts_sur(d, sortants)
+    sans_parts_sur(d, sortants)
     s.flush()
     for x in sortantes:
         d.lignes.remove(x)
@@ -298,6 +320,6 @@ def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: i
     detail = (
         f"{d.numero} · {r.numero} · {len(sortantes)} ligne(s) · {len(d.frais)} frais gardés "
         f"({mad(total)})"
-    )
+    ) + _facture_sortie(s, d, r)
     noter(s, qui, d, "réception détachée", detail)
     return d

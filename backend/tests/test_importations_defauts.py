@@ -229,15 +229,20 @@ def test_second_camion_local_visible_pour_son_dossier(achats: TestClient) -> Non
 
 def test_echeancier_dossier_garde_sa_facture_apres_detachement(achats: TestClient) -> None:
     """Hérité : test_defauts_b::test_echeancier_dossier_garde_sa_facture_apres_detachement (B-07)
-    — la facture reste à payer, sa marchandise détachée (« détachée », sans rien d'apporté)."""
+    — amendé par la décision de Mohamed du 12/10/2026 (lot PLUSIEURS-FACTURES) : la facture dont
+    on détache la dernière réception **quitte** le dossier et attend de nouveau son dossier ; elle
+    ne se perd pas pour autant : elle reste à payer dans l'échéancier général, et revient dans
+    « En attente de dossier »."""
     imp = Import.nouveau()
     rec = imp.recevoir(achats, "DB-DET", [("FIL", "DBD-1", 300, 2)], montant=600)
     d = ouvrir(achats, imp.f("DB-DET"))
     assert [x["quoi"] for x in d["echeancier"]] == [f"Facture {imp.f('DB-DET')}"]
     d = geste(achats, d, "detacher", reception_id=rec["id"])
-    assert d["nb_lignes"] == 0 and d["facture"]["numero"] == imp.f("DB-DET")
-    (e,) = d["echeancier"]
-    assert e["quoi"] == f"Facture {imp.f('DB-DET')}" and e["detachee"] and e["montant"] == 600
+    assert d["nb_lignes"] == 0 and d["factures"] == [] and d["echeancier"] == []
+    attente = ok(achats.get("/api/dossiers/a-rattacher"))["factures"]
+    (f,) = [x for x in attente if x["numero"] == imp.f("DB-DET")]
+    assert f["dossier_id"] is None and f["lignes"] == 1
+    assert imp.f("DB-DET") in str(ok(achats.get("/api/echeancier")))
 
 
 def test_rouvrir_journalise_les_cours_figes_retires(achats: TestClient) -> None:

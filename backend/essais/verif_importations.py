@@ -144,25 +144,58 @@ def _marchandises(a: Acces, r: Releve, d: dict[str, Any], dossier: list[dict[str
     )
 
 
+APPORTEES = (
+    "SELECT l.dossier_id, rc.facture_id, l.devise, l.valeur_devise FROM dossier_ligne l "
+    "JOIN reception_ligne rl ON rl.id = l.reception_ligne_id "
+    "JOIN reception rc ON rc.id = rl.reception_id WHERE rc.facture_id IS NOT NULL"
+)
+"""Ce que chaque facture a apporté à chaque dossier (un dossier porte plusieurs factures)."""
+
+
 def _ecarts_de_facture(a: Acces, r: Releve) -> None:
-    """L'écart de facture : montant − Σ valeur en devise, si tout est dans sa devise."""
+    """L'écart de chaque facture d'un dossier : montant − Σ valeur en devise de ce qu'elle a
+    apporté, si tout est dans sa devise."""
+    devises = {fid: dev for fid, dev in a.sql("SELECT id, devise FROM facture")}
     recu = somme_par(
-        a.sql(
-            "SELECT l.dossier_id, l.valeur_devise FROM dossier_ligne l JOIN dossier d "
-            "ON d.id = l.dossier_id JOIN facture f ON f.id = d.facture_id WHERE l.devise = f.devise"
-        )
+        ((did, fid, v) for did, fid, dev, v in a.sql(APPORTEES) if dev == devises.get(fid)),
+        cle=lambda x: (x[0], x[1]),
     )
     for d in a.get("/dossiers", limite=5000)["elements"]:
-        e = d.get("ecart_facture")
-        if d["statut"] == "annule" or not e:
+        if d["statut"] == "annule":
             continue
-        r.comparer(NOM_TVA, d["numero"] + " (reçu facturé)", e["recu"], recu.get(d["id"], 0.0))
-        r.comparer(
-            NOM_TVA,
-            d["numero"] + " (écart de facture)",
-            e["ecart"],
-            e["montant"] - recu.get(d["id"], 0.0),
-        )
+        for f in d["factures"]:
+            e = f.get("ecart")
+            if not e:
+                continue
+            sujet, attendu = f"{d['numero']} · {f['numero']}", recu.get((d["id"], f["id"]), 0.0)
+            r.comparer(NOM_TVA, sujet + " (reçu facturé)", e["recu"], attendu)
+            r.comparer(NOM_TVA, sujet + " (écart de facture)", e["ecart"], e["montant"] - attendu)
+
+
+def _c36(a: Acces, tol_fac: float) -> int:
+    """C36 recompté facture par facture (décision du 12/10/2026 : un dossier porte plusieurs
+    factures) : sans montant (le dossier a des marchandises), marchandise apportée dans une autre
+    devise, ou écart au-delà de la tolérance avec ce qu'elle a apporté."""
+    pleins = {did for (did,) in a.sql("SELECT DISTINCT dossier_id FROM dossier_ligne")}
+    apportees: dict[tuple[int, int], list[tuple[str, float]]] = defaultdict(list)
+    for did, fid, dev, valeur in a.sql(APPORTEES):
+        apportees[(did, fid)].append((dev, valeur))
+    c36 = 0
+    for did, fid, montant, devise in a.sql(
+        "SELECT x.dossier_id, x.facture_id, f.montant, f.devise FROM dossier_facture x "
+        "JOIN dossier d ON d.id = x.dossier_id JOIN facture f ON f.id = x.facture_id "
+        "WHERE x.liberee_le IS NULL AND d.statut <> 'annule'"
+    ):
+        recues = apportees.get((did, fid), [])
+        if did in pleins and not montant:
+            c36 += 1  # facture sans montant : à vérifier
+        elif recues and any(d != devise for d, _ in recues):
+            c36 += 1  # marchandise apportée dans une autre devise : ne se rapproche pas
+        elif recues:
+            recu = sum(v for _, v in recues)
+            ecart = montant - recu
+            c36 += abs(ecart) > 0.005 and abs(ecart / recu if recu else 1.0) > tol_fac
+    return c36
 
 
 def _controles(
@@ -177,33 +210,14 @@ def _controles(
     se disent aussi), recomptés sur les dossiers non annulés."""
     tol_tva = float(reglages.get("toler_tva_import", 0.05))
     tol_fac = float(reglages.get("toler_facture_import", 0.02))
-    c29 = c36 = 0
-    factures = {
-        did: (m, dev)
-        for did, m, dev in a.sql(
-            "SELECT d.id, f.montant, f.devise FROM dossier d JOIN facture f ON f.id = d.facture_id "
-            "WHERE d.statut <> 'annule'"
-        )
-    }
-    devises: dict[int, list[tuple[str, float]]] = defaultdict(list)
-    for did, dev, valeur in a.sql("SELECT dossier_id, devise, valeur_devise FROM dossier_ligne"):
-        devises[did].append((dev, valeur))
+    c29 = 0
     for (did,) in a.sql("SELECT id FROM dossier WHERE statut <> 'annule'"):
         dossier, siens = lignes.get(did, []), [x for x in frais if x[0] == did]
         saisie = sum(m for _, _, nature, _, m in siens if nature == "tva")
         if dossier and saisie:  # sans TVA saisie, rien à rapprocher
             attendue = _attendue(dossier, siens, reglages)
             c29 += abs(saisie - attendue) > abs(attendue) * tol_tva
-        if did not in factures or not devises.get(did):
-            continue
-        montant, devise = factures[did]
-        recues = devises[did]
-        if not montant or any(d != devise for d, _ in recues):
-            c36 += 1  # facture sans montant, marchandise dans une autre devise : à vérifier
-            continue
-        recu = sum(v for _, v in recues)
-        ecart = montant - recu
-        c36 += abs(ecart) > 0.005 and abs(ecart / recu if recu else 1.0) > tol_fac
+    c36 = _c36(a, tol_fac)
     controles = {c["code"]: c["anomalies"] for c in a.get("/controles")["controles"]}
     nom = "Contrôles C01–C38 recomptés en SQL (nombre d'anomalies)"
     r.juger(

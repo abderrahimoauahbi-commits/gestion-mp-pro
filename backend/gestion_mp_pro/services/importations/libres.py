@@ -1,5 +1,6 @@
 """La marchandise libre (reçue, validée, dans aucun dossier) et les dossiers qui portent une
-facture (REGLES R-IMP-15, R-IMP-18, R-IMP-28).
+facture (REGLES R-IMP-15, R-IMP-18, R-IMP-28) : une facture n'est que dans un seul dossier
+vivant (`dossier_facture`), un dossier en porte une ou plusieurs.
 """
 
 from __future__ import annotations
@@ -10,7 +11,13 @@ from collections.abc import Iterable
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gestion_mp_pro.modeles import Dossier, DossierLigne, Reception, ReceptionLigne
+from gestion_mp_pro.modeles import (
+    Dossier,
+    DossierFacture,
+    DossierLigne,
+    Reception,
+    ReceptionLigne,
+)
 from gestion_mp_pro.modeles.enums import QualiteReception, StatutDocument, StatutDossier
 
 
@@ -56,8 +63,10 @@ def porteurs(s: Session, factures: Iterable[int] | None = None) -> Porteurs:
     """Pour chaque facture, les dossiers (non annulés) qui la portent : le sien d'abord, puis
     ceux — repris de l'ERP Fil, sans facture — qui en ont une marchandise (R-IMP-18)."""
     vivant = Dossier.statut != StatutDossier.annule
-    siens = select(Dossier.facture_id, Dossier.id, Dossier.numero).where(
-        Dossier.facture_id.is_not(None), vivant
+    siens = (
+        select(DossierFacture.facture_id, Dossier.id, Dossier.numero)
+        .join(Dossier, Dossier.id == DossierFacture.dossier_id)
+        .where(DossierFacture.liberee_le.is_(None), vivant)
     )
     par_lignes = (
         select(Reception.facture_id, Dossier.id, Dossier.numero)
@@ -70,7 +79,7 @@ def porteurs(s: Session, factures: Iterable[int] | None = None) -> Porteurs:
     )
     if factures is not None:
         voulues = set(factures)
-        siens = siens.where(Dossier.facture_id.in_(voulues))
+        siens = siens.where(DossierFacture.facture_id.in_(voulues))
         par_lignes = par_lignes.where(Reception.facture_id.in_(voulues))
     resultat: Porteurs = defaultdict(list)
     for fid, did, numero in [*s.execute(siens), *sorted(s.execute(par_lignes), key=lambda z: z[2])]:
@@ -80,17 +89,17 @@ def porteurs(s: Session, factures: Iterable[int] | None = None) -> Porteurs:
 
 
 def factures_acceptees(s: Session, d: Dossier) -> set[int]:
-    """Les factures dont la suite entre dans ce dossier : la sienne ; pour un dossier repris,
-    celles dont il porte déjà une marchandise ; aucune pour un dossier saisi à la main."""
-    if d.facture_id:
-        return {d.facture_id}
+    """Les factures dont la suite (un second camion) entre dans ce dossier : les siennes, et
+    celles dont il porte déjà une marchandise (un dossier repris) ; aucune pour un dossier
+    saisi à la main."""
+    siennes = {x.facture_id for x in d.factures if x.liberee_le is None}
     ids = [x.reception_ligne_id for x in d.lignes if x.reception_ligne_id]
     if not ids:
-        return set()
+        return siennes
     requete = (
         select(Reception.facture_id)
         .distinct()
         .join(ReceptionLigne, ReceptionLigne.reception_id == Reception.id)
         .where(ReceptionLigne.id.in_(ids), Reception.facture_id.is_not(None))
     )
-    return {x for x in s.scalars(requete) if x is not None}
+    return siennes | {x for x in s.scalars(requete) if x is not None}

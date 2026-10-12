@@ -83,7 +83,7 @@ def test_base_vide_migree_puis_relancee_ne_fait_rien(base_vide: None) -> None:
     assert installation.migrer() == []
     assert not installation.schema_en_retard()
     with moteur().connect() as c:
-        assert len(_tables(c)) == 71
+        assert len(_tables(c)) == 72
         assert installation.semences_manquantes(c) == []
 
 
@@ -104,7 +104,7 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002", "0003", "0004", "0005", "0006"]
+    assert installation.migrer() == ["0002", "0003", "0004", "0005", "0006", "0007"]
     assert not installation.schema_en_retard()
 
 
@@ -336,5 +336,5 @@ def test_schema_conforme_au_document_modele_donnees(capsys: pytest.CaptureFixtur
     code = module.main(["--base", str(moteur().url.render_as_string(hide_password=False))])
     sortie = capsys.readouterr().out
     assert code == 0, sortie
-    assert "71 tables en base, 71 au document" in sortie
+    assert "72 tables en base, 72 au document" in sortie
     assert sortie.count("Écart déclaré") == len(module.ECARTS_DECLARES)

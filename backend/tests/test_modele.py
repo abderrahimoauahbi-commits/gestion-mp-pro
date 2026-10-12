@@ -33,9 +33,9 @@ magasin, metier, metier_etage, montage, montage_evenement, poste_frais, motif, l
 mouvement, commande, commande_ligne, commande_version, commande_version_ligne, commande_decision,
 facture, reception, reception_ligne, ordre, ordre_qualite, ordre_ligne, ordre_prevu, operation,
 operation_ligne, inventaire, inventaire_critere, inventaire_matiere, inventaire_ligne, dossier,
-dossier_ligne, dossier_frais, dossier_frais_part, reclamation, signalement, piece_jointe,
-indicateur_jour, reprise_correspondance, reprise_execution, alembic_version"""
-"""MODELE-DONNEES § 11 : les 71 tables."""
+dossier_facture, dossier_ligne, dossier_frais, dossier_frais_part, reclamation, signalement,
+piece_jointe, indicateur_jour, reprise_correspondance, reprise_execution, alembic_version"""
+"""MODELE-DONNEES § 11 : les 72 tables (`dossier_facture` : révision 0007)."""
 
 
 @pytest.fixture
@@ -59,9 +59,9 @@ def _un(c: Connection, sql: str, **parametres: Any) -> Any:
     return c.execute(text(sql), parametres).scalar()
 
 
-def test_les_71_tables(lien: Connection) -> None:
+def test_les_72_tables(lien: Connection) -> None:
     attendues = {t.strip() for t in TABLES_DU_DOCUMENT.split(",")}
-    assert len(attendues) == 71
+    assert len(attendues) == 72
     assert set(modeles.metadata.tables) == attendues - {"alembic_version"}
     en_base = set(
         lien.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")).scalars()
@@ -280,14 +280,17 @@ def test_un_inventaire_ouvert_par_magasin(monde: tuple[Connection, Ids]) -> None
     assert _refus(c, "inventaire", meme) is None
 
 
-def test_un_dossier_par_facture_sauf_annule(monde: tuple[Connection, Ids]) -> None:
+def test_une_facture_dans_un_seul_dossier_sauf_liberee(monde: tuple[Connection, Ids]) -> None:
+    """Lot PLUSIEURS-FACTURES (révision 0007) : un dossier porte plusieurs factures, une facture
+    n'est que dans un seul dossier tant qu'elle n'est pas libérée (dossier annulé)."""
     c, ids = monde
-    second = {"numero": "2/26", "annee": 2026, "rang": 2, "facture_id": ids["facture"]}
-    refus = _refus(c, "dossier", second)
+    autre = inserer(c, "dossier", {"numero": "2/26", "annee": 2026, "rang": 2})
+    second = {"dossier_id": autre, "facture_id": ids["facture"]}
+    refus = _refus(c, "dossier_facture", second)
     assert isinstance(refus, errors.UniqueViolation)
     assert refus.diag.constraint_name == "uq_dossier_facture"
-    c.execute(text("UPDATE dossier SET statut = 'annule', annule_le = now()"))
-    assert _refus(c, "dossier", second) is None
+    c.execute(text("UPDATE dossier_facture SET liberee_le = now()"))
+    assert _refus(c, "dossier_facture", second) is None
 
 
 def test_une_qualite_une_fois_par_ordre(monde: tuple[Connection, Ids]) -> None:

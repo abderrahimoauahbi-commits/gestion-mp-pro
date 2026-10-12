@@ -36,7 +36,7 @@ COLONNES_DOSSIERS = (
     Colonne("Arrivée", lambda d: d.date_arrivee, "date"),
     Colonne("Statut", lambda d: STATUTS.get(d.statut, d.statut)),
     Colonne("Clos le", lambda d: d.clos_le, "horodatage"),
-    Colonne("Factures", lambda d: " · ".join(d.factures)),
+    Colonne("Factures", lambda d: " · ".join(f.numero for f in d.factures)),
     Colonne("Réceptions", lambda d: " · ".join(x.numero for x in d.receptions)),
     Colonne("Poids (kg)", lambda d: d.poids, "kg"),
     _m("Achat MAD", lambda d: d.marchandise_mad),

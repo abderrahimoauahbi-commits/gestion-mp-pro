@@ -133,7 +133,7 @@ def _verifier_dossier(m: Monde, d: dict[str, Any]) -> None:
         "droits attendus (2,5 % de la valeur douane)", d["droits_attendus_mad"], DOUANE * 0.025, MAD
     )
     v.egal("droits : pas d'écart (rendu nul)", d["droits_ecart_mad"], None)
-    e = d["ecart_facture"] or {}
+    e = (d["factures"][0]["ecart"] if d["factures"] else None) or {}
     v.egal("écart de facture (USD)", e.get("ecart"), 720.0, MAD)
     v.egal("écart de facture (part)", e.get("part"), 720 / 7670, 1e-9)
     v.egal("écart de facture hors tolérance", e.get("hors_tolerance"), True)

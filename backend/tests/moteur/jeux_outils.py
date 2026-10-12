@@ -23,7 +23,7 @@ from gestion_mp_pro.calcul.constantes import (
     LIBELLES_GESTION_MP,
     LIBELLES_STATUT,
 )
-from gestion_mp_pro.calcul.modele import Donnees
+from gestion_mp_pro.calcul.modele import Donnees, DossierImport
 
 JEUX = Path(__file__).parent / "jeux"
 
@@ -77,9 +77,31 @@ def depuis_json(v: Any, annotation: Any) -> Any:
     return lecteur(v, *typing.get_args(annotation)) if lecteur else v
 
 
+FACTURE_DE_GESTION_MP = ("facture", "facture_montant", "facture_devise")
+"""Gestion MP portait **une** facture par dossier, rapprochée de toutes ses marchandises."""
+
+
+def _factures_de_gestion_mp(v: dict[str, Any]) -> dict[str, Any]:
+    """Un dossier de Gestion MP lu dans la forme PRO (lot PLUSIEURS-FACTURES, décision du
+    12/10/2026) : sa facture devient la seule de `factures`, et elle a apporté toutes ses
+    marchandises — exactement ce que Gestion MP rapprochait (C36, `ecart_facture`)."""
+    if "factures" in v or not any(v.get(k) for k in FACTURE_DE_GESTION_MP):
+        return v
+    facture = {
+        "numero": v.get("facture") or "",
+        "montant": v.get("facture_montant") or 0.0,
+        "devise": v.get("facture_devise") or "",
+        "lignes": [x["id"] for x in v.get("lignes", [])],
+    }
+    return v | {"factures": [facture]}
+
+
 def relire_dataclass(cls: type, v: dict[str, Any]) -> Any:
     """Une dataclass PRO reconstruite champ par champ ; les champs que PRO n'a plus (le
-    réglage `methode`) sont ignorés, les champs hors constructeur aussi."""
+    réglage `methode`, la facture unique d'un dossier) sont ignorés, les champs hors
+    constructeur aussi."""
+    if cls is DossierImport:
+        v = _factures_de_gestion_mp(v)
     hints = _annotations(cls)
     champs = [f for f in dataclasses.fields(cls) if f.init and f.name in v]  # type: ignore[arg-type]
     return cls(**{f.name: depuis_json(v[f.name], hints[f.name]) for f in champs})

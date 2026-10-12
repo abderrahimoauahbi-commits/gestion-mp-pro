@@ -22,8 +22,9 @@ def devises_employees(donnees: Donnees) -> dict[str, str]:
         for marchandise in dossier.lignes:
             if marchandise.devise:
                 employees.setdefault(marchandise.devise, f"dossier {dossier.numero}")
-        if dossier.facture_devise:
-            employees.setdefault(dossier.facture_devise, f"dossier {dossier.numero}")
+        for facture in dossier.factures:
+            if facture.devise:
+                employees.setdefault(facture.devise, f"dossier {dossier.numero}")
     return employees
 
 

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.modeles import (
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierFraisPart,
     DossierLigne,
@@ -23,6 +24,8 @@ from gestion_mp_pro.modeles import (
     OrdreQualite,
     PosteFrais,
     Qualite,
+    Reception,
+    ReceptionLigne,
 )
 from gestion_mp_pro.modeles.enums import StatutDossier, StatutOrdre
 from gestion_mp_pro.services.chargeur.contexte import Noms, a_l_usine, nombre
@@ -108,15 +111,43 @@ def _frais(s: Session) -> dict[int, list[c.ChargeImport]]:
     return resultat
 
 
+def _factures(s: Session) -> dict[int, list[c.FactureImport]]:
+    """Les factures de chaque dossier (une ou plusieurs, la première ajoutée d'abord), chacune
+    avec les marchandises qu'elle a apportées (celles de ses réceptions)."""
+    apportees: dict[tuple[int, int | None], list[int]] = defaultdict(list)
+    for did, lid, fid in s.execute(
+        select(DossierLigne.dossier_id, DossierLigne.id, Reception.facture_id)
+        .join(ReceptionLigne, ReceptionLigne.id == DossierLigne.reception_ligne_id)
+        .join(Reception, Reception.id == ReceptionLigne.reception_id)
+        .where(Reception.facture_id.is_not(None))
+        .order_by(DossierLigne.id)
+    ):
+        apportees[(did, fid)].append(lid)
+    resultat: dict[int, list[c.FactureImport]] = defaultdict(list)
+    requete = (
+        select(DossierFacture.dossier_id, Facture)
+        .join(Facture, Facture.id == DossierFacture.facture_id)
+        .where(DossierFacture.liberee_le.is_(None))
+        .order_by(DossierFacture.dossier_id, DossierFacture.ajoutee_le, Facture.id)
+    )
+    for did, f in s.execute(requete):
+        resultat[did].append(
+            c.FactureImport(
+                numero=f.numero,
+                montant=nombre(f.montant),
+                devise=f.devise,
+                lignes=apportees.get((did, f.id), []),
+            )
+        )
+    return resultat
+
+
 def dossiers(s: Session, noms: Noms) -> list[c.DossierImport]:
     """Les dossiers non annulés, dans l'ordre de leurs identifiants."""
-    factures = {f.id: f for f in s.scalars(select(Facture).where(Facture.id.in_(
-        select(Dossier.facture_id).where(Dossier.facture_id.is_not(None)))))}  # fmt: skip
-    lignes, frais = _lignes(s, noms), _frais(s)
+    lignes, frais, factures = _lignes(s, noms), _frais(s), _factures(s)
     resultat = []
     requete = select(Dossier).where(Dossier.statut != StatutDossier.annule).order_by(Dossier.id)
     for d in s.scalars(requete):
-        facture = factures.get(d.facture_id) if d.facture_id else None
         resultat.append(
             c.DossierImport(
                 numero=d.numero,
@@ -127,9 +158,7 @@ def dossiers(s: Session, noms: Noms) -> list[c.DossierImport]:
                 commentaire=d.commentaire,
                 lignes=lignes.get(d.id, []),
                 charges=frais.get(d.id, []),
-                facture=facture.numero if facture else "",
-                facture_montant=nombre(facture.montant) if facture else 0.0,
-                facture_devise=facture.devise if facture else "",
+                factures=factures.get(d.id, []),
             )
         )
     return resultat

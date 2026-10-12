@@ -22,7 +22,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
 from gestion_mp_pro.db import fabrique as sessions
-from gestion_mp_pro.modeles import Dossier, DossierFrais
+from gestion_mp_pro.modeles import DossierFacture, DossierFrais
 from gestion_mp_pro.services import factures
 from gestion_mp_pro.services.importations import etats, ouverture
 
@@ -82,7 +82,8 @@ def test_trois_creations_simultanees_un_seul_dossier(
     ]
     assert _ensemble(appels) == [201, 409, 409]
     with sessions()() as s:
-        assert s.scalar(select(func.count()).where(Dossier.facture_id == fid)) == 1
+        vivants = (DossierFacture.facture_id == fid, DossierFacture.liberee_le.is_(None))
+        assert s.scalar(select(func.count()).where(*vivants)) == 1
 
 
 def test_la_course_se_rattrape_par_l_index_unique(
@@ -103,7 +104,7 @@ def test_la_course_se_rattrape_par_l_index_unique(
 
     monkeypatch.setattr(ouverture, "porteurs", pas_encore_vus)
     monkeypatch.setattr(ouverture, "de_la_facture", lambda s, f: [])
-    r = achats.post("/api/dossiers", json={"facture_id": gagnant["facture"]["id"]})
+    r = achats.post("/api/dossiers", json={"facture_id": gagnant["factures"][0]["id"]})
     assert r.status_code == 409 and r.json()["detail"].startswith("Un autre poste vient")
     assert gagnant["numero"] in r.json()["detail"]
 

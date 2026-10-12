@@ -7,10 +7,11 @@ from gestion_mp_pro.calcul.controles.base import Contexte, Ligne, colonne, contr
 from gestion_mp_pro.calcul.importations import (
     ecart_facture,
     lignes_aberrantes,
+    lignes_de_la_facture,
     revient_dossier,
     tva_attendue,
 )
-from gestion_mp_pro.calcul.modele import DossierImport, Parametres
+from gestion_mp_pro.calcul.modele import DossierImport, FactureImport, Parametres
 from gestion_mp_pro.calcul.outils import pourcentage
 
 CENT = 100
@@ -170,27 +171,29 @@ def frais_aberrants(ctx: Contexte) -> tuple[str, list[Ligne]]:
     return libelle, lignes
 
 
-def _facture_ecartee(dossier: DossierImport, parametres: Parametres) -> Ligne | None:
-    """La ligne de C36 pour ce dossier, ou None. Ce qui ne peut pas se rapprocher se dit, au
-    lieu de passer pour conforme."""
-    if dossier.facture and dossier.lignes:
-        if not dossier.facture_montant:
-            return {
-                "dossier": dossier.numero,
-                "facture": dossier.facture,
-                "motif": "montant de la facture non saisi",
-            }
-        autres = sorted(
-            {x.devise or "MAD" for x in dossier.lignes} - {dossier.facture_devise or "MAD"}
-        )
+def _facture_ecartee(
+    dossier: DossierImport, facture: FactureImport, parametres: Parametres
+) -> Ligne | None:
+    """La ligne de C36 pour une facture du dossier, ou None. Ce qui ne peut pas se rapprocher se
+    dit, au lieu de passer pour conforme. Chaque facture se rapproche de **sa** marchandise
+    (un dossier en porte plusieurs depuis le 12/10/2026)."""
+    if facture.numero and dossier.lignes and not facture.montant:
+        return {
+            "dossier": dossier.numero,
+            "facture": facture.numero,
+            "motif": "montant de la facture non saisi",
+        }
+    lignes = lignes_de_la_facture(dossier, facture)
+    if facture.numero and lignes:
+        autres = sorted({x.devise or "MAD" for x in lignes} - {facture.devise or "MAD"})
         if autres:
             return {
                 "dossier": dossier.numero,
-                "facture": dossier.facture,
-                "devise": dossier.facture_devise or "MAD",
+                "facture": facture.numero,
+                "devise": facture.devise or "MAD",
                 "motif": f"marchandise en {', '.join(autres)} : ne se rapproche pas",
             }
-    ecart = ecart_facture(dossier, parametres)
+    ecart = ecart_facture(dossier, facture, parametres)
     if ecart is None or not ecart.hors_tolerance:
         return None
     return {
@@ -218,12 +221,13 @@ def _facture_ecartee(dossier: DossierImport, parametres: Parametres) -> Ligne | 
     ),
 )
 def facture_eloignee(ctx: Contexte) -> tuple[str, list[Ligne]]:
-    """La facture rapprochée de la marchandise reçue (pesée × prix) : au-delà de la tolérance,
-    un manque de poids, une facture mal saisie, un camion pas encore rattaché."""
+    """Chaque facture rapprochée de la marchandise qu'elle a apportée (pesée × prix) : au-delà de
+    la tolérance, un manque de poids, une facture mal saisie, un camion pas encore rattaché."""
     lignes: list[Ligne] = [
         ligne
         for dossier in ctx.donnees.dossiers_import
-        if (ligne := _facture_ecartee(dossier, ctx.parametres)) is not None
+        for facture in dossier.factures
+        if (ligne := _facture_ecartee(dossier, facture, ctx.parametres)) is not None
     ]
     libelle = (
         "Facture d'un dossier d'importation éloignée de plus de "

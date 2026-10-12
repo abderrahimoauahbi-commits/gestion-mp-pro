@@ -24,6 +24,7 @@ from gestion_mp_pro.services.importations.socle import (
     DIRHAM,
     Contexte,
     a_la_main,
+    factures_lues,
     frais_tries,
     refus_statut,
     repris,
@@ -42,6 +43,26 @@ A_LA_MAIN = (
     "Ce dossier est saisi à la main (d'avant la mise en service) : une marchandise reçue entre "
     "par sa facture, dans le dossier de cette facture."
 )
+A_LA_MAIN_AJOUT = (
+    "Ce dossier est saisi à la main (d'avant la mise en service) : une facture reçue ouvre son "
+    "propre dossier, ou s'ajoute à un dossier ouvert depuis une facture."
+)
+
+
+def refus_retrait(d: Dossier, numero: str, lignes: set[int]) -> str | None:
+    """Retirer une facture du dossier (route 254) : il est ouvert, et aucun frais ne vise une
+    marchandise qu'elle a apportée (`lignes`) — il sortirait avec elle (I19)."""
+    statut = refus_statut(d)
+    if statut:
+        return statut
+    vises = [f for f in d.frais if f.ligne_id in lignes]
+    if vises:
+        return (
+            f"{len(vises)} frais porte(nt) sur une marchandise de la facture {numero} : les "
+            "affecter à tout le dossier (onglet Frais, « Porte sur »), ou les retirer, avant de "
+            "retirer la facture — sinon ils sortiraient avec elle."
+        )
+    return None
 
 
 def regle_le(x: DossierFrais) -> str | None:
@@ -121,10 +142,11 @@ def _facture(f: Facture, ctx: Contexte, m: Marchandises) -> Echeance:
 
 
 def echeancier(d: Dossier, ctx: Contexte, m: Marchandises) -> list[Echeance]:
-    """Ce que le dossier engage à payer, échéance par échéance (R-IMP-14, B-07)."""
-    factures = {f: ctx.factures[f] for f in m.apporte if f in ctx.factures}
-    if d.facture_id and d.facture_id in ctx.factures:
-        factures.setdefault(d.facture_id, ctx.factures[d.facture_id])
+    """Ce que le dossier engage à payer, échéance par échéance (R-IMP-14, B-07) : une échéance
+    de marchandise par facture (les siennes, et celles dont il porte une marchandise), puis
+    chaque frais."""
+    factures = {x.facture_id: ctx.factures[x.facture_id] for x in factures_lues(d)}
+    factures |= {f: ctx.factures[f] for f in m.apporte if f in ctx.factures}
     lignes = [_facture(f, ctx, m) for f in factures.values()]
     lignes += [
         Echeance(
@@ -182,8 +204,12 @@ def alertes(r: DossierResume, sans_cours: int, lignes_devise: bool) -> list[str]
         a.append(f"Les frais dépassent {part(r.seuil_surcout, 0)} de l'achat : les vérifier.")
     if r.lignes_aberrantes:
         a.append(f"Frais hors norme sur {', '.join(r.lignes_aberrantes)}.")
-    if r.ecart_facture is not None and r.ecart_facture.hors_tolerance:
-        a.append(f"La facture s'écarte de {part(r.ecart_facture.part, 1)} de la marchandise reçue.")
+    for f in r.factures:
+        if f.ecart is not None and f.ecart.hors_tolerance:
+            a.append(
+                f"La facture {f.numero} s'écarte de {part(f.ecart.part, 1)} de la marchandise "
+                "qu'elle a apportée."
+            )
     if r.cours_eloignes:
         a.append("Un cours s'écarte de plus de 5 % du cours du jour.")
     if len(r.fournisseurs) > 1:
@@ -198,7 +224,7 @@ def a_verifier(r: DossierResume) -> list[str]:
         "droits ≠ attendus" if r.droits_ecart_mad is not None else "",
         "TVA ≠ attendue" if r.tva_ecart_mad is not None else "",
         "facture ≠ marchandise reçue"
-        if r.ecart_facture is not None and r.ecart_facture.hors_tolerance
+        if any(f.ecart is not None and f.ecart.hors_tolerance for f in r.factures)
         else "",
         f"frais au-delà de {part(r.seuil_surcout, 0)} de l'achat" if r.surcout_aberrant else "",
         "frais hors norme sur une marchandise" if r.lignes_aberrantes else "",
@@ -209,18 +235,29 @@ def a_verifier(r: DossierResume) -> list[str]:
     return [x for x in raisons if x]
 
 
-def refus_saisie(d: Dossier, facture: str | None) -> str | None:
+def refus_saisie(d: Dossier, factures: list[str]) -> str | None:
     """La saisie à la main : réservée aux dossiers d'avant la mise en service (X-IMP-18, 19)."""
-    if d.facture_id is not None:
+    if len(factures) == 1:
         return (
-            f"Le dossier de la facture {facture or ''} porte ce qu'elle a apporté, tel que reçu : "
+            f"Le dossier de la facture {factures[0]} porte ce qu'elle a apporté, tel que reçu : "
             "la saisie à la main est réservée aux dossiers d'avant la mise en service."
+        )
+    if factures:
+        return (
+            f"Le dossier des factures {', '.join(factures)} porte ce qu'elles ont apporté, tel "
+            "que reçu : la saisie à la main est réservée aux dossiers d'avant la mise en service."
         )
     if repris(d):
         return (
             f"Le dossier {d.numero} porte des réceptions : sa marchandise entre par ses "
             "factures, telle que reçue. La saisie à la main est réservée aux dossiers d'avant la "
             "mise en service."
+        )
+    if not a_la_main(d):
+        return (
+            f"Le dossier {d.numero} s'est ouvert depuis une facture : sa marchandise entre par "
+            "ses factures (« Ajouter une facture »). La saisie à la main est réservée aux "
+            "dossiers d'avant la mise en service."
         )
     return None
 
@@ -237,14 +274,15 @@ def _cloturer(r: DossierResume) -> str | None:
 def actions(d: Dossier, r: DossierResume, devises: Iterable[str]) -> Actions:
     """Chaque geste : permis (`None`) ou la phrase exacte de son refus."""
     statut = refus_statut(d)
-    facture = r.facture.numero if r.facture else None
+    factures = [f.numero for f in r.factures if f.liberee_le is None]
     rouvrir = {StatutDossier.ouvert: DEJA_OUVERT, StatutDossier.annule: refus_statut(d)}
     annuler = DEJA_ANNULE if d.statut == StatutDossier.annule else statut
     sans_devise = "Aucune marchandise en devise dans ce dossier."
     return Actions(
         modifier=statut,
         rattacher=statut or (A_LA_MAIN if a_la_main(d) else None),
-        saisir=statut or refus_saisie(d, facture),
+        ajouter_facture=statut or (A_LA_MAIN_AJOUT if a_la_main(d) else None),
+        saisir=statut or refus_saisie(d, factures),
         cours=statut or (None if any(x != DIRHAM for x in devises) else sans_devise),
         frais=statut,
         cloturer=statut or _cloturer(r),

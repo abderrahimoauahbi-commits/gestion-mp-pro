@@ -14,20 +14,6 @@ from pydantic import Field
 from gestion_mp_pro.api.communs import Nombre, Page, Sortie
 
 
-class FactureDossier(Sortie):
-    """La facture d'un dossier."""
-
-    id: int
-    numero: str
-    fournisseur_id: int
-    fournisseur: str
-    date: dt.date | None
-    montant: Nombre | None
-    devise: str
-    echeance: dt.date | None
-    payee_le: dt.date | None
-
-
 class ReceptionCitee(Sortie):
     """Une réception citée (lien vers sa fiche)."""
 
@@ -84,6 +70,32 @@ class EcartFacture(Sortie):
     hors_tolerance: bool
 
 
+class FactureDossier(Sortie):
+    """Une facture du dossier (une ou plusieurs, la première ajoutée d'abord ; décision du
+    12/10/2026) : ses réceptions, son rapprochement C36, et pourquoi elle ne peut pas quitter
+    le dossier (`retrait`, `null` si elle le peut)."""
+
+    id: int
+    numero: str
+    fournisseur_id: int
+    fournisseur: str
+    date: dt.date | None
+    montant: Nombre | None
+    devise: str
+    echeance: dt.date | None
+    payee_le: dt.date | None
+    ajoutee_le: dt.datetime
+    liberee_le: dt.datetime | None = Field(
+        description="posé quand l'annulation du dossier a rendu la facture libre"
+    )
+    receptions: list[ReceptionCitee]
+    lignes: int = Field(description="les marchandises du dossier qu'elle a apportées")
+    ecart: EcartFacture | None = Field(
+        description="la facture rapprochée de ce qu'elle a apporté, pesée × prix (C36)"
+    )
+    retrait: str | None = Field(description="null : elle peut quitter le dossier ; sinon pourquoi")
+
+
 class DossierResume(Sortie):
     """Un dossier de la liste : en-tête, totaux, contrôles et raisons « à vérifier »."""
 
@@ -99,7 +111,10 @@ class DossierResume(Sortie):
     annule_le: dt.datetime | None
     annule_par: str | None
     annulation_motif: str
-    facture: FactureDossier | None
+    factures: list[FactureDossier] = Field(
+        description="les factures du dossier, la première ajoutée d'abord (celles qu'un dossier "
+        "annulé a libérées)"
+    )
     a_la_main: bool
     repris: bool
     local_confirme: bool
@@ -124,14 +139,12 @@ class DossierResume(Sortie):
     surcout_aberrant: bool
     lignes_aberrantes: list[str]
     lignes_negatives: list[str]
-    ecart_facture: EcartFacture | None
     lignes_cours_bon: int
     cours_disparates: list[CoursDisparates]
     cours_eloignes: int
     charges_non_reparties_mad: float
     tva_non_repartie_mad: float
     fournisseurs: list[str]
-    factures: list[str]
     receptions: list[ReceptionCitee]
     pieces: list[Piece]
     familles: list[Famille]
@@ -239,6 +252,7 @@ class Actions(Sortie):
 
     modifier: str | None
     rattacher: str | None
+    ajouter_facture: str | None
     saisir: str | None
     cours: str | None
     frais: str | None

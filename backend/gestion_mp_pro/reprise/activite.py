@@ -56,6 +56,7 @@ ORDRE = (
     "mouvement",
     "solde",
     "dossier",
+    "dossier_facture",
     "dossier_ligne",
     "dossier_frais",
     "dossier_frais_part",

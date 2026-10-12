@@ -102,7 +102,7 @@ def test_le_dossier_d_importation_depuis_la_facture(achats: TestClient) -> None:
     assert d["revient_mad"] == pytest.approx(marchandise + 6000)
     assert d["decaisse_mad"] == pytest.approx(marchandise + 19_000)
     assert sum(x["charges_mad"] for x in d["lignes"]) == pytest.approx(6000)
-    r = achats.post("/api/dossiers", json={"facture_id": d["facture"]["id"]})
+    r = achats.post("/api/dossiers", json={"facture_id": d["factures"][0]["id"]})
     assert r.status_code == 409
     assert geste_reception(achats, rec, "annuler", 409, motif="erreur")["code"] == "documents_lies"
     d = geste(achats, d, "cloturer", alertes_lues=True)
@@ -270,16 +270,17 @@ def test_la_facture_se_rapproche_de_la_marchandise_recue(achats: TestClient) -> 
     imp = Import.nouveau(cours="10")
     rec = imp.recevoir(achats, "A2-FAC", [("FIL", "A2F-9", 2541.91, 2)], montant=4598)
     d = ouvrir(achats, imp.f("A2-FAC"))
-    e = d["ecart_facture"]
+    (f,) = d["factures"]
+    e = f["ecart"]
     assert e["hors_tolerance"] and e["recu"] == pytest.approx(5083.82)
     assert e["ecart"] == pytest.approx(4598 - 5083.82) and e["part"] == pytest.approx(
         -485.82 / 5083.82
     )
     assert d["marchandise_mad"] == pytest.approx(50_838.2)
     assert "facture ≠ marchandise reçue" in d["a_verifier"]
-    assert any(x.startswith("La facture s'écarte de −9,6") for x in d["alertes"])
+    assert any(x.startswith(f"La facture {f['numero']} s'écarte de −9,6") for x in d["alertes"])
     facture_reception(achats, rec, montant=5100)
-    assert not fiche(achats, d["id"])["ecart_facture"]["hors_tolerance"]
+    assert not fiche(achats, d["id"])["factures"][0]["ecart"]["hors_tolerance"]
 
 
 def test_echeancier_du_dossier_regle_et_estime(achats: TestClient) -> None:

@@ -92,6 +92,14 @@ class Rattachement(Version):
     facture_id: int = Field(ge=1)
 
 
+class AjoutFacture(Version):
+    """Une facture reçue, dans aucun dossier, qui s'ajoute au dossier avec toute sa marchandise
+    libre (décision du 12/10/2026 : un dossier porte une ou plusieurs factures)."""
+
+    facture_id: int = Field(ge=1)
+    local_confirme: bool = Field(False, description="fournisseur marocain : l'ajouter quand même")
+
+
 class LigneManuelle(Version):
     """Une marchandise d'un dossier d'avant la mise en service, saisie comme un stock
     d'ouverture."""

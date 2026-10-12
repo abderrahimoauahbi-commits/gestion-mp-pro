@@ -7,9 +7,9 @@
 - **Rouvrir** rend vides les cours que la clôture avait figés d'office (B-08) ; un cours saisi,
   ou figé par la clôture d'une période (`periode_close`), reste.
 - **Annuler** remplace la suppression (B-02) : le dossier garde son numéro (série sans trou),
-  sa facture est libérée, ses marchandises sont détachées de leurs lignes reçues
-  (`reception_ligne_id = NULL`) pour qu'un nouveau dossier les reprenne, ses frais restent en
-  lecture, hors de tout coût (un frais réglé reste réglé).
+  ses factures sont libérées (`liberee_le`, la trace reste), ses marchandises sont détachées
+  de leurs lignes reçues (`reception_ligne_id = NULL`) pour qu'un nouveau dossier les
+  reprenne, ses frais restent en lecture, hors de tout coût (un frais réglé reste réglé).
 """
 
 from __future__ import annotations
@@ -39,6 +39,7 @@ from gestion_mp_pro.services.importations.socle import (
     a_la_main,
     charger,
     contexte,
+    factures_vives,
     mad,
     noter,
     ouvert,
@@ -137,7 +138,7 @@ def rouvrir(s: Session, qui: audit.Qui, did: int, version: int, motif: str) -> D
 
 
 def annuler(s: Session, qui: audit.Qui, did: int, version: int, motif: str) -> Dossier:
-    """Annuler le dossier : il garde son numéro, sa facture et sa marchandise sont libérées,
+    """Annuler le dossier : il garde son numéro, ses factures et sa marchandise sont libérées,
     ses frais sortent du coût (B-02, ECRANS-PRO 5.6)."""
     d = charger(s, did, verrou=True)
     verifier(s, d, version)
@@ -153,13 +154,21 @@ def annuler(s: Session, qui: audit.Qui, did: int, version: int, motif: str) -> D
             champs={"motif": "3 caractères au moins"},
         )
     periode.cout_hors_periode_close(s, d, "annulation")
-    facture = s.get(Facture, d.facture_id) if d.facture_id else None
+    quand = horloge.maintenant()
+    liberees = []
+    for lien in factures_vives(d):
+        lien.liberee_le = quand
+        f = s.get(Facture, lien.facture_id)
+        liberees.append(f.numero if f else str(lien.facture_id))
     for x in d.lignes:
         x.reception_ligne_id = None
-    d.statut, d.annule_le, d.annule_par_id = StatutDossier.annule, horloge.maintenant(), qui.id
+    d.statut, d.annule_le, d.annule_par_id = StatutDossier.annule, quand, qui.id
     d.annulation_motif = motif
     total = sum((f.montant for f in d.frais), Decimal(0))
-    detail = f"{d.numero} · {motif}" + (f" · facture {facture.numero} libérée" if facture else "")
+    detail = f"{d.numero} · {motif}"
+    if liberees:
+        quoi = "facture" if len(liberees) == 1 else "factures"
+        detail += f" · {quoi} {', '.join(liberees)} libérée{'s' if len(liberees) > 1 else ''}"
     if d.frais:
         detail += f" · {len(d.frais)} frais ({mad(total)}) sortis du coût"
     noter(s, qui, d, "annulation dossier", detail, avant={"statut": "ouvert"})

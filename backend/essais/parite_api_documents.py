@@ -115,6 +115,7 @@ def _documents_1() -> list[Route]:
                     matieres_sans_code=f.references,
                     matieres_code_inactif=f.references,
                 ),
+                vue_pro=f.dossier_comme_gestion_mp,
                 sous={
                     "lignes": LIGNE_DOSSIER,
                     "familles": FAMILLE,

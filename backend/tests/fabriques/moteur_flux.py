@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.modeles import (
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierFraisPart,
     DossierLigne,
@@ -193,9 +194,10 @@ def dossiers(s: Session, w: Monde) -> None:
         s,
         Dossier(
             numero="01/26", annee=2026, rang=1, libelle="Fil turc", date_arrivee=date(2026, 9, 21),
-            banque="BMCE", facture_id=w.ids["facture"], commentaire="Premier",
+            banque="BMCE", commentaire="Premier",
         ),
     )  # fmt: skip
+    ajouter(s, DossierFacture(dossier_id=d.id, facture_id=w.ids["facture"]))
     ligne = ajouter(
         s,
         DossierLigne(

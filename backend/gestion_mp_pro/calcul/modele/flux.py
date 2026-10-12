@@ -229,8 +229,20 @@ class LigneImport:
 
 
 @dataclass
+class FactureImport:
+    """Une facture du dossier : son montant, sa devise, et les marchandises qu'elle a apportées
+    (identifiants des `LigneImport`), qu'on rapproche d'elle seule (C36)."""
+
+    numero: str
+    montant: float = 0.0
+    devise: str = ""
+    lignes: list[int] = field(default_factory=list)
+
+
+@dataclass
 class DossierImport:
-    """Une arrivée, une facture, ses marchandises et ses frais."""
+    """Une arrivée, ses factures (une ou plusieurs : décision du 12/10/2026, qui amende I3),
+    ses marchandises et ses frais."""
 
     numero: str
     libelle: str = ""
@@ -240,9 +252,7 @@ class DossierImport:
     commentaire: str = ""
     lignes: list[LigneImport] = field(default_factory=list)
     charges: list[ChargeImport] = field(default_factory=list)
-    facture: str = ""
-    facture_montant: float = 0.0
-    facture_devise: str = ""
+    factures: list[FactureImport] = field(default_factory=list)
 
     @property
     def ouvert(self) -> bool:

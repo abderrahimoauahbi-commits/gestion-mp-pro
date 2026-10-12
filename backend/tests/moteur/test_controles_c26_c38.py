@@ -13,6 +13,7 @@ from gestion_mp_pro.calcul.modele import (
     Article,
     ChargeImport,
     DossierImport,
+    FactureImport,
     LigneImport,
     LignePrix,
     LigneReception,
@@ -280,16 +281,12 @@ def test_c35_frais_aberrants_en_fraction():
 def test_c36_facture_eloignee_de_la_marchandise_recue():
     ecartee = DossierImport(
         "D1",
-        facture="FAC-1",
-        facture_montant=1100,
-        facture_devise="MAD",
+        factures=[FactureImport("FAC-1", 1100, "MAD", [1])],
         lignes=[LigneImport(1, "A", valeur_devise=1000)],
     )
     autre_devise = DossierImport(
         "D2",
-        facture="FAC-2",
-        facture_montant=500,
-        facture_devise="MAD",
+        factures=[FactureImport("FAC-2", 500, "MAD", [1])],
         lignes=[LigneImport(1, "A", valeur_devise=50, devise="USD")],
     )
     donnees = D(dossiers_import=[ecartee, autre_devise])
@@ -312,10 +309,37 @@ def test_c36_facture_eloignee_de_la_marchandise_recue():
     ]
     assert c36.libelle.endswith("éloignée de plus de 2 % de la marchandise reçue")
     assert c36.gravite == "avertissement" and c36.lien == "/importations"
-    ecartee.facture_montant = 1010
-    autre_devise.facture_devise = "USD"
-    autre_devise.facture_montant = 50
+    ecartee.factures[0].montant = 1010
+    autre_devise.factures[0].devise = "USD"
+    autre_devise.factures[0].montant = 50
     _conforme("C36", donnees)
+
+
+def test_c36_une_ligne_par_facture_d_un_dossier():
+    """Un dossier à deux factures (décision du 12/10/2026) : chacune se rapproche de sa seule
+    marchandise ; la facture conforme ne sonne pas, l'autre sonne seule."""
+    dossier = DossierImport(
+        "D1",
+        factures=[
+            FactureImport("FAC-A", 1000, "EUR", [1]),
+            FactureImport("FAC-B", 900, "USD", [2]),
+        ],
+        lignes=[
+            LigneImport(1, "A", valeur_devise=1000, devise="EUR"),
+            LigneImport(2, "B", valeur_devise=800, devise="USD"),
+        ],
+    )
+    c36 = _sonne("C36", D(dossiers_import=[dossier]), 1)
+    assert c36.detail == [
+        {
+            "dossier": "D1",
+            "facture": "FAC-B",
+            "facture_montant": 900,
+            "recu": 800,
+            "devise": "USD",
+            "ecart": 0.125,
+        }
+    ]
 
 
 def test_c37_lot_sous_zero_a_une_date_passee():

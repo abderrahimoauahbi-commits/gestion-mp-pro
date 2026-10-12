@@ -20,7 +20,13 @@ from gestion_mp_pro.calcul.constantes import (
     TOLERANCE_DROITS_IMPORT,
     TOLERANCE_TVA_IMPORT,
 )
-from gestion_mp_pro.calcul.modele import Donnees, DossierImport, LigneImport, Parametres
+from gestion_mp_pro.calcul.modele import (
+    Donnees,
+    DossierImport,
+    FactureImport,
+    LigneImport,
+    Parametres,
+)
 
 
 @dataclass
@@ -191,7 +197,7 @@ def lignes_negatives(repartis: list[LigneRevient]) -> list[LigneRevient]:
 
 @dataclass
 class EcartFacture:
-    """La facture d'un dossier rapprochée de la marchandise reçue (pesée × prix)."""
+    """Une facture d'un dossier rapprochée de la marchandise qu'elle a apportée (pesée × prix)."""
 
     facture: str
     montant: float
@@ -203,25 +209,42 @@ class EcartFacture:
     hors_tolerance: bool
 
 
-def ecart_facture(dossier: DossierImport, parametres: Parametres) -> EcartFacture | None:
-    """Rien à rapprocher sans montant de facture, ou une marchandise hors de sa devise."""
-    if not dossier.facture_montant or not dossier.lignes:
+def lignes_de_la_facture(dossier: DossierImport, facture: FactureImport) -> list[LigneImport]:
+    """Les marchandises du dossier que cette facture a apportées."""
+    siennes = set(facture.lignes)
+    return [x for x in dossier.lignes if x.id in siennes]
+
+
+def ecart_facture(
+    dossier: DossierImport, facture: FactureImport, parametres: Parametres
+) -> EcartFacture | None:
+    """Une facture rapprochée de **sa** marchandise reçue (pesée × prix) : rien sans montant,
+    sans marchandise, ou avec une marchandise hors de sa devise (jamais d'addition entre
+    devises)."""
+    lignes = lignes_de_la_facture(dossier, facture)
+    if not facture.montant or not lignes:
         return None
-    if any((x.devise or "MAD") != (dossier.facture_devise or "MAD") for x in dossier.lignes):
+    if any((x.devise or "MAD") != (facture.devise or "MAD") for x in lignes):
         return None
-    recu = sum(x.valeur_devise for x in dossier.lignes)
-    ecart = dossier.facture_montant - recu
+    recu = sum(x.valeur_devise for x in lignes)
+    ecart = facture.montant - recu
     part = ecart / recu if recu else 1.0
     return EcartFacture(
-        facture=dossier.facture,
-        montant=dossier.facture_montant,
+        facture=facture.numero,
+        montant=facture.montant,
         recu=recu,
-        devise=dossier.facture_devise,
+        devise=facture.devise,
         ecart=ecart,
         part=part,
         tolerance=parametres.toler_facture_import,
         hors_tolerance=abs(ecart) > CENTIME and abs(part) > parametres.toler_facture_import,
     )
+
+
+def ecarts_factures(dossier: DossierImport, parametres: Parametres) -> list[EcartFacture]:
+    """Chaque facture du dossier rapprochée de sa marchandise (C36 facture par facture)."""
+    ecarts = (ecart_facture(dossier, f, parametres) for f in dossier.factures)
+    return [e for e in ecarts if e is not None]
 
 
 def revient_par_reception(donnees: Donnees) -> dict[int, LigneRevient]:

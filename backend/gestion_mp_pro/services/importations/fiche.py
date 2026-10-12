@@ -2,6 +2,9 @@
 puis, pour la fiche (route 189), marchandises, frais, échéancier, alertes et gestes permis
 (REGLES R-IMP-04 à R-IMP-14 ; défauts B-04, B-05, B-07, B-11).
 
+Ses factures (une ou plusieurs, décision du 12/10/2026) se lisent une à une : réceptions,
+marchandises apportées, rapprochement C36 avec elles seules, et ce qui empêche de la retirer.
+
 Les chiffres sont ceux du moteur (`calcul/importations.py`, prouvé à l'identique de Gestion MP) ;
 ce module ne fait que lire la base et assembler.
 """
@@ -15,14 +18,16 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.calcul import importations as calcul
+from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.importations import LigneRevient
-from gestion_mp_pro.modeles import Dossier, Facture, PieceJointe
+from gestion_mp_pro.modeles import Dossier, PieceJointe
 from gestion_mp_pro.services.importations import attente, parties
 from gestion_mp_pro.services.importations.lignes import Marchandises, lire_marchandises
 from gestion_mp_pro.services.importations.modele import (
     DossierFiche,
     DossierResume,
     FactureDossier,
+    ReceptionCitee,
 )
 from gestion_mp_pro.services.importations.socle import (
     CENTIME,
@@ -31,6 +36,8 @@ from gestion_mp_pro.services.importations.socle import (
     a_la_main,
     charger,
     contexte,
+    factures_lues,
+    factures_vives,
     repris,
     vue,
 )
@@ -40,19 +47,44 @@ TVA = "TVA"
 DROITS = "DD"
 
 
-def facture_dossier(f: Facture, ctx: Contexte) -> FactureDossier:
-    """La facture telle que le dossier la montre."""
-    return FactureDossier(
-        id=f.id,
-        numero=f.numero,
-        fournisseur_id=f.fournisseur_id,
-        fournisseur=ctx.nom(f.fournisseur_id),
-        date=f.date,
-        montant=f.montant,
-        devise=f.devise,
-        echeance=f.echeance,
-        payee_le=f.payee_le,
-    )
+def _receptions(d: Dossier, ctx: Contexte, lignes: set[int]) -> list[ReceptionCitee]:
+    """Les réceptions de ces marchandises, par numéro."""
+    vues = {
+        o.reception_id: o.reception
+        for x in d.lignes
+        if x.id in lignes and (o := ctx.origines.get(x.reception_ligne_id or 0)) is not None
+    }
+    return [ReceptionCitee(i, n) for i, n in sorted(vues.items(), key=lambda z: z[1])]
+
+
+def factures_du_dossier(d: Dossier, ctx: Contexte, v: c.DossierImport) -> list[FactureDossier]:
+    """Les factures du dossier telles que la fiche les montre, la première ajoutée d'abord."""
+    moteur = dict(zip((x.facture_id for x in factures_vives(d)), v.factures, strict=True))
+    resultat = []
+    for x in factures_lues(d):
+        f = ctx.factures[x.facture_id]
+        fm = moteur.get(f.id)
+        lignes = set(fm.lignes) if fm else set()
+        resultat.append(
+            FactureDossier(
+                id=f.id,
+                numero=f.numero,
+                fournisseur_id=f.fournisseur_id,
+                fournisseur=ctx.nom(f.fournisseur_id),
+                date=f.date,
+                montant=f.montant,
+                devise=f.devise,
+                echeance=f.echeance,
+                payee_le=f.payee_le,
+                ajoutee_le=x.ajoutee_le,
+                liberee_le=x.liberee_le,
+                receptions=_receptions(d, ctx, lignes),
+                lignes=len(lignes),
+                ecart=calcul.ecart_facture(v, fm, ctx.parametres) if fm else None,
+                retrait=parties.refus_retrait(d, f.numero, lignes),
+            )
+        )
+    return resultat
 
 
 def _sommes(d: Dossier, ctx: Contexte) -> tuple[float, float, float, float]:
@@ -83,9 +115,10 @@ def _au_dela(x: float) -> float:
     return x if abs(x) > CENTIME else 0.0
 
 
-def _calcul(d: Dossier, ctx: Contexte) -> tuple[dict[int, LigneRevient], Marchandises]:
+def _calcul(
+    d: Dossier, ctx: Contexte, v: c.DossierImport
+) -> tuple[dict[int, LigneRevient], Marchandises]:
     """Le coût de revient de chaque marchandise, et les marchandises lues."""
-    v = vue(d, ctx)
     repartis = calcul.revient_dossier(v, ctx.parametres)
     seuil = ctx.parametres.seuil_surcout_import
     aberrantes = {x.ligne_id for x in calcul.lignes_aberrantes(repartis, seuil)}
@@ -94,9 +127,8 @@ def _calcul(d: Dossier, ctx: Contexte) -> tuple[dict[int, LigneRevient], Marchan
     return revient, lire_marchandises(d, ctx, revient, aberrantes, negatives)
 
 
-def _entete(d: Dossier, ctx: Contexte) -> dict[str, Any]:
-    """L'en-tête du dossier : numéro, dates, statut, facture, nature, comptes, version."""
-    facture = ctx.factures.get(d.facture_id) if d.facture_id else None
+def _entete(d: Dossier, ctx: Contexte, v: c.DossierImport) -> dict[str, Any]:
+    """L'en-tête du dossier : numéro, dates, statut, factures, nature, comptes, version."""
     return {
         "id": d.id,
         "numero": d.numero,
@@ -110,7 +142,7 @@ def _entete(d: Dossier, ctx: Contexte) -> dict[str, Any]:
         "annule_le": d.annule_le,
         "annule_par": ctx.personnes.get(d.annule_par_id) if d.annule_par_id else None,
         "annulation_motif": d.annulation_motif,
-        "facture": facture_dossier(facture, ctx) if facture else None,
+        "factures": factures_du_dossier(d, ctx, v),
         "a_la_main": a_la_main(d),
         "repris": repris(d),
         "local_confirme": d.local_confirme,
@@ -123,19 +155,21 @@ def _entete(d: Dossier, ctx: Contexte) -> dict[str, Any]:
 def resume(d: Dossier, ctx: Contexte) -> tuple[DossierResume, Marchandises]:
     """Le dossier calculé, sans le détail (route 187), et ses marchandises lues."""
     p = ctx.parametres
-    revient, m = _calcul(d, ctx)
+    v = vue(d, ctx)
+    revient, m = _calcul(d, ctx, v)
+    for x in factures_lues(d):
+        m.pieces.setdefault(ctx.factures[x.facture_id].numero, set())
     marchandise = sum(x.valeur_mad for x in revient.values())
     reparties = sum(x.charges_mad for x in revient.values())
     tva_repartie = sum(x.tva_mad for x in revient.values())
     poids = sum(x.poids_kg for x in revient.values())
     charges, tva, tva_douane, droits = _sommes(d, ctx)
-    v = vue(d, ctx)
     attendue = calcul.tva_attendue(v, p) if d.lignes else None
     tolere = abs(attendue) * p.toler_tva_import if attendue else None
     attendus = m.droits_attendus if d.lignes and not m.sans_code else None
     revient_mad = marchandise + reparties
     r = DossierResume(
-        **_entete(d, ctx),
+        **_entete(d, ctx, v),
         poids=poids,
         marchandise_mad=marchandise,
         charges_mad=reparties,
@@ -155,14 +189,12 @@ def resume(d: Dossier, ctx: Contexte) -> tuple[DossierResume, Marchandises]:
         surcout_aberrant=bool(marchandise > 0 and reparties > marchandise * p.seuil_surcout_import),
         lignes_aberrantes=sorted({x.reference for x in m.lignes if x.aberrante}),
         lignes_negatives=sorted({x.reference for x in m.lignes if x.negative}),
-        ecart_facture=calcul.ecart_facture(v, p),
         lignes_cours_bon=m.au_cours_du_bon,
         cours_disparates=m.cours_disparates,
         cours_eloignes=m.cours_eloignes,
         charges_non_reparties_mad=_au_dela(charges - reparties),
         tva_non_repartie_mad=_au_dela(tva - tva_repartie),
         fournisseurs=sorted({x.fournisseur for x in m.lignes} - {""}),
-        factures=sorted(k for k in m.pieces if k),
         receptions=m.liste_receptions(),
         pieces=m.liste_pieces(),
         familles=m.familles(),

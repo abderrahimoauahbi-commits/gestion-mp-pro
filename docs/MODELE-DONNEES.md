@@ -879,15 +879,16 @@ Index unique partiel `uq_inventaire_ligne_lot_a_creer` sur `(inventaire_id, mati
 | clos_le | TIMESTAMPTZ ; clos_par_id | O | | CK `ck_dossier_cloture_date` : `(statut = 'clos') = (clos_le IS NOT NULL)` | | clos_le |
 | annule_le ; annule_par_id ; annulation_motif | O | | | CK `ck_dossier_annulation_date` : `(statut = 'annule') = (annule_le IS NOT NULL)` | remplace la suppression | nouveau |
 | commentaire | TEXT | | `''` | | | commentaire |
-| facture_id | INTEGER | O | | FK facture ; index unique partiel `uq_dossier_facture` `WHERE statut <> 'annule'` | **un dossier par facture** | facture_id |
 | saisi_a_la_main | BOOLEAN | | false | | dossier d'avant la mise en service (ou repris de l'ERP Fil) | `facture_id IS NULL` |
 | local_confirme | BOOLEAN | | false | | fournisseur marocain ouvert sur confirmation | nouveau (paramètre de requête) |
 | texte_recherche, version, cree_par_id, cree_le | | | | | | nouveau |
 
 Numéro automatique : `annee` + `rang` (UQ) ; `numero` libre seulement si `saisi_a_la_main`.
-**Dossier annulé** : il libère sa facture (index partiel), mais `dossier_ligne.reception_ligne_id` est
-unique **pour tous les dossiers** : à l'annulation, le service (lot D7) **détache ses marchandises**
-(`reception_ligne_id = NULL`) pour qu'un nouveau dossier les reprenne.
+**Dossier annulé** : il libère ses factures (`dossier_facture.liberee_le`), mais
+`dossier_ligne.reception_ligne_id` est unique **pour tous les dossiers** : à l'annulation, le service
+(lot D7) **détache ses marchandises** (`reception_ligne_id = NULL`) pour qu'un nouveau dossier les
+reprenne. `dossier.facture_id` (« un dossier = une facture ») a disparu à la révision 0007 : les
+factures d'un dossier sont dans `dossier_facture` (§ 3.8.5), seule source de vérité.
 
 #### 3.8.2 `dossier_ligne` ← `dossier_ligne`
 
@@ -920,6 +921,25 @@ IX `(echeance) WHERE payee_le IS NULL`.
 PK `(frais_id, ligne_id)` (`frais_id` FK ON DELETE CASCADE ; `ligne_id` FK dossier_ligne ON DELETE RESTRICT,
 comme `dossier_frais.ligne_id`) · `montant NUMERIC(16,2)` (répartition aux plus forts restes : Σ parts = montant
 **exactement**) · `origine OriginePart` · `figee_le TIMESTAMPTZ`.
+
+#### 3.8.5 `dossier_facture` ← `dossier.facture_id` (révision 0007, lot PLUSIEURS-FACTURES)
+
+Décision de Mohamed du 12/10/2026, qui amende I3 : un dossier (une déclaration en douane, un
+arrivage) regroupe **une ou plusieurs factures** ; une facture n'appartient qu'à **un seul** dossier.
+
+| Colonne | Type | N | Défaut | Contraintes | Sens | ← GMP |
+|---|---|---|---|---|---|---|
+| dossier_id | INTEGER | | | PK `(dossier_id, facture_id)` ; FK dossier ON DELETE CASCADE | le dossier | `dossier.id` |
+| facture_id | INTEGER | | | FK facture ; index unique partiel `uq_dossier_facture` `(facture_id) WHERE liberee_le IS NULL` | **une facture dans un seul dossier** | `dossier.facture_id` |
+| ajoutee_le | TIMESTAMPTZ | | now() | | à l'ouverture (la première : facture d'ouverture) ou par « Ajouter une facture » | journal « ouverture dossier » |
+| ajoutee_par_id | INTEGER | O | | FK utilisateur | qui l'a ajoutée | journal |
+| liberee_le | TIMESTAMPTZ | O | | | posé à l'**annulation** du dossier : la facture est libre, la trace reste | nouveau |
+
+Retirer une facture (route 254) **supprime** sa ligne (le journal du dossier le garde) ; détacher la
+dernière réception d'une facture la retire aussi. La migration 0007 crée une ligne par
+`dossier.facture_id` non nul (ajoutée à la création du dossier, par son créateur ; libérée à son
+annulation s'il est annulé), puis retire la colonne ; le retour arrière remet la première facture
+dans `dossier.facture_id` et refuse s'il en perdrait une (dossier vivant à plusieurs factures).
 
 ### 3.9 Suivi
 
@@ -1048,7 +1068,7 @@ sautées, signalées) · `statut StatutReprise` (`en_cours` par défaut, `reussi
 | 37 | operation_ligne | operation_ligne | `LOT INTERNE` → `lot_interne` |
 | 38 | inventaire | inventaire, inventaire_critere, inventaire_matiere | + `abandonne` ; `annule` + `annule_le/par_id`, `annulation_motif` (GMP corrigé, étape 17) |
 | 39 | inventaire_ligne | inventaire_ligne | `second_par` → id ; lot trouvé : `matiere_id`, `lot_numero`, `lot_interne`, `lot_id` facultatif (étape 17) |
-| 40 | dossier | dossier | + `annule`, `saisi_a_la_main` |
+| 40 | dossier | dossier, dossier_facture | + `annule`, `saisi_a_la_main` ; `facture_id` → une ligne de `dossier_facture` (révision 0007) |
 | 41 | dossier_ligne | dossier_ligne | `poids_kg` (morte) ; `cours` 0 → NULL ; `cours_fige_cloture` (GMP corrigé, étape 16) → `cours_origine = 'clos_au_jour'` |
 | 42 | dossier_charge | dossier_frais | `poste` → `poste_id` |
 | 43 | dossier_charge_part | dossier_frais_part | arrondi aux plus forts restes |
@@ -1135,7 +1155,7 @@ Tables PRO sans ancêtre : `appareil`, `notification`, `notification_lecture`, `
 | I18 | Numéros uniques | UQ partout + PK `compteur` | | |
 | I19 | Pas de trou | CK numéro ⇔ statut ; plus de suppression des documents numérotés | | essai de 20 validations parallèles |
 | I20 | OF suivent les dates | — | verrou consultatif `ORDRES` | C31, C32 |
-| I21 | Un dossier par facture | index unique partiel | | |
+| I21 | Une facture dans un seul dossier (un dossier en porte une ou plusieurs, décision du 12/10/2026) | index unique partiel `uq_dossier_facture` sur `dossier_facture` | « Ajouter une facture » (route 253) : 409 qui nomme le dossier | |
 | I22 | Ligne reçue dans un seul dossier | UQ (tous dossiers, annulés compris) | l'annulation d'un dossier détache ses marchandises (D7) | C34 |
 | I23 | Réception portée par un dossier non annulable | — | | |
 | I24 | Stock en kg | sans objet (plus de colonne) | | |
@@ -1176,7 +1196,8 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
 | reception_ligne | `(commande_ligne_id)`, `(lot_id)`, `(matiere_id)` | reçu net, archive des pesées |
 | ordre | `(statut, date)`, GIN trgm `texte_recherche` | dernier ordre validé, recherche |
 | operation | `(type, statut)`, `(ordre_id)` | onglets, retours d'un ordre |
-| dossier | `(statut)`, unique partiel `uq_dossier_facture` `(facture_id) WHERE statut <> 'annule'` | un dossier par facture |
+| dossier | `(statut)` | onglets |
+| dossier_facture | PK `(dossier_id, facture_id)`, unique partiel `uq_dossier_facture` `(facture_id) WHERE liberee_le IS NULL` (révision 0007) | une facture dans un seul dossier |
 | inventaire | unique partiel `uq_inventaire_ouvert_magasin` `(coalesce(magasin_id, 0)) WHERE statut = 'ouvert'` | un inventaire ouvert par magasin |
 | inventaire_ligne | `(lot_id)`, unique partiel `uq_inventaire_ligne_lot_a_creer` `(inventaire_id, matiere_id, lot_numero, magasin_id) WHERE lot_id IS NULL AND NOT lot_interne` | un lot trouvé saisi une fois |
 | facture, dossier_frais | partiel `(echeance) WHERE payee_le IS NULL` | échéancier |
@@ -1211,6 +1232,9 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
   `periode_close` ; `GenreSauvegarde` + `avant_vidage`, `avant_mise_a_jour` (CHECK `…_enum` remplacés).
   Le retour arrière range `periode_close` en `saisi` et retire du registre les sauvegardes des deux genres
   (leurs fichiers restent : le disque fait foi).
+- `0005_motif_d_abandon`, `0006_taux_des_frais` : `inventaire.abandon_motif` ; `dossier_frais.taux`.
+- `0007_dossier_plusieurs_factures` (lot PLUSIEURS-FACTURES) : table `dossier_facture` (§ 3.8.5)
+  remplie depuis `dossier.facture_id`, index `uq_dossier_facture` déplacé sur elle, colonne retirée.
 - Les révisions suivantes : une par changement, avec `upgrade()` et `downgrade()`, numérotées à la suite
   (numéro réservé auprès du coordinateur), relues après autogénération : autogenerate ne voit ni les
   CHECK modifiés ni les déclencheurs (à écrire à la main) ; pas de `%` dans le texte d'un CHECK (utiliser `~`).
@@ -1308,13 +1332,13 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 
 | | Gestion MP | PRO |
 |---|---|---|
-| Tables | 49 | **71** (70 tables métier et techniques + `alembic_version`) |
-| Colonnes | 405 | **687** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005, + `dossier_frais.taux`, révision 0006) |
+| Tables | 49 | **72** (71 tables métier et techniques + `alembic_version` ; `dossier_facture`, révision 0007) |
+| Colonnes | 405 | **691** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005, + `dossier_frais.taux`, révision 0006, − `dossier.facture_id` + les 5 de `dossier_facture`, révision 0007) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
-| Clés étrangères | 73 | **171**, dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
+| Clés étrangères | 73 | **173** (révision 0007 : − `dossier.facture_id`, + 3 de `dossier_facture`), dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
 | CHECK | 39 | **293** : 177 nommés à la main, 41 `…_enum`, 75 `…_nombre` (refus de NaN) — dont les 2 de la révision 0006 (`ck_dossier_frais_taux_borne`, `ck_dossier_frais_taux_nombre`) |
-| Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture` ; `uq_inventaire_ligne_lot_a_creer`) |
-| Index | — | **194** (hors `alembic_version`) : 70 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, le reste simple |
+| Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture`, sur `dossier_facture` depuis 0007 ; `uq_inventaire_ligne_lot_a_creer`) |
+| Index | — | **195** (hors `alembic_version`) : 71 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, le reste simple |
 | Déclencheurs | — | **3** : `tr_mouvement_immuable`, `tr_operation_type_fige`, `tr_matiere_lineaire_densite` |
 | Réglages semés | 56 (Gestion MP corrigé) | **57** (0002 : 56, avec `seuil_bc_urgent` ; 0003 : `toler_tva_import`) |
 | Données métier rangées dans du texte ou du JSON | 17 (§ 4) | 0 |
@@ -1322,7 +1346,7 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 Ces chiffres sont ceux de la base migrée (`0001` à `0004`) ; `outils/schema_contre_modele.py`
 compare tables et colonnes de la base à ce document.
 
-Liste des 71 tables : utilisateur, session, tentative, appareil, journal, parametre,
+Liste des 72 tables : utilisateur, session, tentative, appareil, journal, parametre,
 parametre_historique, compteur, notification, notification_lecture, courriel, tache_execution,
 sauvegarde, devise, devise_cours, composition, type_fil, titrage, couleur, role_nomenclature,
 fournisseur, code_douanier, matiere, qualite, qualite_poids, qualite_saison, recette,
@@ -1331,5 +1355,5 @@ magasin, metier, metier_etage, montage, montage_evenement, poste_frais, motif, l
 mouvement, commande, commande_ligne, commande_version, commande_version_ligne, commande_decision,
 facture, reception, reception_ligne, ordre, ordre_qualite, ordre_ligne, ordre_prevu, operation,
 operation_ligne, inventaire, inventaire_critere, inventaire_matiere, inventaire_ligne, dossier,
-dossier_ligne, dossier_frais, dossier_frais_part, reclamation, signalement, piece_jointe,
-indicateur_jour, reprise_correspondance, reprise_execution, alembic_version.
+dossier_facture, dossier_ligne, dossier_frais, dossier_frais_part, reclamation, signalement,
+piece_jointe, indicateur_jour, reprise_correspondance, reprise_execution, alembic_version.

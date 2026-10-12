@@ -1,10 +1,17 @@
-"""Dossiers d'importation : un dossier = une facture = une livraison (MODELE-DONNEES § 3.8).
+"""Dossiers d'importation : un arrivage, ses factures, ses frais (MODELE-DONNEES § 3.8).
+
+- Un dossier (une déclaration en douane, un arrivage) regroupe **une ou plusieurs factures**
+  (`dossier_facture`, révision 0007 : décision de Mohamed du 12/10/2026, qui amende I3) ; une
+  facture n'est que dans **un seul** dossier non annulé (index unique partiel
+  `uq_dossier_facture` sur `liberee_le IS NULL`). Il n'y a plus de « facture du dossier » à part
+  (`dossier.facture_id` a disparu) : la première ajoutée est celle d'ouverture, rien de plus.
 
 - Numéro `NN/AA` de la maison : `annee` + `rang` pour un numéro automatique (unique) ; un
   numéro saisi à la main est réservé aux dossiers `saisi_a_la_main` (ou `ANC-…` repris).
 - Un dossier s'annule (statut), il ne se supprime plus : la série DOS ne se troue pas. Un
-  dossier annulé libère sa facture (index unique partiel) ; ses marchandises doivent être
+  dossier annulé libère ses factures ; ses marchandises doivent être
   détachées de leurs lignes reçues pour qu'un nouveau dossier les reprenne (voir S1.md).
+  Un dossier annulé garde la trace de ses factures (`liberee_le` posé) : elles sont libres.
 - `cours_origine = 'clos_au_jour'` dit qu'un cours vide a reçu le cours du jour à la clôture
   (étape 16 de Gestion MP, `cours_fige_cloture`) : la réouverture le rend vide.
 - Un frais rattaché à une marchandise la prend dans **son** dossier (FK composite).
@@ -52,7 +59,7 @@ from gestion_mp_pro.modeles.types import COURS, MONTANT, QUANTITE, TAUX_FRAIS, e
 
 
 class Dossier(AvecVersion, Base):
-    """Un dossier d'importation : la marchandise d'une facture et les frais payés pour elle."""
+    """Un dossier d'importation : la marchandise de ses factures et les frais payés pour elle."""
 
     __tablename__ = "dossier"
     __table_args__ = (
@@ -69,12 +76,6 @@ class Dossier(AvecVersion, Base):
             ANNULE_DATE.format(statut="annule", colonne="annule_le"), name="annulation_date"
         ),
         Index(None, "statut"),
-        Index(
-            "uq_dossier_facture",
-            "facture_id",
-            unique=True,
-            postgresql_where=text("statut <> 'annule'"),
-        ),
         index_recherche(),
     )
     __activite__ = True
@@ -95,15 +96,38 @@ class Dossier(AvecVersion, Base):
     annule_par_id: Mapped[int | None] = qui()
     annulation_motif: Mapped[str] = chaine(L.MOTIF)
     commentaire: Mapped[str] = colonne(Text, defaut="")
-    facture_id: Mapped[int | None] = mapped_column(fk("facture.id"))
     saisi_a_la_main: Mapped[bool] = colonne(defaut=False)
     local_confirme: Mapped[bool] = colonne(defaut=False)
     texte_recherche: Mapped[str] = recherche()
     cree_par_id: Mapped[int | None] = qui()
     cree_le: Mapped[datetime] = instant(defaut=MAINTENANT)
 
+    factures: Mapped[list[DossierFacture]] = enfants("DossierFacture", "ajoutee_le")
     lignes: Mapped[list[DossierLigne]] = enfants("DossierLigne")
     frais: Mapped[list[DossierFrais]] = enfants("DossierFrais")
+
+
+class DossierFacture(Base):
+    """Une facture du dossier (révision 0007) : ajoutée à l'ouverture ou ensuite, retirée tant
+    qu'aucun frais ne vise sa marchandise ; `liberee_le` dit que l'annulation du dossier l'a
+    rendue libre (elle n'y est plus, la trace reste)."""
+
+    __tablename__ = "dossier_facture"
+    __table_args__ = (
+        Index(
+            "uq_dossier_facture",
+            "facture_id",
+            unique=True,
+            postgresql_where=text("liberee_le IS NULL"),
+        ),
+    )
+    __activite__ = True
+
+    dossier_id: Mapped[int] = mapped_column(fk("dossier.id", ondelete="CASCADE"), primary_key=True)
+    facture_id: Mapped[int] = mapped_column(fk("facture.id"), primary_key=True)
+    ajoutee_le: Mapped[datetime] = instant(defaut=MAINTENANT)
+    ajoutee_par_id: Mapped[int | None] = qui()
+    liberee_le: Mapped[datetime | None] = instant()
 
 
 class DossierLigne(Base):

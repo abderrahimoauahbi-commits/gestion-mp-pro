@@ -1,7 +1,8 @@
 """La liste des factures des fournisseurs (route 175, `GET /factures`) : chacune avec ses
 réceptions, ce qu'elles ont apporté (pesée × prix, son montant tant qu'il n'est pas saisi), et le
 dossier d'importation qui la porte. `sans_dossier` : celles qu'aucun dossier ne porte encore —
-le lot D7 ouvre un dossier par facture (un dossier = une facture = une livraison, I3).
+le lot D7 ouvre le dossier d'une facture ; une facture n'est que dans un seul dossier, un
+dossier en porte une ou plusieurs (décision du 12/10/2026, qui amende I3).
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.modeles import (
     Dossier,
+    DossierFacture,
     Facture,
     Fournisseur,
     Reception,
@@ -122,10 +124,14 @@ def lister(s: Session, f: FiltresFactures) -> list[FactureResume]:
         nom = r.numero or numerotation.libelle_brouillon(r.id)
         receptions[r.facture_id or 0].append(ReceptionDeFacture(r.id, nom, str(r.statut), r.date))
     dossiers = {
-        d.facture_id: DossierDeFacture(d.id, d.numero, str(d.statut))
-        for d in s.scalars(
-            select(Dossier).where(
-                Dossier.facture_id.in_(fids), Dossier.statut != StatutDossier.annule
+        fid: DossierDeFacture(d.id, d.numero, str(d.statut))
+        for fid, d in s.execute(
+            select(DossierFacture.facture_id, Dossier)
+            .join(Dossier, Dossier.id == DossierFacture.dossier_id)
+            .where(
+                DossierFacture.facture_id.in_(fids),
+                DossierFacture.liberee_le.is_(None),
+                Dossier.statut != StatutDossier.annule,
             )
         )
     }

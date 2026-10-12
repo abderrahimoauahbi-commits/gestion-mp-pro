@@ -16,7 +16,9 @@ from gestion_mp_pro.calcul.importations import EcartFacture
 
 @dataclass
 class FactureDossier:
-    """La facture d'un dossier (ou d'une de ses réceptions)."""
+    """Une facture du dossier (il en porte une ou plusieurs, la première ajoutée d'abord) : ses
+    réceptions, son rapprochement avec ce qu'elle a apporté (C36) et, si elle ne peut pas
+    quitter le dossier, pourquoi (`retrait`)."""
 
     id: int
     numero: str
@@ -27,6 +29,12 @@ class FactureDossier:
     devise: str
     echeance: dt.date | None
     payee_le: dt.date | None
+    ajoutee_le: dt.datetime
+    liberee_le: dt.datetime | None
+    receptions: list[ReceptionCitee]
+    lignes: int
+    ecart: EcartFacture | None
+    retrait: str | None
 
 
 @dataclass
@@ -93,7 +101,7 @@ class DossierResume:
     annule_le: dt.datetime | None
     annule_par: str | None
     annulation_motif: str
-    facture: FactureDossier | None
+    factures: list[FactureDossier]
     a_la_main: bool
     repris: bool
     local_confirme: bool
@@ -118,14 +126,12 @@ class DossierResume:
     surcout_aberrant: bool
     lignes_aberrantes: list[str]
     lignes_negatives: list[str]
-    ecart_facture: EcartFacture | None
     lignes_cours_bon: int
     cours_disparates: list[CoursDisparates]
     cours_eloignes: int
     charges_non_reparties_mad: float
     tva_non_repartie_mad: float
     fournisseurs: list[str]
-    factures: list[str]
     receptions: list[ReceptionCitee]
     pieces: list[Piece]
     familles: list[Famille]
@@ -236,6 +242,7 @@ class Actions:
 
     modifier: str | None
     rattacher: str | None
+    ajouter_facture: str | None
     saisir: str | None
     cours: str | None
     frais: str | None

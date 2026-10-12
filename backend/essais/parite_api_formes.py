@@ -198,6 +198,21 @@ def pesee_comme_gestion_mp(p: dict[str, Any]) -> dict[str, Any]:
     return vue
 
 
+def dossier_comme_gestion_mp(p: dict[str, Any]) -> dict[str, Any]:
+    """Un dossier de PRO lu comme Gestion MP, qui portait **une** facture par dossier (lot
+    PLUSIEURS-FACTURES, décision du 12/10/2026) : `facture` = la première de `factures`,
+    `ecart_facture` = son rapprochement, `factures` = les numéros de ses pièces."""
+    vue = dict(p)
+    factures = p.get("factures")
+    if not isinstance(factures, list) or (factures and not isinstance(factures[0], dict)):
+        return vue
+    premiere = factures[0] if factures else None
+    vue["facture"] = premiere
+    vue["ecart_facture"] = premiere.get("ecart") if premiere else None
+    vue["factures"] = sorted(x["facture"] for x in p.get("pieces", []) if x.get("facture"))
+    return vue
+
+
 NOTE_CLOTURE = re.compile(r"(\s*·\s*)?cours du jour \S+ figé à la clôture du \d{2}/\d{2}/\d{4}")
 
 

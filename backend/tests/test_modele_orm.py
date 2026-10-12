@@ -150,7 +150,7 @@ def test_tables_d_activite() -> None:
     referentiels = {"matiere", "fournisseur", "qualite", "recette_version", "plan_version"}
     gardees = {"utilisateur", "journal", "parametre", "devise_cours", "metier", "montage"}
     assert not activite & (referentiels | gardees | {"piece_jointe"})
-    assert len(activite) == 31
+    assert len(activite) == 32
 
 
 def test_semences_completes() -> None:

@@ -165,12 +165,8 @@ LIGNES: dict[str, Ligne] = {
         "lot_id": i["lot"],
         "magasin_id": i["courant"],
     },
-    "dossier": lambda i: {
-        "numero": "1/26",
-        "annee": 2026,
-        "rang": 1,
-        "facture_id": i["facture"],
-    },
+    "dossier": lambda i: {"numero": "1/26", "annee": 2026, "rang": 1},
+    "dossier_facture": lambda i: {"dossier_id": i["dossier"], "facture_id": i["facture"]},
     "dossier_ligne": lambda i: {
         "dossier_id": i["dossier"],
         "matiere_id": i["matiere"],

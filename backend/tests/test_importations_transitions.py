@@ -1,5 +1,6 @@
 """Table de transitions des dossiers d'importation (lot D7 ; PLAN-DE-RECETTE § 4) : 3 statuts ×
-6 gestes × 4 rôles, rejouée exhaustivement — code attendu, statut suivant, et la fiche annonce
+8 gestes (dont « Ajouter une facture » et « Retirer » une facture, lot PLUSIEURS-FACTURES) ×
+4 rôles, rejouée exhaustivement — code attendu, statut suivant, et la fiche annonce
 d'avance la même chose (`actions`) ; version périmée → 409 sur chaque écriture.
 """
 
@@ -9,10 +10,28 @@ from typing import Any
 
 import pytest
 from fabrique import *  # noqa: F403
-from fabriques.importations import Import, a_la_main, fiche, frais, geste, ouvrir, poste
+from fabriques.importations import (
+    Import,
+    a_la_main,
+    facture_id,
+    fiche,
+    frais,
+    geste,
+    ouvrir,
+    poste,
+)
 from fastapi.testclient import TestClient
 
-GESTES = ("modifier", "frais", "cours", "cloturer", "rouvrir", "annuler")
+GESTES = (
+    "modifier",
+    "frais",
+    "cours",
+    "cloturer",
+    "rouvrir",
+    "annuler",
+    "ajouter_facture",
+    "retirer_facture",
+)
 STATUTS = ("ouvert", "clos", "annule")
 ATTENDU: dict[tuple[str, str], tuple[int, str]] = {
     ("ouvert", "modifier"): (200, "ouvert"),
@@ -33,6 +52,12 @@ ATTENDU: dict[tuple[str, str], tuple[int, str]] = {
     ("annule", "cloturer"): (409, "annule"),
     ("annule", "rouvrir"): (409, "annule"),
     ("annule", "annuler"): (409, "annule"),
+    ("ouvert", "ajouter_facture"): (200, "ouvert"),
+    ("clos", "ajouter_facture"): (409, "clos"),
+    ("annule", "ajouter_facture"): (409, "annule"),
+    ("ouvert", "retirer_facture"): (200, "ouvert"),
+    ("clos", "retirer_facture"): (409, "clos"),
+    ("annule", "retirer_facture"): (409, "annule"),
 }
 """(statut, geste) → (code, statut suivant) pour la direction et les achats."""
 
@@ -55,9 +80,21 @@ def _en_etat(client: TestClient, imp: Import, statut: str) -> dict[str, Any]:
     return d
 
 
-def _jouer(client: TestClient, d: dict[str, Any], nom: str, version: int) -> Any:
-    """Le geste, à la version donnée."""
+def _libre(client: TestClient, imp: Import) -> int:
+    """Une facture reçue qui n'attend encore aucun dossier."""
+    nom = f"TR-libre-{len(imp.factures)}"
+    imp.recevoir(client, nom, [("FIL", "TRL", 10, 2)])
+    return facture_id(client, imp.f(nom))
+
+
+def _jouer(client: TestClient, d: dict[str, Any], nom: str, version: int, libre: int = 0) -> Any:
+    """Le geste, à la version donnée (`libre` : la facture à ajouter)."""
     url = f"/api/dossiers/{d['id']}"
+    if nom == "ajouter_facture":
+        return client.post(f"{url}/factures", json={"version": version, "facture_id": libre})
+    if nom == "retirer_facture":
+        fid = d["factures"][0]["id"]
+        return client.delete(f"{url}/factures/{fid}", params={"version": version})
     if nom == "modifier":
         corps = {
             "libelle": "table",
@@ -88,17 +125,19 @@ def test_table_de_transitions(
     achats: TestClient = request.getfixturevalue("achats")
     client: TestClient = request.getfixturevalue(role)
     d = _en_etat(achats, imp, statut)
+    libre = _libre(achats, imp) if nom == "ajouter_facture" else 0
     lu = fiche(achats, d["id"])
-    reponse = _jouer(client, d, nom, lu["version"])
+    annonce = lu["factures"][0]["retrait"] if nom == "retirer_facture" else lu["actions"][nom]
+    reponse = _jouer(client, d, nom, lu["version"], libre)
     if role in ("alimentation", "administrateur"):
         assert reponse.status_code == 403
         assert fiche(achats, d["id"])["statut"] == statut
         return
     code, suivant = ATTENDU[(statut, nom)]
     assert reponse.status_code == code, reponse.text
-    assert (lu["actions"][nom] is None) == (code < 300)
+    assert (annonce is None) == (code < 300)
     if code >= 300:
-        assert reponse.json()["detail"] == lu["actions"][nom]
+        assert reponse.json()["detail"] == annonce
     assert fiche(achats, d["id"])["statut"] == suivant
 
 
@@ -117,6 +156,8 @@ GESTES_VERSIONNES = (
     "retirer_frais",
     "rouvrir",
     "saisir",
+    "ajouter_facture",
+    "retirer_facture",
 )
 
 
@@ -155,14 +196,14 @@ def _perime(client: TestClient, imp: Import, nom: str) -> Any:
             f"{url}/lignes/{d['lignes'][0]['id']}", json={"version": 99, "commentaire": "x"}
         )
     autres = {
-        "rattacher": {"facture_id": d["facture"]["id"]},
+        "rattacher": {"facture_id": d["factures"][0]["id"]},
         "detacher": {"reception_id": d["receptions"][0]["id"]},
         "annuler": {"motif": "table"},
         "cours-des-bons": {},
     }
     if nom in autres:
         return client.post(f"{url}/{nom}", json={"version": 99, **autres[nom]})
-    return _jouer(client, d, nom, 99)
+    return _jouer(client, d, nom, 99, _libre(client, imp) if nom == "ajouter_facture" else 0)
 
 
 @pytest.mark.parametrize("nom", GESTES_VERSIONNES)

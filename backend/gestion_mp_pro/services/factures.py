@@ -9,8 +9,9 @@
 - Après la validation (route 174) : champ absent = inchangé, `numero: ""` détache ; une facture
   réglée ne change plus (annuler d'abord le règlement), ni une facture d'un dossier clos ; d'un
   dossier ouvert, le coût d'un mois clos ne bouge pas.
-- Une facture n'a qu'une devise, celle de sa réception. **Un dossier d'importation = une facture
-  = une livraison** (décision I3) : le lot D7 s'appuie sur ces factures (une par dossier).
+- Une facture n'a qu'une devise, celle de sa réception. Elle n'est que dans **un seul**
+  dossier d'importation ; un dossier en porte une ou plusieurs (décision du 12/10/2026, qui
+  amende I3) : le lot D7 s'appuie sur ces factures.
 - Le règlement (route 229 du lot D8) : jamais dans le futur ni dans une période close, jamais
   avant la pièce ; l'annuler est une décision de la direction, avec son motif (A-21, B-01).
 """
@@ -25,7 +26,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
-from gestion_mp_pro.modeles import Dossier, Facture, Fournisseur, Reception
+from gestion_mp_pro.modeles import Dossier, DossierFacture, Facture, Fournisseur, Reception
 from gestion_mp_pro.modeles.enums import Role, StatutDocument, StatutDossier
 from gestion_mp_pro.modeles.types import MONTANT, arrondir
 from gestion_mp_pro.services import audit, horloge, periode
@@ -40,8 +41,14 @@ MOTIF_MIN = 3
 
 def porteur(s: Session, facture_id: int) -> Dossier | None:
     """Le dossier d'importation (non annulé) qui porte la facture."""
-    requete = select(Dossier).where(
-        Dossier.facture_id == facture_id, Dossier.statut != StatutDossier.annule
+    requete = (
+        select(Dossier)
+        .join(DossierFacture, DossierFacture.dossier_id == Dossier.id)
+        .where(
+            DossierFacture.facture_id == facture_id,
+            DossierFacture.liberee_le.is_(None),
+            Dossier.statut != StatutDossier.annule,
+        )
     )
     return s.scalars(requete.limit(1)).first()
 

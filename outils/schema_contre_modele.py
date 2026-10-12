@@ -50,8 +50,8 @@ class Documentation:
 
 
 def _tables_listees(texte: str) -> set[str]:
-    """La liste des tables du § 11 (« Liste des 71 tables : … »)."""
-    liste = texte.split("Liste des 71 tables :", 1)[1]
+    """La liste des tables du § 11 (« Liste des 72 tables : … »)."""
+    liste = texte.split("Liste des 72 tables :", 1)[1]
     return {t.strip(" .\n") for t in liste.split(",") if t.strip(" .\n")}
 
 

@@ -31,6 +31,7 @@ from gestion_mp_pro.modeles import (
     Commande,
     CommandeLigne,
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierLigne,
     Lot,
@@ -210,10 +211,11 @@ class Usine:
             saisi_a_la_main=True,
             date_arrivee=arrivee,
             statut=StatutDossier.ouvert,
-            facture_id=facture_id,
         )
         self.s.add(d)
         self.s.flush()
+        if facture_id is not None:
+            self.s.add(DossierFacture(dossier_id=d.id, facture_id=facture_id))
         for mid, kg, valeur in marchandises:
             self.s.add(
                 DossierLigne(

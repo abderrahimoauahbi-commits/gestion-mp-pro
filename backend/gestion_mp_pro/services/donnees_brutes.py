@@ -45,6 +45,7 @@ TABLES = (
     "reception",
     "reception_ligne",
     "dossier",
+    "dossier_facture",
     "dossier_ligne",
     "dossier_frais",
     "dossier_frais_part",

@@ -55,7 +55,7 @@ def test_les_fournisseurs_marocains_n_ont_pas_de_dossier(achats: TestClient) -> 
     assert r.status_code == 409 and "fournisseur marocain" in r.json()["detail"]
     assert r.json()["detail"].endswith("L'ouvrir quand même se confirme.")
     d = ouvrir(achats, numero, local_confirme=True)
-    assert d["facture"]["numero"] == numero and d["local_confirme"]
+    assert d["factures"][0]["numero"] == numero and d["local_confirme"]
 
 
 def test_deux_devises_un_cours_chacune_et_cours_du_bon(achats: TestClient) -> None:
@@ -132,7 +132,7 @@ def test_une_reception_sans_facture_attend_sa_facture(achats: TestClient) -> Non
     assert attente["lignes"] == 1 and attente["valeurs"] == [{"devise": imp.devise, "valeur": 100}]
     facture_reception(achats, r, numero=imp.f("FAC-9"))
     d = ouvrir(achats, imp.f("FAC-9"))
-    assert d["nb_lignes"] == 1 and d["facture"]["numero"] == imp.f("FAC-9")
+    assert d["nb_lignes"] == 1 and d["factures"][0]["numero"] == imp.f("FAC-9")
 
 
 def _repris(receptions: list[int]) -> int:
@@ -188,7 +188,8 @@ def test_une_facture_d_un_dossier_repris_n_ouvre_pas_un_second_dossier(
     imp: Import = reprise["imp"]
     d = fiche(achats, reprise["dossier"])
     assert d["repris"] and not d["a_la_main"]
-    assert d["factures"] == sorted([imp.f("REP-FA"), imp.f("REP-FB")])
+    assert d["factures"] == []  # un dossier repris n'a pas de facture à lui
+    assert [x["facture"] for x in d["pieces"]] == sorted([imp.f("REP-FA"), imp.f("REP-FB")])
     assert d["actions"]["saisir"].startswith(f"Le dossier {d['numero']} porte des réceptions")
     corps = {"matiere_id": imp.matiere("ROUGE"), "lot_numero": unique("NEUF"), "quantite_kg": 1}
     refus = geste(achats, d, "lignes", 409, **corps, valeur_devise=1)
@@ -211,9 +212,9 @@ def test_une_facture_d_un_dossier_repris_n_ouvre_pas_un_second_dossier(
     assert d["nb_lignes"] == 3
     for rec in (reprise["ra1"], reprise["ra2"]):
         d = geste(achats, d, "detacher", reception_id=rec["id"])
-    assert d["factures"] == [imp.f("REP-FB")] and d["nb_frais"] == 1
+    assert [x["facture"] for x in d["pieces"]] == [imp.f("REP-FB")] and d["nb_frais"] == 1
     nouveau = ouvrir(achats, imp.f("REP-FA"))
-    assert nouveau["nb_lignes"] == 2 and nouveau["facture"]["numero"] == imp.f("REP-FA")
+    assert nouveau["nb_lignes"] == 2 and nouveau["factures"][0]["numero"] == imp.f("REP-FA")
     refus = geste(achats, d, "detacher", 404, reception_id=reprise["rc"]["id"])
     assert (
         refus["detail"]
@@ -267,7 +268,7 @@ def test_la_cloture_dit_le_cours_du_bon_et_trace_le_cours_fige(achats: TestClien
     d = geste_put(achats, d, f"lignes/{x['id']}", cours=10)
     with cours(imp.devise, "10.5"):
         imp.recevoir(achats, "COURS-1", [("NOIR", "C-2", 10, 4)])
-        d = geste(achats, d, "rattacher", facture_id=d["facture"]["id"])
+        d = geste(achats, d, "rattacher", facture_id=d["factures"][0]["id"])
         assert d["cours_disparates"] == [{"devise": imp.devise, "cours": [10, 10.5]}]
         assert f"plusieurs cours en {imp.devise}" in d["a_verifier"]
     assert j()

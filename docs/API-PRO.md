@@ -414,13 +414,15 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 187 | GET | `/dossiers` | D, A | `?statut=ouvert\|clos\|annule&q=&fournisseur=&verifier=oui\|non&apres=&limite=` (sans statut : ouverts et clos ; `q` : mots sans accents **et à la ponctuation près**, poussés en SQL, sur numéro, libellé, banque, commentaire, factures, réceptions, familles, fournisseurs ; `fournisseur` = celui de la facture ; `verifier` : dossiers à vérifier — calcul par dossier, servi en liste bornée) | `PageDossiers` = `Page[DossierResume]`, le plus récemment arrivé d'abord (curseur date d'arrivée puis id) | A71 |
+| 187 | GET | `/dossiers` | D, A | `?statut=ouvert\|clos\|annule&q=&fournisseur=&verifier=oui\|non&apres=&limite=` (sans statut : ouverts et clos ; `q` : mots sans accents **et à la ponctuation près**, poussés en SQL, sur numéro, libellé, banque, commentaire, factures (celles du dossier et de ses marchandises), réceptions, familles, fournisseurs ; `fournisseur` = celui d'**une** de ses factures (lot PLUSIEURS-FACTURES) ; `verifier` : dossiers à vérifier — calcul par dossier, servi en liste bornée) | `PageDossiers` = `Page[DossierResume]`, le plus récemment arrivé d'abord (curseur date d'arrivée puis id) | A71 |
 | 250 | GET | `/dossiers/apercu` | D, A | mêmes filtres que 187 (sans `apres`/`limite`) | `ApercuDossiers` {ouvert, clos, annule (comptes par statut), nombre, poids, marchandise_mad, charges_mad, revient_mad, decaisse_mad (totaux indicateurs/pied), non_repartis `[{id, numero, montant}]`, fournisseurs `[{id, nom}]`} | nouveau (pagination, lot PAGINATION3) |
 | 188 | GET | `/dossiers/a-rattacher` | D, A | `?locaux=` | `EnAttente` {factures: `[FactureARattacher]`, sans_facture: `[ReceptionSansFacture]`, locaux: {factures, lignes}} ; valeurs par devise en liste `[{devise, valeur}]` | A73 |
-| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (marchandise, frais, répartition, coût hors TVA, TVA, attendus — dont `tva_ecart_tolere_mad` = \|TVA attendue\| × `toler_tva_import`, le même écart que C29 —, `tva_ecart_mad`, `toler_tva_import`, `cours_eloignes`, `alertes` de clôture, `a_verifier`, `echeancier`, `actions` (geste → null ou phrase du refus), `a_rattacher`, `nb_pieces`, `version` ; détail dans `api/importations/schemas_fiche.py`) | A72 |
+| 189 | GET | `/dossiers/{id}` | D, A | — | `DossierFiche` (`factures` : `[FactureDossier]` {id, numero, fournisseur, date, montant, devise, echeance, payee_le, ajoutee_le, liberee_le, receptions, lignes, `ecart` (C36 de **cette** facture avec ce qu'elle a apporté), `retrait` (null, ou pourquoi elle ne peut pas quitter le dossier)} — remplace `facture` et `ecart_facture`, lot PLUSIEURS-FACTURES ; marchandise, frais, répartition, coût hors TVA, TVA, attendus — dont `tva_ecart_tolere_mad` = \|TVA attendue\| × `toler_tva_import`, le même écart que C29 —, `tva_ecart_mad`, `toler_tva_import`, `cours_eloignes`, `alertes` de clôture, `a_verifier`, `echeancier`, `actions` (geste → null ou phrase du refus), `a_rattacher`, `nb_pieces`, `version` ; détail dans `api/importations/schemas_fiche.py`) | A72 |
 | 190 | POST | `/dossiers` | D, A | `DossierCreation` {facture_id \| null, numero (à la main seulement, format `NN/AA`), libelle, date_arrivee (exigée à la main), banque, commentaire, local_confirme} | `DossierFiche` | A74 |
 | 191 | PUT | `/dossiers/{id}` | D, A | `DossierModification` {libelle, banque, commentaire, date_arrivee \| null, version} (fiche entière ; `commentaire` = colonne du modèle, « Observations » à l'écran) | `DossierFiche` | A75 |
-| 192 | POST | `/dossiers/{id}/rattacher` | D, A | `{version, facture_id}` — par facture seulement (pas de `reception_ligne_ids` : un rattachement par lignes pouvait couper une réception, contraire à « un dossier = une facture = une livraison ») | `DossierFiche` | A76 |
+| 192 | POST | `/dossiers/{id}/rattacher` | D, A | `{version, facture_id}` — par facture seulement (pas de `reception_ligne_ids` : un rattachement par lignes pouvait couper une réception) ; le second camion d'**une** des factures du dossier | `DossierFiche` | A76 |
+| 253 | POST | `/dossiers/{id}/factures` | D, A | `AjoutFacture` {version, facture_id, local_confirme} — une facture reçue qui n'est dans aucun dossier : toute sa marchandise libre entre (comme à l'ouverture) ; autre devise ou autre fournisseur permis ; fournisseur marocain : 409 sans `local_confirme` ; facture déjà dans un dossier (ou prise au même instant par un autre poste) : 409 `doublon` qui nomme le dossier ; dossier saisi à la main : 409 ; période close respectée | `DossierFiche` | nouveau (lot PLUSIEURS-FACTURES) |
+| 254 | DELETE | `/dossiers/{id}/factures/{fid}` | D, A | `?version=` (celle du dossier) — sa marchandise sort et attend de nouveau son dossier, les frais restent (répartis sur ce qui reste) ; 409 si un frais vise une de ses marchandises (le `retrait` de la fiche, mot pour mot) ; 404 si elle n'est pas dans le dossier | `DossierFiche` | nouveau (lot PLUSIEURS-FACTURES) |
 | 193 | POST | `/dossiers/{id}/lignes` | D, A | `LigneManuelle` {matiere_id, lot_numero, fournisseur_id, quantite_kg, valeur_devise, devise, cours (nul = cours du jour), commentaire, version} | `DossierFiche` | A77 |
 | 194 | PUT | `/dossiers/{id}/lignes/{lid}` | D, A | `{cours, commentaire, version}` | `DossierFiche` | A78 |
 | 195 | DELETE | `/dossiers/{id}/lignes/{lid}` | D, A | `?version=` | `DossierFiche` | A81 |
@@ -432,7 +434,7 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 | 201 | DELETE | `/dossiers/{id}/frais/{fid}` | D, A | `?version=` (celle du frais) | `DossierFiche` | A85 |
 | 202 | POST | `/dossiers/{id}/cloturer` | D, A | `{version, alertes_lues}` (`alertes_lues` vaut confirmation : s'il y a des alertes et qu'il est faux → 422 `confirmation_requise`) | `DossierFiche` | A86 |
 | 203 | POST | `/dossiers/{id}/rouvrir` | D, A | `{version, motif}` (motif facultatif, au journal ; refusé en période close) | `DossierFiche` | A87 |
-| 204 | POST | `/dossiers/{id}/annuler` | D, A | `{version, motif}` (motif **exigé**, 3–300 ; refusé sur un clos et en période close) | `DossierFiche` (statut `annule`, numéro, lignes détachées et frais gardés, marchandise libérée ; un annulé ne se rouvre pas ; un dossier n'est **jamais supprimé**) | A88 |
+| 204 | POST | `/dossiers/{id}/annuler` | D, A | `{version, motif}` (motif **exigé**, 3–300 ; refusé sur un clos et en période close) | `DossierFiche` (statut `annule`, numéro, lignes détachées et frais gardés, marchandise et **toutes** ses factures libérées (`liberee_le`) ; un annulé ne se rouvre pas ; un dossier n'est **jamais supprimé**) | A88 |
 | 205 | GET | `/export/dossiers` | D, A | mêmes filtres que 187 | xlsx (4 feuilles) | A89 |
 | 206 | GET | `/analyse/revient` | D, A | `?axe=&q=&statut=ouvert\|clos&du=&au=&qualite=` (id) `&matieres=` (ids répétés) `&selection=` (JSON) `&composition=&type_fil=&titrage=&couleur=&fournisseur=` (nom) `&detail=` ; axe, sélection, statut inconnus → 422 | `AnalyseRevient` | A90 |
 | 207 | GET | `/analyse/revient/qualites/{id}` | D, A | `?du=&au=` | `CoutQualite` | A91 (par id) |
@@ -499,7 +501,7 @@ comprises) ; `GET /acces` et `GET /acces/qr` sont ouverts aussi à T ; `GET /ech
 reçoit `vue=consommation` ; `POST /commandes/{id}/approuver` reçoit `date` ; `PUT /dossiers/{id}/lignes/{lid}` accepte `cours: null` (« cours du jour ») ; `GET /dossiers/{id}` porte `a_rattacher` ; `GET /receptions/bobines` reçoit `matiere`. Le `PUT` d'une fiche reste un remplacement complet (l'écran envoie
 la fiche entière, y compris pour « désactiver ») : pas de corps partiel.
 
-**Total : 246 routes PRO** (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
+**Total : 248 routes PRO** (253 et 254 ajoutées par le lot PLUSIEURS-FACTURES) (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
 service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/api/openapi.json`.
 
 ---
@@ -551,7 +553,8 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 | 174 | Facture : sémantique unique (absent = inchangé), réservée à une réception validée (le brouillon porte sa facture dans son corps) | A.12-17 |
 | 184 | Une réclamation close se complète encore (réponse, montant obtenu : l'avoir arrive après la clôture) sans changer son issue | R20r |
 | 190–191 | `PUT` n'accepte que ce qu'il modifie ; `date_arrivee` peut se vider | A.12-19 |
-| 192 | Rattacher par facture seulement (plus de `reception_ligne_ids`) | un dossier = une facture = une livraison (I3) |
+| 192 | Rattacher par facture seulement (plus de `reception_ligne_ids`) | I3 (une ligne reçue ne sort qu'avec sa réception) |
+| 189, 253, 254 | Un dossier porte **une ou plusieurs factures** (`factures`, « Ajouter une facture », « Retirer ») ; une facture n'est que dans un seul dossier ; C36 facture par facture ; détacher la dernière réception d'une facture la retire du dossier ; annuler libère toutes ses factures | décision de Mohamed du 12/10/2026 (amende I3) |
 | 204 | Annuler un dossier au lieu de le supprimer, pour **tout** dossier, même saisi à la main (numéro gardé, frais sortis du coût, motif exigé) : plus aucune suppression | DONNEES 11, B-02 |
 | 205–208 | Statuts `ouvert`/`clos` en minuscules partout ; dates en vraies dates Excel ; titre corrigé | A.12-8/9/10 |
 | 212 | Écart (%) sur une seule échelle (pourcentage) ; synthèse = contrôles en anomalie **et** lignes | CONTROLES § 6 n° 1, 27 |
@@ -796,7 +799,7 @@ de Gestion MP corrigé** (245 : annulation d'un inventaire validé), et **1 ajou
 ## 4. Matrice des droits
 
 Déclarée une fois (`securite/matrice.py`, générée depuis les dépendances des routes et exportée en
-`tests/matrice_droits.csv`) : 246 routes × {anonyme, D, A, L, T} → code attendu. L'essai
+`tests/matrice_droits.csv`) : 248 routes × {anonyme, D, A, L, T} → code attendu. L'essai
 `test_matrice_droits` la rejoue entièrement (paramètres remplis par les fabriques) ; une route
 nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 `test_toute_route_declare_ses_roles` échoue si une route (hors 1, 2, 8, 9, 10, 22) n'a pas de
@@ -805,7 +808,7 @@ nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 | Rôle | Routes permises | Interdites notables |
 |---|---|---|
 | Anonyme | 1, 2, 8, 9, 10, 22 | tout le reste (401) |
-| Direction | toutes les routes métier et techniques (239 hors routes publiques) | aucune |
+| Direction | toutes les routes métier et techniques (241 hors routes publiques) | aucune |
 | Achats | lectures et écritures achats, réceptions, importations, stock (sauf retour machine), inventaires, référentiels matières/fournisseurs/classification (valeurs), devises, pilotage, suivi | approbation (158, 159), plan et recettes (84–90, 146), rôles, postes, codes, magasins, métiers (écriture), montage, ordres (écriture), comptes, sauvegardes, journal, période close |
 | Alimentation | lectures « C » (prix filtrés), ordres, retours machine, transferts, mise en quarantaine, montage, signalements, notifications, recherche | tout ce qui est D/A : commandes, réceptions, importations, plan d'achat, pilotage, réglages, devises, exports chiffrés |
 | Administrateur | 3, 4, 11–25 (techniques), 43–55 | toute route métier (403) : il ne lit ni stock, ni prix, ni documents |

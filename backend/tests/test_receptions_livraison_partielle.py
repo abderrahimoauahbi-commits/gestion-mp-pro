@@ -118,7 +118,7 @@ def test_un_bon_livre_en_deux_camions_puis_deux_dossiers(
     d2 = ouvrir(achats, f2)
     assert d2["id"] != d1["id"] and d2["numero"] != d1["numero"]
     assert sorted(x["matiere_id"] for x in d2["lignes"]) == sorted([vert, bleu])
-    assert (d1["facture"]["numero"], d2["facture"]["numero"]) == (f1, f2)
+    assert (d1["factures"][0]["numero"], d2["factures"][0]["numero"]) == (f1, f2)
 
 
 def test_toutes_les_lignes_vides_rien_n_est_pese(

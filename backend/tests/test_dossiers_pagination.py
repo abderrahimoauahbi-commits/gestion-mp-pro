@@ -107,9 +107,15 @@ def test_apercu_par_onglet(achats: TestClient, jeu: dict) -> None:
     assert apercu["revient_mad"] == pytest.approx(sum(d["revient_mad"] for d in clos))
 
 
+def _factures(r: Any) -> list[str]:
+    """Les factures d'un dossier (les siennes et leurs fournisseurs, celles de ses marchandises)."""
+    siennes = [x for f in r.factures for x in (f.numero, f.fournisseur)]
+    return siennes + [p.facture for p in r.pieces if p.facture]
+
+
 def _vieux_match(r: Any, q: str) -> bool:
     """L'ancienne recherche Python (route 187 avant pagination) : `trouve` sur les mêmes champs."""
-    morceaux = [r.numero, r.libelle, r.banque, r.commentaire, *r.factures, *r.fournisseurs]
+    morceaux = [r.numero, r.libelle, r.banque, r.commentaire, *_factures(r), *r.fournisseurs]
     morceaux += [x.numero for x in r.receptions] + [x.famille for x in r.familles]
     return recherche.trouve(q, *morceaux)
 
@@ -121,7 +127,7 @@ def test_recherche_sql_identique_a_l_ancienne(jeu: dict) -> None:
         resumes = lecture._resumes(s, lecture._charger(s, lecture.filtrer(FiltresDossiers())))
         jetons: set[str] = set()
         for r in resumes:
-            for champ in [r.numero, r.libelle, r.banque, *r.factures, *r.fournisseurs]:
+            for champ in [r.numero, r.libelle, r.banque, *_factures(r), *r.fournisseurs]:
                 jetons.update((champ or "").split())
             jetons.update(x.numero for x in r.receptions)
             jetons.update(x.famille for x in r.familles)
@@ -138,7 +144,7 @@ def test_filtre_fournisseur_et_verifier(achats: TestClient, jeu: dict) -> None:
     """Le filtre fournisseur (de la facture) et « à vérifier » filtrent au serveur."""
     fid = jeu["imp"].fournisseur_id
     page = _page(achats, fournisseur=fid, limite=5000)["elements"]
-    assert page and all(d["facture"] and d["facture"]["fournisseur_id"] == fid for d in page)
+    assert page and all(any(f["fournisseur_id"] == fid for f in d["factures"]) for d in page)
     a_verifier = _page(achats, verifier="oui", limite=5000)["elements"]
     assert all(d["a_verifier"] for d in a_verifier)
     sans = _page(achats, verifier="non", limite=5000)["elements"]

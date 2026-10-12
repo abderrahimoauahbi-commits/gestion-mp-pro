@@ -25,6 +25,7 @@ from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.constantes import TYPES_MOUVEMENT
 from gestion_mp_pro.modeles import (
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierFraisPart,
     DossierLigne,
@@ -193,13 +194,14 @@ def dossiers(s: Session, d: c.Donnees, ix: Index) -> None:
     postes = dict(s.execute(select(PosteFrais.code, PosteFrais.id)).all())
     for x in d.dossiers_import:
         nn, aa = x.numero.split("/")
-        facture = ix.factures.get(x.facture) if x.facture else None
-        if facture is not None:
-            s.execute(
-                update(Facture)
-                .where(Facture.id == facture)
-                .values(montant=x.facture_montant or None, devise=x.facture_devise or "MAD")
-            )
+        factures = [(f, ix.factures.get(f.numero)) for f in x.factures if f.numero]
+        for f, fid in factures:
+            if fid is not None:
+                s.execute(
+                    update(Facture)
+                    .where(Facture.id == fid)
+                    .values(montant=f.montant or None, devise=f.devise or "MAD")
+                )
         did = ajouter(
             s,
             Dossier(
@@ -211,12 +213,12 @@ def dossiers(s: Session, d: c.Donnees, ix: Index) -> None:
                 banque=x.banque,
                 commentaire=x.commentaire,
                 statut="clos" if x.statut == "Clos" else "ouvert",
-                facture_id=facture,
                 clos_le=instant(x.date_arrivee or d.mouvements[0].date)
                 if x.statut == "Clos"
                 else None,
             ),
         ).id
+        s.add_all(DossierFacture(dossier_id=did, facture_id=fid) for _, fid in factures if fid)
         _lignes_et_frais(s, ix, did, x, postes)
     s.flush()
 

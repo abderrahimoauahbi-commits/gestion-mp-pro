@@ -1,14 +1,17 @@
-"""Ouvrir un dossier (route 190) et y rattacher le second camion de sa facture (route 192) —
-REGLES R-IMP-19 à R-IMP-30 ; défauts B-02, B-03.
+"""Ouvrir un dossier (route 190) et y rattacher le second camion d'une de ses factures (route
+192) — REGLES R-IMP-19 à R-IMP-30 ; défauts B-02, B-03. Une facture s'ajoute ensuite à un dossier
+ouvert (route 253, `factures_du_dossier`) : un dossier en porte une ou plusieurs (décision de
+Mohamed du 12/10/2026), une facture n'est que dans un seul dossier.
 
 Depuis une facture : toute sa marchandise libre entre, à sa pesée × son prix, au cours figé de
 son bon s'il y en a un (`cours_origine = bon`), sinon sans cours (« cours du jour »). Le numéro
 suit la série `NN/AA` de l'année d'arrivée, sans trou (`services/numerotation`). Seul un dossier
 d'avant la mise en service se saisit à la main, avec son vrai numéro s'il en avait un.
 
-**Deux postes** qui ouvrent ensemble le dossier d'une facture (ou rattachent la même
-marchandise) : les index uniques départagent, l'insertion se fait dans un point de reprise, et
-le perdant reçoit un 409 qui nomme le dossier gagnant — jamais une erreur du serveur.
+**Deux postes** qui ouvrent ensemble le dossier d'une facture (ou l'ajoutent chacun à un
+dossier, ou rattachent la même marchandise) : les index uniques départagent, l'insertion se
+fait dans un point de reprise, et le perdant reçoit un 409 qui nomme le dossier gagnant —
+jamais une erreur du serveur.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import (
     Dossier,
+    DossierFacture,
     DossierLigne,
     Facture,
     Fournisseur,
@@ -42,7 +46,14 @@ from gestion_mp_pro.services.importations.libres import (
     porteurs,
 )
 from gestion_mp_pro.services.importations.parties import A_LA_MAIN
-from gestion_mp_pro.services.importations.socle import DIRHAM, bons, contexte, noter, ouvert
+from gestion_mp_pro.services.importations.socle import (
+    DIRHAM,
+    a_la_main,
+    bons,
+    contexte,
+    noter,
+    ouvert,
+)
 
 Paires = Sequence[tuple[ReceptionLigne, Reception]]
 SERIE = re.compile(r"(\d{1,3})/(\d{2})")
@@ -116,8 +127,8 @@ def numero_saisi(s: Session, brut: str) -> str:
 def deja_porte(s: Session, f: Facture, porteur: tuple[int, str]) -> str:
     """Le refus d'un second dossier pour une facture : il dit où va ce qui en reste."""
     did, numero = porteur
-    d = s.get(Dossier, did)
-    if d is not None and d.facture_id == f.id:
+    lien = s.get(DossierFacture, (did, f.id))
+    if lien is not None and lien.liberee_le is None:
         return (
             f"Cette facture a déjà son dossier, {numero} : un dossier par facture. Ce qui en "
             "reste à rattacher (un second camion) s'y ajoute."
@@ -179,45 +190,69 @@ def refus_concurrent(s: Session, facture_id: int | None) -> Refus:
     )
 
 
-def inserer(s: Session, d: Dossier, lignes: list[DossierLigne], facture_id: int | None) -> None:
-    """Le dossier et ses marchandises, dans un point de reprise : l'index unique départage."""
+def inserer(
+    s: Session,
+    d: Dossier,
+    lignes: list[DossierLigne],
+    facture_id: int | None,
+    lien: DossierFacture | None = None,
+) -> None:
+    """Le dossier, sa facture nouvelle et ses marchandises, dans un point de reprise : les index
+    uniques (`uq_dossier_facture`, la ligne reçue) départagent deux postes."""
     try:
         with s.begin_nested():
             if d.id is None:
                 s.add(d)
+            if lien is not None:
+                d.factures.append(lien)
             d.lignes.extend(lignes)
             s.flush()
     except IntegrityError:
         raise refus_concurrent(s, facture_id) from None
 
 
-def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
-    """Le dossier d'une facture : toute sa marchandise libre (R-IMP-19, 21 à 25)."""
-    f = s.get(Facture, e.facture_id)
+def facture_libre(s: Session, facture_id: int | None) -> Facture:
+    """La facture qui ouvre un dossier ou s'y ajoute : connue, et dans aucun dossier (une
+    facture n'est que dans un seul dossier)."""
+    f = s.get(Facture, facture_id) if facture_id else None
     if f is None:
         raise Refus.introuvable("Facture inconnue.")
     deja = porteurs(s, [f.id]).get(f.id)
     if deja:
         raise Refus.etat(deja_porte(s, f, deja[0]), code="doublon")
+    return f
+
+
+def fournisseur_confirme(s: Session, f: Facture, confirme: bool, geste: str) -> tuple[str, bool]:
+    """Le nom du fournisseur de la facture, et s'il est marocain : alors le geste se confirme
+    (I16, ni douane ni fret international)."""
+    fournisseur = s.get(Fournisseur, f.fournisseur_id)
+    if fournisseur is None:
+        return "", False
+    local = est_local(fournisseur.pays, fournisseur.devise)
+    if local and not confirme:
+        raise Refus.etat(
+            f"{fournisseur.nom} est un fournisseur marocain : ni douane, ni fret international, "
+            f"sa facture {f.numero} n'a normalement pas de dossier d'importation. {geste} quand "
+            "même se confirme."
+        )
+    return fournisseur.nom, local
+
+
+def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
+    """Le dossier d'une facture : toute sa marchandise libre (R-IMP-19, 21 à 25)."""
+    f = facture_libre(s, e.facture_id)
     if e.numero.strip():
         raise Refus.saisie(
             "Le dossier d'une facture prend le numéro suivant de la série (NN/AA) : un numéro "
             "choisi ne vaut que pour un dossier d'avant la mise en service, saisi à la main.",
             champs={"numero": "automatique"},
         )
-    fournisseur = s.get(Fournisseur, f.fournisseur_id)
-    local = fournisseur is not None and est_local(fournisseur.pays, fournisseur.devise)
-    if local and not e.local_confirme and fournisseur is not None:
-        raise Refus.etat(
-            f"{fournisseur.nom} est un fournisseur marocain : ni douane, ni fret international, "
-            f"sa facture {f.numero} n'a normalement pas de dossier d'importation. L'ouvrir quand "
-            "même se confirme."
-        )
+    nom, local = fournisseur_confirme(s, f, e.local_confirme, "L'ouvrir")
     paires = de_la_facture(s, f)
     periode.cout_hors_periode_close(s, None, "ouverture du dossier", [r.date for _, r in paires])
     arrivee = e.date_arrivee or min((r.date for _, r in paires), default=horloge.aujourd_hui())
     annee, rang, numero = numero_suivant(s, arrivee)
-    nom = fournisseur.nom if fournisseur else ""
     d = Dossier(
         numero=numero,
         annee=annee,
@@ -226,11 +261,11 @@ def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
         date_arrivee=arrivee,
         banque=e.banque.strip(),
         commentaire=e.commentaire.strip(),
-        facture_id=f.id,
         local_confirme=local,
         cree_par_id=qui.id,
     )
-    inserer(s, d, marchandises(s, paires), f.id)
+    lien = DossierFacture(facture_id=f.id, ajoutee_par_id=qui.id)
+    inserer(s, d, marchandises(s, paires), f.id, lien)
     detail = f"{numero} · {len(paires)} ligne(s) · facture {f.numero}"
     journaliser(s, qui, d, detail + (" · fournisseur marocain, confirmé" if local else ""))
     return d
@@ -278,14 +313,15 @@ def creer(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
 
 
 def _refus_autre_facture(s: Session, d: Dossier, facture_id: int) -> Refus:
-    """Un dossier, une facture : une autre facture ouvre son propre dossier (X-IMP-13, 14)."""
+    """Le second camion d'une facture qui n'est pas dans ce dossier : l'y ajouter d'abord, ou
+    elle ouvre son propre dossier (X-IMP-13, 14)."""
     autre = s.get(Facture, facture_id)
     nom = autre.numero if autre else "choisie"
-    sienne = s.get(Facture, d.facture_id) if d.facture_id else None
-    if sienne is not None:
+    if not d.saisi_a_la_main:
         return Refus.etat(
-            f"Un dossier, une facture : {d.numero} est celui de la facture {sienne.numero}. La "
-            f"facture {nom} ouvre son propre dossier."
+            f"La facture {nom} n'est pas dans le dossier {d.numero} : l'y ajouter d'abord "
+            "(« Ajouter une facture », toute sa marchandise entre), ou elle ouvre son propre "
+            "dossier."
         )
     return Refus.etat(
         f"Le dossier {d.numero}, repris de l'ancien ERP, ne prend que la suite des factures "
@@ -296,11 +332,8 @@ def _refus_autre_facture(s: Session, d: Dossier, facture_id: int) -> Refus:
 def rattacher(s: Session, qui: audit.Qui, did: int, version: int, facture_id: int) -> Dossier:
     """Le second camion d'une facture rejoint son dossier (route 192 ; R-IMP-28 à 30)."""
     d = ouvert(s, did, version)
-    acceptees = factures_acceptees(s, d)
-    if not acceptees:
-        raise Refus.etat(A_LA_MAIN)
-    if facture_id not in acceptees:
-        raise _refus_autre_facture(s, d, facture_id)
+    if facture_id not in factures_acceptees(s, d):
+        raise Refus.etat(A_LA_MAIN) if a_la_main(d) else _refus_autre_facture(s, d, facture_id)
     f = s.get(Facture, facture_id)
     if f is None:
         raise Refus.introuvable("Facture inconnue.")

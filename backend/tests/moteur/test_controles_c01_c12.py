@@ -11,6 +11,7 @@ from gestion_mp_pro.calcul.modele import (
     Article,
     Commande,
     DossierImport,
+    FactureImport,
     Fournisseur,
     LigneCommande,
     LigneReception,
@@ -212,7 +213,7 @@ def test_c10_delai_fournisseur_nul():
 def test_c11_devises_employees_sans_cours():
     cours = {"MAD": 1.0, "USD": 10.0, "EUR": 0.0}
     commande = Commande("BC-1", lignes=[LigneCommande("BC-1", "A", devise="GBP")])
-    dossier = DossierImport("D1", facture_devise="EUR")
+    dossier = DossierImport("D1", factures=[FactureImport("F-1", devise="EUR")])
     donnees = D(
         parametres=Parametres(cours=cours),
         articles=[Article("A", devise="CNY"), Article("B", devise="JPY", actif=False)],

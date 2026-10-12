@@ -10,6 +10,7 @@ from gestion_mp_pro.calcul.importations import (
     ecart_droits,
     ecart_facture,
     ecart_tva_tolere,
+    ecarts_factures,
     lignes_aberrantes,
     lignes_negatives,
     revient_dossier,
@@ -21,6 +22,7 @@ from gestion_mp_pro.calcul.modele import (
     ChargeImport,
     Donnees,
     DossierImport,
+    FactureImport,
     LigneImport,
     Parametres,
 )
@@ -160,21 +162,46 @@ def test_la_facture_se_rapproche_de_la_marchandise_recue() -> None:
             LigneImport(1, "A", 100, 1000, devise="USD"),
             LigneImport(2, "B", 50, 500, devise="USD"),
         ],
-        facture="F-1",
-        facture_montant=1550,
-        facture_devise="USD",
+        factures=[FactureImport("F-1", 1550, "USD", [1, 2])],
     )
-    ecart = ecart_facture(d, p)
+    f = d.factures[0]
+    ecart = ecart_facture(d, f, p)
     assert ecart is not None
     assert (ecart.recu, ecart.ecart, ecart.tolerance) == (1500, 50, 0.02)
     assert ecart.part == pytest.approx(50 / 1500) and ecart.hors_tolerance
-    d.facture_montant = 1520
-    moins = ecart_facture(d, p)
+    f.montant = 1520
+    moins = ecart_facture(d, f, p)
     assert moins is not None and not moins.hors_tolerance
-    d.facture_devise = "EUR"
-    assert ecart_facture(d, p) is None
-    d.facture_montant = 0
-    assert ecart_facture(d, p) is None
+    f.devise = "EUR"
+    assert ecart_facture(d, f, p) is None
+    f.montant = 0
+    assert ecart_facture(d, f, p) is None
+
+
+def test_chaque_facture_se_rapproche_de_sa_seule_marchandise() -> None:
+    """Lot PLUSIEURS-FACTURES (décision du 12/10/2026) : un dossier à plusieurs factures les
+    rapproche une à une, chacune de ce qu'elle a apporté, sans additionner les devises."""
+    p = Parametres()
+    d = DossierImport(
+        numero="PLUS",
+        lignes=[
+            LigneImport(1, "A", 100, 1000, devise="EUR"),
+            LigneImport(2, "B", 50, 500, devise="EUR"),
+            LigneImport(3, "C", 80, 800, devise="USD"),
+        ],
+        factures=[
+            FactureImport("A-1", 1000, "EUR", [1]),
+            FactureImport("B-1", 600, "EUR", [2]),
+            FactureImport("C-1", 800, "USD", [3]),
+            FactureImport("D-1", 900, "EUR", []),
+        ],
+    )
+    ecarts = ecarts_factures(d, p)
+    assert [(e.facture, e.recu, e.devise, e.hors_tolerance) for e in ecarts] == [
+        ("A-1", 1000, "EUR", False),
+        ("B-1", 500, "EUR", True),
+        ("C-1", 800, "USD", False),
+    ]
 
 
 def test_le_revient_s_indexe_par_ligne_de_reception() -> None:

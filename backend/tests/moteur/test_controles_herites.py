@@ -16,6 +16,7 @@ from gestion_mp_pro.calcul.modele import (
     Commande,
     Donnees,
     DossierImport,
+    FactureImport,
     FilMonte,
     Fournisseur,
     LigneCommande,
@@ -206,8 +207,7 @@ def test_dossier_facture_sans_montant_signale():
     """Hérité : test_defauts_e.py::test_dossier_facture_sans_montant_signale."""
     dossier = DossierImport(
         "D2",
-        facture="FAC-9",
-        facture_montant=0,
+        factures=[FactureImport("FAC-9", 0, "MAD", [1])],
         lignes=[LigneImport(1, "A", quantite=10, valeur_devise=20)],
     )
     c36 = _controle("C36", Donnees(dossiers_import=[dossier]))

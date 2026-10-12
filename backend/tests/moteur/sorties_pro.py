@@ -27,7 +27,8 @@ from gestion_mp_pro.calcul import (
 )
 from gestion_mp_pro.calcul.a_la_date import a_la_date
 from gestion_mp_pro.calcul.besoins import besoins_mensuels
-from gestion_mp_pro.calcul.modele import Donnees
+from gestion_mp_pro.calcul.importations import EcartFacture
+from gestion_mp_pro.calcul.modele import Donnees, DossierImport, Parametres
 from gestion_mp_pro.calcul.plan import plan_mensuel
 from gestion_mp_pro.calcul.stock import LigneStock, etat_stock, fils_en_machine, stock_en_machine
 
@@ -61,6 +62,13 @@ def revient_en_dict(r: importations.LigneRevient) -> dict[str, Any]:
     return champs
 
 
+def _ecart_unique(dossier: DossierImport, p: Parametres) -> EcartFacture | None:
+    """L'écart de la facture du dossier, dans la forme de Gestion MP (une facture par dossier ;
+    PRO rapproche chaque facture de sa marchandise, `ecarts_factures`)."""
+    ecarts = importations.ecarts_factures(dossier, p)
+    return ecarts[0] if ecarts else None
+
+
 def _importations(d: Donnees) -> dict[str, Any]:
     p = d.parametres
     revients = {x.numero: importations.revient_dossier(x, p) for x in d.dossiers_import}
@@ -68,7 +76,7 @@ def _importations(d: Donnees) -> dict[str, Any]:
     return {
         "revient": {n: [revient_en_dict(r) for r in rs] for n, rs in revients.items()},
         "tva_attendue": {x.numero: importations.tva_attendue(x, p) for x in d.dossiers_import},
-        "ecart_facture": {x.numero: importations.ecart_facture(x, p) for x in d.dossiers_import},
+        "ecart_facture": {x.numero: _ecart_unique(x, p) for x in d.dossiers_import},
         "aberrantes": {
             n: [r.ligne_id for r in importations.lignes_aberrantes(rs, seuil)]
             for n, rs in revients.items()

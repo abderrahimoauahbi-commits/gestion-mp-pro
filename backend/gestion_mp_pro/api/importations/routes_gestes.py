@@ -1,11 +1,13 @@
-"""Les gestes sur un dossier (routes 192–204) : second camion, marchandises, cours, frais,
-clôture, réouverture, annulation. Chacun rend la fiche relue."""
+"""Les gestes sur un dossier (routes 192–204, 253–254) : second camion, factures ajoutées ou
+retirées, marchandises, cours, frais, clôture, réouverture, annulation. Chacun rend la fiche
+relue."""
 
 from __future__ import annotations
 
 from gestion_mp_pro.api.dependances import SessionDep, VersionDep
 from gestion_mp_pro.api.importations.routeur import GESTE, fiche_relue, routeur
 from gestion_mp_pro.api.importations.schemas import (
+    AjoutFacture,
     AnnulationDossier,
     ClotureDossier,
     CoursDevise,
@@ -19,7 +21,13 @@ from gestion_mp_pro.api.importations.schemas import (
 )
 from gestion_mp_pro.api.importations.schemas_fiche import DossierFiche
 from gestion_mp_pro.securite import A, D, QuiDep, droit
-from gestion_mp_pro.services.importations import etats, frais, marchandises, ouverture
+from gestion_mp_pro.services.importations import (
+    etats,
+    factures_dossier,
+    frais,
+    marchandises,
+    ouverture,
+)
 
 __all__ = ["routeur"]
 
@@ -39,6 +47,36 @@ def _frais(corps: FraisEntree) -> frais.FraisSaisi:
 def rattacher(did: int, corps: Rattachement, qui: QuiDep, s: SessionDep) -> DossierFiche:
     """Route 192."""
     ouverture.rattacher(s, qui, did, corps.version, corps.facture_id)
+    return fiche_relue(s, did)
+
+
+@routeur.post(
+    "/dossiers/{did}/factures",
+    response_model=DossierFiche,
+    dependencies=[droit(D, A)],
+    summary="Ajouter au dossier une facture reçue qui n'est dans aucun dossier (sa marchandise).",
+    responses=GESTE,
+)
+def ajouter_facture(did: int, corps: AjoutFacture, qui: QuiDep, s: SessionDep) -> DossierFiche:
+    """Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme."""
+    factures_dossier.ajouter(
+        s, qui, did, corps.version, corps.facture_id, local_confirme=corps.local_confirme
+    )
+    return fiche_relue(s, did)
+
+
+@routeur.delete(
+    "/dossiers/{did}/factures/{fid}",
+    response_model=DossierFiche,
+    dependencies=[droit(D, A)],
+    summary="Retirer une facture du dossier : sa marchandise attend de nouveau, les frais restent.",
+    responses=GESTE,
+)
+def retirer_facture(
+    did: int, fid: int, version: VersionDep, qui: QuiDep, s: SessionDep
+) -> DossierFiche:
+    """Route 254 : refusé si un frais vise une marchandise qu'elle a apportée."""
+    factures_dossier.retirer(s, qui, did, version, fid)
     return fiche_relue(s, did)
 
 
@@ -204,7 +242,7 @@ def rouvrir(did: int, corps: ReouvertureDossier, qui: QuiDep, s: SessionDep) -> 
     "/dossiers/{did}/annuler",
     response_model=DossierFiche,
     dependencies=[droit(D, A)],
-    summary="Annuler le dossier : il garde son numéro, sa facture et sa marchandise attendent.",
+    summary="Annuler le dossier : il garde son numéro, ses factures et sa marchandise attendent.",
     responses=GESTE,
 )
 def annuler(did: int, corps: AnnulationDossier, qui: QuiDep, s: SessionDep) -> DossierFiche:

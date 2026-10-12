@@ -229,6 +229,26 @@ def resume(liste: list[Ecart]) -> dict[str, dict[str, int]]:
     return sortie
 
 
+def facture_de_gestion_mp(dossier: dict[str, Any]) -> dict[str, Any]:
+    """Un dossier PRO dans la forme de Gestion MP, qui portait **une** facture par dossier
+    (`facture`, `facture_montant`, `facture_devise`) : la première de `factures` (lot
+    PLUSIEURS-FACTURES, décision du 12/10/2026 ; une base reprise n'en a qu'une par dossier)."""
+    factures = dossier.get("factures")
+    if factures is None:
+        return dossier
+    reste = {k: v for k, v in dossier.items() if k != "factures"}
+    premiere = factures[0] if factures else {}
+    return reste | {
+        "facture": premiere.get("numero", ""),
+        "facture_montant": premiere.get("montant", 0.0),
+        "facture_devise": premiere.get("devise", ""),
+    }
+
+
 def sans_index(donnees: dict[str, Any]) -> dict[str, Any]:
-    """Les `Donnees` PRO au format des jeux, sans les champs hors constructeur (index)."""
-    return {k: v for k, v in donnees.items() if not k.startswith("_") and k != "derniere_date"}
+    """Les `Donnees` PRO au format des jeux, sans les champs hors constructeur (index), chaque
+    dossier avec sa facture à la façon de Gestion MP (`facture_de_gestion_mp`)."""
+    rendu = {k: v for k, v in donnees.items() if not k.startswith("_") and k != "derniere_date"}
+    if "dossiers_import" in rendu:
+        rendu["dossiers_import"] = [facture_de_gestion_mp(d) for d in rendu["dossiers_import"]]
+    return rendu

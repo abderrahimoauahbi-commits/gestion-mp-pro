@@ -27,6 +27,7 @@ from gestion_mp_pro.modeles.communication import (
 )
 from gestion_mp_pro.modeles.importations import (
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierFraisPart,
     DossierLigne,
@@ -108,6 +109,7 @@ __all__ = [
     "Devise",
     "DeviseCours",
     "Dossier",
+    "DossierFacture",
     "DossierFrais",
     "DossierFraisPart",
     "DossierLigne",

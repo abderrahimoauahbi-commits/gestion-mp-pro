@@ -26,6 +26,7 @@ export const TABLES: readonly string[] = [
   'matiere', 'fournisseur', 'devise', 'devise_cours', 'magasin', 'role_nomenclature', 'composition',
   'type_fil', 'titrage', 'couleur', 'code_douanier', 'poste_frais', 'motif', 'parametre', 'lot', 'solde',
   'mouvement', 'commande', 'commande_ligne', 'facture', 'reception', 'reception_ligne', 'dossier',
+  'dossier_facture',
   'dossier_ligne', 'dossier_frais', 'dossier_frais_part', 'ordre', 'ordre_qualite', 'ordre_ligne',
   'ordre_prevu', 'operation', 'operation_ligne', 'qualite', 'qualite_poids', 'qualite_saison', 'recette',
   'recette_version', 'recette_version_ligne', 'recette_version_poids', 'plan_version', 'plan_version_saison',

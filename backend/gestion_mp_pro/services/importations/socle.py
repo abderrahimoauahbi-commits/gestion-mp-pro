@@ -1,6 +1,9 @@
 """Le socle des dossiers : chargement verrouillé, version, contexte de lecture partagé, vue du
-moteur, marchandise libre et porteurs d'une facture (`gestion_mp/api/importations.py`,
-REGLES § 4.1–4.3).
+moteur, factures du dossier (`gestion_mp/api/importations.py`, REGLES § 4.1–4.3).
+
+Un dossier porte **une ou plusieurs factures** (`dossier.factures`, décision de Mohamed du
+12/10/2026 qui amende I3) ; `factures_vives` les donne dans l'ordre de leur ajout (la première
+est celle d'ouverture). Un dossier annulé garde la trace des siennes, libérées.
 
 Le **contexte** lit en un nombre fixe de requêtes ce que la fiche d'un ou de plusieurs dossiers
 demande (postes, codes douaniers, matières, réceptions d'origine, bons, factures) : la liste des
@@ -26,6 +29,7 @@ from gestion_mp_pro.modeles import (
     CommandeLigne,
     Composition,
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierLigne,
     Facture,
@@ -76,6 +80,7 @@ def charger(s: Session, did: int, *, verrou: bool = False) -> Dossier:
         select(Dossier)
         .where(Dossier.id == did)
         .options(
+            selectinload(Dossier.factures),
             selectinload(Dossier.lignes),
             selectinload(Dossier.frais).selectinload(DossierFrais.parts),
         )
@@ -148,14 +153,31 @@ def noter(
     s.flush()
 
 
+def factures_vives(d: Dossier) -> list[DossierFacture]:
+    """Les factures du dossier (non libérées), la première ajoutée d'abord."""
+    vives = [x for x in d.factures if x.liberee_le is None]
+    return sorted(vives, key=lambda x: (x.ajoutee_le, x.facture_id))
+
+
+def factures_lues(d: Dossier) -> list[DossierFacture]:
+    """Les factures que la fiche montre : les siennes ; celles qu'un dossier annulé a libérées."""
+    return sorted(d.factures, key=lambda x: (x.ajoutee_le, x.facture_id))
+
+
 def a_la_main(d: Dossier) -> bool:
-    """Sans facture ni marchandise reçue : un dossier d'avant la mise en service."""
-    return d.facture_id is None and not any(x.reception_ligne_id for x in d.lignes)
+    """Saisi à la main, sans facture ni marchandise reçue : un dossier d'avant la mise en
+    service (un dossier ouvert depuis une facture ne le devient jamais, même vidé)."""
+    return (
+        d.saisi_a_la_main
+        and not factures_vives(d)
+        and not any(x.reception_ligne_id for x in d.lignes)
+    )
 
 
 def repris(d: Dossier) -> bool:
-    """Sans facture mais avec des réceptions : un dossier repris de l'ERP Fil (B-11)."""
-    return d.facture_id is None and any(x.reception_ligne_id for x in d.lignes)
+    """Sans facture du dossier mais avec des réceptions : un dossier repris de l'ERP Fil (B-11),
+    dont les factures se lisent sur ses marchandises."""
+    return d.saisi_a_la_main and any(x.reception_ligne_id for x in d.lignes)
 
 
 # ── Le contexte de lecture ───────────────────────────────────────────────────
@@ -290,16 +312,32 @@ def contexte(s: Session, dossiers: Sequence[Dossier]) -> Contexte:
         ctx.lots = dict(s.execute(select(Lot.id, Lot.numero).where(Lot.id.in_(lots))).all())
     ctx.origines = origines(s, recues)
     ctx.bons = bons(s, recues)
-    factures = {d.facture_id for d in dossiers if d.facture_id}
+    factures = {x.facture_id for d in dossiers for x in d.factures}
     factures |= {o.facture_id for o in ctx.origines.values() if o.facture_id}
     if factures:
         ctx.factures = {f.id: f for f in s.scalars(select(Facture).where(Facture.id.in_(factures)))}
     return ctx
 
 
+def factures_moteur(d: Dossier, ctx: Contexte) -> list[c.FactureImport]:
+    """Les factures du dossier pour le moteur, chacune avec les marchandises qu'elle a apportées
+    (comme `services/chargeur/production._factures`)."""
+    resultat = []
+    for x in factures_vives(d):
+        f = ctx.factures[x.facture_id]
+        lignes = [
+            y.id
+            for y in lignes_triees(d)
+            if y.reception_ligne_id
+            and (o := ctx.origines.get(y.reception_ligne_id)) is not None
+            and o.facture_id == f.id
+        ]
+        resultat.append(c.FactureImport(f.numero, float(f.montant or 0), f.devise, lignes))
+    return resultat
+
+
 def vue(d: Dossier, ctx: Contexte) -> c.DossierImport:
     """Le dossier tel que le moteur le calcule (comme `services/chargeur/production.dossiers`)."""
-    facture = ctx.factures.get(d.facture_id) if d.facture_id else None
     return c.DossierImport(
         numero=d.numero,
         libelle=d.libelle,
@@ -334,7 +372,5 @@ def vue(d: Dossier, ctx: Contexte) -> c.DossierImport:
             )
             for x in frais_tries(d)
         ],
-        facture=facture.numero if facture else "",
-        facture_montant=float(facture.montant or 0) if facture else 0.0,
-        facture_devise=facture.devise if facture else "",
+        factures=factures_moteur(d, ctx),
     )

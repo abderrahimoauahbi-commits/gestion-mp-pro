@@ -1,7 +1,8 @@
 """Activité des importations : dossiers, marchandises, frais et parts figées.
 
 - Numéro `NN/AA` → `annee` + `rang` (le compteur DOS repart du plus grand) ; un autre format
-  devient `ANC-…` (signalé). Un dossier sans facture est « saisi à la main ».
+  devient `ANC-…` (signalé). Un dossier sans facture est « saisi à la main » ; la facture d'un
+  dossier (Gestion MP : une par dossier) devient sa seule ligne de `dossier_facture`.
 - Marchandise : `quantite` → `quantite_kg` (`poids_kg`, colonne morte, n'est pas reprise) ;
   cours 0 ou MAD → NULL ; tout cours dit son origine (`clos_au_jour` si figé à la clôture,
   sinon `reprise`) ; une ligne reçue déjà portée par un autre dossier est détachée (signalé).
@@ -39,7 +40,6 @@ def dossiers(ctx: Contexte, j: jt.Journal, sortie: Lignes) -> None:
                 "statut",
                 "clos_le",
                 "commentaire",
-                "facture_id",
             )
         }
         numero = (d["numero"] or "").strip()
@@ -63,6 +63,11 @@ def dossiers(ctx: Contexte, j: jt.Journal, sortie: Lignes) -> None:
             ctx.signaler("dossier", d["id"], "clos sans date : date de clôture du journal")
             v["clos_le"] = cloture.quand if cloture else d["date_arrivee"]
         sortie["dossier"].append(ctx.ligne("dossier", v, d["id"]))
+        if d["facture_id"] is not None:
+            lien = {"dossier_id": d["id"], "facture_id": d["facture_id"]}
+            if ouverture:
+                lien |= {"ajoutee_le": ouverture.quand, "ajoutee_par_id": ouverture.par_id}
+            sortie["dossier_facture"].append(ctx.ligne("dossier_facture", lien, d["id"]))
     _marchandises(ctx, sortie)
     _frais(ctx, sortie)
 

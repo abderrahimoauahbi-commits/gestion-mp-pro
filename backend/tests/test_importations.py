@@ -78,17 +78,19 @@ def test_un_dossier_par_facture(arrivees: dict[str, Any], achats: TestClient) ->
         and f["valeurs"] == [{"devise": imp.devise, "valeur": 6000.0}]
     )
     d = ouvrir(achats, imp.f("FAC-1"))
-    assert d["nb_lignes"] == 3 and d["facture"]["numero"] == imp.f("FAC-1") and not d["a_la_main"]
+    assert d["nb_lignes"] == 3 and not d["a_la_main"]
+    assert [f["numero"] for f in d["factures"]] == [imp.f("FAC-1")]
     assert d["pieces"] == [{"facture": imp.f("FAC-1"), "receptions": [arrivees["r1"]["numero"]]}]
     assert d["numero"].endswith("/26") and d["statut"] == "ouvert" and not d["repris"]
-    r = achats.post("/api/dossiers", json={"facture_id": d["facture"]["id"]})
+    r = achats.post("/api/dossiers", json={"facture_id": d["factures"][0]["id"]})
     assert r.status_code == 409 and d["numero"] in r.json()["detail"]
     assert r.json()["detail"].startswith("Cette facture a déjà son dossier")
     autre = facture_id(achats, imp.f("FAC-2"))
     r = geste(achats, d, "rattacher", 409, facture_id=autre)
     assert r["detail"] == (
-        f"Un dossier, une facture : {d['numero']} est celui de la facture {imp.f('FAC-1')}. "
-        f"La facture {imp.f('FAC-2')} ouvre son propre dossier."
+        f"La facture {imp.f('FAC-2')} n'est pas dans le dossier {d['numero']} : l'y ajouter "
+        "d'abord (« Ajouter une facture », toute sa marchandise entre), ou elle ouvre son propre "
+        "dossier."
     )
     x = d["lignes"][0]
     r = achats.delete(f"/api/dossiers/{d['id']}/lignes/{x['id']}", params={"version": d["version"]})
@@ -119,7 +121,7 @@ def test_cours_et_frais_au_poids_ou_a_la_valeur(
     fret = d["frais"][0]
     assert fret["prestataire"] == "CMA CGM" and fret["cle"] == "valeur" and fret["version"] == 1
     assert ligne(d, "IMP FRISÉ ROUGE")["charges_mad"] == pytest.approx(3500 / 3)
-    assert {x["quoi"] for x in d["echeancier"]} == {f"Facture {d['facture']['numero']}", "Fret"}
+    assert {x["quoi"] for x in d["echeancier"]} == {f"Facture {d['factures'][0]['numero']}", "Fret"}
     p = ok(direction.get("/api/postes-frais"))
     fret_poste = next(x for x in p if x["code"] == "FRET")
     corps = {

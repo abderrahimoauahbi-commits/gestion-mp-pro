@@ -173,10 +173,13 @@ def test_importations(reprise: tuple[Resultat, Path]) -> None:
 
 def test_la_reprise_relie_les_dossiers_a_leur_facture(reprise: tuple[Resultat, Path]) -> None:
     """Hérité : test_importations::test_la_reprise_relie_les_dossiers_a_leur_facture — un dossier
-    d'une facture la garde (un dossier = une facture, I3) ; un dossier d'avant, sans facture
-    unique, n'en reçoit aucune (saisi à la main) ; rejouer ne change rien (RESTES3, R1)."""
-    lies = valeurs("SELECT d.numero, f.numero FROM dossier d LEFT JOIN facture f"
-                   " ON f.id = d.facture_id")  # fmt: skip
+    d'une facture la garde (Gestion MP : une par dossier ; PRO : sa ligne de `dossier_facture`,
+    révision 0007) ; un dossier d'avant, sans facture unique, n'en reçoit aucune (saisi à la
+    main) ; rejouer ne change rien (RESTES3, R1)."""
+    lies = valeurs(
+        "SELECT d.numero, f.numero FROM dossier d LEFT JOIN dossier_facture x"
+        " ON x.dossier_id = d.id LEFT JOIN facture f ON f.id = x.facture_id"
+    )
     assert lies == {"01/26": "F-1", "ANC-X-OLD": None}
 
 

@@ -5,9 +5,11 @@ Ordre de Gestion MP (R-IMP-04) : date d'arrivée décroissante, sans date à la 
 décroissant. Sans statut demandé : les dossiers ouverts et clos (les annulés sont à part,
 `statut=annule`). La recherche cherche chaque mot, sans accents **et à la ponctuation près**
 (« FA-2026/117 » = « FA-2026-117 »), dans le numéro, le libellé, la banque, les observations, les
-factures, les réceptions, les familles de fil et les fournisseurs : tout cela poussé en SQL (le
-détail est joint par sous-requête). Le filtre « à vérifier » tient à un calcul par dossier
-(`parties.a_verifier`) non poussable en SQL : il est servi en liste bornée (peu de dossiers).
+factures (toutes celles du dossier, et celles de ses marchandises), les réceptions, les familles
+de fil et les fournisseurs : tout cela poussé en SQL (le détail est joint par sous-requête). Le
+filtre « fournisseur » retient un dossier dont **une** facture est de ce fournisseur. Le
+filtre « à vérifier » tient à un calcul par dossier (`parties.a_verifier`) non poussable en
+SQL : il est servi en liste bornée (peu de dossiers).
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from sqlalchemy.orm import Session, selectinload
 from gestion_mp_pro.modeles import (
     Composition,
     Dossier,
+    DossierFacture,
     DossierFrais,
     DossierLigne,
     Facture,
@@ -105,14 +108,25 @@ def _texte_sql() -> ColumnElement[str]:
         .where(DossierLigne.dossier_id == Dossier.id)
         .scalar_subquery()
     )
+    siennes = (
+        select(func.string_agg(func.concat_ws(" ", Facture.numero, Fournisseur.nom), " "))
+        .select_from(DossierFacture)
+        .join(Facture, Facture.id == DossierFacture.facture_id)
+        .join(Fournisseur, Fournisseur.id == Facture.fournisseur_id)
+        .where(DossierFacture.dossier_id == Dossier.id)
+        .scalar_subquery()
+    )
     return func.concat_ws(
-        " ", Dossier.numero, Dossier.libelle, Dossier.banque, Dossier.commentaire, derive
+        " ", Dossier.numero, Dossier.libelle, Dossier.banque, Dossier.commentaire, derive, siennes
     )
 
 
-def _fournisseur_facture() -> ColumnElement[int]:
-    """Le fournisseur de la facture du dossier (celui que lit le filtre lié de l'écran)."""
-    return select(Facture.fournisseur_id).where(Facture.id == Dossier.facture_id).scalar_subquery()
+def _fournisseurs_des_factures() -> Select[int, int]:
+    """Les fournisseurs des factures de chaque dossier (celles qu'un dossier annulé a libérées
+    comprises) : `(dossier_id, fournisseur_id)`, ce que lit le filtre lié de l'écran."""
+    return select(DossierFacture.dossier_id, Facture.fournisseur_id).join(
+        Facture, Facture.id == DossierFacture.facture_id
+    )
 
 
 def filtrer(f: FiltresDossiers) -> Select[Dossier]:
@@ -124,7 +138,8 @@ def filtrer(f: FiltresDossiers) -> Select[Dossier]:
     else:
         requete = requete.where(Dossier.statut != StatutDossier.annule)
     if f.fournisseur is not None:
-        requete = requete.where(_fournisseur_facture() == f.fournisseur)
+        siens = _fournisseurs_des_factures().where(Facture.fournisseur_id == f.fournisseur)
+        requete = requete.where(Dossier.id.in_(siens.with_only_columns(DossierFacture.dossier_id)))
     if f.q.strip():
         requete = requete.where(*recherche.conditions_tolerantes(_texte_sql(), f.q))
     return requete
@@ -135,6 +150,7 @@ def _charger(s: Session, requete: Select[Dossier]) -> list[Dossier]:
     return list(
         s.scalars(
             requete.options(
+                selectinload(Dossier.factures),
                 selectinload(Dossier.lignes),
                 selectinload(Dossier.frais).selectinload(DossierFrais.parts),
             )
@@ -261,11 +277,15 @@ class ApercuDossiers:
 
 def _fournisseurs(s: Session, f: FiltresDossiers) -> list[FournisseurOption]:
     """Les fournisseurs des factures des dossiers du statut (options du filtre lié)."""
-    statut = FiltresDossiers(statut=f.statut)
-    ids = filtrer(statut).with_only_columns(_fournisseur_facture())
+    dossiers = filtrer(FiltresDossiers(statut=f.statut)).with_only_columns(Dossier.id)
+    ids = (
+        _fournisseurs_des_factures()
+        .where(DossierFacture.dossier_id.in_(dossiers))
+        .with_only_columns(Facture.fournisseur_id)
+    )
     requete = (
         select(Fournisseur.id, Fournisseur.nom)
-        .where(Fournisseur.id.in_(ids.where(_fournisseur_facture().isnot(None))))
+        .where(Fournisseur.id.in_(ids))
         .order_by(Fournisseur.nom)
     )
     return [FournisseurOption(i, n) for i, n in s.execute(requete)]
