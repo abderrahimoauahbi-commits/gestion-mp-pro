@@ -4,6 +4,8 @@
  * son écart, les palettes et les bobines, le prix, le magasin, la qualité, les observations.
  */
 
+import { useEffect, useRef } from 'react'
+
 import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import type { Colonne } from '../../composants/tableaux/colonnes'
@@ -169,9 +171,21 @@ function colonnes(x: ContexteTable): Colonne<LigneSaisie>[] {
   return [...colonnes1(x), ...colonnes2(x), ...colonnes3(x)]
 }
 
+/** Quand des lignes arrivent (références prises, matière ajoutée), la fenêtre descend sur le tableau. */
+function useMontrerLesAjouts(n: number) {
+  const boite = useRef<HTMLDivElement>(null)
+  const avant = useRef(n)
+  useEffect(() => {
+    if (n > avant.current) boite.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' })
+    avant.current = n
+  }, [n])
+  return boite
+}
+
 export function TableSaisie(x: ContexteTable) {
+  const boite = useMontrerLesAjouts(x.lignes.length)
   return (
-    <div className={cadre.tableSaisie}>
+    <div ref={boite} className={cadre.tableSaisie}>
       <DataTable<LigneSaisie>
         libelle="Lignes du camion"
         lignes={x.lignes}

@@ -18,6 +18,7 @@
 .grand [data-hauteur] {
   flex: 1 1 auto;
   max-height: none !important;
+  overflow: auto !important;
 }
 
 .agrandir,

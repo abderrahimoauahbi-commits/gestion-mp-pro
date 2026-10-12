@@ -1,8 +1,13 @@
-/* Le tableau de la saisie d'un camion : il ne rétrécit pas sous l'en-tête (c'est la fenêtre qui
-   défile) et garde une vraie hauteur pour lire et saisir ses lignes. */
+/* Le tableau de la saisie d'un camion : toutes ses lignes visibles, sans défilement à lui (une ligne
+   cachée sous un défilement intérieur passait pour absente) ; c'est la fenêtre qui défile. En
+   grand (« Agrandir »), il reprend le défilement du plein écran. */
 .tableSaisie {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  min-height: min(420px, 55vh);
+}
+
+.tableSaisie [data-hauteur] {
+  max-height: none;
+  overflow: visible;
 }
