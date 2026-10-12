@@ -3382,6 +3382,46 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/dossiers/{did}/factures': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ajouter au dossier une facture reçue qui n'est dans aucun dossier (sa marchandise).
+     * @description Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme.
+     */
+    post: operations['ajouter_facture_api_dossiers__did__factures_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/dossiers/{did}/factures/{fid}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Retirer une facture du dossier : sa marchandise attend de nouveau, les frais restent.
+     * @description Route 254 : refusé si un frais vise une marchandise qu'elle a apportée.
+     */
+    delete: operations['retirer_facture_api_dossiers__did__factures__fid__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/dossiers/{did}/lignes': {
     parameters: {
       query?: never
@@ -3580,7 +3620,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * Annuler le dossier : il garde son numéro, sa facture et sa marchandise attendent.
+     * Annuler le dossier : il garde son numéro, ses factures et sa marchandise attendent.
      * @description Route 204.
      */
     post: operations['annuler_api_dossiers__did__annuler_post']
@@ -4295,6 +4335,8 @@ export interface components {
       modifier: string | null
       /** Rattacher */
       rattacher: string | null
+      /** Ajouter Facture */
+      ajouter_facture: string | null
       /** Saisir */
       saisir: string | null
       /** Cours */
@@ -4317,6 +4359,23 @@ export interface components {
       libelle: string
       /** Adresse */
       adresse: string
+    }
+    /**
+     * AjoutFacture
+     * @description Une facture reçue, dans aucun dossier, qui s'ajoute au dossier avec toute sa marchandise
+     *     libre (décision du 12/10/2026 : un dossier porte une ou plusieurs factures).
+     */
+    AjoutFacture: {
+      /** Version */
+      version: number
+      /** Facture Id */
+      facture_id: number
+      /**
+       * Local Confirme
+       * @description fournisseur marocain : l'ajouter quand même
+       * @default false
+       */
+      local_confirme: boolean
     }
     /**
      * AlerteCockpit
@@ -6287,7 +6346,11 @@ export interface components {
       annule_par: string | null
       /** Annulation Motif */
       annulation_motif: string
-      facture: components['schemas']['FactureDossier'] | null
+      /**
+       * Factures
+       * @description les factures du dossier, la première ajoutée d'abord (celles qu'un dossier annulé a libérées)
+       */
+      factures: components['schemas']['FactureDossier'][]
       /** A La Main */
       a_la_main: boolean
       /** Repris */
@@ -6336,7 +6399,6 @@ export interface components {
       lignes_aberrantes: string[]
       /** Lignes Negatives */
       lignes_negatives: string[]
-      ecart_facture: components['schemas']['EcartFacture'] | null
       /** Lignes Cours Bon */
       lignes_cours_bon: number
       /** Cours Disparates */
@@ -6349,8 +6411,6 @@ export interface components {
       tva_non_repartie_mad: number
       /** Fournisseurs */
       fournisseurs: string[]
-      /** Factures */
-      factures: string[]
       /** Receptions */
       receptions: components['schemas']['ReceptionCitee'][]
       /** Pieces */
@@ -6443,7 +6503,11 @@ export interface components {
       annule_par: string | null
       /** Annulation Motif */
       annulation_motif: string
-      facture: components['schemas']['FactureDossier'] | null
+      /**
+       * Factures
+       * @description les factures du dossier, la première ajoutée d'abord (celles qu'un dossier annulé a libérées)
+       */
+      factures: components['schemas']['FactureDossier'][]
       /** A La Main */
       a_la_main: boolean
       /** Repris */
@@ -6492,7 +6556,6 @@ export interface components {
       lignes_aberrantes: string[]
       /** Lignes Negatives */
       lignes_negatives: string[]
-      ecart_facture: components['schemas']['EcartFacture'] | null
       /** Lignes Cours Bon */
       lignes_cours_bon: number
       /** Cours Disparates */
@@ -6505,8 +6568,6 @@ export interface components {
       tva_non_repartie_mad: number
       /** Fournisseurs */
       fournisseurs: string[]
-      /** Factures */
-      factures: string[]
       /** Receptions */
       receptions: components['schemas']['ReceptionCitee'][]
       /** Pieces */
@@ -7345,7 +7406,9 @@ export interface components {
     }
     /**
      * FactureDossier
-     * @description La facture d'un dossier.
+     * @description Une facture du dossier (une ou plusieurs, la première ajoutée d'abord ; décision du
+     *     12/10/2026) : ses réceptions, son rapprochement C36, et pourquoi elle ne peut pas quitter
+     *     le dossier (`retrait`, `null` si elle le peut).
      */
     FactureDossier: {
       /** Id */
@@ -7366,6 +7429,30 @@ export interface components {
       echeance: string | null
       /** Payee Le */
       payee_le: string | null
+      /**
+       * Ajoutee Le
+       * Format: date-time
+       */
+      ajoutee_le: string
+      /**
+       * Liberee Le
+       * @description posé quand l'annulation du dossier a rendu la facture libre
+       */
+      liberee_le: string | null
+      /** Receptions */
+      receptions: components['schemas']['ReceptionCitee'][]
+      /**
+       * Lignes
+       * @description les marchandises du dossier qu'elle a apportées
+       */
+      lignes: number
+      /** @description la facture rapprochée de ce qu'elle a apporté, pesée × prix (C36) */
+      ecart: components['schemas']['EcartFacture'] | null
+      /**
+       * Retrait
+       * @description null : elle peut quitter le dossier ; sinon pourquoi
+       */
+      retrait: string | null
     }
     /**
      * FactureEntree
@@ -26066,6 +26153,148 @@ export interface operations {
         'application/json': components['schemas']['Rattachement']
       }
     }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DossierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  ajouter_facture_api_dossiers__did__factures_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        did: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AjoutFacture']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DossierFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  retirer_facture_api_dossiers__did__factures__fid__delete: {
+    parameters: {
+      query: {
+        /** @description version lue avec la fiche */
+        version: number
+      }
+      header?: never
+      path: {
+        did: number
+        fid: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
     responses: {
       /** @description Successful Response */
       200: {

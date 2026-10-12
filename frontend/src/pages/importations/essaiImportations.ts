@@ -23,7 +23,8 @@ export function donnees(): Donnees {
 
 /** Le texte cherché d'un dossier (comme le serveur : champs et dérivés). */
 function texte(x: DossierResume): string {
-  const morceaux = [x.numero, x.libelle, x.banque, x.commentaire, ...x.factures, ...x.fournisseurs]
+  const factures = x.factures.flatMap((f) => [f.numero, f.fournisseur])
+  const morceaux = [x.numero, x.libelle, x.banque, x.commentaire, ...factures, ...x.fournisseurs]
   morceaux.push(...x.receptions.map((r) => r.numero), ...x.familles.map((f) => f.famille))
   return morceaux.join(' ').toLowerCase()
 }
@@ -41,7 +42,8 @@ function filtres(dossiers: DossierResume[], url: URL): DossierResume[] {
         ? dossiers.filter((x) => x.statut === statut)
         : dossiers.filter((x) => x.statut !== 'annule')
   if (q) gardes = gardes.filter((x) => q.split(/\s+/).every((m) => texte(x).includes(m)))
-  if (fournisseur) gardes = gardes.filter((x) => String(x.facture?.fournisseur_id) === fournisseur)
+  if (fournisseur)
+    gardes = gardes.filter((x) => x.factures.some((f) => String(f.fournisseur_id) === fournisseur))
   if (verifier) gardes = gardes.filter((x) => x.a_verifier.length > 0 === (verifier === 'oui'))
   return gardes
 }
@@ -50,7 +52,7 @@ function filtres(dossiers: DossierResume[], url: URL): DossierResume[] {
 function apercuDe(dossiers: DossierResume[]): ApercuDossiers {
   const somme = (f: (x: DossierResume) => number) => dossiers.reduce((s, x) => s + f(x), 0)
   const fournisseurs = new Map<number, string>()
-  for (const x of dossiers) if (x.facture) fournisseurs.set(x.facture.fournisseur_id, x.facture.fournisseur)
+  for (const x of dossiers) for (const f of x.factures) fournisseurs.set(f.fournisseur_id, f.fournisseur)
   return {
     ouvert: dossiers.filter((x) => x.statut === 'ouvert').length,
     clos: dossiers.filter((x) => x.statut === 'clos').length,

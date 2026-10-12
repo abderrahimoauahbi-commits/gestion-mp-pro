@@ -162,10 +162,11 @@ export function EnAttente({ page, clos }: { page: EtatPage; clos: (id: number) =
         <Chargement quoi="ce qui attend un dossier" />
       ) : vue === 'factures' ? (
         <>
-          <Note uneLigne="Un dossier, une facture : c’est à chaque livraison qu’on paie les droits, le fret et le transitaire. La facture ouvre son dossier avec toute la marchandise qu’elle a apportée ; un second camion de la même facture rejoint son dossier.">
-            Un dossier, une facture : c’est à chaque livraison qu’on paie les droits, le fret et le
-            transitaire. La facture ouvre son dossier avec toute la marchandise qu’elle a apportée ; un second
-            camion de la même facture rejoint son dossier.
+          <Note uneLigne="C’est à chaque arrivage qu’on paie les droits, le fret et le transitaire. Une facture ouvre son dossier avec toute la marchandise qu’elle a apportée ; une autre facture du même arrivage s’y ajoute depuis la fiche du dossier ; un second camion d’une facture rejoint son dossier.">
+            C’est à chaque arrivage qu’on paie les droits, le fret et le transitaire. Une facture ouvre son
+            dossier avec toute la marchandise qu’elle a apportée ; une autre facture du même arrivage s’y
+            ajoute depuis la fiche du dossier (« Ajouter une facture ») ; un second camion d’une facture
+            rejoint son dossier.
           </Note>
           <ChoixFacture
             factures={a.factures}

@@ -1,6 +1,7 @@
 /**
- * L'en-tête de la fiche d'un dossier (ECRANS-PRO 5.6) : arrivée, banque, facture (n°, date, montant,
- * échéance, réceptions en liens) ou pièces d'un dossier repris, ou « Saisi à la main », observations ;
+ * L'en-tête de la fiche d'un dossier (ECRANS-PRO 5.6) : arrivée, banque, ses factures (leurs numéros ;
+ * le détail est dans le bloc « Factures du dossier ») ou les pièces d'un dossier repris, ou « Saisi à
+ * la main », observations ;
  * les gestes à place fixe (« Modifier l'en-tête », « Clôturer le dossier » / « Rouvrir pour
  * corriger », « Fermer ») ; le panneau d'en-tête (chaque champ s'enregistre en le quittant) avec
  * « Annuler le dossier » (motif exigé, il garde son numéro).
@@ -19,7 +20,7 @@ import styles from './Importations.module.css'
 import type { DossierFiche } from './types'
 import type { EnTeteCorps, GestesDossier } from './useDossier'
 
-/** La facture, ou les pièces d'un dossier repris, ou « Saisi à la main ». */
+/** Les factures (leurs numéros), ou les pièces d'un dossier repris, ou « Saisi à la main ». */
 function Facture({ d }: { d: DossierFiche }) {
   const ids = new Map(d.receptions.map((r) => [r.numero, r.id]))
   const recs = (numeros: readonly string[]) =>
@@ -29,17 +30,21 @@ function Facture({ d }: { d: DossierFiche }) {
         {ids.get(n) != null ? <Link to={`/receptions/${ids.get(n) ?? ''}`}>{n}</Link> : n}
       </span>
     ))
-  if (d.facture) {
-    const f = d.facture
+  if (d.factures.length) {
     return (
       <span>
-        Facture <strong>{f.numero}</strong> du {date(f.date)}
-        {f.montant != null ? ` · ${montantPrecis(f.montant, f.devise)}` : ''}
-        {f.echeance ? ` · échéance ${date(f.echeance)}` : ''}
+        {d.factures.length > 1 ? 'Factures ' : 'Facture '}
+        {d.factures.map((f, i) => (
+          <span key={f.id}>
+            {i ? ' · ' : ''}
+            <strong>{f.numero}</strong>
+          </span>
+        ))}
         {d.receptions.length ? <> ({recs(d.receptions.map((r) => r.numero))})</> : null}
       </span>
     )
   }
+  if (!d.a_la_main && !d.repris) return <span>Plus aucune facture</span>
   if (d.repris && d.pieces.length) {
     return (
       <span>
@@ -62,23 +67,32 @@ function Facture({ d }: { d: DossierFiche }) {
   return <span>Saisi à la main (avant la mise en service)</span>
 }
 
-/** La question de l'annulation : ce qu'il advient de la facture et des frais. */
+/** Ce qui attendra de nouveau son dossier : « La facture F », « Les factures F, G », « Ses marchandises ». */
+function quiAttend(d: DossierFiche): string {
+  const numeros = d.factures.map((f) => f.numero)
+  if (numeros.length > 1) return `Les factures ${numeros.join(', ')}`
+  return numeros.length ? `La facture ${numeros[0] ?? ''}` : 'Ses marchandises'
+}
+
+/** La question de l'annulation : ce qu'il advient des factures et des frais. */
 function questionAnnulation(d: DossierFiche): string {
   const charges = d.frais.reduce((s, f) => s + f.montant, 0)
-  const quoi = d.facture ? `La facture ${d.facture.numero}` : 'Ses marchandises'
+  const quoi = quiAttend(d)
   const frais = d.frais.length
     ? ` ${nombre(d.frais.length)} frais saisi(s), ${montantPrecis(charges, 'MAD')}, sortiront du coût — pour les garder, détacher plutôt la réception (onglet Marchandises).`
     : ' Aucun frais n’est saisi.'
-  return `Annuler le dossier ${d.numero} ? Il garde son numéro. ${quoi} attendra de nouveau son dossier.${frais}`
+  const verbe =
+    d.factures.length > 1 ? 'attendront de nouveau leur dossier' : 'attendra de nouveau son dossier'
+  return `Annuler le dossier ${d.numero} ? Il garde son numéro. ${quoi} ${verbe}.${frais}`
 }
 
-/** « Annuler le dossier » : motif exigé, il garde son numéro (sa facture attend de nouveau). */
+/** « Annuler le dossier » : motif exigé, il garde son numéro (ses factures attendent de nouveau). */
 function AnnulerDossier({ d, g }: { d: DossierFiche; g: GestesDossier }) {
   const annuler = async (motif: string) => {
     const charges = d.frais.reduce((s, f) => s + f.montant, 0)
     await g.annuler(motif)
     dire(
-      `Dossier ${d.numero} annulé : sa facture attend de nouveau son dossier ; ${nombre(d.frais.length)} frais (${montantPrecis(charges, 'MAD')}) sortis du coût.`,
+      `Dossier ${d.numero} annulé : ${quiAttend(d).toLowerCase()} ${d.factures.length > 1 ? 'attendent' : 'attend'} de nouveau ; ${nombre(d.frais.length)} frais (${montantPrecis(charges, 'MAD')}) sortis du coût.`,
     )
   }
   return (
@@ -88,7 +102,7 @@ function AnnulerDossier({ d, g }: { d: DossierFiche; g: GestesDossier }) {
       question={questionAnnulation(d)}
       oui="Oui, annuler le dossier"
       blocages={d.actions.annuler ? [d.actions.annuler] : []}
-      titre={`Annuler le dossier : sa facture attend de nouveau son dossier${d.frais.length ? `, ses ${nombre(d.frais.length)} frais sortent du coût` : ''}`}
+      titre={`Annuler le dossier : ses factures attendent de nouveau leur dossier${d.frais.length ? `, ses ${nombre(d.frais.length)} frais sortent du coût` : ''}`}
       onOui={annuler}
     >
       Annuler le dossier

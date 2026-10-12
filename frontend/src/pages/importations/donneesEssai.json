@@ -13,17 +13,39 @@
       "annule_le": null,
       "annule_par": null,
       "annulation_motif": "",
-      "facture": {
-        "id": 1,
-        "numero": "FA-2026-117-BBO-6",
-        "fournisseur_id": 1,
-        "fournisseur": "Fournisseur-BBO-1",
-        "date": "2025-12-31",
-        "montant": 5700.0,
-        "devise": "DJN",
-        "echeance": null,
-        "payee_le": null
-      },
+      "factures": [
+        {
+          "id": 1,
+          "numero": "FA-2026-117-BBO-6",
+          "fournisseur_id": 1,
+          "fournisseur": "Fournisseur-BBO-1",
+          "date": "2025-12-31",
+          "montant": 5700.0,
+          "devise": "DJN",
+          "echeance": null,
+          "payee_le": null,
+          "ajoutee_le": "2026-10-08T09:12:00+01:00",
+          "liberee_le": null,
+          "receptions": [
+            {
+              "id": 1,
+              "numero": "REC-2025-0001"
+            }
+          ],
+          "lignes": 2,
+          "ecart": {
+            "facture": "FA-2026-117-BBO-6",
+            "montant": 5700.0,
+            "recu": 5680.0,
+            "devise": "DJN",
+            "ecart": 20.0,
+            "part": 0.0035211267605633804,
+            "tolerance": 0.02,
+            "hors_tolerance": false
+          },
+          "retrait": null
+        }
+      ],
       "a_la_main": false,
       "repris": false,
       "local_confirme": false,
@@ -48,23 +70,12 @@
       "surcout_aberrant": false,
       "lignes_aberrantes": [],
       "lignes_negatives": [],
-      "ecart_facture": {
-        "facture": "FA-2026-117-BBO-6",
-        "montant": 5700.0,
-        "recu": 5680.0,
-        "devise": "DJN",
-        "ecart": 20.0,
-        "part": 0.0035211267605633804,
-        "tolerance": 0.02,
-        "hors_tolerance": false
-      },
       "lignes_cours_bon": 0,
       "cours_disparates": [],
       "cours_eloignes": 0,
       "charges_non_reparties_mad": 0.0,
       "tva_non_repartie_mad": 0.0,
       "fournisseurs": ["Fournisseur-BBO-1"],
-      "factures": ["FA-2026-117-BBO-6"],
       "receptions": [
         {
           "id": 1,
@@ -119,17 +130,39 @@
       "annule_le": null,
       "annule_par": null,
       "annulation_motif": "",
-      "facture": {
-        "id": 4,
-        "numero": "IT-55-BBO-17",
-        "fournisseur_id": 2,
-        "fournisseur": "Fournisseur-BBO-14",
-        "date": "2025-12-31",
-        "montant": 3060.0,
-        "devise": "GFF",
-        "echeance": null,
-        "payee_le": null
-      },
+      "factures": [
+        {
+          "id": 4,
+          "numero": "IT-55-BBO-17",
+          "fournisseur_id": 2,
+          "fournisseur": "Fournisseur-BBO-14",
+          "date": "2025-12-31",
+          "montant": 3060.0,
+          "devise": "GFF",
+          "echeance": null,
+          "payee_le": null,
+          "ajoutee_le": "2026-10-08T09:12:00+01:00",
+          "liberee_le": null,
+          "receptions": [
+            {
+              "id": 5,
+              "numero": "REC-2025-0005"
+            }
+          ],
+          "lignes": 1,
+          "ecart": {
+            "facture": "IT-55-BBO-17",
+            "montant": 3060.0,
+            "recu": 3060.0,
+            "devise": "GFF",
+            "ecart": 0.0,
+            "part": 0.0,
+            "tolerance": 0.02,
+            "hors_tolerance": false
+          },
+          "retrait": "Ce dossier est clos : le rouvrir pour y toucher (c'est tracé)."
+        }
+      ],
       "a_la_main": false,
       "repris": false,
       "local_confirme": false,
@@ -154,23 +187,12 @@
       "surcout_aberrant": false,
       "lignes_aberrantes": [],
       "lignes_negatives": [],
-      "ecart_facture": {
-        "facture": "IT-55-BBO-17",
-        "montant": 3060.0,
-        "recu": 3060.0,
-        "devise": "GFF",
-        "ecart": 0.0,
-        "part": 0.0,
-        "tolerance": 0.02,
-        "hors_tolerance": false
-      },
       "lignes_cours_bon": 0,
       "cours_disparates": [],
       "cours_eloignes": 0,
       "charges_non_reparties_mad": 0.0,
       "tva_non_repartie_mad": 0.0,
       "fournisseurs": ["Fournisseur-BBO-14"],
-      "factures": ["IT-55-BBO-17"],
       "receptions": [
         {
           "id": 5,
@@ -304,17 +326,39 @@
     "annule_le": null,
     "annule_par": null,
     "annulation_motif": "",
-    "facture": {
-      "id": 1,
-      "numero": "FA-2026-117-BBO-6",
-      "fournisseur_id": 1,
-      "fournisseur": "Fournisseur-BBO-1",
-      "date": "2025-12-31",
-      "montant": 5700.0,
-      "devise": "DJN",
-      "echeance": null,
-      "payee_le": null
-    },
+    "factures": [
+      {
+        "id": 1,
+        "numero": "FA-2026-117-BBO-6",
+        "fournisseur_id": 1,
+        "fournisseur": "Fournisseur-BBO-1",
+        "date": "2025-12-31",
+        "montant": 5700.0,
+        "devise": "DJN",
+        "echeance": null,
+        "payee_le": null,
+        "ajoutee_le": "2026-10-08T09:12:00+01:00",
+        "liberee_le": null,
+        "receptions": [
+          {
+            "id": 1,
+            "numero": "REC-2025-0001"
+          }
+        ],
+        "lignes": 2,
+        "ecart": {
+          "facture": "FA-2026-117-BBO-6",
+          "montant": 5700.0,
+          "recu": 5680.0,
+          "devise": "DJN",
+          "ecart": 20.0,
+          "part": 0.0035211267605633804,
+          "tolerance": 0.02,
+          "hors_tolerance": false
+        },
+        "retrait": null
+      }
+    ],
     "a_la_main": false,
     "repris": false,
     "local_confirme": false,
@@ -339,23 +383,12 @@
     "surcout_aberrant": false,
     "lignes_aberrantes": [],
     "lignes_negatives": [],
-    "ecart_facture": {
-      "facture": "FA-2026-117-BBO-6",
-      "montant": 5700.0,
-      "recu": 5680.0,
-      "devise": "DJN",
-      "ecart": 20.0,
-      "part": 0.0035211267605633804,
-      "tolerance": 0.02,
-      "hors_tolerance": false
-    },
     "lignes_cours_bon": 0,
     "cours_disparates": [],
     "cours_eloignes": 0,
     "charges_non_reparties_mad": 0.0,
     "tva_non_repartie_mad": 0.0,
     "fournisseurs": ["Fournisseur-BBO-1"],
-    "factures": ["FA-2026-117-BBO-6"],
     "receptions": [
       {
         "id": 1,
@@ -590,6 +623,7 @@
     "actions": {
       "modifier": null,
       "rattacher": null,
+      "ajouter_facture": null,
       "saisir": "Le dossier de la facture FA-2026-117-BBO-6 porte ce qu'elle a apporté, tel que reçu : la saisie à la main est réservée aux dossiers d'avant la mise en service.",
       "cours": null,
       "frais": null,

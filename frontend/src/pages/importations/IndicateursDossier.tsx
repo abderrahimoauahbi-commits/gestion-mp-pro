@@ -96,7 +96,7 @@ function Lien({ texte, versFrais }: { texte: string; versFrais: () => void }) {
 export function BandeauxDossier({ d, versFrais }: { d: DossierFiche; versFrais: () => void }) {
   const horsTva = Math.abs(d.charges_non_reparties_mad) > SEUIL_NON_REPARTIS
   const tva = Math.abs(d.tva_non_repartie_mad) > SEUIL_NON_REPARTIS
-  const f = d.ecart_facture
+  const ecartees = d.factures.filter((x) => x.ecart?.hors_tolerance)
   return (
     <>
       {horsTva || tva ? (
@@ -126,13 +126,15 @@ export function BandeauxDossier({ d, versFrais }: { d: DossierFiche; versFrais: 
           <Lien texte="le vérifier" versFrais={versFrais} />
         </Note>
       ) : null}
-      {f && f.hors_tolerance ? (
-        <Note ton="info">
-          Facture {f.facture} : {montantPrecis(f.montant, f.devise)} facturés pour{' '}
-          {montantPrecis(f.recu, f.devise)} reçus (pesée × prix), soit {part(f.part)} d’écart (tolérance{' '}
-          {part(f.tolerance)}, Réglages › Prix). Le coût reste pesée × prix (contrôle C36).
-        </Note>
-      ) : null}
+      {ecartees.map(({ id, ecart: f }) =>
+        f ? (
+          <Note key={id} ton="info">
+            Facture {f.facture} : {montantPrecis(f.montant, f.devise)} facturés pour{' '}
+            {montantPrecis(f.recu, f.devise)} reçus (pesée × prix), soit {part(f.part)} d’écart (tolérance{' '}
+            {part(f.tolerance)}, Réglages › Prix). Le coût reste pesée × prix (contrôle C36).
+          </Note>
+        ) : null,
+      )}
     </>
   )
 }

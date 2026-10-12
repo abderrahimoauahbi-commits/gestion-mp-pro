@@ -50,10 +50,10 @@ function DepuisLaFacture({ page, clos }: { page: EtatPage; clos: (id: number) =>
   const sans = lu.data.sans_facture.length
   return (
     <div className={styles.pile}>
-      <Note uneLigne="Un dossier, une facture. Choisir le fournisseur, taper le numéro de facture : toute la marchandise qu’elle a apportée entre au dossier, le libellé et la date d’arrivée se remplissent seuls. Il ne restera qu’à saisir les frais.">
-        Un dossier, une facture. Choisir le fournisseur, taper le numéro de facture : toute la marchandise
-        qu’elle a apportée entre au dossier, le libellé et la date d’arrivée se remplissent seuls. Il ne
-        restera qu’à saisir les frais.
+      <Note uneLigne="Choisir le fournisseur, taper le numéro de facture : toute la marchandise qu’elle a apportée entre au dossier, le libellé et la date d’arrivée se remplissent seuls. Les autres factures du même arrivage s’ajoutent ensuite depuis la fiche du dossier ; il ne restera qu’à saisir les frais.">
+        Choisir le fournisseur, taper le numéro de facture : toute la marchandise qu’elle a apportée entre au
+        dossier, le libellé et la date d’arrivée se remplissent seuls. Les autres factures du même arrivage
+        s’ajoutent ensuite depuis la fiche du dossier ; il ne restera qu’à saisir les frais.
       </Note>
       <ChoixFacture
         factures={lu.data.factures}

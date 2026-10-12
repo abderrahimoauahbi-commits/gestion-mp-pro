@@ -75,7 +75,9 @@ function CoursDevise({
 /** Les notes des cours, calculées par le serveur. */
 function NotesCours({ d }: { d: DossierFiche }) {
   const auJour = d.lignes.filter((l) => l.devise !== 'MAD' && l.cours == null).length
-  const f = d.ecart_facture
+  const proches = d.factures.flatMap((x) =>
+    x.ecart && !x.ecart.hors_tolerance && x.ecart.ecart ? [x.ecart] : [],
+  )
   return (
     <>
       {d.cours_eloignes ? (
@@ -103,13 +105,13 @@ function NotesCours({ d }: { d: DossierFiche }) {
           Vérifier l’avis de la banque.
         </Note>
       ))}
-      {f && !f.hors_tolerance && f.ecart ? (
-        <Note>
-          Chaque marchandise entre à sa <strong>pesée × son prix</strong> (
+      {proches.map((f) => (
+        <Note key={f.facture}>
+          Chaque marchandise entre à sa <strong>pesée × son prix</strong> (facture {f.facture} :{' '}
           {montantPrecis(f.montant, f.devise)} facturés, {montantPrecis(f.recu, f.devise)} reçus, écart{' '}
           {part(f.part)}) : l’écart à la facture ne change pas le coût.
         </Note>
-      ) : null}
+      ))}
     </>
   )
 }

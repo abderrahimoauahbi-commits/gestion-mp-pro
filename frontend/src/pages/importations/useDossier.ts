@@ -1,5 +1,5 @@
 /**
- * Les écritures sur un dossier (routes 190–204) : chacune envoie la `version` lue (celle du dossier,
+ * Les écritures sur un dossier (routes 190–204, 253–254) : chacune envoie la `version` lue (celle du dossier,
  * ou celle du frais pour modifier et retirer un frais), rend la fiche relue, et la page relit tout
  * (invalidation globale de `useEcriture`). « Enregistré à HH:MM » (heure du serveur) s'affiche
  * quatre secondes après un champ enregistré en le quittant.
@@ -68,6 +68,12 @@ export function useGestesDossier(fiche: DossierFiche) {
     enCours: ecrire.isPending,
     enTete: (corps: EnTeteCorps) => ecrire.mutateAsync(() => api.put<DossierFiche>(base, avec(corps))),
     rattacher: (factureId: number) => poster('rattacher', { facture_id: factureId }),
+    ajouterFacture: (factureId: number, localConfirme: boolean) =>
+      poster('factures', { facture_id: factureId, local_confirme: localConfirme }),
+    retirerFacture: (factureId: number) =>
+      ecrire.mutateAsync(() =>
+        api.supprimer<DossierFiche>(`${base}/factures/${factureId}?version=${fiche.version}`),
+      ),
     saisir: (corps: object) => poster('lignes', corps),
     ligne: (ligneId: number, corps: { cours?: number | null; commentaire?: string }) =>
       ecrire.mutateAsync(() => api.put<DossierFiche>(`${base}/lignes/${ligneId}`, avec(corps))),

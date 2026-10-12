@@ -1,7 +1,8 @@
 /**
  * La fiche d'un dossier d'importation (`/dossiers/:id?onglet=…`, ECRANS-PRO 5.6 à 5.14), en fenêtre
  * très large par-dessus la liste (ou l'écran qui l'a ouverte) : titre et badge (« Ouvert »,
- * « Clos le … », « Annulé le … »), en-tête et gestes, indicateurs, bandeaux, puis huit volets dans
+ * « Clos le … », « Annulé le … »), en-tête et gestes, « Factures du dossier » (une ligne par
+ * facture, « Ajouter une facture », « Retirer »), indicateurs, bandeaux, puis huit volets dans
  * l'adresse — familles, marchandises, frais (● si un frais est en cours de saisie), échéancier,
  * pièces jointes, second camion (si une facture attend et le dossier est ouvert), saisie à la main
  * (dossier sans facture, ouvert), historique. Un volet devenu impossible revient aux familles ; un
@@ -24,6 +25,7 @@ import { horodatage } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
 import { FRAIS_VIDE, fraisCommence, type BrouillonFrais } from './AjoutFrais'
 import { EnTeteDossier } from './EnTeteDossier'
+import { FacturesDossier } from './FacturesDossier'
 import styles from './Importations.module.css'
 import { BandeauxDossier, IndicateursDossier } from './IndicateursDossier'
 import { titreDossier, VOLETS, type DossierFiche, type PosteFiche, type Volet } from './types'
@@ -76,7 +78,7 @@ const LIBELLES: Record<Volet, { libelle: string; court?: string }> = {
   frais: { libelle: 'Frais' },
   echeancier: { libelle: 'Échéancier' },
   pieces: { libelle: 'Pièces jointes' },
-  facture: { libelle: 'Second camion de la facture', court: 'Second camion' },
+  facture: { libelle: 'Second camion d’une facture', court: 'Second camion' },
   main: { libelle: 'Saisie à la main' },
   historique: { libelle: 'Historique' },
 }
@@ -181,6 +183,7 @@ function Fiche({ d, onFermer }: { d: DossierFiche; onFermer: () => void }) {
           enregistreA={enregistre.a}
           noter={enregistre.noter}
         />
+        <FacturesDossier d={d} g={g} />
         <IndicateursDossier d={d} versFrais={() => volet.choisir('frais')} />
         <BandeauxDossier d={d} versFrais={() => volet.choisir('frais')} />
         <Onglets

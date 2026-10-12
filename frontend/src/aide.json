@@ -122,9 +122,12 @@
     },
     "importations": {
       "titre": "Importations & coût de revient",
-      "resume": "Un dossier d’importation par facture : ses marchandises, ses frais répartis, son échéancier, ses pièces ; ce que chaque fil a coûté rendu usine.",
+      "resume": "Un dossier d’importation par arrivage (une déclaration en douane) : ses factures — une ou plusieurs —, leurs marchandises, ses frais répartis, son échéancier, ses pièces ; ce que chaque fil a coûté rendu usine.",
       "points": [
         "Le dossier s’ouvre depuis la facture apportée par une réception.",
+        "Une autre facture du même arrivage (même conteneur, même déclaration, du même fournisseur ou d’un autre) s’y ajoute depuis la fiche du dossier : « Ajouter une facture » ; toute sa marchandise entre, dans sa devise (les devises ne s’additionnent pas). Une facture n’est que dans un seul dossier.",
+        "« Retirer » une facture du dossier : sa marchandise attend de nouveau son dossier, les frais restent et se répartissent sur ce qui reste ; impossible tant qu’un frais vise une de ses marchandises (la raison est dite). Détacher la dernière réception d’une facture la retire aussi ; annuler le dossier libère toutes ses factures.",
+        "Chaque facture se rapproche de ce qu’elle a apporté (pesée × prix, contrôle C36) : l’écart se lit facture par facture.",
         "Coût hors TVA (le coût de revient) = achat au cours de la banque + charges non récupérables ; la TVA est à part (Coût TTC).",
         "Les frais non répartis sont dits à part, partout.",
         "Un frais se saisit aussi par son taux (TVA 20 %, droits 2,5 %…) : le montant est proposé sur la valeur en douane (plus droits et TPI pour la TVA) ; corrigé à la main s’il le faut, il est gardé tel quel et n’est jamais recalculé ensuite."
@@ -564,7 +567,7 @@
     },
     "import_dossiers": {
       "grandeur": "Dossiers d’importation",
-      "texte": "Tous les dossiers, ouverts et clos ; les dossiers annulés ne sont comptés nulle part. Un dossier = une facture = une livraison."
+      "texte": "Tous les dossiers, ouverts et clos ; les dossiers annulés ne sont comptés nulle part. Un dossier = un arrivage (une déclaration en douane), avec une ou plusieurs factures ; une facture n’est que dans un seul dossier."
     },
     "import_poids": {
       "grandeur": "Poids importé",
@@ -1299,7 +1302,7 @@
           "titre": "Le cuir, les franges, le ruban : des kilos en stock, des mètres dans la recette."
         },
         {
-          "texte": "Droits, fret, transit, port, banque s’ajoutent, et se paient à chaque livraison : le dossier d’importation suit donc la **facture** (un dossier par facture, ouvert depuis la réception qui l’a apportée), pas la commande. Il porte ces frais et les répartit sur les marchandises, à la valeur ou au poids selon le poste de frais. La TVA, récupérable, reste hors du coût : c’est le **Coût hors TVA** (le coût de revient) qui valorise le stock ; le **Coût TTC** dit ce qui a été décaissé.",
+          "texte": "Droits, fret, transit, port, banque s’ajoutent, et se paient à chaque livraison : le dossier d’importation suit donc l’**arrivage** et ses **factures** (ouvert depuis la facture d’une réception ; une autre facture du même conteneur s’y ajoute ; une facture n’est que dans un seul dossier), pas la commande. Il porte ces frais et les répartit sur les marchandises, à la valeur ou au poids selon le poste de frais. La TVA, récupérable, reste hors du coût : c’est le **Coût hors TVA** (le coût de revient) qui valorise le stock ; le **Coût TTC** dit ce qui a été décaissé.",
           "titre": "Le prix de la facture n’est pas le coût du fil."
         },
         {

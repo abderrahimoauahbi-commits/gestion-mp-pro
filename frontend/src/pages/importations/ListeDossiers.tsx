@@ -2,8 +2,8 @@
  * Importations › Dossiers ouverts · Dossiers clos (· Annulés) (ECRANS-PRO 5.2) : la liste est
  * **paginée au serveur** (recherche tolérante à la ponctuation, filtres liés et pied poussés en
  * SQL/au moteur ; mêmes chiffres qu'avant). Recherche à la frappe (numéro, libellé, banque,
- * observations, factures, réceptions, familles, fournisseurs) et filtres (fournisseur de la
- * facture, « à vérifier ») dans l'adresse, tableau dans son cadre, pied « Total des N dossiers
+ * observations, factures, réceptions, familles, fournisseurs) et filtres (fournisseur d'une de ses
+ * factures, « à vérifier ») dans l'adresse, tableau dans son cadre, pied « Total des N dossiers
  * affichés » (il suit la recherche, anomalie 5.9), export avec la vue.
  */
 import { useMemo } from 'react'
@@ -41,7 +41,7 @@ function parametres(statut: Statut, etat: EtatListe) {
   }
 }
 
-/** Les filtres liés, appliqués **au serveur** : le fournisseur de la facture (options de l'aperçu),
+/** Les filtres liés, appliqués **au serveur** : le fournisseur d'une facture (options de l'aperçu),
  * « à vérifier » (oui/non). Leurs valeurs sont celles qu'envoient la route et l'export. */
 function filtres(apercu?: ApercuDossiers): Filtre<DossierResume>[] {
   const noms = new Map((apercu?.fournisseurs ?? []).map((f) => [String(f.id), f.nom]))
@@ -49,7 +49,7 @@ function filtres(apercu?: ApercuDossiers): Filtre<DossierResume>[] {
     {
       cle: 'fournisseur',
       libelle: 'Fournisseur',
-      valeur: (d) => (d.facture ? String(d.facture.fournisseur_id) : null),
+      valeur: (d) => (d.factures[0] ? String(d.factures[0].fournisseur_id) : null),
       libelleValeur: (v) => noms.get(v) ?? v,
       options: (apercu?.fournisseurs ?? []).map((f) => String(f.id)),
     },

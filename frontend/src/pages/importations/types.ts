@@ -13,6 +13,7 @@ export type FraisDossier = Schema<'FraisDossier'>
 export type Echeance = Schema<'Echeance'>
 export type EnAttente = Schema<'EnAttente'>
 export type FactureARattacher = Schema<'FactureARattacher'>
+export type FactureDossier = Schema<'FactureDossier'>
 export type ReceptionSansFacture = Schema<'ReceptionSansFacture'>
 export type ValeurDevise = Schema<'ValeurDeviseDossier'>
 export type Famille = Schema<'Famille'>

@@ -1,5 +1,6 @@
 /**
- * Choisir une facture (ECRANS-PRO 5.4 ; trois usages : En attente, Nouveau dossier, Second camion) :
+ * Choisir une facture (ECRANS-PRO 5.4 ; quatre usages : En attente, Nouveau dossier, Second camion,
+ * « Ajouter une facture » à un dossier) :
  * fournisseur en filtre lié (ses comptes suivent le numéro tapé), numéro tapé qui réduit la liste
  * à la frappe (« FA-2026/117 » = « fa 2026 117 » = « fa2026117 » ; ou des mots de ses réceptions et
  * familles), « Effacer les filtres », et sur chaque facture le geste de l'usage. Un fournisseur
@@ -35,15 +36,20 @@ export interface ChoixFactureProps {
   /** Ce qui empêche le geste (dossier clos : « le rouvrir d'abord »). */
   blocages?: (f: FactureARattacher) => readonly string[]
   hauteur?: 'page' | 'fenetre'
+  /** « Ajouter une facture » à un dossier : la confirmation d'un fournisseur marocain le dit. */
+  ajout?: boolean
 }
 
 function Geste({ f, p }: { f: FactureARattacher; p: ChoixFactureProps }) {
   const blocages = p.blocages?.(f) ?? []
   if (f.local && !f.dossier_id) {
+    const question = p.ajout
+      ? `${f.fournisseur} est un fournisseur marocain : ni douane, ni fret international. L’ajouter quand même à ce dossier d’importation ?`
+      : `${f.fournisseur} est un fournisseur marocain : ni douane, ni fret international. Ouvrir quand même un dossier d’importation ?`
     return (
       <Confirmer
-        question={`${f.fournisseur} est un fournisseur marocain : ni douane, ni fret international. Ouvrir quand même un dossier d’importation ?`}
-        oui="Oui, l’ouvrir"
+        question={question}
+        oui={p.ajout ? 'Oui, l’ajouter' : 'Oui, l’ouvrir'}
         titre="Un fournisseur marocain n’a normalement pas de dossier d’importation"
         taille="petit"
         blocages={blocages}

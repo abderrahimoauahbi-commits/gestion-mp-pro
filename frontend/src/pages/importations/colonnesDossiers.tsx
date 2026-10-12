@@ -91,8 +91,12 @@ function FacturesEtReceptions({ d }: { d: DossierResume }) {
 const factures: C = {
   cle: 'factures',
   titre: 'Facture · réceptions',
-  valeur: (d) => d.factures.join(' '),
-  recherche: (d) => [...d.receptions.map((r) => r.numero), ...d.fournisseurs],
+  valeur: (d) => d.pieces.map((p) => p.facture ?? '').join(' '),
+  recherche: (d) => [
+    ...d.receptions.map((r) => r.numero),
+    ...d.fournisseurs,
+    ...d.factures.map((f) => f.fournisseur),
+  ],
   rendu: (d) => <FacturesEtReceptions d={d} />,
 }
 
