@@ -43,7 +43,7 @@ Une **ligne non livrée** est une ligne de réception rattachée à une ligne de
    due … » ; plusieurs bons : « sur les bons X, Y »). Les comptes de la question (en stock, en
    quarantaine, refusées, écarts) ne comptent plus les lignes non livrées. La fiche serveur ne
    rédige pas cette question (rien à changer côté serveur). Dans la saisie, une note discrète :
-   « N lignes vides : non livrées par ce camion, elles resteront dues sur le bon. »
+   « N lignes encore vides (ni BL, ni pesée, ni lot) : laissées ainsi, elles ne seront pas reçues et resteront dues sur le bon. »
 5. Une ligne **hors bon** vide, ou une ligne de bon **partiellement remplie** (BL saisi sans
    pesée, pesée sans lot, palettes seules, « Lot interne » coché…), garde les blocages d'avant,
    mot pour mot.

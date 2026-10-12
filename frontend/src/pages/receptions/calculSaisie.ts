@@ -205,13 +205,13 @@ export const nonLivree = (l: LigneRemplie) =>
   !n(l.bobines_en_plus) &&
   !n(l.nb_bobines ?? null)
 
-/** La note discrète de la saisie : « 3 lignes vides : non livrées par ce camion, … » (vide sans elles). */
+/** La note discrète de la saisie : « 3 lignes encore vides … : laissées ainsi, elles ne seront pas reçues … » (vide sans elles). */
 export function noteNonLivrees(lignes: readonly LigneRemplie[]): string {
   const vides = lignes.filter(nonLivree).length
   if (!vides) return ''
   return vides === 1
-    ? '1 ligne vide : non livrée par ce camion, elle restera due sur le bon.'
-    : `${vides} lignes vides : non livrées par ce camion, elles resteront dues sur le bon.`
+    ? '1 ligne encore vide (ni BL, ni pesée, ni lot) : laissée ainsi, elle ne sera pas reçue et restera due sur le bon.'
+    : `${vides} lignes encore vides (ni BL, ni pesée, ni lot) : laissées ainsi, elles ne seront pas reçues et resteront dues sur le bon.`
 }
 
 /** Ce que la validation annonce : « 23 lignes non livrées par ce camion seront retirées : … ». */

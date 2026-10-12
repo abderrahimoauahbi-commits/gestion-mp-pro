@@ -10,6 +10,7 @@ import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
 import { nombre } from '../../lib/format'
 import styles from '../plan-achat/achats.module.css'
+import cadre from './TableSaisie.module.css'
 import { type LigneSaisie } from './calculSaisie'
 import {
   Bobines,
@@ -170,7 +171,7 @@ function colonnes(x: ContexteTable): Colonne<LigneSaisie>[] {
 
 export function TableSaisie(x: ContexteTable) {
   return (
-    <div className={styles.tableFenetre}>
+    <div className={cadre.tableSaisie}>
       <DataTable<LigneSaisie>
         libelle="Lignes du camion"
         lignes={x.lignes}
@@ -178,7 +179,7 @@ export function TableSaisie(x: ContexteTable) {
         cle={(l) => l.cle}
         recherche={false}
         hauteur="fenetre"
-        vide="Cochez un bon de commande ci-dessus, ou ajoutez une matière hors commande."
+        vide="Choisissez les références arrivées du bon ci-dessus, ou ajoutez une matière hors commande."
       />
     </div>
   )

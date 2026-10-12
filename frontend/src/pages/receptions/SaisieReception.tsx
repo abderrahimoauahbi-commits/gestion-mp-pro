@@ -22,25 +22,27 @@ import {
   blocagesSaisie,
   corps,
   devisesDuCamion,
+  estSaisie,
   noteNonLivrees,
   totaux,
   type Tolerances,
 } from './calculSaisie'
 import { useBons, useFournisseursActifs, useMagasins, useMatieresActives, useReception } from './donnees'
+import { ChoixReferences } from './ChoixReferences'
 import { EnTeteSaisie, FacturesSaisie } from './EnTeteSaisie'
 import { TableSaisie } from './TableSaisie'
 import { useTolerances } from './tolerances'
 import type { ReceptionFiche } from './types'
 import { useSaisieReception, type Referentiels, type SaisieReception as Saisie } from './useSaisieReception'
 
-const CLE_AIDE = 'gestion-mp-pro.aide-reception'
+// Nouvelle clé : l'ancienne gardait le mode d'emploi ouvert pour toujours (il s'ouvrait la première
+// fois, et ce premier affichage s'enregistrait comme « ouvert »).
+const CLE_AIDE = 'gestion-mp-pro.aide-reception-repliee'
 
-/** Le mode d'emploi s'ouvre la toute première fois, puis reste replié (sauf si on le rouvre). */
+/** Le mode d'emploi reste replié (la place va au tableau), sauf si on l'a laissé ouvert. */
 function lireAide(): boolean {
   try {
-    const etat = localStorage.getItem(CLE_AIDE)
-    if (etat == null) localStorage.setItem(CLE_AIDE, 'repliee')
-    return etat == null || etat === 'ouverte'
+    return localStorage.getItem(CLE_AIDE) === 'ouverte'
   } catch {
     return false
   }
@@ -77,7 +79,9 @@ export function manquesSaisie(
   const m: string[] = []
   if (!s.fournisseurId) m.push('le fournisseur (ou le n° du bon)')
   if (!s.lignes.length)
-    m.push('au moins une ligne : cochez un bon de commande, ou ajoutez une matière hors commande')
+    m.push(
+      'au moins une ligne : choisissez les références arrivées du bon, ou ajoutez une matière hors commande',
+    )
   if (s.entete.date > aujourdhui()) m.push('une date d’arrivée qui n’est pas dans le futur')
   if (correction && devisesDuCamion(s.lignes).length > 1)
     m.push('une seule devise (un brouillon ne mêle pas deux devises)')
@@ -133,6 +137,15 @@ function Pied({
   )
 }
 
+/** Les lignes du bon déjà dans la saisie (ou seulement celles déjà saisies : lot, pesée). */
+function dedansDuBon(s: Saisie, bon: number, saisiesSeules = false): Set<number> {
+  return new Set(
+    s.lignes
+      .filter((l) => l.commande_id === bon && (!saisiesSeules || estSaisie(l)))
+      .flatMap((l) => (l.commande_ligne_id == null ? [] : [l.commande_ligne_id])),
+  )
+}
+
 function Question({ s }: { s: Saisie }) {
   if (!s.question) return null
   const q = s.question
@@ -155,6 +168,26 @@ function Question({ s }: { s: Saisie }) {
   )
 }
 
+/** Les replis sous l'en-tête : mode d'emploi, facture, ce qui sera refusé, les lignes vides. */
+function Replis({ s, blocages }: { s: Saisie; blocages: readonly string[] }) {
+  const vides = noteNonLivrees(s.lignes)
+  return (
+    <div className={styles.replis}>
+      <ModeEmploi />
+      {s.fournisseur ? <FacturesSaisie s={s} /> : null}
+      {blocages.length ? (
+        <details className={styles.repli}>
+          <summary className={styles.attention}>
+            Sera refusé à la validation : {blocages.length} point(s) à régler
+          </summary>
+          <Blocages blocages={blocages} titre="Sera refusé à la validation :" />
+        </details>
+      ) : null}
+      {vides ? <Note uneLigne={vides}>{vides}</Note> : null}
+    </div>
+  )
+}
+
 function Formulaire({
   r,
   donnees,
@@ -169,7 +202,6 @@ function Formulaire({
   const s = useSaisieReception(r, donnees)
   const tol = useTolerances()
   const blocages = blocagesSaisie(s.lignes, donnees.magasins, tol)
-  const vides = noteNonLivrees(s.lignes)
   return (
     <Fenetre
       titre={r ? `Corriger la réception — ${r.numero ?? 'Brouillon'}` : 'Nouvelle réception'}
@@ -179,20 +211,17 @@ function Formulaire({
       pied={<Pied s={s} r={r} tol={tol} onEnregistrees={onEnregistrees} />}
     >
       <EnTeteSaisie s={s} donnees={donnees} />
-      <div className={styles.replis}>
-        <ModeEmploi />
-        {s.fournisseur ? <FacturesSaisie s={s} /> : null}
-        {blocages.length ? (
-          <details className={styles.repli}>
-            <summary className={styles.attention}>
-              Sera refusé à la validation : {blocages.length} point(s) à régler
-            </summary>
-            <Blocages blocages={blocages} titre="Sera refusé à la validation :" />
-          </details>
-        ) : null}
-        {vides ? <Note uneLigne={vides}>{vides}</Note> : null}
-      </div>
+      <Replis s={s} blocages={blocages} />
       <Question s={s} />
+      {s.choixRefs != null ? (
+        <ChoixReferences
+          commandeId={s.choixRefs}
+          dedans={dedansDuBon(s, s.choixRefs)}
+          saisies={dedansDuBon(s, s.choixRefs, true)}
+          onChoisir={s.prendreReferences}
+          onFermer={s.fermerReferences}
+        />
+      ) : null}
       {s.fournisseur ? (
         <TableSaisie
           lignes={s.lignes}

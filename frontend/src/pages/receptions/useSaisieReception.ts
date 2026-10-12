@@ -1,13 +1,12 @@
 /**
  * L'état de la saisie d'un camion : l'en-tête, les factures par devise, les lignes, et les gestes
- * qui effaceraient une saisie (changer de fournisseur, décocher un bon, retirer une ligne pesée),
+ * qui effaceraient une saisie (changer de fournisseur, décocher un bon ou une référence, retirer une
+ * ligne pesée),
  * qui demandent d'abord (`question`). Un nouveau camion part de la date du jour ; un brouillon à
  * corriger part de sa fiche.
  */
 import { useMemo, useState, type ReactNode } from 'react'
 
-import { direErreur } from '../../composants/retour/Messages'
-import { api } from '../../lib/api'
 import { ajouterJours, aujourdhui } from '../../lib/heure'
 import type { CommandeFiche, CommandeResume } from '../commandes/types'
 import type { Matiere } from '../plan-achat/types'
@@ -82,11 +81,37 @@ function useEnTete(r: ReceptionFiche | null, fournisseur: Fournisseur | null, ma
   }
 }
 
-/** Les lignes et les gestes qui les touchent ; ce qui effacerait une saisie demande d'abord. */
+/** Les bons du camion d'un brouillon : ceux que ses lignes nomment, dans l'ordre. */
+const bonsDe = (r: ReceptionFiche | null) => [
+  ...new Set((r?.lignes ?? []).map((l) => l.commande_id).filter((x): x is number => x != null)),
+]
+
+/** Ce que change le choix des références d'un bon : les lignes qui sortent, celles qui entrent. */
+function ecartReferences(
+  lignes: readonly LigneSaisie[],
+  fiche: CommandeFiche,
+  cochees: ReadonlySet<number>,
+  nouvelle: (l: CommandeFiche['lignes'][number]) => LigneSaisie,
+) {
+  const du = lignes.filter((l) => l.commande_id === fiche.id)
+  const presentes = new Set(du.map((l) => l.commande_ligne_id))
+  return {
+    sortantes: du.filter((l) => l.commande_ligne_id != null && !cochees.has(l.commande_ligne_id)),
+    entrantes: fiche.lignes.filter((l) => cochees.has(l.id) && !presentes.has(l.id)).map(nouvelle),
+  }
+}
+
+/**
+ * Les lignes et les gestes qui les touchent ; ce qui effacerait une saisie demande d'abord.
+ * Choisir un bon le met dans le camion et ouvre « Références arrivées » (`choixRefs`) : seules les
+ * références cochées entrent dans la saisie, le reste demeure dû sur le bon.
+ */
 function useLignes(r: ReceptionFiche | null, ref: Referentiels, marquer: () => void) {
   const [lignes, setLignes] = useState<LigneSaisie[]>(
     () => r?.lignes.map((l) => depuisFiche(l, r.devise)) ?? [],
   )
+  const [bons, setBons] = useState<number[]>(() => bonsDe(r))
+  const [choixRefs, setChoixRefs] = useState<number | null>(null)
   const [question, setQuestion] = useState<Question | null>(null)
   const parMatiere = useMemo(() => new Map(ref.matieres.map((m) => [m.id, m])), [ref.matieres])
   const magasin = ref.magasins.find((m) => m.actif && m.type !== 'quarantaine')?.id ?? null
@@ -96,47 +121,63 @@ function useLignes(r: ReceptionFiche | null, ref: Referentiels, marquer: () => v
   }
   const demander = (si: boolean, texte: ReactNode, oui: string, faire: () => void) =>
     si ? setQuestion({ texte, oui, faire }) : faire()
-  async function ajouterBon(c: CommandeResume) {
-    let fiche: CommandeFiche
-    try {
-      fiche = await api.get<CommandeFiche>(`/commandes/${c.id}`)
-    } catch (e) {
-      direErreur(e)
-      return
-    }
-    const nouvelles = fiche.lignes
-      .filter((l) => l.reste > 0)
-      .map((l) => ligneDuBon(fiche, l, parMatiere.get(l.matiere_id), magasin))
-    changer((a) => {
-      const deja = new Set(a.map((l) => l.commande_ligne_id))
-      return [...a, ...nouvelles.filter((l) => !deja.has(l.commande_ligne_id))]
-    })
+  function ajouterBon(c: CommandeResume) {
+    marquer()
+    setBons((b) => (b.includes(c.id) ? b : [...b, c.id]))
+    setChoixRefs(c.id)
+  }
+  /** Les références cochées dans « Références arrivées » : ajoutées ; les décochées : retirées. */
+  function prendreReferences(fiche: CommandeFiche, cochees: ReadonlySet<number>) {
+    const { sortantes, entrantes } = ecartReferences(lignes, fiche, cochees, (l) =>
+      ligneDuBon(fiche, l, parMatiere.get(l.matiere_id), magasin),
+    )
+    const hors = new Set(sortantes.map((l) => l.cle))
+    const faire = () => changer((a) => [...a.filter((l) => !hors.has(l.cle)), ...entrantes])
+    setChoixRefs(null) // la question éventuelle se pose dans la saisie, au premier plan
+    const saisies = sortantes.filter(estSaisie).length
+    demander(saisies > 0, questionDecocher(sortantes.length, saisies), 'Oui, les retirer', faire)
   }
   return {
     lignes,
-    vider: () => changer(() => []),
+    bons,
+    choixRefs,
+    ouvrirReferences: (id: number) => setChoixRefs(id),
+    fermerReferences: () => setChoixRefs(null),
+    prendreReferences,
+    vider: () => {
+      changer(() => [])
+      setBons([])
+    },
     question,
     fermerQuestion: () => setQuestion(null),
     demander,
     ajouterBon,
     retirer: (l: LigneSaisie) =>
-      demander(
-        estSaisie(l),
-        `Retirer « ${l.reference} »${l.lot_numero ? ` (lot ${l.lot_numero})` : ''} déjà saisie ?${l.commande ? ' Elle reste due sur le bon.' : ''}`,
-        'Oui, retirer la ligne',
-        () => changer((a) => a.filter((x) => x.cle !== l.cle)),
+      demander(estSaisie(l), questionRetrait(l), 'Oui, retirer la ligne', () =>
+        changer((a) => a.filter((x) => x.cle !== l.cle)),
       ),
-    retirerBon: (id: number) => changer((a) => a.filter((l) => l.commande_id !== id)),
+    retirerBon: (id: number) => {
+      changer((a) => a.filter((l) => l.commande_id !== id))
+      setBons((b) => b.filter((x) => x !== id))
+    },
     modifier: (cle: string, m: Partial<LigneSaisie>) =>
       changer((a) => a.map((l) => (l.cle === cle ? { ...l, ...m } : l))),
-    ajouterLot: (l: LigneSaisie) =>
-      changer((a) => {
-        const i = a.findIndex((x) => x.cle === l.cle)
-        return [...a.slice(0, i + 1), autreLot(l), ...a.slice(i + 1)]
-      }),
+    ajouterLot: (l: LigneSaisie) => changer((a) => avecAutreLot(a, l)),
     ajouterHorsCommande: (m: Matiere, devise: string) =>
       changer((a) => [...a, ligneHorsCommande(m, devise, magasin)]),
   }
+}
+
+const questionDecocher = (n: number, saisies: number) =>
+  `Décocher ${n} référence(s) en retire ${saisies} déjà saisie(s) (lot, pesée) : elles resteront dues sur le bon. Continuer ?`
+
+const questionRetrait = (l: LigneSaisie) =>
+  `Retirer « ${l.reference} »${l.lot_numero ? ` (lot ${l.lot_numero})` : ''} déjà saisie ?${l.commande ? ' Elle reste due sur le bon.' : ''}`
+
+/** Les lignes avec un autre lot de `l` juste en dessous. */
+function avecAutreLot(a: readonly LigneSaisie[], l: LigneSaisie): LigneSaisie[] {
+  const i = a.findIndex((x) => x.cle === l.cle)
+  return [...a.slice(0, i + 1), autreLot(l), ...a.slice(i + 1)]
 }
 
 /** Un autre lot de la même ligne de bon, juste en dessous (même `commande_ligne_id`). */
@@ -168,7 +209,7 @@ export function useSaisieReception(r: ReceptionFiche | null, ref: Referentiels) 
     li.vider()
     const ouverts = ref.bons.filter((c) => f && c.fournisseur_id === f.id && bonOuvert(c))
     const charger = bon ?? (ouverts.length === 1 ? ouverts[0] : undefined)
-    if (charger) void li.ajouterBon(charger)
+    if (charger) li.ajouterBon(charger)
   }
   const effacer = `${li.lignes.length} ligne(s)`
   return {
@@ -188,7 +229,7 @@ export function useSaisieReception(r: ReceptionFiche | null, ref: Referentiels) 
       )
     },
     choisirBon: (c: CommandeResume) => {
-      if (c.fournisseur_id === fournisseurId) return void li.ajouterBon(c)
+      if (c.fournisseur_id === fournisseurId) return li.ajouterBon(c)
       const f = ref.fournisseurs.find((x) => x.id === c.fournisseur_id) ?? null
       li.demander(
         saisies > 0,
@@ -198,7 +239,7 @@ export function useSaisieReception(r: ReceptionFiche | null, ref: Referentiels) 
       )
     },
     basculerBon: (c: CommandeResume, dedans: boolean) => {
-      if (dedans) return void li.ajouterBon(c)
+      if (dedans) return li.ajouterBon(c)
       const retirees = li.lignes.filter((l) => l.commande_id === c.id)
       const n = retirees.filter(estSaisie).length
       li.demander(

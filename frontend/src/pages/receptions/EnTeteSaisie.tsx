@@ -1,7 +1,8 @@
 /**
  * Le haut de la saisie d'un camion (ECRANS-PRO 4.16) : le n° du bon que le chauffeur apporte (ou le
  * fournisseur), la date d'arrivée, le BL, le contrôle au quai, les factures par devise, les bons du
- * camion à cocher et l'ajout d'une matière hors commande.
+ * camion (le dernier choisi reste affiché ; « Choisir les références arrivées… » ouvre la liste du
+ * bon) et l'ajout d'une matière hors commande.
  */
 import { Grille } from '../../composants/mise-en-page/Grille'
 import { Note } from '../../composants/retour/Note'
@@ -10,10 +11,12 @@ import { DateChamp } from '../../composants/saisie/DateChamp'
 import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
+import { Bouton } from '../../composants/saisie/Bouton'
 import { date, kg, montant, nombre, part } from '../../lib/format'
 import { useSession } from '../../lib/session'
 import type { CommandeResume } from '../commandes/types'
 import styles from '../plan-achat/achats.module.css'
+import cartes from './BonsCamion.module.css'
 import { devisesDuCamion } from './calculSaisie'
 import { bonOuvert, type Referentiels, type SaisieReception } from './useSaisieReception'
 
@@ -88,7 +91,7 @@ export function FacturesSaisie({ s }: { s: SaisieReception }) {
 }
 
 function BonsDuCamion({ s, bons }: { s: SaisieReception; bons: readonly CommandeResume[] }) {
-  const dedans = new Set(s.lignes.map((l) => l.commande_id))
+  const dedans = new Set(s.bons)
   if (!bons.length)
     return (
       <span className={styles.note} title="Un bon encore en brouillon doit d’abord être marqué comme envoyé">
@@ -96,20 +99,37 @@ function BonsDuCamion({ s, bons }: { s: SaisieReception; bons: readonly Commande
       </span>
     )
   return (
-    <span className={styles.rangeeCentree} role="group" aria-label="Bons de commande dans ce camion">
-      {bons.map((c) => (
-        <label key={c.id} className={styles.rangeeCentree}>
-          <input
-            type="checkbox"
-            checked={dedans.has(c.id)}
-            onChange={(e) => s.basculerBon(c, e.target.checked)}
-          />
-          {c.numero} · {kg(c.reste_kg)} à livrer · {part(c.part_livree, 0)} déjà reçu
-          {c.statut === 'a_approuver' ? (
-            <span className={styles.attention}> (attend l’approbation)</span>
-          ) : null}
-        </label>
-      ))}
+    <span className={cartes.bons} role="group" aria-label="Bons de commande dans ce camion">
+      {bons.map((c) => {
+        const prises = s.lignes.filter((l) => l.commande_id === c.id).length
+        return (
+          <span key={c.id} className={dedans.has(c.id) ? cartes.dedans : cartes.bon}>
+            <label className={styles.rangeeCentree}>
+              <input
+                type="checkbox"
+                checked={dedans.has(c.id)}
+                onChange={(e) => s.basculerBon(c, e.target.checked)}
+              />
+              <strong>{c.numero}</strong>
+            </label>
+            <span className={styles.note}>
+              {kg(c.reste_kg)} à livrer · {part(c.part_livree, 0)} déjà reçu
+              {c.statut === 'a_approuver' ? (
+                <span className={styles.attention}> (attend l’approbation)</span>
+              ) : null}
+            </span>
+            {dedans.has(c.id) ? (
+              <Bouton
+                variante={prises ? 'neutre' : 'principal'}
+                onClick={() => s.ouvrirReferences(c.id)}
+                titre="Ouvre la liste des références du bon : cochez celles que le camion a apportées"
+              >
+                {prises ? `${prises} référence(s) prise(s) — modifier…` : 'Choisir les références arrivées…'}
+              </Bouton>
+            ) : null}
+          </span>
+        )
+      })}
     </span>
   )
 }
@@ -121,7 +141,7 @@ function ChoixBonEtFournisseur({ s, donnees }: { s: SaisieReception; donnees: Re
     <>
       <Champ libelle="N° du bon de commande (le chauffeur l’apporte)">
         <Selecteur<number>
-          valeur={null}
+          valeur={s.bons.findLast((id) => ouverts.some((c) => c.id === id)) ?? null}
           options={ouverts.map((c) => ({
             id: c.id,
             titre: `${c.numero} — ${c.fournisseur}`,
@@ -130,7 +150,8 @@ function ChoixBonEtFournisseur({ s, donnees }: { s: SaisieReception; donnees: Re
           placeholder="ou taper le n° du bon…"
           onChange={(id) => {
             const c = ouverts.find((x) => x.id === id)
-            if (c) s.choisirBon(c)
+            if (c && !s.bons.includes(c.id)) s.choisirBon(c)
+            else if (c) s.ouvrirReferences(c.id)
           }}
         />
       </Champ>

@@ -487,11 +487,11 @@ Un défaut constaté chez un fournisseur (qualité, quantité, bobines, retard, 
 
 Un camion à la bascule : le bon que le chauffeur apporte, puis ligne par ligne le lot, l’annonce du BL, la pesée, les bobines, le magasin et la qualité.
 
-- Tapez le n° du bon que le chauffeur apporte (ou choisissez le fournisseur) : cochez le ou les bons du camion, leurs lignes restant à livrer se chargent. Une matière sans commande : « Ajouter une matière hors commande ».
+- Tapez le n° du bon que le chauffeur apporte (ou choisissez le fournisseur) : le bon reste affiché, et la fenêtre « Références arrivées » s'ouvre. Cochez-y ce que le camion a apporté (« Choisir les références arrivées… » la rouvre) : seules ces références entrent dans la saisie, le reste demeure dû sur le bon. Une matière sans commande : « Ajouter une matière hors commande ».
 - Recopiez le n° du BL et, si elle est là, la facture ; elle peut aussi se compléter après la validation.
 - Ligne par ligne : le lot imprimé sur l’étiquette (sinon « Lot interne »), la quantité annoncée sur le BL, la quantité pesée à la bascule — c’est elle qui entre en stock — puis les palettes complètes et les bobines en plus.
 - Deux lots d’une même ligne de bon : « + un autre lot ». L’excédent se compte tous lots ensemble.
-- Une ligne absente du camion : laissez-la vide (ni BL, ni pesée, ni lot), ou retirez-la. À la validation, une ligne de bon laissée vide est retirée de la réception : elle reste due sur la commande, pour le camion suivant.
+- Une ligne absente du camion : décochez-la dans « Références arrivées », ou laissez-la vide (ni BL, ni pesée, ni lot). À la validation, une ligne de bon laissée vide est retirée de la réception : elle reste due sur la commande, pour le camion suivant.
 - Qualité : conforme ; sous réserve — entre en quarantaine, non utilisable ; refusé — n’entre pas, le fournisseur la doit toujours (dites pourquoi dans les observations).
 - Enregistrer crée un brouillon (un par devise du camion, en une fois) : rien n’entre en stock. La validation, depuis la fiche, fait entrer la marchandise et donne le numéro.
 

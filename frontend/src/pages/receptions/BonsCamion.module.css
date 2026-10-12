@@ -1,0 +1,29 @@
+/* Les bons du camion : une carte par bon, le n° bien visible, le geste des références à côté. */
+
+.bons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.bon,
+.dedans {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+  padding: var(--espace-2) var(--espace-3);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+}
+
+.dedans {
+  border-color: var(--accent);
+  background: var(--ton-accent-clair);
+}
+
+.dedans strong,
+.bon strong {
+  font-size: 1.05rem;
+}

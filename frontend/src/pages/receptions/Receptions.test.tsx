@@ -147,7 +147,7 @@ describe('Réceptions', () => {
     await waitFor(() => expect(adresse()).toBe('/receptions/nouvelle?brouillon=2'))
   })
 
-  it('saisie : le n° du bon choisit le fournisseur et charge ses lignes ; deux devises en une requête', async () => {
+  it('saisie : le n° du bon choisit le fournisseur, reste affiché, et ses références arrivées se cochent en grand ; deux devises en une requête', async () => {
     const appels = serveur('achats', {
       'POST /receptions': {
         statut: 201,
@@ -163,7 +163,15 @@ describe('Réceptions', () => {
     const fenetre = screen.getByRole('dialog', { name: 'Nouvelle réception' })
     await userEvent.click(bon)
     await userEvent.type(bon, '0002{Enter}')
-    expect(await within(fenetre).findByText('COTON TRAME 8/2 Écru')).toBeInTheDocument()
+    // Le bon reste affiché, et « Références arrivées » s'ouvre : rien n'entre avant d'avoir coché.
+    const choix = await screen.findByRole('dialog', { name: /Références arrivées/ })
+    expect(within(choix).getByText('COTON TRAME 8/2 Écru')).toBeInTheDocument()
+    await userEvent.click(within(choix).getByRole('button', { name: 'Tout cocher' }))
+    await userEvent.click(within(choix).getByRole('button', { name: /Prendre 2 référence\(s\)/ }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: /Références arrivées/ })).toBeNull())
+    expect(within(fenetre).getByText('COTON TRAME 8/2 Écru')).toBeInTheDocument()
+    expect(within(fenetre).getByRole('button', { name: /2 référence\(s\) prise\(s\)/ })).toBeInTheDocument()
+    expect((bon as HTMLInputElement).value).toMatch(/0002/) // le bon choisi reste dans son champ
     const ajout = within(fenetre).getByRole('combobox', { name: /Ajouter une matière hors commande/ })
     await userEvent.click(ajout)
     await userEvent.type(ajout, 'ivoire{Enter}')

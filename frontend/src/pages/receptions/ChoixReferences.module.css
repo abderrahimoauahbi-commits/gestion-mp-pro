@@ -1,0 +1,110 @@
+/* « Références arrivées » : une liste grande et lisible, une ligne cliquable par référence. */
+
+.outils {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+  margin-bottom: var(--espace-3);
+}
+
+.outils > :first-child {
+  flex: 1 1 280px;
+  max-width: 420px;
+}
+
+.note {
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.tableau th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  text-align: left;
+  font-size: var(--taille-petite);
+  font-weight: 600;
+  color: var(--texte-2);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--bord);
+}
+
+.tableau td {
+  padding: 12px;
+  border-bottom: 1px solid var(--bord);
+  vertical-align: middle;
+}
+
+.tableau tbody tr {
+  cursor: pointer;
+}
+
+.tableau tbody tr:hover {
+  background: var(--survol);
+}
+
+.cochee,
+.cochee:hover {
+  background: var(--ton-accent-clair) !important;
+}
+
+.case {
+  width: 44px;
+  text-align: center;
+}
+
+.case input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.reference {
+  display: block;
+  font-weight: 600;
+}
+
+.designation {
+  display: block;
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+}
+
+.nombre,
+.tableau th.nombre {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.etat {
+  color: var(--texte-2);
+  font-size: var(--taille-petite);
+  white-space: nowrap;
+}
+
+.vide {
+  padding: 24px;
+  text-align: center;
+  color: var(--texte-2);
+}
+
+.pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  width: 100%;
+}
+
+.pousse {
+  flex: 1;
+}

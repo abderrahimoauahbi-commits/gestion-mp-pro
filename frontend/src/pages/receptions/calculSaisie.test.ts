@@ -113,10 +113,10 @@ describe('Saisie d’une réception', () => {
     expect(nonLivree(vide)).toBe(true)
     expect(blocagesSaisie([pesee, vide, base()], MAGASINS, TOL)).toEqual([])
     expect(noteNonLivrees([pesee, vide, base()])).toBe(
-      '2 lignes vides : non livrées par ce camion, elles resteront dues sur le bon.',
+      '2 lignes encore vides (ni BL, ni pesée, ni lot) : laissées ainsi, elles ne seront pas reçues et resteront dues sur le bon.',
     )
     expect(noteNonLivrees([pesee, vide])).toBe(
-      '1 ligne vide : non livrée par ce camion, elle restera due sur le bon.',
+      '1 ligne encore vide (ni BL, ni pesée, ni lot) : laissée ainsi, elle ne sera pas reçue et restera due sur le bon.',
     )
     expect(noteNonLivrees([pesee])).toBe('')
     expect(blocagesSaisie([vide, base()], MAGASINS, TOL)).toEqual([RIEN_N_EST_PESE])
