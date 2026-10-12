@@ -318,7 +318,7 @@ describe('Opérations : la fenêtre', () => {
     await userEvent.click(screen.getByRole('switch', { name: 'Lot interne' }))
     await userEvent.click(screen.getByRole('combobox', { name: 'Magasin' }))
     await userEvent.click(await screen.findByRole('option', { name: 'PRINCIPAL' }))
-    await userEvent.type(screen.getByLabelText('Quantité (kg)'), '120')
+    await userEvent.type(screen.getByRole('textbox', { name: 'Quantité' }), '120')
     expect(screen.getByRole('textbox', { name: 'Prix d’achat / kg' })).toHaveValue('3,2')
     await userEvent.click(screen.getByRole('button', { name: 'Ajouter la ligne' }))
     await userEvent.click(screen.getByRole('button', { name: 'Valider : le stock bouge' }))

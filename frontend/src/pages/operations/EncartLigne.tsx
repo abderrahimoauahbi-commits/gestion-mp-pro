@@ -1,7 +1,7 @@
 /**
  * L'encart « Nouvelle ligne » / « Modifier la ligne RÉF » de la fenêtre d'opération (ECRANS-PRO
  * partie 6) : matière, lot (ou lot à créer, case « Lot interne » — numéro donné à la validation),
- * magasins, sens, quantité en kg, bobines ou palettes, prix et devise d'une ouverture. « Ajouter la
+ * magasins, sens, quantité en kg, bobines ou palettes (ouverture comprise), prix et devise d'une ouverture. « Ajouter la
  * ligne » est grisé avec ce qui manque ; « Annuler » demande si l'encart est rempli (an. 25).
  */
 import { useEffect, useState } from 'react'
@@ -12,14 +12,12 @@ import { Bouton } from '../../composants/saisie/Bouton'
 import { Champ } from '../../composants/saisie/Champ'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import { Interrupteur } from '../../composants/saisie/Interrupteur'
-import { Nombre } from '../../composants/saisie/Nombre'
-import { Prix } from '../../composants/saisie/Prix'
 import { Quantite } from '../../composants/saisie/Quantite'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Segments } from '../../composants/saisie/Segments'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { SelecteurMatiere } from '../../composants/saisie/SelecteurMatiere'
-import { kg, prixUnite } from '../../lib/format'
+import { kg } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
 import { choixMatiere } from '../inventaire/matieres'
 import {
@@ -34,6 +32,7 @@ import {
   type EtatEncart,
 } from './encart'
 import { ChampDepart } from './ChampDepart'
+import { ChampsOuverture } from './ChampsOuverture'
 import styles from './Operations.module.css'
 import { aucunLot, destinations, optionDePlace, placesDeLots, placesProposees } from './places'
 import type { LigneSaisie } from './saisie'
@@ -109,7 +108,7 @@ function useEncart(p: EncartProps) {
   return { e, poser, m, lots, sortis, sorti, toutes, places, place, matieresDuDepot, rempli, poserLigne }
 }
 
-type Encart = ReturnType<typeof useEncart>
+export type Encart = ReturnType<typeof useEncart>
 
 /** Le lot (et le magasin de départ) parmi ceux proposés ; un lot à créer pour une matière retrouvée. */
 function ChampLot({ p, x }: { p: EncartProps; x: Encart }) {
@@ -260,43 +259,7 @@ function ChampsSens({ p, x }: { p: EncartProps; x: Encart }) {
   )
 }
 
-/** Quantité en kg, prix au kilo et devise d'un stock d'ouverture. */
-function ChampsOuverture({ p, x }: { p: EncartProps; x: Encart }) {
-  const { e, poser, m } = x
-  return (
-    <>
-      <Champ libelle="Quantité (kg)">
-        <Nombre valeur={e.kg} onChange={(v) => poser({ kg: v })} min={0} decimales={3} unite="kg" />
-      </Champ>
-      <Champ
-        libelle="Prix d’achat / kg"
-        groupe
-        aide={m?.prix_kg != null ? `catalogue : ${prixUnite(m.prix_kg, m.devise ?? 'MAD', 'kg')}` : undefined}
-      >
-        <span className={styles.prixDevise}>
-          <Prix
-            libelle="Prix d’achat / kg"
-            valeur={e.prix}
-            onChange={(v) => poser({ prix: v })}
-            devise={e.devise}
-            unite="kg"
-          />
-          <Selecteur
-            libelle="Devise"
-            effacable={false}
-            valeur={e.devise}
-            options={p.devises
-              .filter((d) => d.actif || d.code === e.devise)
-              .map((d) => ({ id: d.code, titre: d.code, sous: d.nom }))}
-            onChange={(id) => poser({ devise: id ?? 'MAD' })}
-          />
-        </span>
-      </Champ>
-    </>
-  )
-}
-
-/** La quantité (kg, bobines, palettes ; kg seul pour une ouverture), prix et devise d'une ouverture. */
+/** La quantité (kg, bobines, palettes, selon le conditionnement), et pour une ouverture son prix et sa devise. */
 function ChampsQuantite({ p, x }: { p: EncartProps; x: Encart }) {
   const { e, poser, m, place } = x
   if (p.type === 'ouverture') return <ChampsOuverture p={p} x={x} />
