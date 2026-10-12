@@ -43,7 +43,6 @@ routes d'écran · 5. Arbitrages de l'architecte · 6. Correspondance, parties 1
 | | Cockpit | `/cockpit` | ✓ | — | — | — |
 | | Stock, lots & mouvements | `/stock` | ✓ | ✓ | ✓ (sans prix) | — |
 | | Sorties vers les machines | `/sorties` | ✓ | ✓ (lecture) | ✓ | — |
-| | Production & besoins | `/production` | ✓ | ✓ | ✓ | — |
 | | Écran atelier (téléphone) | `/atelier` | ✓ | — | ✓ | — |
 | Achats | Plan d'achat | `/plan-achat` | ✓ | ✓ | — | — |
 | | Commandes | `/commandes` | ✓ | ✓ | — | — |
@@ -54,6 +53,7 @@ routes d'écran · 5. Arbitrages de l'architecte · 6. Correspondance, parties 1
 | Référentiels | Matières, classification, fournisseurs | `/catalogue` | ✓ | ✓ | ✓ (matières, lecture sans prix) | — |
 | | Qualités et recettes | `/qualites` | ✓ | ✓ (lecture) | ✓ (lecture sans coût) | — |
 | | Métiers à tisser | `/metiers` | ✓ | ✓ (lecture) | ✓ (fils montés) | — |
+| | Production & besoins | `/production` | ✓ | ✓ | ✓ | — |
 | Pilotage | Analyse | `/analyse` | ✓ | ✓ | — | — |
 | | Réglages | `/reglages` | ✓ | ✓ (devises ; autres onglets en lecture) | — | — |
 | | Administration | `/administration` | ✓ | — | — | ✓ |
@@ -315,7 +315,7 @@ Gestion MP : `App.tsx` (`Bureau`, menu, pastilles, gardes) → PRO : `Coque`, `B
 | Menu à gauche ; < 1080 px repli derrière « ☰ Menu » (290 px, 85 vw), refermé à chaque navigation | `BarreLaterale` repliable (bouton du `EnTete`), repliée sous 1080 px, refermée à la navigation ; état replié mémorisé (localStorage) | — |
 | Marque « Gestion MP » / « Matières premières » | en tête de `BarreLaterale` | — |
 | Bas du menu : nom, `role_libelle`, « Se déconnecter » | `MenuCompte` (en-tête 56 px) : nom + rôle ; Mon compte, Aide, Signaler un besoin, Se déconnecter | regroupé à droite de l'en-tête |
-| Menu par rôle (6 groupes, 18 liens, infobulle = détail ou libellé) ; groupe vide masqué ; lien actif filet bleu ; tient en 1366 × 768 | menu généré par `routes.ts` (titre = libellé, rôles) ; mêmes groupes : Tous les jours (Accueil [A,L], Cockpit [D], Stock, lots & mouvements [C], Sorties vers les machines [C], Production & besoins [C], Écran atelier [L, D]) · Achats (Plan d'achat, Commandes, Réceptions, Importations & coût de revient [D,A]) · Stock (Inventaire [D,A], Ouvertures, transferts, ajustements [D,A,L]) · Référentiels (Matières, classification, fournisseurs [D,A,L lecture]; Qualités et recettes [C]; Métiers à tisser [C]) · Pilotage (Analyse [D,A], Réglages [D,A]) · Administration [T,D] · Aide (Mode d'emploi [tous]) | **D n'a pas l'Accueil** (gardé) ; L voit Opérations (transferts, retours machine) et le catalogue des matières en lecture ; A voit Réglages (devises en écriture, reste en lecture) (P1-28) ; T ne voit que Administration, Mode d'emploi, Mon compte |
+| Menu par rôle (6 groupes, 18 liens, infobulle = détail ou libellé) ; groupe vide masqué ; lien actif filet bleu ; tient en 1366 × 768 | menu généré par `routes.ts` (titre = libellé, rôles) ; mêmes groupes : Tous les jours (Accueil [A,L], Cockpit [D], Stock, lots & mouvements [C], Sorties vers les machines [C], Écran atelier [L, D]) · Achats (Plan d'achat, Commandes, Réceptions, Importations & coût de revient [D,A]) · Stock (Inventaire [D,A], Ouvertures, transferts, ajustements [D,A,L]) · Référentiels (Matières, classification, fournisseurs [D,A,L lecture]; Qualités et recettes [C]; Métiers à tisser [C]; Production & besoins [C]) · Pilotage (Analyse [D,A], Réglages [D,A]) · Administration [T,D] · Aide (Mode d'emploi [tous]) | **D n'a pas l'Accueil** (gardé) ; L voit Opérations (transferts, retours machine) et le catalogue des matières en lecture ; A voit Réglages (devises en écriture, reste en lecture) (P1-28) ; T ne voit que Administration, Mode d'emploi, Mon compte |
 | Pastille « Stock » = ruptures + critiques (GET `/cockpit`, 180 s, **non lue pour L**) ; pastille « Analyse » = anomalies, le lien mène alors à `?onglet=controles` | `Pastille` sur `BarreLaterale`, compteurs de GET `contexte` (relu 180 s et après chaque mutation) : Stock = « alerte rouge » (ruptures + critiques) pour C ; Analyse = anomalies (D,A) → `/analyse?onglet=controles` | L voit aussi la pastille Stock (aucun prix) ; définition nommée unique (P1-9) |
 | Style pastille rouge, mini 20 px, chiffres tabulaires | `Pastille` ton critique | — |
 | — | `Cloche` (tous, T compris) : GET `notifications` ; liste, « Tout marquer lu » ; une notification ouvre le document (adresse stable) | nouveau (A10) |

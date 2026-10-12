@@ -243,13 +243,6 @@ Les ordres de fabrication : ce qui est sorti du magasin pour chaque qualité tis
 - Un retour se saisit contre son ordre ; annuler l’ordre annule ses retours.
 - Le numéro OF est donné à la validation.
 
-### Production & besoins (`/production`)
-
-Le plan de production, le plan glissant, le plan face au réalisé, et les besoins matière qui en découlent.
-
-- La direction saisit le plan ; une saisie non enregistrée est gardée en changeant d’onglet.
-- Le besoin d’une matière dit d’où il vient : qualités, mètres carrés, recettes.
-
 ### Écran atelier (téléphone) (`/atelier`)
 
 Au pied du métier : envoyer aux machines, retour des machines, trouver un lot (mots ou QR), déplacer un lot, monter un fil, signaler un besoin.
@@ -335,6 +328,13 @@ Les métiers, leurs étages et les fils montés ; la direction règle le métier
 - La direction crée et règle les métiers ; l’alimentation monte les fils (ici ou au téléphone) ; les achats lisent.
 - « Enregistrer » annonce l’effet sur le stock sur les métiers et alerte quand un fil monté dépasse ce qui est parti aux machines en 30 jours.
 - Un fil monté sans sortie enregistrée est encore compté au magasin (contrôle C25).
+
+### Production & besoins (`/production`)
+
+Le plan de production, le plan glissant, le plan face au réalisé, et les besoins matière qui en découlent.
+
+- La direction saisit le plan ; une saisie non enregistrée est gardée en changeant d’onglet.
+- Le besoin d’une matière dit d’où il vient : qualités, mètres carrés, recettes.
 
 ### Analyse (`/analyse`)
 
