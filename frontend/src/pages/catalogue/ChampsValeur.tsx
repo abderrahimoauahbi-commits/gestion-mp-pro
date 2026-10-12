@@ -25,7 +25,7 @@ export interface FormeValeur {
   actif: boolean
 }
 
-export const UNITES_TITRAGE = ['Dtex', 'Deniers', 'Nm', 'Tex', 'Nec'] as const
+export const UNITES_TITRAGE = ['Dtex', 'Deniers', 'Nm', 'Tex', 'Nec', 'lbs'] as const
 
 /** La forme d'une valeur lue, ou d'une valeur nouvelle (code tapé, active). */
 export function versFormeValeur(v: Valeur | null, code = ''): FormeValeur {
@@ -134,7 +134,7 @@ function ChampCode({ d, forme, onChange }: ChampsProps) {
 function ChampUnite({ forme, onChange }: ChampsProps) {
   const unites = [...new Set([...UNITES_TITRAGE, forme.unite].filter(Boolean))]
   return (
-    <Champ libelle="Unité" aide="Dtex, Deniers, Nm, Tex, Nec">
+    <Champ libelle="Unité" aide={UNITES_TITRAGE.join(', ')}>
       <Selecteur<string>
         valeur={forme.unite || null}
         options={unites.map((u) => ({ id: u, titre: u }))}

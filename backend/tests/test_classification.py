@@ -13,6 +13,7 @@ from fabriques.referentiels import matiere, qualite, role_id, unique, valeur_cla
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from gestion_mp_pro.calcul.classification import decomposer
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Journal, QualitePoids, RoleNomenclature
 
@@ -184,3 +185,11 @@ def test_un_role_modifie_entre_temps_est_refuse(direction: TestClient) -> None:
     with sessions()() as s:
         lu = s.get(RoleNomenclature, r["id"])
         assert lu is not None and (lu.code, lu.ordre, lu.version) == (code, 5, 2)
+
+
+def test_le_titrage_en_livres_du_jute() -> None:
+    """« lbs » : le titrage du jute en livres, lu dans la référence (Mohamed, 12/10/2026)."""
+    for reference, titrage in (("Jute 8 lbs", "8"), ("JUTE 10LBS Naturel", "10")):
+        c = decomposer(reference)
+        assert (c.titrage, c.titrage_unite) == (titrage, "lbs")
+    assert decomposer("Jute 12/1").titrage_unite == "Nm"

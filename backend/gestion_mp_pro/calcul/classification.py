@@ -29,8 +29,11 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-# Les unités de titrage du métier. L'ordre compte : « Deniers » avant « Den ».
-UNITES_TITRAGE = ("Dtex", "Deniers", "Den", "Tex", "Nm", "Nec")
+# Les unités de titrage du métier. L'ordre compte : « Deniers » avant « Den ». « lbs » : le
+# titrage du jute en livres (« Jute 8 lbs »), ajouté à la demande de Mohamed le 12/10/2026.
+UNITES_TITRAGE = ("Dtex", "Deniers", "Den", "Tex", "Nm", "Nec", "lbs")
+# L'écriture retenue d'une unité lue dans une référence (après `str.title()`).
+ECRITURE_UNITE = {"Dtex": "Dtex", "Nm": "Nm", "Tex": "Tex", "Nec": "Nec", "Lbs": "lbs"}
 UNITE_PAR_DEFAUT = {
     "PP": "Dtex",
     "PES": "Deniers",
@@ -205,9 +208,7 @@ def _titrage(resultat: Classification, trouve: re.Match[str]) -> None:
     unite = trouve.group(2)
     if unite:
         resultat.titrage_unite = "Deniers" if unite.lower().startswith("den") else unite.title()
-        resultat.titrage_unite = {"Dtex": "Dtex", "Nm": "Nm", "Tex": "Tex", "Nec": "Nec"}.get(
-            resultat.titrage_unite, resultat.titrage_unite
-        )
+        resultat.titrage_unite = ECRITURE_UNITE.get(resultat.titrage_unite, resultat.titrage_unite)
     elif "/" in resultat.titrage:
         resultat.titrage_unite = "Nm"  # 20/2, 12/1 : numéro métrique
     else:
