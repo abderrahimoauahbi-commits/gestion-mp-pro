@@ -127,10 +127,11 @@ function EnTetePreparation({ s, p }: { s: SaisiePreparation; p: PreparationLue }
           placeholder="Deliver in one shipment, attach the certificate of origin…"
         />
       </Champ>
-      {place.libres > 0.05 ? (
+      {place.libres > 0 && s.parConteneur ? (
         <Note>
-          Il reste la place de <strong>{nombre(place.libres, 1)} palette(s)</strong> dans le dernier conteneur
-          ({nombre(Math.ceil((place.conteneurs ?? 0) - 1e-9))} au total).
+          {place.nombre === 1 ? 'Le conteneur' : `${nombre(place.nombre)}ᵉ conteneur`} :{' '}
+          {nombre(s.parConteneur - place.libres, 0, 1)} palette(s) sur {nombre(s.parConteneur, 0, 1)} — il
+          manque <strong>{nombre(place.libres, 0, 1)} palette(s)</strong> pour le remplir.
         </Note>
       ) : null}
     </>

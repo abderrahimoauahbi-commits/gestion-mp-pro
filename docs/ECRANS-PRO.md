@@ -2555,7 +2555,7 @@ Gestion MP : fenêtre « Préparer une commande — {fournisseur} » (`Preparati
 | « Palettes par conteneur » (placeholder « ex. 20 »), ni `sale` ni envoyée (anom. 4.19) | `Nombre` libellé « Palettes par conteneur (aide de calcul) », retenu par poste et par fournisseur (stockage local) | n'est plus perdu à la fermeture ; reste hors du bon |
 | « Ajouter une matière de ce fournisseur » (`ChoixRecherche` 340 px ; matières actives du fournisseur absentes ; « {réf} — {désignation} », détail devise ; placeholder « Référence, couleur, titrage… ») ; ligne « ajoutée » (unité = dernière possible, qté = 1 unité ou minimum, prix catalogue) | `SelecteurMatiere` (filtre fournisseur imposé) | — |
 | « Remarques au fournisseur » (textarea 2 l., pleine largeur ; aide « imprimées sur le bon, qui est en anglais : les écrire en anglais (ex. « Deliver in one shipment ») » ; ≤ 2000) | `Zone` pleine largeur, même aide ; champ `observations` de l'API (`CommandeCreation`, lot D3 ; et non `remarques_fournisseur`) | case à part (A23) ; vocabulaire (anom. 4.11) |
-| Message « Il reste la place de **{n} palette(s)** dans le dernier conteneur ({N} au total). » | `Note` | — |
+| Message « Il reste la place de **{n} palette(s)** dans le dernier conteneur ({N} au total). » | `Note` « {N}ᵉ conteneur : {p} palette(s) sur {C} — il manque **{n} palette(s)** pour le remplir. » ; plein à 0,05 palette près ; une ligne en palettes compte le nombre tapé (12/10/2026, Mohamed) | libellé plus clair ; plus de conteneur fantôme |
 | Col. « Cmd. » (case ; ligne décochée à 50 %) | colonne case à cocher | — |
 | « Référence » + note « nature · désignation · devise » | idem | — |
 | « Statut · couverture » (étiquette ou « ajoutée » ; note « classe A · couvre 45 j ») | `Badge` | — |

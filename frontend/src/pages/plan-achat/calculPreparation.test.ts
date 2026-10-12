@@ -13,6 +13,7 @@ import {
   depuisServeur,
   devisesDe,
   ecart,
+  palettesDe,
   placeRestante,
   retenues,
   revenirALaSuggestion,
@@ -90,7 +91,33 @@ describe('Préparation d’une commande', () => {
     expect(t.parDevise).toEqual({ EUR: 1392, USD: 480 })
     expect(t.mad).toBeCloseTo(1392 * 10.8 + 4800)
     expect(devisesDe([a, b])).toEqual(['EUR', 'USD'])
-    expect(placeRestante(3, 20)).toEqual({ conteneurs: 0.15, libres: 17 })
+    expect(placeRestante(3, 20)).toEqual({ conteneurs: 0.15, libres: 17, nombre: 1 })
+  })
+
+  it('conteneur de 18 : il reste 3, on en ajoute 3, il est plein (pas « il reste 18 »)', () => {
+    // 15 palettes : il reste 3.
+    expect(placeRestante(15, 18)).toMatchObject({ libres: 3, nombre: 1 })
+    // 18 palettes, à une poussière de kilos près (kg ↔ palettes) : plein, un seul conteneur.
+    expect(placeRestante(18.0000004, 18)).toMatchObject({ libres: 0, nombre: 1 })
+    expect(placeRestante(17.9999996, 18)).toMatchObject({ libres: 0, nombre: 1 })
+    expect(placeRestante(36, 18)).toMatchObject({ libres: 0, nombre: 2 })
+    // Une vraie palette de plus ouvre bien un conteneur.
+    expect(placeRestante(19, 18)).toMatchObject({ libres: 17, nombre: 2 })
+  })
+
+  it('une ligne saisie en palettes compte le nombre tapé, sans repasser par les kilos', () => {
+    const l = depuisServeur(lignePreparationEssai())
+    // Contenance de la palette affichée (761,6) un peu au-dessus de celle de la matière : 3 palettes
+    // tapées font 2 284,8 kg, soit 3,0000004 palettes « de matière » — le compte reste 3.
+    const saisie = {
+      ...l,
+      unite: 'Palette',
+      contenance: 761.6,
+      contenance_palette: 761.599712,
+      quantite: 2284.8,
+    }
+    expect(palettesDe(saisie)).toBe(3)
+    expect(palettesDe({ ...saisie, unite: 'kg', contenance: 1 })).toBeCloseTo(3.0000011, 6)
   })
 
   it('écart à la suggestion : ok ≤ 10 %, attention au-dessus, critique en dessous', () => {

@@ -129,6 +129,19 @@ export interface Totaux {
   mad: number | null
 }
 
+/** Une unité de palette (« Palette », « Palettes ») : son nombre se compte tel que tapé. */
+const estPalette = (unite: string) => /^palettes?$/i.test(unite.trim())
+
+/**
+ * Les palettes d'une ligne : saisie en palettes, le nombre tapé lui-même (repasser par les kilos
+ * et une autre contenance donnait 18,0000004 pour 18 : un conteneur de plus) ; sinon ses kilos
+ * divisés par la contenance d'une palette de la matière.
+ */
+export function palettesDe(l: LigneSaisie): number {
+  if (estPalette(l.unite) && l.contenance > 0) return arrondi(l.quantite / l.contenance, 3)
+  return l.contenance_palette ? l.quantite / l.contenance_palette : 0
+}
+
 export function totaux(lignes: readonly LigneSaisie[], devises: readonly Devise[]): Totaux {
   const cours = new Map(devises.map((d) => [d.code, d.cours]))
   const parDevise: Record<string, number> = {}
@@ -136,7 +149,7 @@ export function totaux(lignes: readonly LigneSaisie[], devises: readonly Devise[
   let kilos = 0
   for (const l of retenues(lignes)) {
     kilos += l.quantite
-    if (l.contenance_palette) palettes += l.quantite / l.contenance_palette
+    palettes += palettesDe(l)
     if (l.prix) parDevise[l.devise] = (parDevise[l.devise] ?? 0) + l.quantite * l.prix
   }
   let mad: number | null = 0
@@ -151,15 +164,20 @@ export function totaux(lignes: readonly LigneSaisie[], devises: readonly Devise[
 export const devisesDe = (lignes: readonly LigneSaisie[]) =>
   [...new Set(retenues(lignes).map((l) => l.devise))].sort()
 
-/** La place restante dans le dernier conteneur (palettes), 0 sans réglage ou s'il est plein. */
+/** Un conteneur est plein à un vingtième de palette près (les kilos arrondis ne l'ouvrent pas). */
+export const TOLERANCE_PALETTE = 0.05
+
+/** La place restante dans le dernier conteneur (palettes, 0 sans réglage ou s'il est plein) et le nombre de conteneurs. */
 export function placeRestante(
   palettes: number,
   parConteneur: number | null,
-): { conteneurs: number | null; libres: number } {
-  if (!parConteneur || parConteneur <= 0) return { conteneurs: null, libres: 0 }
+): { conteneurs: number | null; libres: number; nombre: number } {
+  if (!parConteneur || parConteneur <= 0) return { conteneurs: null, libres: 0, nombre: 0 }
   const conteneurs = palettes / parConteneur
-  const libres = conteneurs > 0 ? Math.ceil(conteneurs - 1e-9) * parConteneur - palettes : 0
-  return { conteneurs, libres }
+  if (palettes <= TOLERANCE_PALETTE) return { conteneurs, libres: 0, nombre: 0 }
+  const nombre = Math.ceil((palettes - TOLERANCE_PALETTE) / parConteneur)
+  const libres = nombre * parConteneur - palettes
+  return { conteneurs, libres: libres < TOLERANCE_PALETTE ? 0 : libres, nombre }
 }
 
 export type Ecart =
