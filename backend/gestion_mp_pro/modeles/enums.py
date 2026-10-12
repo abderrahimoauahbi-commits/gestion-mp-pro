@@ -319,6 +319,7 @@ class ObjetJournal(StrEnum):
     composition = "composition"
     type_fil = "type_fil"
     titrage = "titrage"
+    unite_titrage = "unite_titrage"
     couleur = "couleur"
     role_nomenclature = "role_nomenclature"
     fournisseur = "fournisseur"

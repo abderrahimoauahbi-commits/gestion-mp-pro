@@ -5,7 +5,8 @@ S1, la période close, le courriel du lundi, les semences, le chargeur du moteur
 dépendre de ce que les autres ont laissé, dans quelque ordre qu'ils passent.
 
 - `photographier(c)` : appelée une fois, juste après la migration (`conftest.schema`), garde les
-  lignes des tables semées (réglages, devises, rôles, postes de frais, magasins, motifs).
+  lignes des tables semées (réglages, devises, rôles, postes de frais, magasins, motifs, unités
+  de titrage).
 - `remettre(c)` : vide **toutes** les tables sauf les comptes (utilisateurs, sessions,
   appareils, tentatives : les postes connectés de la séance restent connectés) et réécrit les
   semences telles que photographiées — réglages à leur défaut compris. Dans une transaction
@@ -24,6 +25,7 @@ COMPTES = frozenset({"alembic_version", "utilisateur", "session", "appareil", "t
 """Tables gardées telles quelles : comptes et sessions (elles ne citent qu'elles-mêmes)."""
 SEMEES = (
     "parametre", "devise", "devise_cours", "role_nomenclature", "poste_frais", "magasin", "motif",
+    "unite_titrage",
 )  # fmt: skip
 """Tables semées à l'installation, dans l'ordre de leurs dépendances."""
 

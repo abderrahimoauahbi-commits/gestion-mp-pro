@@ -27,13 +27,17 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import lru_cache
 
-# Les unités de titrage du métier. L'ordre compte : « Deniers » avant « Den ». « lbs » : le
-# titrage du jute en livres (« Jute 8 lbs »), ajouté à la demande de Mohamed le 12/10/2026.
-UNITES_TITRAGE = ("Dtex", "Deniers", "Den", "Tex", "Nm", "Nec", "lbs")
-# L'écriture retenue d'une unité lue dans une référence (après `str.title()`).
-ECRITURE_UNITE = {"Dtex": "Dtex", "Nm": "Nm", "Tex": "Tex", "Nec": "Nec", "Lbs": "lbs"}
+# Les unités de titrage ne sont plus écrites ici : c'est un référentiel (table `unite_titrage`,
+# décision de Mohamed du 12/10/2026) que l'appelant passe à `decomposer(…, unites=…)` — les
+# unités actives, dans leur écriture (« Dtex », « lbs »). Le moteur reste sans base.
+ABREVIATIONS_UNITE = {"den": "deniers"}
+"""Façons courtes d'écrire une unité dans une référence (« 1500 Den » = 1500 Deniers), lues
+seulement si l'unité qu'elles abrègent est dans la liste (en minuscules)."""
+# L'unité sous-entendue d'un titrage écrit sans unité, selon la composition (et « 20/2 » : Nm).
 UNITE_PAR_DEFAUT = {
     "PP": "Dtex",
     "PES": "Deniers",
@@ -185,11 +189,33 @@ def libelle_composition(code: str) -> tuple[str, str]:
     return COMPOSITIONS.get(code.upper(), (code, "Autre"))
 
 
-_TITRAGE = re.compile(
-    r"(?<![\w/])(\d+(?:[.,]\d+)?(?:\s*[*x]\s*\d+)?(?:\s*/\s*\d+)?)\s*"
-    r"(" + "|".join(UNITES_TITRAGE) + r")?\b",
-    re.IGNORECASE,
-)
+_NOMBRE_TITRAGE = r"(?<![\w/])(\d+(?:[.,]\d+)?(?:\s*[*x]\s*\d+)?(?:\s*/\s*\d+)?)\s*"
+
+
+@dataclass(frozen=True)
+class LectureUnites:
+    """Ce qu'on tire d'une liste d'unités : le motif du titrage, l'écriture de chaque unité."""
+
+    motif: re.Pattern[str]
+    ecriture: dict[str, str]
+    """Unité lue, en minuscules (abréviation comprise) → son écriture dans la liste."""
+
+
+@lru_cache(maxsize=32)
+def lecture_unites(unites: tuple[str, ...]) -> LectureUnites:
+    """Le motif d'une liste d'unités, gardé tant que la liste ne change pas (clé : la liste).
+
+    Les plus longues d'abord : « Deniers » avant « Den », « Nec » avant « Ne ». Une liste vide
+    lit le nombre sans unité.
+    """
+    ecriture = {u.lower(): u for u in unites if u}
+    for court, long in ABREVIATIONS_UNITE.items():
+        if long in ecriture and court not in ecriture:
+            ecriture[court] = ecriture[long]
+    formes = sorted(ecriture, key=lambda u: (-len(u), u))
+    groupe = "|".join(re.escape(f) for f in formes) or "(?!)"
+    motif = re.compile(_NOMBRE_TITRAGE + "(" + groupe + r")?\b", re.IGNORECASE)
+    return LectureUnites(motif, ecriture)
 
 
 def _composition(brut: str, nature: str) -> str:
@@ -203,16 +229,16 @@ def _composition(brut: str, nature: str) -> str:
     return composition
 
 
-def _titrage(resultat: Classification, trouve: re.Match[str]) -> None:
+def _titrage(resultat: Classification, trouve: re.Match[str], lecture: LectureUnites) -> None:
+    """Le titrage et son unité, écrite comme dans la liste ; sans unité lue, l'unité
+    sous-entendue (« 20/2 » : Nm ; PP : Dtex ; PES : Deniers) si elle est dans la liste."""
     resultat.titrage = re.sub(r"\s*([*x/])\s*", r"\1", trouve.group(1)).replace("x", "*")
     unite = trouve.group(2)
     if unite:
-        resultat.titrage_unite = "Deniers" if unite.lower().startswith("den") else unite.title()
-        resultat.titrage_unite = ECRITURE_UNITE.get(resultat.titrage_unite, resultat.titrage_unite)
-    elif "/" in resultat.titrage:
-        resultat.titrage_unite = "Nm"  # 20/2, 12/1 : numéro métrique
-    else:
-        resultat.titrage_unite = UNITE_PAR_DEFAUT.get(resultat.composition, "")
+        resultat.titrage_unite = lecture.ecriture.get(unite.lower(), unite)
+        return
+    implicite = "Nm" if "/" in resultat.titrage else UNITE_PAR_DEFAUT.get(resultat.composition, "")
+    resultat.titrage_unite = lecture.ecriture.get(implicite.lower(), "")
 
 
 def _couleur(resultat: Classification, reste: str) -> None:
@@ -231,11 +257,14 @@ def _couleur(resultat: Classification, reste: str) -> None:
     resultat.couleur_code = " ".join(codes)
 
 
-def decomposer(reference: str, nature: str = "") -> Classification:
+def decomposer(reference: str, nature: str = "", *, unites: Sequence[str]) -> Classification:
     """Retire d'une référence ce qu'elle dit : composition, type, titrage, couleur.
 
-    Rien n'est inventé : ce qui ne se lit pas reste vide, à renseigner à la main.
+    `unites` : les unités de titrage reconnues (le référentiel `unite_titrage`, unités actives,
+    lu par l'appelant). Rien n'est inventé : ce qui ne se lit pas reste vide, à renseigner à la
+    main.
     """
+    lecture = lecture_unites(tuple(unites))
     brut = " ".join(reference.split())
     resultat = Classification()
     if not brut:
@@ -252,9 +281,9 @@ def decomposer(reference: str, nature: str = "") -> Classification:
         if re.search(rf"(?<![A-Z]){marqueur}(?![A-Z])", majuscules):
             resultat.type_fil = marqueur
             break
-    trouve = _TITRAGE.search(corps)
+    trouve = lecture.motif.search(corps)
     if trouve:
-        _titrage(resultat, trouve)
+        _titrage(resultat, trouve, lecture)
     _couleur(resultat, corps[trouve.end() :] if trouve else corps)
     return resultat
 

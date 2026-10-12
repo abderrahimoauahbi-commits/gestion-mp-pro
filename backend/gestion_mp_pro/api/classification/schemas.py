@@ -54,8 +54,27 @@ class RoleFiche(Sortie):
     nb_qualites: int = 0
 
 
+class UniteFiche(Sortie):
+    """Une unité de titrage, les titrages qui l'écrivent et les matières qui les portent."""
+
+    id: int
+    code: str
+    libelle: str
+    ordre: int
+    actif: bool
+    version: int
+    nb_titrages: int = 0
+    nb_matieres: int = 0
+    raison_garder: str | None = Field(
+        default=None, description="pourquoi elle ne se supprime pas (employée), sinon vide"
+    )
+    avertissement: str | None = Field(
+        default=None, description="après une désactivation : les titrages qui la gardent"
+    )
+
+
 class Classification(Sortie):
-    """Toute la classification (route 57)."""
+    """Toute la classification (route 57), unités de titrage comprises (ordre, puis code)."""
 
     cles_non_monetaires: ClassVar[frozenset[str]] = frozenset({"valeur"})
 
@@ -64,6 +83,25 @@ class Classification(Sortie):
     titrages: list[ValeurFiche]
     couleurs: list[ValeurFiche]
     roles: list[RoleFiche]
+    unites_titrage: list[UniteFiche]
+
+
+class UniteCreation(Entree):
+    """Une unité de titrage (route 255) ; sans ordre, elle se range après la dernière.
+
+    Le code (un mot de lettres, 2 à 16) est contrôlé par le service, qui dit le refus en clair.
+    """
+
+    code: str = Field(min_length=1, max_length=L.LIBELLE)
+    libelle: str = Field(default="", max_length=L.LIBELLE)
+    ordre: int | None = Field(default=None, ge=0, le=9999)
+    actif: bool = True
+
+
+class UniteModification(UniteCreation):
+    """Une unité modifiée (route 256) ; `version` lue avec la liste (409 si périmée)."""
+
+    version: int = Field(ge=1)
 
 
 class RoleCreation(Entree):

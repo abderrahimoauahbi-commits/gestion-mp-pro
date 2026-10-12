@@ -14,6 +14,9 @@ GET;/api/classification;401;ok;ok;ok;403
 POST;/api/classification/roles;401;ok;403;403;403
 DELETE;/api/classification/roles/{ident};401;ok;403;403;403
 PUT;/api/classification/roles/{ident};401;ok;403;403;403
+POST;/api/classification/unites-titrage;401;ok;ok;403;403
+DELETE;/api/classification/unites-titrage/{ident};401;ok;ok;403;403
+PUT;/api/classification/unites-titrage/{ident};401;ok;ok;403;403
 POST;/api/classification/{liste};401;ok;ok;403;403
 DELETE;/api/classification/{liste}/{ident};401;ok;ok;403;403
 PUT;/api/classification/{liste}/{ident};401;ok;ok;403;403

@@ -20,6 +20,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -121,6 +122,29 @@ class Titrage(_Classification, Base):
     code: Mapped[str] = mapped_column(String(L.CODE_TITRAGE), unique=True)
     valeur: Mapped[str] = chaine(L.VALEUR_TITRAGE)
     unite: Mapped[str] = chaine(L.UNITE_TITRAGE)
+
+
+class UniteTitrage(AvecVersion, Base):
+    """Une unité de titrage (Dtex, Deniers, Nm, Tex, Nec, lbs…), tenue par les achats et la
+    direction (décision de Mohamed du 12/10/2026, révision 0008).
+
+    Le `code` s'écrit comme dans les références (« Dtex », « lbs ») : un mot, unique sans tenir
+    compte de la casse (index `uq_unite_titrage_code` sur `lower(code)`). `titrage.unite` reste
+    un texte (pas de clé étrangère) : l'emploi d'une unité se compte sur ce texte.
+    """
+
+    __tablename__ = "unite_titrage"
+    __table_args__ = (
+        CheckConstraint("code <> '' AND code !~ '[[:space:]]'", name="code_un_mot"),
+        CheckConstraint("ordre >= 0", name="ordre_positif"),
+        Index("uq_unite_titrage_code", text("lower(code)"), unique=True),
+    )
+
+    id: Mapped[int] = cle_primaire()
+    code: Mapped[str] = mapped_column(String(L.UNITE_TITRAGE))
+    libelle: Mapped[str] = chaine(L.LIBELLE)
+    ordre: Mapped[int] = colonne(Integer, defaut=0)
+    actif: Mapped[bool] = colonne(defaut=True)
 
 
 class Couleur(_Classification, Base):

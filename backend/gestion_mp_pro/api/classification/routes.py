@@ -1,7 +1,7 @@
-"""Routes du domaine « Classification » (API-PRO § 1.7, routes 57–63).
+"""Routes du domaine « Classification » (API-PRO § 1.7, routes 57–63 et 255–257).
 
-Les routes des rôles sont déclarées **avant** les routes génériques `/classification/{liste}` :
-« roles » n'est pas une liste (R-REF-11).
+Les routes des rôles et des unités de titrage sont déclarées **avant** les routes génériques
+`/classification/{liste}` : « roles » et « unites-titrage » ne sont pas des listes (R-REF-11).
 """
 
 from __future__ import annotations
@@ -13,6 +13,9 @@ from gestion_mp_pro.api.classification.schemas import (
     RoleCreation,
     RoleFiche,
     RoleModification,
+    UniteCreation,
+    UniteFiche,
+    UniteModification,
     ValeurCreation,
     ValeurFiche,
     ValeurModification,
@@ -20,9 +23,10 @@ from gestion_mp_pro.api.classification.schemas import (
 from gestion_mp_pro.api.communs import nouveau_routeur
 from gestion_mp_pro.api.dependances import SessionDep
 from gestion_mp_pro.api.erreurs import reponses
-from gestion_mp_pro.modeles import RoleNomenclature
+from gestion_mp_pro.modeles import RoleNomenclature, UniteTitrage
 from gestion_mp_pro.securite import A, C, D, QuiDep, droit
 from gestion_mp_pro.services import classification as cla
+from gestion_mp_pro.services import unites_titrage as ut
 
 routeur = nouveau_routeur("classification")
 SANS_CORPS = {"status_code": 204, "response_class": Response}
@@ -48,6 +52,22 @@ def _role(r: RoleNomenclature, matieres: int = 0, qualites: int = 0) -> RoleFich
     )
 
 
+def _unite(u: UniteTitrage, e: ut.Emploi, avertissement: str = "") -> UniteFiche:
+    """La fiche d'une unité de titrage, son emploi et la raison de la garder."""
+    return UniteFiche(
+        id=u.id,
+        code=u.code,
+        libelle=u.libelle,
+        ordre=u.ordre,
+        actif=u.actif,
+        version=u.version,
+        nb_titrages=e.titrages,
+        nb_matieres=e.matieres,
+        raison_garder=ut.raison_de_garder(e),
+        avertissement=avertissement or None,
+    )
+
+
 @routeur.get(
     "/classification",
     response_model=Classification,
@@ -69,6 +89,7 @@ def lire(s: SessionDep) -> Classification:
         titrages=liste("titrages"),
         couleurs=liste("couleurs"),
         roles=[_role(r, m, q) for r, m, q in lu.roles],
+        unites_titrage=[_unite(u, e) for u, e in ut.lire(s)],
     )
 
 
@@ -107,6 +128,51 @@ def modifier_role(ident: int, corps: RoleModification, qui: QuiDep, s: SessionDe
 def supprimer_role(ident: int, qui: QuiDep, s: SessionDep) -> Response:
     """Route 60 : ses poids nuls partent avec lui."""
     cla.supprimer_role(s, qui, ident)
+    return Response(status_code=204)
+
+
+def _saisie_unite(corps: UniteCreation) -> ut.UniteSaisie:
+    """Ce qu'on saisit d'une unité de titrage."""
+    return ut.UniteSaisie(corps.code, corps.libelle, corps.ordre, corps.actif)
+
+
+@routeur.post(
+    "/classification/unites-titrage",
+    response_model=UniteFiche,
+    status_code=201,
+    dependencies=[droit(D, A)],
+    summary="Ajouter une unité de titrage : elle se lit aussitôt dans les références.",
+    responses=reponses(401, 403, 409, 422),
+)
+def ajouter_unite(corps: UniteCreation, qui: QuiDep, s: SessionDep) -> UniteFiche:
+    """Route 255 : code unique sans tenir compte de la casse (409 `doublon`)."""
+    u = ut.ajouter(s, qui, _saisie_unite(corps))
+    return _unite(u, ut.Emploi())
+
+
+@routeur.put(
+    "/classification/unites-titrage/{ident}",
+    response_model=UniteFiche,
+    dependencies=[droit(D, A)],
+    summary="Modifier une unité de titrage (employée : son code ne change pas, elle se désactive).",
+    responses=reponses(401, 403, 404, 409, 422),
+)
+def modifier_unite(ident: int, corps: UniteModification, qui: QuiDep, s: SessionDep) -> UniteFiche:
+    """Route 256 : `avertissement` dit les titrages qui gardent une unité désactivée."""
+    u, avertissement = ut.modifier(s, qui, ident, _saisie_unite(corps), version=corps.version)
+    return _unite(u, ut.emploi(s, u.code), avertissement)
+
+
+@routeur.delete(
+    "/classification/unites-titrage/{ident}",
+    dependencies=[droit(D, A)],
+    summary="Supprimer une unité de titrage qu'aucun titrage n'écrit.",
+    responses=reponses(401, 403, 404, 409),
+    **SANS_CORPS,
+)
+def supprimer_unite(ident: int, qui: QuiDep, s: SessionDep, version: int | None = None) -> Response:
+    """Route 257 : `?version=` facultatif (contrôlé s'il est donné)."""
+    ut.supprimer(s, qui, ident, version)
     return Response(status_code=204)
 
 

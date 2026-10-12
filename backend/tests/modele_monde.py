@@ -55,6 +55,7 @@ LIGNES: dict[str, Ligne] = {
     "composition": lambda i: {"code": "PP"},
     "type_fil": lambda i: {"code": "Frisé"},
     "titrage": lambda i: {"code": "2900 Dtex"},
+    "unite_titrage": lambda i: {"code": "Ne", "ordre": 70},
     "couleur": lambda i: {"code": "Rouge"},
     "role_nomenclature": lambda i: {"code": "Nouveau rôle", "ordre": 8},
     "fournisseur": lambda i: {"nom": "Fournisseur essai", "pays": "MAROC"},

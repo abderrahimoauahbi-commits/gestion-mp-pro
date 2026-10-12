@@ -65,6 +65,7 @@ from gestion_mp_pro.modeles.referentiels import (
     RoleNomenclature,
     Titrage,
     TypeFil,
+    UniteTitrage,
 )
 from gestion_mp_pro.modeles.reprise import RepriseCorrespondance, RepriseExecution
 from gestion_mp_pro.modeles.socle import (
@@ -165,6 +166,7 @@ __all__ = [
     "Tentative",
     "Titrage",
     "TypeFil",
+    "UniteTitrage",
     "Utilisateur",
     "metadata",
     "recherche",

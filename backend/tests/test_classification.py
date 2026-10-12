@@ -16,6 +16,7 @@ from sqlalchemy import select
 from gestion_mp_pro.calcul.classification import decomposer
 from gestion_mp_pro.db import fabrique as sessions
 from gestion_mp_pro.modeles import Journal, QualitePoids, RoleNomenclature
+from gestion_mp_pro.services import unites_titrage
 
 
 def ok(r: Any, statut: int = 200) -> Any:
@@ -188,8 +189,11 @@ def test_un_role_modifie_entre_temps_est_refuse(direction: TestClient) -> None:
 
 
 def test_le_titrage_en_livres_du_jute() -> None:
-    """« lbs » : le titrage du jute en livres, lu dans la référence (Mohamed, 12/10/2026)."""
+    """« lbs » : le titrage du jute en livres, lu dans la référence (Mohamed, 12/10/2026) — une
+    unité du référentiel depuis la révision 0008."""
+    with sessions()() as s:
+        unites = unites_titrage.actives(s)
     for reference, titrage in (("Jute 8 lbs", "8"), ("JUTE 10LBS Naturel", "10")):
-        c = decomposer(reference)
+        c = decomposer(reference, unites=unites)
         assert (c.titrage, c.titrage_unite) == (titrage, "lbs")
-    assert decomposer("Jute 12/1").titrage_unite == "Nm"
+    assert decomposer("Jute 12/1", unites=unites).titrage_unite == "Nm"

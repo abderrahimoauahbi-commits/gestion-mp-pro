@@ -59,6 +59,8 @@ CAS: dict[str, tuple[str, Mutation]] = {
     "ck_composition_code_non_vide": ("composition", {"code": ""}),
     "ck_type_fil_code_non_vide": ("type_fil", {"code": ""}),
     "ck_titrage_code_non_vide": ("titrage", {"code": ""}),
+    "ck_unite_titrage_code_un_mot": ("unite_titrage", {"code": "g km"}),
+    "ck_unite_titrage_ordre_positif": ("unite_titrage", {"ordre": -1}),
     "ck_couleur_code_non_vide": ("couleur", {"code": ""}),
     "ck_role_nomenclature_lineaire_de_base": ("role_nomenclature", {"lineaire": True}),
     "ck_role_nomenclature_ordre_positif": ("role_nomenclature", {"ordre": -1}),

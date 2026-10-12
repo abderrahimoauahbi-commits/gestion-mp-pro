@@ -26,16 +26,18 @@ from gestion_mp_pro.services import horloge
 
 TABLES_DU_DOCUMENT = """utilisateur, session, tentative, appareil, journal, parametre,
 parametre_historique, compteur, notification, notification_lecture, courriel, tache_execution,
-sauvegarde, devise, devise_cours, composition, type_fil, titrage, couleur, role_nomenclature,
-fournisseur, code_douanier, matiere, qualite, qualite_poids, qualite_saison, recette,
-recette_version, recette_version_ligne, recette_version_poids, plan_version, plan_version_saison,
+sauvegarde, devise, devise_cours, composition, type_fil, titrage, unite_titrage, couleur,
+role_nomenclature, fournisseur, code_douanier, matiere, qualite, qualite_poids, qualite_saison,
+recette, recette_version, recette_version_ligne, recette_version_poids, plan_version,
+plan_version_saison,
 magasin, metier, metier_etage, montage, montage_evenement, poste_frais, motif, lot, solde,
 mouvement, commande, commande_ligne, commande_version, commande_version_ligne, commande_decision,
 facture, reception, reception_ligne, ordre, ordre_qualite, ordre_ligne, ordre_prevu, operation,
 operation_ligne, inventaire, inventaire_critere, inventaire_matiere, inventaire_ligne, dossier,
 dossier_facture, dossier_ligne, dossier_frais, dossier_frais_part, reclamation, signalement,
 piece_jointe, indicateur_jour, reprise_correspondance, reprise_execution, alembic_version"""
-"""MODELE-DONNEES § 11 : les 72 tables (`dossier_facture` : révision 0007)."""
+"""MODELE-DONNEES § 11 : les 73 tables (`dossier_facture` : révision 0007 ; `unite_titrage` :
+révision 0008)."""
 
 
 @pytest.fixture
@@ -59,9 +61,9 @@ def _un(c: Connection, sql: str, **parametres: Any) -> Any:
     return c.execute(text(sql), parametres).scalar()
 
 
-def test_les_72_tables(lien: Connection) -> None:
+def test_les_73_tables(lien: Connection) -> None:
     attendues = {t.strip() for t in TABLES_DU_DOCUMENT.split(",")}
-    assert len(attendues) == 72
+    assert len(attendues) == 73
     assert set(modeles.metadata.tables) == attendues - {"alembic_version"}
     en_base = set(
         lien.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")).scalars()
