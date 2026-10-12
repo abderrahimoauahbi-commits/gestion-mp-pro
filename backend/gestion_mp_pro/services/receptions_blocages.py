@@ -7,7 +7,9 @@ ligne de bon ensemble** ; à la validation, il se lit après le verrou des bons 
 franchissent pas la borne à deux). Les lignes refusées ne sont soumises qu'à la date et aux
 problèmes du bon. Une suspension d'inventaire ne vaut que pour les matières de son périmètre
 (K2). Un bon parti qui attend l'approbation de la direction se reçoit : la réception l'annonce
-sans bloquer (A-RCP-02).
+sans bloquer (A-RCP-02). Une ligne de bon laissée vide n'a pas été livrée par ce camion : elle ne
+bloque ni n'avertit (la validation la retire, `receptions_non_livrees`) ; si toutes le sont, rien
+n'est pesé et la validation est refusée.
 """
 
 from __future__ import annotations
@@ -30,6 +32,11 @@ from gestion_mp_pro.modeles.enums import QualiteReception, StatutCommande, Statu
 from gestion_mp_pro.services import periode
 from gestion_mp_pro.services.commandes_socle import nom_commande
 from gestion_mp_pro.services.conversions import kg
+from gestion_mp_pro.services.receptions_non_livrees import (
+    RIEN_N_EST_PESE,
+    non_livree,
+    tout_est_vide,
+)
 from gestion_mp_pro.services.receptions_socle import Bons, probleme_du_bon
 
 PRECISION = 1e-6
@@ -199,8 +206,12 @@ def _rangement(x: ReceptionLigne, ctx: Contexte) -> list[Blocage]:
 def blocages(s: Session, r: Reception, ctx: Contexte) -> list[Blocage]:
     """Ce qui empêcherait de valider ce brouillon, dans l'ordre, sans doublon."""
     manques = _date(s, r)
+    if tout_est_vide(r):
+        manques.append(Blocage("quantite_invalide", RIEN_N_EST_PESE))
     apporte = _apporte(r)
     for x in sorted(r.lignes, key=lambda y: y.id or 0):
+        if non_livree(x):
+            continue
         probleme = None
         if x.commande_ligne_id is not None:
             probleme = probleme_du_bon(ctx.bons.bon(x.commande_ligne_id), r.date)
@@ -224,7 +235,7 @@ def avertissements(r: Reception, ctx: Contexte) -> list[str]:
     soldé (A-RCP-01), bon parti qui attend l'approbation d'une modification (A-RCP-02)."""
     alertes: list[str] = []
     for x in sorted(r.lignes, key=lambda y: y.id or 0):
-        if x.commande_ligne_id is None:
+        if x.commande_ligne_id is None or non_livree(x):
             continue
         m = ctx.matieres[x.matiere_id]
         if not m.actif:

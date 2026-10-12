@@ -19,6 +19,9 @@ import {
   estSaisie,
   ligneDuBon,
   ligneHorsCommande,
+  nonLivree,
+  noteNonLivrees,
+  RIEN_N_EST_PESE,
   TOLERANCES_DEFAUT as TOL,
   totaux,
   type LigneSaisie,
@@ -88,7 +91,7 @@ describe('Saisie d’une réception', () => {
   })
 
   it('ce qui sera refusé à la validation : pesée nulle, lot, magasin, quarantaine absente, excédent', () => {
-    const l = base({ quantite_pesee: 0, magasin_id: null })
+    const l = base({ quantite_bl: 500, quantite_pesee: 0, magasin_id: null })
     expect(blocagesSaisie([l], MAGASINS, TOL)).toEqual([
       expect.stringContaining('la pesée est à zéro'),
       expect.stringContaining('le numéro de lot manque'),
@@ -102,6 +105,44 @@ describe('Saisie d’une réception', () => {
       ),
     ).toEqual([expect.stringContaining('Quarantaine')])
     expect(blocagesSaisie([base({ qualite: 'refuse' })], MAGASINS, TOL)).toEqual([])
+  })
+
+  it('une ligne de bon laissée vide n’est pas livrée : aucun blocage, une note ; toutes vides, rien n’est pesé', () => {
+    const vide = base({ magasin_id: null, observations: 'pas dans ce camion' })
+    const pesee = base({ quantite_pesee: 480, lot_numero: 'FS-1' })
+    expect(nonLivree(vide)).toBe(true)
+    expect(blocagesSaisie([pesee, vide, base()], MAGASINS, TOL)).toEqual([])
+    expect(noteNonLivrees([pesee, vide, base()])).toBe(
+      '2 lignes vides : non livrées par ce camion, elles resteront dues sur le bon.',
+    )
+    expect(noteNonLivrees([pesee, vide])).toBe(
+      '1 ligne vide : non livrée par ce camion, elle restera due sur le bon.',
+    )
+    expect(noteNonLivrees([pesee])).toBe('')
+    expect(blocagesSaisie([vide, base()], MAGASINS, TOL)).toEqual([RIEN_N_EST_PESE])
+    expect(RIEN_N_EST_PESE).toBe(
+      "Rien n'est pesé : saisir ce que le camion a apporté (les lignes laissées vides restent dues sur le bon).",
+    )
+  })
+
+  it('à moitié remplie, refusée ou hors bon : la ligne n’est pas « non livrée », les blocages restent', () => {
+    for (const autres of [
+      { quantite_bl: 500 },
+      { quantite_pesee: 480 },
+      { nb_palettes: 2 },
+      { lot_interne: true },
+    ])
+      expect(nonLivree(base(autres))).toBe(false)
+    expect(nonLivree(base({ qualite: 'refuse' }))).toBe(false)
+    const hors = { ...base(), commande_ligne_id: null, commande: '' }
+    expect(nonLivree(hors)).toBe(false)
+    expect(blocagesSaisie([hors], MAGASINS, TOL)).toEqual([
+      expect.stringContaining('la pesée est à zéro'),
+      expect.stringContaining('le numéro de lot manque'),
+    ])
+    expect(blocagesSaisie([base({ quantite_pesee: 480 })], MAGASINS, TOL)).toEqual([
+      expect.stringContaining('le numéro de lot manque'),
+    ])
   })
 
   it('un camion en deux devises : une seule requête, une facture par devise (sans numéro : absente)', () => {

@@ -491,7 +491,7 @@ Un camion à la bascule : le bon que le chauffeur apporte, puis ligne par ligne 
 - Recopiez le n° du BL et, si elle est là, la facture ; elle peut aussi se compléter après la validation.
 - Ligne par ligne : le lot imprimé sur l’étiquette (sinon « Lot interne »), la quantité annoncée sur le BL, la quantité pesée à la bascule — c’est elle qui entre en stock — puis les palettes complètes et les bobines en plus.
 - Deux lots d’une même ligne de bon : « + un autre lot ». L’excédent se compte tous lots ensemble.
-- Une ligne absente du camion : retirez-la. Elle reste due sur la commande.
+- Une ligne absente du camion : laissez-la vide (ni BL, ni pesée, ni lot), ou retirez-la. À la validation, une ligne de bon laissée vide est retirée de la réception : elle reste due sur la commande, pour le camion suivant.
 - Qualité : conforme ; sous réserve — entre en quarantaine, non utilisable ; refusé — n’entre pas, le fournisseur la doit toujours (dites pourquoi dans les observations).
 - Enregistrer crée un brouillon (un par devise du camion, en une fois) : rien n’entre en stock. La validation, depuis la fiche, fait entrer la marchandise et donne le numéro.
 

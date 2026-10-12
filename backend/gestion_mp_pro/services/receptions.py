@@ -7,7 +7,8 @@
 - Un brouillon se **corrige** (lignes remplacées) et se **supprime** ; sans numéro jusqu'à la
   validation (M65). Son recalage s'écrit à la modification et à la validation.
 - **Valider** : verrou des bons (excédent, deux postes), blocages, quarantaine pour une ligne
-  sous réserve, lot interne `LOT-AAAA-NNNN` numéroté ici (jamais avant : aucun trou), numéro
+  sous réserve, lignes de bon laissées vides retirées (non livrées par ce camion : elles restent
+  dues), lot interne `LOT-AAAA-NNNN` numéroté ici (jamais avant : aucun trou), numéro
   `REC-AAAA-NNNN`, lots et entrées en stock par `services/stock.py` (cours figé du bon), puis
   soldes des bons recalés (une ligne en quarantaine reste attendue : D-02).
 - **Annuler** : contre-passation de toutes ses entrées (datées de l'original) ; une réception
@@ -25,7 +26,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
-from gestion_mp_pro.modeles import Reception, ReceptionLigne
+from gestion_mp_pro.modeles import Magasin, Reception, ReceptionLigne
 from gestion_mp_pro.modeles.enums import (
     DocumentMouvement,
     QualiteReception,
@@ -42,6 +43,7 @@ from gestion_mp_pro.services import (
     lots,
     numerotation,
     periode,
+    receptions_non_livrees,
     stock,
 )
 from gestion_mp_pro.services.brouillons import Brouillon
@@ -50,6 +52,7 @@ from gestion_mp_pro.services.comptes import Acteur, message_refus
 from gestion_mp_pro.services.receptions_blocages import blocages, contexte
 from gestion_mp_pro.services.receptions_saisie import Saisie, preparer
 from gestion_mp_pro.services.receptions_socle import (
+    Bons,
     appliquer_recalage,
     bons,
     charger,
@@ -227,6 +230,17 @@ def _entrer(
     x.lot_id = lot.id
 
 
+def _controler(s: Session, qui: audit.Qui, r: Reception, b: Bons, q: Magasin | None) -> int:
+    """Les blocages (le premier refuse), puis les lignes de bon que ce camion n'a pas apportées
+    retirées de la réception (elles restent dues sur le bon) ; rend leur nombre."""
+    ctx = contexte(s, [r], b, q)
+    manques = blocages(s, r, ctx)
+    if manques:
+        raise Refus(manques[0].code, manques[0].message)
+    references = {m.id: m.reference for m in ctx.matieres.values()}
+    return receptions_non_livrees.retirer(s, qui, r, b, references)
+
+
 def valider(s: Session, qui: audit.Qui, rid: int, version: int) -> Reception:
     """Écrit la réception d'un coup : lots, entrées en stock, prix payés (R-RCP-18 à 26)."""
     r = _brouillon(
@@ -241,9 +255,7 @@ def valider(s: Session, qui: audit.Qui, rid: int, version: int) -> Reception:
     b = bons(s, [r])
     appliquer_recalage(r, b)
     q = quarantaine(s)
-    manques = blocages(s, r, contexte(s, [r], b, q))
-    if manques:
-        raise Refus(manques[0].code, manques[0].message)
+    retirees = _controler(s, qui, r, b, q)
     acceptees = [x for x in lignes_triees(r) if x.qualite != QualiteReception.refuse]
     avant = audit.photo(r)
     numero = numerotation.numero(s, SerieNumero.REC, r.date)
@@ -269,7 +281,7 @@ def valider(s: Session, qui: audit.Qui, rid: int, version: int) -> Reception:
         f"{numero} · {len(acceptees)} entrée(s)"
         if acceptees
         else f"{numero} · tout refusé, rien n'entre en stock"
-    )
+    ) + (f" · {retirees} ligne(s) non livrée(s) retirée(s), dues sur le bon" if retirees else "")
     a, apres = audit.differences(avant, audit.photo(r))
     audit.journal(
         s,

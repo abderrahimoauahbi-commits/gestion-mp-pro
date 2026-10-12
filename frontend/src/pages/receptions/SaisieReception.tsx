@@ -18,7 +18,14 @@ import { date, kg, part } from '../../lib/format'
 import { aujourdhui } from '../../lib/heure'
 import { useEcriture } from '../../lib/requetes'
 import styles from '../plan-achat/achats.module.css'
-import { blocagesSaisie, corps, devisesDuCamion, totaux, type Tolerances } from './calculSaisie'
+import {
+  blocagesSaisie,
+  corps,
+  devisesDuCamion,
+  noteNonLivrees,
+  totaux,
+  type Tolerances,
+} from './calculSaisie'
 import { useBons, useFournisseursActifs, useMagasins, useMatieresActives, useReception } from './donnees'
 import { EnTeteSaisie, FacturesSaisie } from './EnTeteSaisie'
 import { TableSaisie } from './TableSaisie'
@@ -162,6 +169,7 @@ function Formulaire({
   const s = useSaisieReception(r, donnees)
   const tol = useTolerances()
   const blocages = blocagesSaisie(s.lignes, donnees.magasins, tol)
+  const vides = noteNonLivrees(s.lignes)
   return (
     <Fenetre
       titre={r ? `Corriger la réception — ${r.numero ?? 'Brouillon'}` : 'Nouvelle réception'}
@@ -182,6 +190,7 @@ function Formulaire({
             <Blocages blocages={blocages} titre="Sera refusé à la validation :" />
           </details>
         ) : null}
+        {vides ? <Note uneLigne={vides}>{vides}</Note> : null}
       </div>
       <Question s={s} />
       {s.fournisseur ? (

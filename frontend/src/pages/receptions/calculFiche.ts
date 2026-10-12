@@ -5,6 +5,7 @@
  */
 import { date, nombre } from '../../lib/format'
 import { joursDepuis } from '../../lib/heure'
+import { annonceNonLivrees, nonLivree, RIEN_N_EST_PESE } from './calculSaisie'
 import type { FactureCorrection, ReceptionFiche } from './types'
 
 export function resumerBlocages(liste: readonly string[]): string[] {
@@ -30,21 +31,25 @@ export function echeanceLisible(iso: string): string {
   return `échéance ${date(iso)} (dans ${nombre(-passes)} j)`
 }
 
-/** Ce que la validation fera, dit avant le « Oui ». */
+/** Ce que la validation fera, dit avant le « Oui » : les lignes non livrées retirées (dues sur le bon) comprises. */
 export function questionValidation(r: ReceptionFiche): string {
-  const entrees = r.lignes.filter((l) => l.qualite !== 'refuse')
+  const retrait = annonceNonLivrees(r.lignes)
+  const fin = `${retrait ? ` ${retrait}` : ''} Ensuite, elle ne se modifie plus.`
+  const lignes = r.lignes.filter((l) => !nonLivree(l))
+  if (r.lignes.length && !lignes.length) return RIEN_N_EST_PESE
+  const entrees = lignes.filter((l) => l.qualite !== 'refuse')
   if (!entrees.length)
-    return 'Toutes les lignes sont refusées : rien n’entre en stock, la réception reste la trace du refus. Ensuite, elle ne se modifie plus.'
+    return `Toutes les lignes sont refusées : rien n’entre en stock, la réception reste la trace du refus.${fin}`
   const quarantaine = entrees.filter((l) => l.qualite === 'reserve').length
-  const refusees = r.lignes.length - entrees.length
-  const hors = r.lignes.filter((l) => l.hors_tolerance).length
+  const refusees = lignes.length - entrees.length
+  const hors = lignes.filter((l) => l.hors_tolerance).length
   return (
     `${entrees.length - quarantaine} ligne(s) en stock disponible` +
     (quarantaine ? `, ${quarantaine} en quarantaine` : '') +
     (refusees ? `, ${refusees} refusée(s)` : '') +
     ` — ${nombre(r.pese)} kg.` +
     (hors ? ` ${hors} écart(s) de pesée hors tolérance.` : '') +
-    ' Ensuite, elle ne se modifie plus.'
+    fin
   )
 }
 

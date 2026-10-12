@@ -11,7 +11,9 @@ import {
   resumerBlocages,
   versFormeFacture,
 } from './calculFiche'
+import { RIEN_N_EST_PESE } from './calculSaisie'
 import { receptionEssai } from './donneesEssai'
+import type { LigneReception } from './types'
 
 describe('Fiche d’une réception', () => {
   it('au-delà de deux lignes sans pesée ou sans lot, une phrase pour chacune', () => {
@@ -39,6 +41,37 @@ describe('Fiche d’une réception', () => {
     )
     const refusee = receptionEssai({ lignes: r.lignes.map((l) => ({ ...l, qualite: 'refuse' })) })
     expect(questionValidation(refusee)).toMatch(/^Toutes les lignes sont refusées/)
+  })
+
+  it('la question de la validation annonce les lignes non livrées retirées, dues sur le bon', () => {
+    const r = receptionEssai()
+    const [l1, l2] = r.lignes as [LigneReception, LigneReception]
+    const vide = (id: number): LigneReception => ({
+      ...l2,
+      id,
+      lot_numero: '',
+      lot_interne: false,
+      lot_id: null,
+      quantite_bl: 0,
+      quantite_pesee: 0,
+      nb_palettes: 0,
+      bobines_en_plus: 0,
+      nb_bobines: 0,
+      qualite: 'conforme',
+      hors_tolerance: false,
+    })
+    const vides = Array.from({ length: 23 }, (_, i) => vide(10 + i))
+    expect(questionValidation({ ...r, lignes: [l1, ...vides], pese: 978 })).toBe(
+      '1 ligne(s) en stock disponible — 978 kg. 1 écart(s) de pesée hors tolérance. 23 lignes non livrées par ce camion seront retirées : elles restent dues sur le bon BC-2026-0002. Ensuite, elle ne se modifie plus.',
+    )
+    expect(questionValidation({ ...r, lignes: [l1, vide(9)], pese: 978 })).toContain(
+      ' 1 ligne non livrée par ce camion sera retirée : elle reste due sur le bon BC-2026-0002.',
+    )
+    expect(questionValidation({ ...r, lignes: [{ ...l1, qualite: 'refuse' }, vide(9)] })).toMatch(
+      /^Toutes les lignes sont refusées.* 1 ligne non livrée par ce camion sera retirée/,
+    )
+    expect(questionValidation({ ...r, lignes: vides })).toBe(RIEN_N_EST_PESE)
+    expect(questionValidation(r)).not.toContain('non livrée')
   })
 
   it('facture : seuls les champs changés partent ; un numéro vidé détache', () => {

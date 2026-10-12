@@ -171,6 +171,60 @@ export const estSaisie = (l: LigneSaisie) =>
 
 const n = (v: number | null) => v ?? 0
 
+/** Le refus d'une réception où rien n'est pesé : la même phrase que le serveur. */
+export const RIEN_N_EST_PESE =
+  "Rien n'est pesé : saisir ce que le camion a apporté (les lignes laissées vides restent dues sur le bon)."
+
+/** Ce qu'il faut d'une ligne (saisie ou lue sur la fiche) pour la dire non livrée. */
+export interface LigneRemplie {
+  commande_ligne_id: number | null
+  commande: string
+  qualite: string
+  lot_numero: string
+  lot_interne: boolean
+  quantite_bl: number | null
+  quantite_pesee: number | null
+  nb_palettes: number | null
+  bobines_en_plus: number | null
+  nb_bobines?: number | null
+}
+
+/**
+ * Une ligne de bon, pas refusée, laissée entièrement vide (ni BL, ni pesée, ni palette, ni bobine,
+ * ni lot ; les observations ne comptent pas) : ce camion ne l'a pas apportée. Elle ne bloque rien ;
+ * la validation la retire, elle reste due sur le bon (règle du serveur, LIVRAISON-PARTIELLE).
+ */
+export const nonLivree = (l: LigneRemplie) =>
+  l.commande_ligne_id != null &&
+  l.qualite !== 'refuse' &&
+  !l.lot_interne &&
+  !l.lot_numero.trim() &&
+  !n(l.quantite_bl) &&
+  !n(l.quantite_pesee) &&
+  !n(l.nb_palettes) &&
+  !n(l.bobines_en_plus) &&
+  !n(l.nb_bobines ?? null)
+
+/** La note discrète de la saisie : « 3 lignes vides : non livrées par ce camion, … » (vide sans elles). */
+export function noteNonLivrees(lignes: readonly LigneRemplie[]): string {
+  const vides = lignes.filter(nonLivree).length
+  if (!vides) return ''
+  return vides === 1
+    ? '1 ligne vide : non livrée par ce camion, elle restera due sur le bon.'
+    : `${vides} lignes vides : non livrées par ce camion, elles resteront dues sur le bon.`
+}
+
+/** Ce que la validation annonce : « 23 lignes non livrées par ce camion seront retirées : … ». */
+export function annonceNonLivrees(lignes: readonly LigneRemplie[]): string {
+  const vides = lignes.filter(nonLivree)
+  if (!vides.length) return ''
+  const bons = [...new Set(vides.map((l) => l.commande).filter(Boolean))]
+  const sur = bons.length > 1 ? `les bons ${bons.join(', ')}` : `le bon ${bons[0] ?? ''}`
+  return vides.length === 1
+    ? `1 ligne non livrée par ce camion sera retirée : elle reste due sur ${sur}.`
+    : `${vides.length} lignes non livrées par ce camion seront retirées : elles restent dues sur ${sur}.`
+}
+
 /** À quoi comparer la pesée : le BL ; sans BL, le reste à livrer, seulement si l'on pèse au moins ce reste. */
 export function attenduDe(l: LigneSaisie, tol: Tolerances): number {
   if (n(l.quantite_bl)) return n(l.quantite_bl)
@@ -223,15 +277,17 @@ export function totaux(lignes: readonly LigneSaisie[], tol: Tolerances) {
   }
 }
 
-/** Ce que la validation refusera, dit dès la saisie (le serveur reste juge). */
+/** Ce que la validation refusera, dit dès la saisie (le serveur reste juge) ; une ligne non livrée n'y compte pas. */
 export function blocagesSaisie(
   lignes: readonly LigneSaisie[],
   magasins: readonly Magasin[],
   tol: Tolerances,
 ): string[] {
+  const livrees = lignes.filter((l) => !nonLivree(l))
+  if (lignes.length && !livrees.length) return [RIEN_N_EST_PESE]
   const b: string[] = []
   const quarantaine = magasins.some((m) => m.actif && m.type === 'quarantaine')
-  for (const l of lignes) {
+  for (const l of livrees) {
     if (l.qualite === 'refuse') continue
     if (!n(l.quantite_pesee)) b.push(`« ${l.reference} » : la pesée est à zéro.`)
     if (!l.lot_interne && !l.lot_numero.trim())
