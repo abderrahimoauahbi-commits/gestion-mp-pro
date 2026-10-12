@@ -43,6 +43,10 @@
 
 .avecUnite > .controle {
   flex: 1 1 0;
+
+  /* Dans une cellule de tableau, « la place qui reste » peut être nulle : le champ ne descend pas
+     sous une largeur où son nombre se lit (« 2,5 », « 12 345 »). */
+  min-width: 4.5em;
 }
 
 .unite {

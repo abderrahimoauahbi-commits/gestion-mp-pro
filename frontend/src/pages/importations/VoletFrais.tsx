@@ -89,16 +89,20 @@ function Taux({ f, c }: { f: FraisDossier; c: Ctx }) {
   if (!c.modifiable || f.blocage) {
     return <span title={f.blocage ?? undefined}>{f.taux == null ? VIDE : tauxLisible(f.taux)}</span>
   }
+  // Un champ suivi de son unité prend « la place qui reste » : dans une cellule, il s'écrasait à
+  // quelques pixels et le taux enregistré paraissait vide. La cellule lui donne sa largeur.
   return (
-    <NombreEnregistre
-      libelle={`Taux du frais ${f.libelle}`}
-      valeur={f.taux}
-      decimales={4}
-      min={0}
-      max={TAUX_MAX}
-      unite="%"
-      onEnregistrer={(v) => modifier(c, f)(changementDeTaux(c.d, c.postes, f, v))}
-    />
+    <span className={styles.celluleTaux}>
+      <NombreEnregistre
+        libelle={`Taux du frais ${f.libelle}`}
+        valeur={f.taux}
+        decimales={4}
+        min={0}
+        max={TAUX_MAX}
+        unite="%"
+        onEnregistrer={(v) => modifier(c, f)(changementDeTaux(c.d, c.postes, f, v))}
+      />
+    </span>
   )
 }
 

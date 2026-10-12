@@ -240,6 +240,12 @@
   min-width: 170px;
 }
 
+/* Le taux d'un frais (« 2,5 % ») : sans largeur, son champ s'écrasait dans la cellule. */
+.celluleTaux {
+  display: block;
+  min-width: 96px;
+}
+
 /* L'en-tête d'un mois de l'échéancier : le mois, ce qui reste à payer, où saisir l'échéance. */
 .enteteMois {
   display: flex;
