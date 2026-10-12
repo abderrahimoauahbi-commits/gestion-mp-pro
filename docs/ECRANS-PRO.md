@@ -18,7 +18,7 @@ routes d'écran · 5. Arbitrages de l'architecte · 6. Correspondance, parties 1
 |---|---|---|
 | Aucune page ne défile à 1366 × 768 (ni 1920 × 1080) | `Page` = `EnTete` + `Indicateurs` + `Onglets` + `Carte` ; le `DataTable` prend la hauteur restante (`Cadre`) | recette navigateur : `scrollHeight` de chaque route × onglet × rôle |
 | Tableau qui défile dans son cadre, en-tête fixe | `Cadre` (mesure `useLayoutEffect`, plancher 200 px ; hauteur fixe en fenêtre) | vitest + recette |
-| Onglets plutôt que longues pages ; jamais deux rangées | `Onglets` (compteur, libellé court + infobulle), `Bascule` pour 2 à 5 vues d'une carte | contrôle statique |
+| Onglets plutôt que longues pages ; jamais deux rangées | `Onglets` (compteur, libellé court + infobulle), `Bascule` pour 2 à 6 vues d'une carte (6 : la classification, lot UNITES-TITRAGE) | contrôle statique |
 | Détail dans une fenêtre par-dessus la liste, adresse stable | `useFicheAdresse` : `/commandes/12` = liste + `Fenetre` | vitest (fermer → liste, filtres gardés) |
 | Recherche à la frappe, multi-mots, sans accents, sur toute la base, garde le focus | `Recherche`, `Colonne.recherche`, `?q=` au serveur | vitest (focus, « frise rouge » trouve « IMP FRISÉ ROUGE ») |
 | Filtres liés, « Effacer les filtres » dès deux | `Filtres` | vitest |
@@ -122,7 +122,7 @@ GMAO PRO pour la forme, corrigé des dix arbitrages (ARCHITECTURE § 10.2).
 | | `EcranReserve` | `chemin` | « L'écran demandé (…) est réservé à un autre rôle : vous êtes revenu à votre accueil. » | garde |
 | mise en page | `Page`, `Carte`, `Grille`, `Definitions`, `Indicateurs` | | une rangée de KPI ; six sur une rangée au Cockpit | |
 | | `Onglets` | `onglets[{cle, libelle, court?, compte?}]`, `?onglet=` | un seul niveau ; libellé court + nom complet en infobulle ; « • » si saisie non enregistrée | adresse |
-| | `Bascule` | 2 à 5 vues | dans une carte | |
+| | `Bascule` | 2 à 6 vues | dans une carte | |
 | | `Fenetre` | `taille: normale\|large\|tresLarge, tiroir?, sale?, pied?, onFermer` | pile ; Échap ferme celle du dessus ; clic voile / × / Échap avec `sale` → « Des modifications ne sont pas enregistrées. Les abandonner ? » · « Non, continuer la saisie » · « Oui, abandonner » ; la page dessous ne défile pas | garde de saisie, pile |
 | | `FenetreConfirmation` | `titre, texte, motif?, caseJaiCompris?` | lecture longue seulement (restauration, clôture de dossier, clôture de période) | — |
 | tableaux | `DataTable<T>` | `colonnes: Colonne<T>[]` (`cle, titre, rendu, valeur, recherche, droite, unite, exporte, largeur, lien`), `lignes`, `filtres`, `pied`, `cliquable`, `chargerPlus?` | tri numérique puis naturel (`localeCompare` numérique) ; compteur « n / total » ; ligne cliquable (curseur, filet) ; pied de totaux (jamais kg + ml, jamais deux devises) | tri, recherche, filtres, export |
@@ -362,7 +362,7 @@ Gestion MP : `components/ui.tsx`, `components/direction/commun.tsx`, `components
 | 11 `Onglets` (compteur dès `compte != null`) | `Onglets` (compteur, libellé court + infobulle, `?onglet=`, `useOngletAdresse`) | onglet toujours dans l'adresse |
 | 12 `Dialogue` (×, Échap haut de pile, fond, `sale`, blocage du défilement, `large`/`tres-large`) | `Fenetre({taille: normale|large|tresLarge, tiroir, sale, pied})` + pile ; garde « Des modifications ne sont pas enregistrées. Les abandonner ? » · « Non, continuer la saisie » · « Oui, abandonner » | garde aussi sur les boutons « Fermer »/« Annuler » et à la navigation (P1-22, P2-10) ; libellé unique (P1-7) |
 | 13 `Confirmer` (question sur place, « Non », `oui`) | `Confirmer` (motif facultatif ou exigé, « Oui » grisé et `occupe` pendant l'envoi, erreur rattrapée → `Messages`) ; `FenetreConfirmation` pour lecture longue | P1-21 |
-| 14 `Bascule` (2 à 5 vues d'une carte) | `Bascule` (vue dans l'adresse `?vue=`) | P2-5 |
+| 14 `Bascule` (2 à 6 vues d'une carte) | `Bascule` (vue dans l'adresse `?vue=`) | P2-5 |
 | 15 `HAUT` (page/court/dialogue) et `Cadre` (hauteur mesurée, ≥ 200 px, en-tête fixe) | `Cadre` (hauteur restante mesurée, en-tête fixe) ; `HAUT` supprimé | — |
 | 16 `useEnvoi` (occupe, messages, effacer) | `useMutation` TanStack enveloppé dans `Bouton`/`Confirmer` (`occupe`), `Messages`, invalidation globale | — |
 | 17 `ChoixRecherche` (« Taper pour chercher… », 60 résultats, Entrée si un seul, Échap, « Rien ne correspond. ») | `Selecteur` (clavier ↑↓, Entrée) ; `SelecteurMatiere` (composition/type/titrage/couleur/fournisseur cumulés) ; `SelecteurLot` | recherche sur champs cachés |
@@ -4320,7 +4320,7 @@ Gestion MP : page « Matières, classification, fournisseurs », `/catalogue` (`
 | `?onglet=` ; valeur inconnue → matieres ; changer d'onglet efface toute l'adresse | `?onglet=` ; chaque onglet garde ses filtres dans l'adresse | les filtres ne se perdent plus au changement d'onglet |
 | `?matiere=ID|nouvelle`, `?fournisseur=ID|nouveau` | routes `/matieres/:id`, `/matieres/nouvelle`, `/fournisseurs/:id`, `/fournisseurs/nouveau` | R1 |
 | `?fournisseur_filtre=ID` | filtre « Fournisseur » dans l'adresse (`?onglet=matieres&fournisseur=ID`) | effacé par « Effacer les filtres » (P7-28) |
-| `?liste=` (composition par défaut, type_fil, titrage, couleur, roles) | `?onglet=classification&liste=` | inchangé |
+| `?liste=` (composition par défaut, type_fil, titrage, couleur, roles) | `?onglet=classification&liste=` (+ `unites-titrage`, lot UNITES-TITRAGE) | inchangé |
 | Données `GET /articles`, `/fournisseurs`, `/classification` (acteur) | `GET matieres` (prix masqués pour L), `GET fournisseurs` (L : résumé), `GET classification` | routes renommées |
 
 | Geste GMP (libellé exact) | Rôles | Route API PRO | Confirmation / blocages | Changement PRO |
@@ -4475,16 +4475,18 @@ Anomalies : P7-9, P7-10, P7-11, P7-12.
 
 ---
 
-### Onglet Classification — `/catalogue?onglet=classification&liste=composition|type_fil|titrage|couleur|roles`
+### Onglet Classification — `/catalogue?onglet=classification&liste=composition|type_fil|titrage|unites-titrage|couleur|roles`
 
 Gestion MP : onglet Classification (`CatalogueClassification.tsx`) → PRO : `Carte` « Classification des
-matières » + `Bascule` 5 vues + `DataTable` ; compositions, types, titrages, couleurs : D, A en
-écriture ; rôles : D en écriture, A en lecture ; L : pas d'accès.
+matières » + `Bascule` 6 vues + `DataTable` ; compositions, types, titrages, unités de titrage,
+couleurs : D, A en écriture ; rôles : D en écriture, A en lecture ; L : pas d'accès (la route 57,
+qui porte aussi les unités, reste lisible par L pour les fiches).
 
 | Élément GMP | Élément PRO (composant) | Changement |
 |---|---|---|
 | « Un instant — chargement : la classification… » ; erreur | `Chargement`, `Erreur` | — |
-| Bascule « Compositions · N », « Types de fil · N », « Titrages · N », « Couleurs · N » (actives), « Rôles · N » (tous) ; écrit `?liste=` | `Bascule` + `?liste=` | — |
+| Bascule « Compositions · N », « Types de fil · N », « Titrages · N », « Couleurs · N » (actives), « Rôles · N » (tous) ; écrit `?liste=` | `Bascule` + `?liste=` ; **« Unités de titrage · N »** (actives) après « Titrages » | vue ajoutée (décision de Mohamed du 12/10/2026, DECISIONS F29) |
+| — (Gestion MP : unités figées dans le code) | **Unités de titrage** : note « Les unités du titrage, telles qu'elles s'écrivent dans les références : « 2900 Dtex », « 20 Ne », « 8 lbs »… employée, elle ne se supprime ni ne se renomme : ajouter la nouvelle, désactiver l'ancienne. » ; recherche « Chercher une unité… » ; « Montrer les unités désactivées (N) » ; « Ajouter une unité » ; colonnes Code (mono, grisé si désactivée) · Libellé · Ordre · Titrages (infobulle « Titrages qui écrivent cette unité ») · Matières · État · gestes ; tri par ordre ; ligne → fenêtre « Unité de titrage » | `Note`, `DataTable`, `Interrupteur`, `Bouton` | nouveau (lot UNITES-TITRAGE) |
 | Bouton « Relire les références » (pas sur Rôles) | `Bouton` | voir fenêtre Classer |
 | Notes d'explication des 4 listes (« La matière du fil : PP… Le code ouvre la référence. » ; « La façon du fil… » ; « La grosseur du fil, avec son unité… » ; « Les couleurs du catalogue, telles que l'atelier les nomme… ») | `Note` | — |
 | Recherche « Chercher dans les compositions… » (code, libellé, famille, valeur, unité, composition détaillée, commentaire) | `Recherche` + `Colonne.recherche` | « commentaire » → « observations » |
@@ -4505,7 +4507,9 @@ matières » + `Bascule` 5 vues + `DataTable` ; compositions, types, titrages, c
 | clic ligne | D, A | — | — | fenêtre d'édition (A : écriture ; rôles exclus) |
 | « Désactiver » / « Réactiver » (infobulles « Ne plus la proposer pour une nouvelle matière ; celles qui la portent la gardent » / « La proposer de nouveau ») | D, A | `PUT classification/{liste}/{id}` `{actif}` | `Confirmer` « Désactiver « PP » ? » / « Oui, désactiver » (réactiver sans) | succès « « PP » désactivé : il n'est plus proposé pour une nouvelle matière. » / « « PP » réactivé. » ; confirmation ajoutée (P7-23) |
 | « Supprimer » (valeur) | D, A | `DELETE classification/{liste}/{id}` | `Confirmer` « Supprimer « PP » ? » / « Oui, supprimer » ; blocage « Portée par N matière(s) : la reclasser d'abord, ou la désactiver » ; infobulle « Supprimer cette valeur, qu'aucune matière ne porte » | « « PP » supprimé. » ; 409/404 inchangés |
-| « Relire les références » | D, A | `GET matieres/classement` | — | voir fenêtre Classer |
+| « Relire les références » | D, A | `GET matieres/classement` | — | voir fenêtre Classer ; ne lit que les unités de titrage **actives** |
+| « Désactiver » / « Réactiver » (unité de titrage ; infobulle « Ne plus la proposer ni la lire dans une nouvelle référence ; les titrages qui l'écrivent la gardent ») | D, A | `PUT classification/unites-titrage/{id}` `{actif}` (route 256) | `Confirmer` « Désactiver « Ne » ? » / « Oui, désactiver » | « Unité « Ne » désactivée : elle n'est plus proposée. » ; employée : l'avertissement du serveur (« « Ne » reste écrite sur N titrage(s) (M matière(s))… ces titrages la gardent. ») |
+| « Supprimer » (unité de titrage) | D, A | `DELETE classification/unites-titrage/{id}?version=` (route 257) | `Confirmer` « Supprimer l'unité « Ne » ? » ; blocage = `raison_garder` du serveur (« Écrite sur N titrage(s) (M matière(s)) : la désactiver plutôt que la supprimer ») | « Unité « Ne » supprimée. » |
 | « Ajouter le rôle » | D | `POST classification/roles` `{code, lineaire:false, ordre}` | grisé si vide ou envoi (raison en infobulle) | « Rôle « X » ajouté : il se choisit pour une matière et reçoit un poids dans chaque qualité. » ; 409 « Le rôle « X » existe déjà. » |
 | « Modifier » (rôle) (infobulles « Changer l'ordre (le nom reste : rôle du calcul ou déjà porté) » / « Renommer ou changer l'ordre ») | D | — | nom éditable seulement si ni de base ni porté (`blocages`) | même règle écran et serveur (P7-5) |
 | « Annuler » (rôle en édition) | D | — | — | — |
@@ -4529,7 +4533,7 @@ Gestion MP : fenêtre `EditionValeur` « Composition « PP » » / « Ajouter un
 | Libellé (compo, type, couleur ; aides « Polypropylène, Polyester… », « Frisé, Shrink, Filament… », « comme l'atelier la nomme » ; ≤ 120) | `Saisie` | — |
 | Famille (compo, couleur ; suggestions ; « Synthétique, Naturel, Intrant » / « Rouges, Beiges, Gris… » ; ≤ 64) | `Selecteur` avec saisie libre | — |
 | Composition détaillée (« « 100 % polypropylène » », ≤ 160) | `Saisie` | — |
-| Valeur (titrage ; « lue dans le code si vide », ≤ 32) ; Unité (Dtex, Deniers, Nm, Tex, Nec ; ≤ 16) | `Saisie`, `Selecteur` | — |
+| Valeur (titrage ; « lue dans le code si vide », ≤ 32) ; Unité (Dtex, Deniers, Nm, Tex, Nec ; ≤ 16) | `Saisie`, `Selecteur` : les unités **actives** du référentiel (route 57, `unites_titrage`), et l'unité déjà posée même désactivée ; aide « Dtex, Deniers, Nm, Tex, Nec, lbs (Classification › Unités de titrage) » | liste tenue dans l'écran (lot UNITES-TITRAGE) au lieu d'une constante |
 | Commentaire (zone 3 lignes, ≤ 500) | `Zone` « Observations » | P7-3 |
 | Case « Active (proposée pour une nouvelle matière) » | `Interrupteur` | — |
 | Info « Changer le code renomme la valeur sur les N matière(s) qui la portent ; leurs références déjà écrites ne changent pas. » | `Note` | — |
@@ -4541,6 +4545,26 @@ Gestion MP : fenêtre `EditionValeur` « Composition « PP » » / « Ajouter un
 | « Ajouter » / « Enregistrer » | D, A | `POST classification/{liste}` / `PUT classification/{liste}/{id}` | grisé si envoi, code vide, rien modifié (raison en infobulle) ; refus « « X » existe déjà. », « Valeur introuvable. » | ferme ; message ajouté « « X » enregistré. » ; journal avant → après |
 
 Anomalies : P7-3, P7-19, P7-22, P7-23.
+
+---
+
+### Unité de titrage (fenêtre) — sur `/catalogue?onglet=classification&liste=unites-titrage`
+
+Nouveau (lot UNITES-TITRAGE, décision de Mohamed du 12/10/2026) : `Fenetre({sale})`, D, A.
+`FenetreUnite.tsx`.
+
+| Élément | Élément PRO (composant) | Règle |
+|---|---|---|
+| Titre « Unité « Dtex » » ou « Ajouter une unité de titrage » | titre de `Fenetre` | — |
+| Note (modification) « Écrite sur N titrage(s), portés par M matière(s). Désactivée, elle n'est plus proposée ni lue dans une nouvelle référence… » ; (ajout) « L'unité du titrage, telle qu'elle s'écrit dans les références : « 20 Ne », « 8 lbs »… » | `Note` | — |
+| Code (obligatoire, ≤ 16 ; aide « comme dans les références : « Dtex », « lbs » » ou, employée, « employée : sa casse seule se corrige ») · Libellé (facultatif, ≤ 120) · Ordre (0–9999 ; vide : après la dernière) · « Active (proposée, et lue dans les références) » | `Saisie`, `Nombre`, `Interrupteur` | serveur : lettres seules (2 à 16), unique sans casse, « Den » refusé |
+| Conflit de version (409 `conflit_version`) gardé sur la fiche avec « Recharger la fiche » | `BandeauConflit` | — |
+
+| Geste | Rôles | Route API PRO | Confirmation / blocages | Message |
+|---|---|---|---|---|
+| « Ajouter » | D, A | `POST classification/unites-titrage` (route 255) | grisé si code vide | « Unité « Ne » ajoutée : elle se choisit pour un titrage et se lit dans les références. » ; refus « L'unité « lbs » existe déjà (« LBS »). », « Une unité de titrage s'écrit en lettres seules… » |
+| « Enregistrer » | D, A | `PUT classification/unites-titrage/{id}` (route 256) | grisé sans modification | « Unité « X » enregistrée. » ou l'avertissement ; refus « « Ne » est écrite sur N titrage(s) (M matière(s)) : son code ne se change pas. Ajouter l'unité « Nx », puis désactiver « Ne ». » |
+| « Supprimer » | D, A | `DELETE classification/unites-titrage/{id}?version=` (route 257) | blocage `raison_garder` | « Unité « X » supprimée. » |
 
 ---
 

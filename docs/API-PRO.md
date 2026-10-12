@@ -186,17 +186,22 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 
 ### 1.7 Classification (`api/classification`)
 
-`{liste}` ∈ `compositions`, `types-fil`, `titrages`, `couleurs`.
+`{liste}` ∈ `compositions`, `types-fil`, `titrages`, `couleurs`. Les unités de titrage (routes
+255–257, lot UNITES-TITRAGE, décision de Mohamed du 12/10/2026) sont déclarées avant les routes
+`{liste}` : « unites-titrage » n'est pas une liste.
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 57 | GET | `/classification` | C | — | `Classification` {compositions, types_fil, titrages, couleurs: [ValeurFiche + nb_matieres], roles: [RoleFiche {id, code, lineaire, de_base, ordre, version} + nb_matieres, nb_qualites]} | A1 |
+| 57 | GET | `/classification` | C | — | `Classification` {compositions, types_fil, titrages, couleurs: [ValeurFiche + nb_matieres], roles: [RoleFiche {id, code, lineaire, de_base, ordre, version} + nb_matieres, nb_qualites], unites_titrage: [UniteFiche {id, code, libelle, ordre, actif, version, nb_titrages, nb_matieres, raison_garder}] (ordre puis code, désactivées comprises)} | A1 |
 | 58 | POST | `/classification/roles` | D | `RoleCreation` {code, ordre} | `RoleFiche` | A2 |
 | 59 | PUT | `/classification/roles/{id}` | D | `RoleModification` {code, ordre, version} | `RoleFiche` | A3 |
 | 60 | DELETE | `/classification/roles/{id}` | D | — | 204 | A4 |
 | 61 | POST | `/classification/{liste}` | D, A | `ValeurCreation` | `ValeurFiche` | A5 |
 | 62 | PUT | `/classification/{liste}/{id}` | D, A | `ValeurModification` (+version) | `ValeurFiche` (+ `avertissement` : une valeur désactivée encore portée) | A6 |
 | 63 | DELETE | `/classification/{liste}/{id}` | D, A | `?version=` (facultatif) | 204 | A7 |
+| 255 | POST | `/classification/unites-titrage` | D, A | `UniteCreation` {code, libelle, ordre (vide : après la dernière), actif} — code d'un mot de lettres (2 à 16), unique sans casse (409 `doublon` « L'unité « lbs » existe déjà (« LBS »). ») ; « Den » refusé (abréviation de Deniers) | `UniteFiche` ; l'unité se lit aussitôt dans les références (routes 76–77) | nouveau (lot UNITES-TITRAGE) |
+| 256 | PUT | `/classification/unites-titrage/{id}` | D, A | `UniteModification` (+version, 409 si périmée) — employée par un titrage : son code ne change pas, sa casse seule se corrige (409 `fiche_utilisee` : ajouter la nouvelle, désactiver l'ancienne) | `UniteFiche` (+ `avertissement` : une unité désactivée encore écrite sur des titrages) | nouveau (lot UNITES-TITRAGE) |
+| 257 | DELETE | `/classification/unites-titrage/{id}` | D, A | `?version=` (facultatif) — refusée si un titrage l'écrit (409 `fiche_utilisee` « … la désactiver plutôt que la supprimer. ») | 204 | nouveau (lot UNITES-TITRAGE) |
 
 ### 1.8 Fournisseurs (`api/fournisseurs`)
 
@@ -501,7 +506,7 @@ comprises) ; `GET /acces` et `GET /acces/qr` sont ouverts aussi à T ; `GET /ech
 reçoit `vue=consommation` ; `POST /commandes/{id}/approuver` reçoit `date` ; `PUT /dossiers/{id}/lignes/{lid}` accepte `cours: null` (« cours du jour ») ; `GET /dossiers/{id}` porte `a_rattacher` ; `GET /receptions/bobines` reçoit `matiere`. Le `PUT` d'une fiche reste un remplacement complet (l'écran envoie
 la fiche entière, y compris pour « désactiver ») : pas de corps partiel.
 
-**Total : 248 routes PRO** (253 et 254 ajoutées par le lot PLUSIEURS-FACTURES) (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
+**Total : 251 routes PRO** (253 et 254 ajoutées par le lot PLUSIEURS-FACTURES ; 255–257 par le lot UNITES-TITRAGE) (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
 service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/api/openapi.json`.
 
 ---
@@ -554,6 +559,7 @@ service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/ap
 | 184 | Une réclamation close se complète encore (réponse, montant obtenu : l'avoir arrive après la clôture) sans changer son issue | R20r |
 | 190–191 | `PUT` n'accepte que ce qu'il modifie ; `date_arrivee` peut se vider | A.12-19 |
 | 192 | Rattacher par facture seulement (plus de `reception_ligne_ids`) | I3 (une ligne reçue ne sort qu'avec sa réception) |
+| 57, 76–77, 255–257 | Les unités de titrage sont un référentiel (`unite_titrage`) et non plus une constante : la lecture des références (classement) ne reconnaît que les unités **actives** ; une unité employée ne se supprime ni ne se renomme, elle se désactive | décision de Mohamed du 12/10/2026 (DECISIONS F29) |
 | 189, 253, 254 | Un dossier porte **une ou plusieurs factures** (`factures`, « Ajouter une facture », « Retirer ») ; une facture n'est que dans un seul dossier ; C36 facture par facture ; détacher la dernière réception d'une facture la retire du dossier ; annuler libère toutes ses factures | décision de Mohamed du 12/10/2026 (amende I3) |
 | 204 | Annuler un dossier au lieu de le supprimer, pour **tout** dossier, même saisi à la main (numéro gardé, frais sortis du coût, motif exigé) : plus aucune suppression | DONNEES 11, B-02 |
 | 205–208 | Statuts `ouvert`/`clos` en minuscules partout ; dates en vraies dates Excel ; titre corrigé | A.12-8/9/10 |
@@ -799,7 +805,7 @@ de Gestion MP corrigé** (245 : annulation d'un inventaire validé), et **1 ajou
 ## 4. Matrice des droits
 
 Déclarée une fois (`securite/matrice.py`, générée depuis les dépendances des routes et exportée en
-`tests/matrice_droits.csv`) : 248 routes × {anonyme, D, A, L, T} → code attendu. L'essai
+`tests/matrice_droits.csv`) : 251 routes × {anonyme, D, A, L, T} → code attendu. L'essai
 `test_matrice_droits` la rejoue entièrement (paramètres remplis par les fabriques) ; une route
 nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 `test_toute_route_declare_ses_roles` échoue si une route (hors 1, 2, 8, 9, 10, 22) n'a pas de
@@ -808,7 +814,7 @@ nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 | Rôle | Routes permises | Interdites notables |
 |---|---|---|
 | Anonyme | 1, 2, 8, 9, 10, 22 | tout le reste (401) |
-| Direction | toutes les routes métier et techniques (241 hors routes publiques) | aucune |
-| Achats | lectures et écritures achats, réceptions, importations, stock (sauf retour machine), inventaires, référentiels matières/fournisseurs/classification (valeurs), devises, pilotage, suivi | approbation (158, 159), plan et recettes (84–90, 146), rôles, postes, codes, magasins, métiers (écriture), montage, ordres (écriture), comptes, sauvegardes, journal, période close |
+| Direction | toutes les routes métier et techniques (244 hors routes publiques) | aucune |
+| Achats | lectures et écritures achats, réceptions, importations, stock (sauf retour machine), inventaires, référentiels matières/fournisseurs/classification (valeurs, unités de titrage), devises, pilotage, suivi | approbation (158, 159), plan et recettes (84–90, 146), rôles, postes, codes, magasins, métiers (écriture), montage, ordres (écriture), comptes, sauvegardes, journal, période close |
 | Alimentation | lectures « C » (prix filtrés), ordres, retours machine, transferts, mise en quarantaine, montage, signalements, notifications, recherche | tout ce qui est D/A : commandes, réceptions, importations, plan d'achat, pilotage, réglages, devises, exports chiffrés |
 | Administrateur | 3, 4, 11–25 (techniques), 43–55 | toute route métier (403) : il ne lit ni stock, ni prix, ni documents |

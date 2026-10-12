@@ -255,7 +255,7 @@ visages à la connexion (reproche R7 de `AMELIORATIONS-PRO.md`).
 | adresse | VARCHAR(64) | | `''` | | IP | nouveau |
 
 `ObjetJournal` : `utilisateur, appareil, parametre, devise, sauvegarde, composition, type_fil,
-titrage, couleur, role_nomenclature, fournisseur, matiere, code_douanier, poste_frais, qualite,
+titrage, unite_titrage (révision 0008), couleur, role_nomenclature, fournisseur, matiere, code_douanier, poste_frais, qualite,
 magasin, metier, lot, commande, reception, facture, ordre, operation, inventaire, dossier,
 dossier_frais, reclamation, signalement, piece_jointe, periode, reprise, systeme`.
 Jamais modifié ni purgé. Index : `(objet, objet_id, quand)`, `(quand)`, `(utilisateur_id, quand)`, `(action)`.
@@ -378,6 +378,26 @@ Clé technique ajoutée ; le `code` reste unique et renommable sans cascade.
 | commentaire | TEXT | | `''` | | | commentaire |
 | actif | BOOLEAN | | true | | | actif |
 | version | INTEGER | | 1 | | | nouveau |
+
+#### 3.2.2 b `unite_titrage` (révision 0008, lot UNITES-TITRAGE) ← constante `UNITES_TITRAGE` du code
+
+Les unités de titrage (Dtex, Deniers, Nm, Tex, Nec, lbs…), tenues par la direction et les achats
+depuis Catalogue › Classification (décision de Mohamed du 12/10/2026, DECISIONS F29). `titrage.unite`
+reste un texte : une unité est **employée** dès qu'un titrage l'écrit (sans casse ; « den » compte pour
+Deniers), et les matières qui portent ces titrages avec elle.
+
+| Colonne | Type | N | Défaut | Contraintes | Sens | ← GMP |
+|---|---|---|---|---|---|---|
+| id | INTEGER identity | | | PK | | nouveau |
+| code | VARCHAR(16) | | | index unique `uq_unite_titrage_code` sur `lower(code)` (« LBS » et « lbs » ne coexistent pas) ; CK `ck_unite_titrage_code_un_mot` : `code <> '' AND code !~ '[[:space:]]'` | écrit comme dans les références (« Dtex », « lbs ») ; le service exige des lettres seules, 2 à 16 | constante `UNITES_TITRAGE` |
+| libelle | VARCHAR(120) | | `''` | | facultatif (« décitex (grammes pour 10 000 m) ») | nouveau |
+| ordre | INTEGER | | 0 | CK `ck_unite_titrage_ordre_positif` : `ordre >= 0` | ordre de la liste (semées 10 à 60, puis de dix en dix) | nouveau |
+| actif | BOOLEAN | | true | | désactivée : ni proposée, ni lue dans une nouvelle référence ; gardée sur les titrages qui l'écrivent | nouveau |
+| version | INTEGER | | 1 | | verrou optimiste (routes 256, 257 : 409 si périmée) | nouveau |
+
+Semée par la révision 0008 : Dtex, Deniers, Nm, Tex, Nec, lbs (dans cet ordre), puis les unités déjà
+écrites sur des titrages et absentes (un mot de lettres, « den » excepté). Le moteur (`calcul/`) ne lit
+pas la base : `decomposer(…, unites=…)` reçoit les unités actives (`services/unites_titrage.actives`).
 
 #### 3.2.3 `role_nomenclature` ← `role_nomenclature`
 
@@ -1235,6 +1255,9 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
 - `0005_motif_d_abandon`, `0006_taux_des_frais` : `inventaire.abandon_motif` ; `dossier_frais.taux`.
 - `0007_dossier_plusieurs_factures` (lot PLUSIEURS-FACTURES) : table `dossier_facture` (§ 3.8.5)
   remplie depuis `dossier.facture_id`, index `uq_dossier_facture` déplacé sur elle, colonne retirée.
+- `0008_unites_de_titrage` (lot UNITES-TITRAGE) : table `unite_titrage` (§ 3.2.2 b) semée (six unités,
+  puis celles que les titrages emploient déjà), `ObjetJournal` + `unite_titrage` (CHECK
+  `ck_journal_objet_enum` remplacé). Retour arrière refusé si le journal cite une unité de titrage.
 - Les révisions suivantes : une par changement, avec `upgrade()` et `downgrade()`, numérotées à la suite
   (numéro réservé auprès du coordinateur), relues après autogénération : autogenerate ne voit ni les
   CHECK modifiés ni les déclencheurs (à écrire à la main) ; pas de `%` dans le texte d'un CHECK (utiliser `~`).
@@ -1332,13 +1355,13 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 
 | | Gestion MP | PRO |
 |---|---|---|
-| Tables | 49 | **72** (71 tables métier et techniques + `alembic_version` ; `dossier_facture`, révision 0007) |
-| Colonnes | 405 | **691** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005, + `dossier_frais.taux`, révision 0006, − `dossier.facture_id` + les 5 de `dossier_facture`, révision 0007) |
+| Tables | 49 | **73** (72 tables métier et techniques + `alembic_version` ; `dossier_facture`, révision 0007 ; `unite_titrage`, révision 0008) |
+| Colonnes | 405 | **697** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005, + `dossier_frais.taux`, révision 0006, − `dossier.facture_id` + les 5 de `dossier_facture`, révision 0007, + les 6 de `unite_titrage`, révision 0008) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
 | Clés étrangères | 73 | **173** (révision 0007 : − `dossier.facture_id`, + 3 de `dossier_facture`), dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
-| CHECK | 39 | **293** : 177 nommés à la main, 41 `…_enum`, 75 `…_nombre` (refus de NaN) — dont les 2 de la révision 0006 (`ck_dossier_frais_taux_borne`, `ck_dossier_frais_taux_nombre`) |
-| Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture`, sur `dossier_facture` depuis 0007 ; `uq_inventaire_ligne_lot_a_creer`) |
-| Index | — | **195** (hors `alembic_version`) : 71 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, le reste simple |
+| CHECK | 39 | **295** : 179 nommés à la main, 41 `…_enum`, 75 `…_nombre` (refus de NaN) — dont les 2 de la révision 0006 (`ck_dossier_frais_taux_borne`, `ck_dossier_frais_taux_nombre`) et les 2 de la révision 0008 (`ck_unite_titrage_code_un_mot`, `ck_unite_titrage_ordre_positif`) |
+| Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture`, sur `dossier_facture` depuis 0007 ; `uq_inventaire_ligne_lot_a_creer`) + **1** index unique d'expression (`uq_unite_titrage_code` sur `lower(code)`, révision 0008) |
+| Index | — | **197** (hors `alembic_version`) : 72 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, 1 unique d'expression (0008), le reste simple |
 | Déclencheurs | — | **3** : `tr_mouvement_immuable`, `tr_operation_type_fige`, `tr_matiere_lineaire_densite` |
 | Réglages semés | 56 (Gestion MP corrigé) | **57** (0002 : 56, avec `seuil_bc_urgent` ; 0003 : `toler_tva_import`) |
 | Données métier rangées dans du texte ou du JSON | 17 (§ 4) | 0 |
@@ -1346,9 +1369,10 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 Ces chiffres sont ceux de la base migrée (`0001` à `0004`) ; `outils/schema_contre_modele.py`
 compare tables et colonnes de la base à ce document.
 
-Liste des 72 tables : utilisateur, session, tentative, appareil, journal, parametre,
+Liste des 73 tables : utilisateur, session, tentative, appareil, journal, parametre,
 parametre_historique, compteur, notification, notification_lecture, courriel, tache_execution,
-sauvegarde, devise, devise_cours, composition, type_fil, titrage, couleur, role_nomenclature,
+sauvegarde, devise, devise_cours, composition, type_fil, titrage, unite_titrage, couleur,
+role_nomenclature,
 fournisseur, code_douanier, matiere, qualite, qualite_poids, qualite_saison, recette,
 recette_version, recette_version_ligne, recette_version_poids, plan_version, plan_version_saison,
 magasin, metier, metier_etage, montage, montage_evenement, poste_frais, motif, lot, solde,

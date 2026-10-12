@@ -185,7 +185,7 @@ Menu « Analyse ». Chaque liste s’exporte en Excel ; chaque onglet a son adre
 | Coût de revient | Analyse › Coût de revient (`/analyse?onglet=revient`) | La même recherche, combinable. |
 | Inventaire | Inventaire (`/inventaire`) | Comptage sur un périmètre, écarts justifiés, ajustements à la validation. |
 | Catalogue | Matières, classification, fournisseurs › Matières (`/catalogue`) | La référence se compose depuis la classification. |
-| Classification des fils | Matières, classification, fournisseurs › Classification (`/catalogue?onglet=classification`) | Compositions, types, titrages, couleurs. |
+| Classification des fils | Matières, classification, fournisseurs › Classification (`/catalogue?onglet=classification`) | Compositions, types, titrages et leurs unités, couleurs. |
 | Fournisseurs | Matières, classification, fournisseurs › Fournisseurs (`/catalogue?onglet=fournisseurs`) | La fiche ; le score est dans Analyse › Fournisseurs. |
 | Qualités & recettes | Qualités et recettes (`/qualites`) | Poids par rôle, recette à 100 % par rôle, versions, coût au m². |
 | Valorisation du stock | Analyse › Valorisation (`/analyse?onglet=valorisation`) | Le stock détenu (magasins et sur les métiers), au coût moyen pondéré, dont X sur les métiers. |
@@ -310,9 +310,10 @@ Un document par geste de stock : stock d’ouverture, transfert (dont quarantain
 
 ### Matières, classification, fournisseurs (`/catalogue`)
 
-Les matières (la référence se compose depuis la classification), les quatre listes de la classification, et les fournisseurs.
+Les matières (la référence se compose depuis la classification), les listes de la classification et les unités de titrage, et les fournisseurs.
 
 - Une référence de fil : composition, type de fil, titrage, couleur.
+- Les unités de titrage (Dtex, Deniers, Nm, Tex, Nec, lbs…) se tiennent dans Classification › Unités de titrage : une unité ajoutée se choisit aussitôt pour un titrage et se lit dans les références ; employée par un titrage, elle ne se supprime ni ne se renomme : ajouter la nouvelle, désactiver l’ancienne.
 - Le stock se tient en kilos ; le cuir, les franges et le ruban portent une densité (kg par mètre).
 - Une fiche modifiée entre-temps par quelqu’un d’autre est refusée : « Recharger » repart de sa dernière version.
 - L’alimentation lit les matières, sans prix.
