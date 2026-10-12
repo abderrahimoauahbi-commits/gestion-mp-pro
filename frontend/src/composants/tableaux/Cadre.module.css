@@ -2,7 +2,6 @@
   position: relative;
   min-height: 0;
   overflow: auto;
-  overscroll-behavior: contain;
 }
 
 /* Avant la première mesure : les replis de Gestion MP (HAUT.page, HAUT.court). */
@@ -14,8 +13,13 @@
   max-height: max(240px, calc(100vh - 470px));
 }
 
+/* Dans une fenêtre : toutes les lignes, sans défilement à elles. Un tableau qui défilait sous
+   l'en-tête de la fenêtre (qui défile elle-même) ne montrait que ses premières lignes, les autres
+   passaient pour absentes. C'est la fenêtre qui défile ; « Agrandir » donne le plein écran. La
+   molette passe à la fenêtre même la souris posée sur le tableau (un « overscroll contain » la
+   retenait : la liste « bloquait »). */
 .fenetre {
-  max-height: var(--cadre-fenetre);
+  max-height: none;
 }
 
 /* Un tableau écrit à la main, agrandissable : son bouton au-dessus, à droite. */

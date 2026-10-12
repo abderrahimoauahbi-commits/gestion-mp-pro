@@ -6,15 +6,20 @@
  *
  * La liste s'ouvre à la frappe, à ↓ (ou ↑) et au clic, jamais au seul focus : le premier champ
  * d'une fiche, qui reçoit le focus à l'ouverture, ne déplie pas sa liste sur le reste.
+ *
+ * Elle s'ouvre vers le bas, ou **vers le haut** quand la place manque dessous (un champ au bas d'une
+ * fenêtre : la liste passait sous le bord et « bloquait en bas ») ; sa hauteur tient dans la place.
  */
 import {
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type KeyboardEvent,
   type MouseEvent,
+  type RefObject,
 } from 'react'
 
 import { nombre } from '../../lib/format'
@@ -98,6 +103,46 @@ function useListe<K extends string | number>(props: SelecteurProps<K>) {
   return { ouvert, q, actif, setActif, trouvees, choisir, evenements }
 }
 
+/** La hauteur d'une liste ouverte, au plus ; en dessous de PLANCHER_LISTE, on regarde au-dessus. */
+const HAUTEUR_LISTE = 320
+const PLANCHER_LISTE = 200
+const MARGE = 8
+
+/** Le haut et le bas visibles autour du champ : l'écran, rogné par le cadre qui défile (une fenêtre). */
+function bornesVisibles(el: HTMLElement): { haut: number; bas: number } {
+  let haut = 0
+  let bas = window.innerHeight
+  for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+    const o = getComputedStyle(e).overflowY
+    if (o === 'auto' || o === 'scroll' || o === 'hidden') {
+      const r = e.getBoundingClientRect()
+      haut = Math.max(haut, r.top)
+      bas = Math.min(bas, r.bottom)
+    }
+  }
+  return { haut, bas }
+}
+
+/** Où ouvrir la liste : dessous, ou dessus quand la place manque dessous ; et sa hauteur. */
+function usePlaceListe(champ: RefObject<HTMLElement | null>, ouvert: boolean) {
+  const [place, setPlace] = useState<{ dessus: boolean; hauteur: number }>({
+    dessus: false,
+    hauteur: HAUTEUR_LISTE,
+  })
+  useLayoutEffect(() => {
+    const el = champ.current
+    if (!ouvert || !el) return
+    const r = el.getBoundingClientRect()
+    const b = bornesVisibles(el)
+    const dessous = b.bas - r.bottom - MARGE
+    const dessus = r.top - b.haut - MARGE
+    const versLeHaut = dessous < Math.min(HAUTEUR_LISTE, PLANCHER_LISTE * 1.5) && dessus > dessous
+    const libre = versLeHaut ? dessus : dessous
+    setPlace({ dessus: versLeHaut, hauteur: Math.max(120, Math.min(HAUTEUR_LISTE, libre)) })
+  }, [champ, ouvert])
+  return place
+}
+
 interface ListeOptionsProps<K extends string | number> {
   id: string
   libelle?: string
@@ -109,6 +154,8 @@ interface ListeOptionsProps<K extends string | number> {
   reste: number
   onChoisir: (o: OptionSelecteur<K> | null) => void
   onSurvol: (i: number) => void
+  dessus: boolean
+  hauteur: number
 }
 
 /** La liste ouverte : « — Aucun — », les options (avec leur groupe), et ce qui n'est pas montré. */
@@ -117,7 +164,13 @@ function ListeOptions<K extends string | number>(p: ListeOptionsProps<K>) {
   // Les options retiennent le focus (mousedown) : le champ garde la main, la liste ne se ferme pas.
   const retenir = (e: MouseEvent) => e.preventDefault()
   return (
-    <div className={styles.liste} role="listbox" id={`${p.id}-liste`} aria-label={p.libelle}>
+    <div
+      className={classes(styles.liste, p.dessus && styles.dessus)}
+      style={{ maxHeight: p.hauteur }}
+      role="listbox"
+      id={`${p.id}-liste`}
+      aria-label={p.libelle}
+    >
       {p.effacer ? (
         <div
           role="option"
@@ -178,6 +231,7 @@ export function Selecteur<K extends string | number>(props: SelecteurProps<K>) {
   const id = useId()
   const champ = useRef<HTMLInputElement>(null)
   const l = useListe(props)
+  const place = usePlaceListe(champ, l.ouvert)
   const choisie = options.find((o) => o.id === valeur)
   const montrees = l.trouvees.slice(0, limite)
   const effacer = (props.effacable ?? true) && valeur != null
@@ -213,6 +267,8 @@ export function Selecteur<K extends string | number>(props: SelecteurProps<K>) {
           reste={l.trouvees.length - montrees.length}
           onChoisir={l.choisir}
           onSurvol={l.setActif}
+          dessus={place.dessus}
+          hauteur={place.hauteur}
         />
       ) : null}
     </div>

@@ -52,6 +52,12 @@
   box-shadow: var(--ombre-haute);
 }
 
+/* Ouverte vers le haut : la place manquait sous le champ (au bas d'une fenêtre). */
+.dessus {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
 .option,
 .aucun {
   display: flex;

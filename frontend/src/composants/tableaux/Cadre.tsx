@@ -3,7 +3,8 @@
  * reste** jusqu'au bas de la fenêtre du navigateur, en mesurant ce qui le suit (marges, voisins,
  * bords des parents). Plancher de 360 px (une dizaine de lignes) : sous l'en-tête d'un petit écran,
  * c'est la page qui défile plutôt qu'un tableau réduit à quelques lignes. Dans une fenêtre
- * (`hauteur="fenetre"`, ou posé dans un `role="dialog"`), une hauteur fixe sans mesure.
+ * (`hauteur="fenetre"`, ou posé dans un `role="dialog"`), aucune borne : toutes ses lignes, et
+ * c'est la fenêtre qui défile.
  */
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 

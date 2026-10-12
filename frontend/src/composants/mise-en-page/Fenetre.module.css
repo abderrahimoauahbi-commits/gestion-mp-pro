@@ -132,8 +132,8 @@
 }
 
 /* Rien ne s'écrase dans une fenêtre : quand le contenu dépasse, c'est le corps qui défile, jamais
-   un tableau qui rétrécit sous l'en-tête jusqu'à une seule ligne (un tableau garde sa hauteur,
-   bornée par son cadre, --cadre-fenetre). */
+   un tableau qui rétrécit sous l'en-tête jusqu'à une seule ligne (un tableau y montre toutes ses
+   lignes, Cadre.module.css .fenetre). */
 .corps > * {
   flex-shrink: 0;
 }
