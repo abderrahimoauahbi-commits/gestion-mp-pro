@@ -52,9 +52,10 @@
     },
     "catalogue": {
       "titre": "Matières, classification, fournisseurs",
-      "resume": "Les matières (la référence se compose depuis la classification), les quatre listes de la classification, et les fournisseurs.",
+      "resume": "Les matières (la référence se compose depuis la classification), les listes de la classification et les unités de titrage, et les fournisseurs.",
       "points": [
         "Une référence de fil : composition, type de fil, titrage, couleur.",
+        "Les unités de titrage (Dtex, Deniers, Nm, Tex, Nec, lbs…) se tiennent dans Classification › Unités de titrage : une unité ajoutée se choisit aussitôt pour un titrage et se lit dans les références ; employée par un titrage, elle ne se supprime ni ne se renomme : ajouter la nouvelle, désactiver l’ancienne.",
         "Le stock se tient en kilos ; le cuir, les franges et le ruban portent une densité (kg par mètre).",
         "Une fiche modifiée entre-temps par quelqu’un d’autre est refusée : « Recharger » repart de sa dernière version.",
         "L’alimentation lit les matières, sans prix."
@@ -1116,7 +1117,7 @@
         },
         {
           "erp": "Classification des fils",
-          "note": "Compositions, types, titrages, couleurs.",
+          "note": "Compositions, types, titrages et leurs unités, couleurs.",
           "ou": "Matières, classification, fournisseurs › Classification",
           "vers": "/catalogue?onglet=classification"
         },

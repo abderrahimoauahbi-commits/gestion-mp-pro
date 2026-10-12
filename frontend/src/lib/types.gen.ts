@@ -1015,6 +1015,50 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification/unites-titrage': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ajouter une unité de titrage : elle se lit aussitôt dans les références.
+     * @description Route 255 : code unique sans tenir compte de la casse (409 `doublon`).
+     */
+    post: operations['ajouter_unite_api_classification_unites_titrage_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification/unites-titrage/{ident}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Modifier une unité de titrage (employée : son code ne change pas, elle se désactive).
+     * @description Route 256 : `avertissement` dit les titrages qui gardent une unité désactivée.
+     */
+    put: operations['modifier_unite_api_classification_unites_titrage__ident__put']
+    post?: never
+    /**
+     * Supprimer une unité de titrage qu'aucun titrage n'écrit.
+     * @description Route 257 : `?version=` facultatif (contrôlé s'il est donné).
+     */
+    delete: operations['supprimer_unite_api_classification_unites_titrage__ident__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/classification/{liste}': {
     parameters: {
       query?: never
@@ -5139,7 +5183,7 @@ export interface components {
     }
     /**
      * Classification
-     * @description Toute la classification (route 57).
+     * @description Toute la classification (route 57), unités de titrage comprises (ordre, puis code).
      */
     Classification: {
       /** Compositions */
@@ -5152,6 +5196,8 @@ export interface components {
       couleurs: components['schemas']['ValeurFiche'][]
       /** Roles */
       roles: components['schemas']['RoleFiche'][]
+      /** Unites Titrage */
+      unites_titrage: components['schemas']['UniteFiche'][]
     }
     /**
      * ClotureDossier
@@ -11190,6 +11236,7 @@ export interface components {
       | 'composition'
       | 'type_fil'
       | 'titrage'
+      | 'unite_titrage'
       | 'couleur'
       | 'role_nomenclature'
       | 'fournisseur'
@@ -14262,6 +14309,88 @@ export interface components {
       unite: string
       /** Contenance */
       contenance: number
+    }
+    /**
+     * UniteCreation
+     * @description Une unité de titrage (route 255) ; sans ordre, elle se range après la dernière.
+     *
+     *     Le code (un mot de lettres, 2 à 16) est contrôlé par le service, qui dit le refus en clair.
+     */
+    UniteCreation: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /** Ordre */
+      ordre?: number | null
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+    }
+    /**
+     * UniteFiche
+     * @description Une unité de titrage, les titrages qui l'écrivent et les matières qui les portent.
+     */
+    UniteFiche: {
+      /** Id */
+      id: number
+      /** Code */
+      code: string
+      /** Libelle */
+      libelle: string
+      /** Ordre */
+      ordre: number
+      /** Actif */
+      actif: boolean
+      /** Version */
+      version: number
+      /**
+       * Nb Titrages
+       * @default 0
+       */
+      nb_titrages: number
+      /**
+       * Nb Matieres
+       * @default 0
+       */
+      nb_matieres: number
+      /**
+       * Raison Garder
+       * @description pourquoi elle ne se supprime pas (employée), sinon vide
+       */
+      raison_garder?: string | null
+      /**
+       * Avertissement
+       * @description après une désactivation : les titrages qui la gardent
+       */
+      avertissement?: string | null
+    }
+    /**
+     * UniteModification
+     * @description Une unité modifiée (route 256) ; `version` lue avec la liste (409 si périmée).
+     */
+    UniteModification: {
+      /** Code */
+      code: string
+      /**
+       * Libelle
+       * @default
+       */
+      libelle: string
+      /** Ordre */
+      ordre?: number | null
+      /**
+       * Actif
+       * @default true
+       */
+      actif: boolean
+      /** Version */
+      version: number
     }
     /**
      * Urgence
@@ -17535,6 +17664,204 @@ export interface operations {
   supprimer_role_api_classification_roles__ident__delete: {
     parameters: {
       query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  ajouter_unite_api_classification_unites_titrage_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UniteCreation']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UniteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  modifier_unite_api_classification_unites_titrage__ident__put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ident: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UniteModification']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UniteFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_unite_api_classification_unites_titrage__ident__delete: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
       header?: never
       path: {
         ident: number

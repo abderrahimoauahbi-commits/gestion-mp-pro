@@ -3,7 +3,15 @@
  * celles de l'OpenAPI ; chaque fabrique prend des changements.
  */
 import type { Reponse } from '../../essais/monter'
-import type { Classification, Fournisseur, Matiere, MatiereFiche, RoleNomenclature, Valeur } from './types'
+import type {
+  Classification,
+  Fournisseur,
+  Matiere,
+  MatiereFiche,
+  RoleNomenclature,
+  UniteTitrage,
+  Valeur,
+} from './types'
 
 export function roleEssai(id: number, code: string, lineaire = false, ordre = id): RoleNomenclature {
   return { id, code, lineaire, de_base: true, ordre, version: 1, nb_matieres: 0, nb_qualites: 0 }
@@ -13,6 +21,29 @@ export function valeurEssai(id: number, code: string, autres: Partial<Valeur> = 
   return { id, code, libelle: null, commentaire: '', actif: true, version: 1, nb_matieres: 0, ...autres }
 }
 
+export function uniteEssai(
+  id: number,
+  code: string,
+  ordre: number,
+  autres: Partial<UniteTitrage> = {},
+): UniteTitrage {
+  const employee = (autres.nb_titrages ?? 0) > 0
+  return {
+    id,
+    code,
+    libelle: '',
+    ordre,
+    actif: true,
+    version: 1,
+    nb_titrages: 0,
+    nb_matieres: 0,
+    raison_garder: employee
+      ? `Écrite sur ${autres.nb_titrages} titrage(s) (${autres.nb_matieres ?? 0} matière(s)) : la désactiver plutôt que la supprimer`
+      : null,
+    ...autres,
+  }
+}
+
 export function classificationEssai(): Classification {
   return {
     compositions: [valeurEssai(1, 'PP', { libelle: 'Polypropylène', nb_matieres: 3 })],
@@ -20,6 +51,13 @@ export function classificationEssai(): Classification {
     titrages: [valeurEssai(3, '2900 Dtex', { valeur: '2900', unite: 'Dtex' })],
     couleurs: [valeurEssai(4, 'Rouge'), valeurEssai(5, 'Ivoire', { actif: false })],
     roles: [roleEssai(1, 'Poil'), roleEssai(2, 'Chaîne'), roleEssai(5, 'Cuir', true)],
+    unites_titrage: [
+      uniteEssai(1, 'Dtex', 10, { nb_titrages: 1, nb_matieres: 3 }),
+      uniteEssai(2, 'Deniers', 20),
+      uniteEssai(3, 'Nm', 30),
+      uniteEssai(6, 'lbs', 60),
+      uniteEssai(7, 'Nec', 50, { actif: false }),
+    ],
   }
 }
 

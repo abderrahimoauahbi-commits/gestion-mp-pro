@@ -3,7 +3,9 @@
  * colonne de la matière, en majuscules pour une composition et un type de fil — P7-19),
  * libellé, famille, composition détaillée, valeur et unité d'un titrage, observations. Servent à
  * la fenêtre de l'onglet Classification et au panneau d'ajout de la fiche matière (une seule
- * déclaration).
+ * déclaration). L'unité d'un titrage se choisit dans le référentiel des unités de titrage
+ * (vue « Unités de titrage », décision de Mohamed du 12/10/2026) : les actives, et celle déjà
+ * posée même désactivée.
  */
 import { Grille } from '../../composants/mise-en-page/Grille'
 import { Champ } from '../../composants/saisie/Champ'
@@ -12,7 +14,8 @@ import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { Zone } from '../../composants/saisie/Zone'
 import { COMMENTAIRE_MAX, LONGUEURS } from './bornes'
-import type { DefinitionListe, Liste, Valeur } from './types'
+import { useClassification } from './donnees'
+import type { DefinitionListe, Liste, UniteTitrage, Valeur } from './types'
 
 export interface FormeValeur {
   code: string
@@ -24,8 +27,6 @@ export interface FormeValeur {
   commentaire: string
   actif: boolean
 }
-
-export const UNITES_TITRAGE = ['Dtex', 'Deniers', 'Nm', 'Tex', 'Nec', 'lbs'] as const
 
 /** La forme d'une valeur lue, ou d'une valeur nouvelle (code tapé, active). */
 export function versFormeValeur(v: Valeur | null, code = ''): FormeValeur {
@@ -130,11 +131,27 @@ function ChampCode({ d, forme, onChange }: ChampsProps) {
   )
 }
 
-/** L'unité d'un titrage, dans la liste des unités connues. */
+/** Les unités proposées : les actives dans leur ordre, et l'unité déjà posée (même désactivée). */
+export function unitesProposees(unites: readonly UniteTitrage[], posee: string): string[] {
+  const actives = unites.filter((u) => u.actif).map((u) => u.code)
+  const connue = actives.some((u) => u.toLowerCase() === posee.toLowerCase())
+  return posee && !connue ? [...actives, posee] : actives
+}
+
+/** L'aide du champ : les unités actives, et où les tenir. */
+function aideUnites(unites: readonly UniteTitrage[]): string {
+  const actives = unites.filter((u) => u.actif).map((u) => u.code)
+  return actives.length
+    ? `${actives.join(', ')} (Classification › Unités de titrage)`
+    : 'aucune unité active : en ajouter une dans Classification › Unités de titrage'
+}
+
+/** L'unité d'un titrage, dans le référentiel des unités de titrage. */
 function ChampUnite({ forme, onChange }: ChampsProps) {
-  const unites = [...new Set([...UNITES_TITRAGE, forme.unite].filter(Boolean))]
+  const lues = useClassification().data?.unites_titrage ?? []
+  const unites = unitesProposees(lues, forme.unite)
   return (
-    <Champ libelle="Unité" aide={UNITES_TITRAGE.join(', ')}>
+    <Champ libelle="Unité" aide={aideUnites(lues)}>
       <Selecteur<string>
         valeur={forme.unite || null}
         options={unites.map((u) => ({ id: u, titre: u }))}

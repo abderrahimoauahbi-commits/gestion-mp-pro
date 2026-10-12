@@ -1,7 +1,7 @@
 /**
  * Onglet « Classification » (`/catalogue?onglet=classification&liste=…` ; direction, achats) :
- * une bascule de cinq vues — compositions, types de fil, titrages, couleurs (valeurs actives
- * comptées) et rôles de nomenclature. Une ligne ouvre la valeur en fenêtre ; désactiver se
+ * une bascule de six vues — compositions, types de fil, titrages, unités de titrage, couleurs
+ * (valeurs et unités actives comptées) et rôles de nomenclature. Une ligne ouvre la valeur en fenêtre ; désactiver se
  * confirme sur la ligne (P7-23) ; supprimer est grisé tant qu'une matière porte la valeur.
  */
 import { useMemo, useState } from 'react'
@@ -27,6 +27,7 @@ import { Classer } from './Classer'
 import { useClassification } from './donnees'
 import { useEtatListe } from './etatListe'
 import { Roles } from './Roles'
+import { UnitesTitrage } from './UnitesTitrage'
 import {
   definition,
   LISTES,
@@ -37,8 +38,8 @@ import {
 } from './types'
 import { blocagesValeur, ValeurClassification } from './ValeurClassification'
 
-type Vue = Liste | 'roles'
-const VUES: readonly Vue[] = ['compositions', 'types-fil', 'titrages', 'couleurs', 'roles']
+type Vue = Liste | 'unites-titrage' | 'roles'
+const VUES: readonly Vue[] = ['compositions', 'types-fil', 'titrages', 'unites-titrage', 'couleurs', 'roles']
 
 /** Les gestes d'une valeur sur sa ligne : changer son état, la supprimer. */
 function useGestesValeur(v: Valeur, d: DefinitionListe) {
@@ -211,21 +212,28 @@ function Valeurs({ d, c }: { d: DefinitionListe; c: Classification }) {
   )
 }
 
+/** Les vues de la bascule, chacune avec son compte (valeurs et unités actives ; rôles : tous). */
+function vuesClassification(c: Classification): { cle: Vue; libelle: string }[] {
+  const listes: { cle: Vue; libelle: string }[] = LISTES.map((d) => ({
+    cle: d.liste,
+    libelle: `${d.pluriel} · ${nombre(c[d.cle].filter((v) => v.actif).length)}`,
+  }))
+  const unites = {
+    cle: 'unites-titrage' as const,
+    libelle: `Unités de titrage · ${nombre(c.unites_titrage.filter((u) => u.actif).length)}`,
+  }
+  const rang = listes.findIndex((l) => l.cle === 'titrages') + 1
+  const roles = { cle: 'roles' as const, libelle: `Rôles · ${nombre(c.roles.length)}` }
+  return [...listes.slice(0, rang), unites, ...listes.slice(rang), roles]
+}
+
 export function OngletClassification({ direction }: { direction: boolean }) {
   const lu = useClassification()
   const etat = useEtatListe('cq', ['liste'])
   const vue = VUES.find((v) => v === etat.lire('liste')) ?? 'compositions'
   const [classer, setClasser] = useState(false)
   const c = lu.data
-  const vues = c
-    ? [
-        ...LISTES.map((d) => ({
-          cle: d.liste,
-          libelle: `${d.pluriel} · ${nombre(c[d.cle].filter((v) => v.actif).length)}`,
-        })),
-        { cle: 'roles' as const, libelle: `Rôles · ${nombre(c.roles.length)}` },
-      ]
-    : []
+  const vues = c ? vuesClassification(c) : []
   const actions =
     vue === 'roles' ? null : (
       <Bouton
@@ -249,6 +257,8 @@ export function OngletClassification({ direction }: { direction: boolean }) {
           />
           {vue === 'roles' ? (
             <Roles c={c} direction={direction} />
+          ) : vue === 'unites-titrage' ? (
+            <UnitesTitrage c={c} />
           ) : (
             <Valeurs key={vue} d={definition(vue)} c={c} />
           )}

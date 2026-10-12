@@ -1,5 +1,5 @@
 /**
- * Deux à cinq vues d'une même carte, dans son en-tête (les écrans, eux, se découpent en
+ * Deux à six vues d'une même carte, dans son en-tête (les écrans, eux, se découpent en
  * `Onglets`). La vue vit dans l'adresse (`?vue=`, P2-5) avec `useVueAdresse`.
  */
 import { useCallback } from 'react'
@@ -26,8 +26,8 @@ export function Bascule<T extends string>({
   onChange: (cle: T) => void
   libelle?: string
 }) {
-  if (vues.length < 2 || vues.length > 5) {
-    console.error(`Bascule « ${libelle} » : 2 à 5 vues (${vues.length}) ; au-delà, des onglets.`)
+  if (vues.length < 2 || vues.length > 6) {
+    console.error(`Bascule « ${libelle} » : 2 à 6 vues (${vues.length}) ; au-delà, des onglets.`)
   }
   return (
     <div className={styles.bascule} role="group" aria-label={libelle}>

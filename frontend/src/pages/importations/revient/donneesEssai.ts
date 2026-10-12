@@ -99,6 +99,7 @@ export const CLASSIFICATION: Classification = {
   titrages: [valeur(1, 'T1500', '1500'), valeur(2, 'T1800', '1800')],
   couleurs: [valeur(1, 'RGE')],
   roles: [],
+  unites_titrage: [],
 }
 
 export function qualiteEssai(autres: Partial<Qualite> = {}): Qualite {

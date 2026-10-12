@@ -14,6 +14,7 @@ export type FournisseurCorps = Schema<'FournisseurModification'>
 export type Classification = Schema<'Classification'>
 export type Valeur = Schema<'ValeurFiche'>
 export type RoleNomenclature = Schema<'RoleFiche'>
+export type UniteTitrage = Schema<'UniteFiche'>
 export type Devise = Schema<'DeviseFiche'>
 export type CodeDouanier = Schema<'CodeDouanierFiche'>
 export type ApercuImport = Schema<'ApercuImport'>
