@@ -17,3 +17,16 @@
 .fenetre {
   max-height: var(--cadre-fenetre);
 }
+
+/* Un tableau écrit à la main, agrandissable : son bouton au-dessus, à droite. */
+.agrandissable {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.barre {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--espace-1);
+}

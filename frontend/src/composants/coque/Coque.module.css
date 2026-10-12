@@ -58,7 +58,9 @@
   min-width: 0;
 }
 
-/* Le <main> borné : la page le remplit, seuls ses cadres défilent (Cadre mesure le reste). */
+/* Le <main> borné : la page le remplit et ses cadres défilent (Cadre mesure le reste) ; sur un petit
+   écran, la page ne s'écrase pas sous la hauteur de main (flex-shrink 0) : un tableau garde son
+   plancher (Cadre.PLANCHER) et c'est main qui défile. */
 .contenu {
   display: flex;
   flex: 1 1 auto;
@@ -68,7 +70,7 @@
 }
 
 .contenu > * {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   min-height: 0;
 }
 

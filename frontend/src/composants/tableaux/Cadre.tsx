@@ -1,16 +1,18 @@
 /**
  * Le cadre où défile un tableau, en-tête collant (A2, M45, M69) : il prend **la hauteur qui
  * reste** jusqu'au bas de la fenêtre du navigateur, en mesurant ce qui le suit (marges, voisins,
- * bords des parents) ; la page, elle, ne défile jamais. Plancher de 200 px. Dans une fenêtre
+ * bords des parents). Plancher de 360 px (une dizaine de lignes) : sous l'en-tête d'un petit écran,
+ * c'est la page qui défile plutôt qu'un tableau réduit à quelques lignes. Dans une fenêtre
  * (`hauteur="fenetre"`, ou posé dans un `role="dialog"`), une hauteur fixe sans mesure.
  */
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { classes } from '../mise-en-page/classes'
+import { useAgrandir } from './Agrandir'
 import styles from './Cadre.module.css'
 
 /** Le plancher d'un cadre (px) : quelques lignes restent toujours visibles. */
-export const PLANCHER = 200
+export const PLANCHER = 360
 
 const px = (v: string) => parseFloat(v) || 0
 
@@ -38,6 +40,26 @@ function hauteurDessous(el: HTMLElement): number {
 export function hauteurRestante(el: HTMLElement, hauteurFenetre = window.innerHeight): number {
   const haut = el.getBoundingClientRect().top + window.scrollY
   return Math.max(PLANCHER, Math.round(hauteurFenetre - haut - hauteurDessous(el)))
+}
+
+/**
+ * Un tableau écrit à la main (sans `DataTable`) posé dans une fenêtre, avec au-dessus de lui le
+ * bouton « Agrandir » (plein écran, `useAgrandir`) ; `DataTable` a déjà le sien.
+ */
+export function CadreAgrandissable({
+  children,
+  hauteur = 'fenetre',
+}: {
+  children: ReactNode
+  hauteur?: 'fenetre'
+}) {
+  const a = useAgrandir<HTMLDivElement>()
+  return (
+    <div ref={a.boite} className={classes(styles.agrandissable, a.classe)}>
+      <div className={styles.barre}>{a.bouton}</div>
+      <Cadre hauteur={hauteur}>{children}</Cadre>
+    </div>
+  )
 }
 
 export function Cadre({

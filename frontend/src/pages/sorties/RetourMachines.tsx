@@ -20,7 +20,7 @@ import { DateChamp } from '../../composants/saisie/DateChamp'
 import { Quantite } from '../../composants/saisie/Quantite'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import { api } from '../../lib/api'
 import { date, kg, kgEtMetres } from '../../lib/format'
 import { aujourdhui } from '../../lib/heure'
@@ -114,7 +114,7 @@ function TableRetour({
   poser: (id: number, s: SaisieLot) => void
 }) {
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={styles.tableSimple} aria-label="Ce qui revient, lot par lot">
         <thead>
           <tr>
@@ -136,7 +136,7 @@ function TableRetour({
           ))}
         </tbody>
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }
 

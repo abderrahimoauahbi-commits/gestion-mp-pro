@@ -1,0 +1,51 @@
+/* Un tableau de fenêtre ouvert en grand : plein écran par-dessus la fenêtre, le reste voilé. */
+
+.grand {
+  position: fixed;
+  inset: var(--espace-5);
+  z-index: calc(var(--plan-fenetre) - 10); /* au-dessus de la coque, sous les fenêtres */
+  display: flex;
+  flex-direction: column;
+  padding: var(--espace-4);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow:
+    var(--ombre-haute),
+    0 0 0 100vmax var(--voile);
+}
+
+/* Le cadre prend toute la hauteur qui reste (sa borne de fenêtre ne vaut plus). */
+.grand [data-hauteur] {
+  flex: 1 1 auto;
+  max-height: none !important;
+}
+
+.agrandir,
+.reduire {
+  height: var(--hauteur-bouton-petit);
+  padding: 0 var(--espace-3);
+  border: 1px solid var(--bord-fort);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+  color: var(--texte);
+  font: inherit;
+  font-size: var(--taille-petite);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reduire {
+  border-color: var(--accent);
+  color: var(--accent-fonce);
+}
+
+.agrandir:hover,
+.reduire:hover {
+  background: var(--survol);
+}
+
+.agrandir:focus-visible,
+.reduire:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

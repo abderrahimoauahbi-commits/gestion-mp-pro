@@ -20,7 +20,9 @@
 import { useMemo, useState, type ReactNode } from 'react'
 
 import { nombre } from '../../lib/format'
+import { classes } from '../mise-en-page/classes'
 import { Bouton } from '../saisie/Bouton'
+import { useAgrandir } from './Agrandir'
 import { Cadre } from './Cadre'
 import { ChargerPlus, type ChargerPlusProps } from './ChargerPlus'
 import { brute, champsCherches, type Colonne } from './colonnes'
@@ -143,8 +145,9 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const q = recherche?.valeur ?? ''
   const { retenues, dansRecherche } = useLignes(props, q, choix.valeurs, tri)
   const total = props.total ?? lignes.length
+  const agrandir = useAgrandir<HTMLDivElement>()
   return (
-    <div className={styles.dataTable}>
+    <div ref={agrandir.boite} className={classes(styles.dataTable, agrandir.classe)}>
       <div className={styles.outils}>
         {recherche ? (
           <Recherche
@@ -166,6 +169,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
         ) : null}
         <span className={styles.pousse} />
         <Compte affichees={retenues.length} total={total} />
+        {agrandir.bouton}
         {props.outils}
         {exporter ? (
           <Exporter exporter={exporter} q={q} choix={choix.valeurs} colonnes={colonnes} lignes={retenues} />

@@ -12,7 +12,7 @@ import { Bouton } from '../../composants/saisie/Bouton'
 import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import { kg, nombre, part } from '../../lib/format'
 import { bobinesDe, poidsRetenu } from '../atelier/calculMontage'
 import { largeurs, type FilForme } from './formeMetier'
@@ -221,7 +221,7 @@ export function OngletFils(props: Props) {
   const totalPoids = tous.reduce((t, x) => t + poidsFil(x.b, poidsRetenu(e.m, e.matieres, x.f.matiere_id), x.f.pourcentage), 0) // prettier-ignore
   return (
     <>
-      <Cadre hauteur="fenetre">
+      <CadreAgrandissable>
         <table className={styles.table} aria-label="Fils montés">
           <thead>
             <tr>
@@ -260,7 +260,7 @@ export function OngletFils(props: Props) {
             </tr>
           </tfoot>
         </table>
-      </Cadre>
+      </CadreAgrandissable>
       {props.ecrit ? <AjoutFil e={e} /> : null}
     </>
   )

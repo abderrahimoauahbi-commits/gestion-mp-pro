@@ -5,7 +5,7 @@
  * au m² (absents pour l'alimentation), autres qualités qui la portent, « Retirer ». Pied : toute
  * la recette.
  */
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import tableau from '../../composants/tableaux/DataTable.module.css'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { Nombre } from '../../composants/saisie/Nombre'
@@ -121,7 +121,7 @@ export function TableRecette(p: TableRecetteProps) {
   const couts = p.groupes.map((g) => g.cout_m2)
   const cout = couts.every((c) => c != null) ? couts.reduce<number>((s, c) => s + (c ?? 0), 0) : null
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={tableau.table} aria-label="Recette">
         <thead>
           <tr>
@@ -149,6 +149,6 @@ export function TableRecette(p: TableRecetteProps) {
           </tr>
         </tfoot>
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }

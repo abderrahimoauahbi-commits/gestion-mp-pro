@@ -5,7 +5,7 @@
 import { Link } from 'react-router'
 
 import { Badge } from '../../composants/retour/Badge'
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import { kgEtMetres, nombre, nombreSigne, VIDE } from '../../lib/format'
 import styles from '../stock/stock.module.css'
 import type { OrdreFiche, ParMatiere } from './donnees'
@@ -14,7 +14,7 @@ import { EcartRecette } from './ecart'
 export function LotsDeLOrdre({ o }: { o: OrdreFiche }) {
   const brouillon = o.statut === 'brouillon'
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={styles.tableSimple} aria-label={brouillon ? 'Lots à sortir' : 'Lots sortis'}>
         <thead>
           <tr>
@@ -35,7 +35,7 @@ export function LotsDeLOrdre({ o }: { o: OrdreFiche }) {
           ))}
         </tbody>
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }
 
@@ -80,7 +80,7 @@ export function TablePrevuSorti({
   onSuivre?: (matiere: number) => void
 }) {
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={styles.tableSimple} aria-label="Prévu par la recette et sorti net, par matière">
         <thead>
           <tr>
@@ -118,7 +118,7 @@ export function TablePrevuSorti({
           </tr>
         </tfoot>
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }
 

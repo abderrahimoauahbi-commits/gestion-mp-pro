@@ -5,7 +5,7 @@
  * Un lot qui ne porte pas ce qu'on lui demande est en rouge, et dit pourquoi.
  */
 import { Quantite } from '../../composants/saisie/Quantite'
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import { kg, kgEtMetres, nombre, nombreSigne, VIDE } from '../../lib/format'
 import styles from '../stock/stock.module.css'
 import { EcartRecette, ecartRelatif } from './ecart'
@@ -152,7 +152,7 @@ export function LignesSaisie({ s }: { s: SaisieOrdre }) {
   const totalPrevu = s.besoins.reduce((t, b) => t + b.prevu, 0)
   const totalSorti = s.fils.reduce((t, f) => t + f.sorti, 0)
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={styles.tableSimple} aria-label="Les matières qui sortent">
         <thead>
           <tr>
@@ -194,6 +194,6 @@ export function LignesSaisie({ s }: { s: SaisieOrdre }) {
           </tfoot>
         ) : null}
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }

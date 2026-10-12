@@ -11,7 +11,7 @@ import { Indicateurs } from '../../composants/mise-en-page/Indicateurs'
 import { Kpi } from '../../composants/retour/Kpi'
 import { Vide } from '../../composants/retour/Vide'
 import { Bouton } from '../../composants/saisie/Bouton'
-import { Cadre } from '../../composants/tableaux/Cadre'
+import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
 import { formule } from '../../lib/aide'
 import { jours, kg, kgEtMetres, metres, moisCourt, nombre, partSignee, VIDE } from '../../lib/format'
 import { statut, cleStock } from '../../lib/statuts'
@@ -100,7 +100,7 @@ function TableBesoin({ b, mois }: { b: Besoin; mois: readonly string[] }) {
     b.kg,
   )
   return (
-    <Cadre hauteur="fenetre">
+    <CadreAgrandissable>
       <table className={stock.tableSimple} aria-label="D’où vient le besoin">
         <TeteBesoin mois={mois} />
         <tbody>
@@ -150,7 +150,7 @@ function TableBesoin({ b, mois }: { b: Besoin; mois: readonly string[] }) {
           ) : null}
         </tfoot>
       </table>
-    </Cadre>
+    </CadreAgrandissable>
   )
 }
 
