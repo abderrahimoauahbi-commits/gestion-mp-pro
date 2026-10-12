@@ -71,7 +71,8 @@ def textes_classes(html: str) -> set[str]:
 def test_le_document_est_un_a4_aux_tailles_en_points() -> None:
     """A4 (`@page`), polices en points, rien à l'écran seulement qui s'imprime."""
     html = _papier()
-    assert "@page { size: A4; margin: 12mm 13mm 10mm; }" in html
+    assert "@page { size: A4; margin: 0; }" in html  # ni date, ni heure, ni adresse du navigateur
+    assert "--marges: var(--marge-haut) var(--marge-cote) var(--marge-bas)" in html
     tailles = re.findall(r"font(?:-size)?:\s*(?:\d+\s+)?([\d.]+)(pt|px|em|rem)", html)
     assert tailles and {unite for _, unite in tailles} == {"pt"}
     assert ".ecran-seulement { display: none !important; }" in html
@@ -232,7 +233,7 @@ def test_l_etiquette_porte_un_qr(base: Session, alimentation: TestClient) -> Non
     (texte,) = textes(html, "texte")
     assert x.numero in texte and m.reference in texte and "Entré le 08/10/2026" in texte
     assert f"Reste 120,5{NSP}kg à l'impression N° {x.id}" in texte
-    assert "@page { size: 100mm 70mm; margin: 4mm; }" in html
+    assert "@page { size: 100mm 70mm; margin: 0; }" in html
     assert "QUARANTAINE" not in html and "MAD" not in html and "prix" not in html.lower()
 
 

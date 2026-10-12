@@ -11,7 +11,10 @@
   --fond-alerte: #fff4e5;
   --largeur-page: 210mm;
   --hauteur-page: 297mm;
-  --marges: 12mm 13mm 10mm;
+  --marge-haut: 12mm;
+  --marge-cote: 13mm;
+  --marge-bas: 10mm;
+  --marges: var(--marge-haut) var(--marge-cote) var(--marge-bas);
   --place-du-pied: 18mm;
 }
 body.paysage {
@@ -34,8 +37,8 @@ body { font: 10pt/1.45 Arial, Helvetica, sans-serif; color: var(--encre); margin
 .page { background: #fff; width: var(--largeur-page); min-height: var(--hauteur-page); margin: 20px auto 40px;
   padding: var(--marges); box-shadow: 0 2px 14px rgba(0, 0, 0, .14); display: flex; flex-direction: column; }
 .mise-en-page { width: 100%; border-collapse: collapse; flex: 1; }
-.mise-en-page > tbody > tr > td, .mise-en-page > tfoot > tr > td { padding: 0; border: 0; vertical-align: top; }
-.place-du-pied { display: none; }
+.mise-en-page > * > tr > td { padding: 0; border: 0; vertical-align: top; }
+.place-du-pied, .marge-haut { display: none; }
 
 /* Le papier à en-tête de l'usine (décision A22) : Times, raison sociale rouge, grande initiale. */
 .entete-societe { text-align: center; font-family: "Times New Roman", Times, serif; padding-bottom: 3mm;
@@ -73,12 +76,16 @@ th.n { text-align: right; }
 }
 
 /* À l'impression : ni fond, ni ombre, ni barre ; le pied du papier en bas de chaque feuille
-   (une place lui est gardée sur chaque feuille par le pied du tableau de mise en page). */
+   (une place lui est gardée sur chaque feuille par le pied du tableau de mise en page). La page n'a
+   pas de marge (@page margin 0 : le navigateur n'y écrit ni date ni adresse) : les marges du papier
+   sont refaites sur chaque feuille — côtés par la feuille, haut et bas par la tête et le pied du
+   tableau de mise en page, qui se répètent. */
 @media print {
   body { background: #fff; }
   .ecran-seulement { display: none !important; }
-  .page { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; display: block; }
+  .page { width: auto; min-height: 0; margin: 0; padding: 0 var(--marge-cote); box-shadow: none; display: block; }
   .page + .page { break-before: page; page-break-before: always; }
-  .place-du-pied { display: block; height: var(--place-du-pied); }
-  .pied-societe { position: fixed; bottom: 0; left: 0; right: 0; margin: 0; }
+  .marge-haut { display: block; height: var(--marge-haut); }
+  .place-du-pied { display: block; height: calc(var(--place-du-pied) + var(--marge-bas)); }
+  .pied-societe { position: fixed; bottom: var(--marge-bas); left: var(--marge-cote); right: var(--marge-cote); margin: 0; }
 }

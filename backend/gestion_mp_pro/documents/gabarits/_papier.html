@@ -4,7 +4,8 @@
     {{ papier.en_tete(societe, mots) }}   {{ papier.pied(societe, mots) }}
     {% call papier.feuille(societe, mots) %}…contenu d'une feuille A4…{% endcall %}
 
-`feuille` : en-tête, contenu, et le pied du papier en bas de chaque feuille imprimée.
+`feuille` : en-tête, contenu, et le pied du papier en bas de chaque feuille imprimée ; la marge du
+haut et celle du bas se répètent sur chaque feuille (tête et pied du tableau de mise en page).
 -#}
 {% macro en_tete(societe, mots) %}
 {% if societe.nom or societe.secteur or societe.forme_juridique or societe.adresse or societe.ville or societe.telephone %}
@@ -29,6 +30,7 @@
 {% macro feuille(societe, mots) %}
 <div class="page">
   <table class="mise-en-page">
+    <thead><tr><td><div class="marge-haut"></div></td></tr></thead>
     <tbody><tr><td>
       {{ en_tete(societe, mots) }}
       <main>{{ caller() }}</main>

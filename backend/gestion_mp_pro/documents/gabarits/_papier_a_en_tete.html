@@ -19,7 +19,9 @@ script_imprimer.
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ titre }}</title>
 <style>
-@page { size: A4{% if paysage %} landscape{% endif %}; margin: 12mm 13mm 10mm; }
+{#- Marges de page nulles : le navigateur n'a plus où écrire date, heure, titre et adresse
+(« localhost ») ; les marges du papier (12 / 13 / 10 mm) sont dans la feuille (_impression.css). -#}
+@page { size: A4{% if paysage %} landscape{% endif %}; margin: 0; }
 {% include "_impression.css" %}
 {% block style %}{% endblock %}
 </style>

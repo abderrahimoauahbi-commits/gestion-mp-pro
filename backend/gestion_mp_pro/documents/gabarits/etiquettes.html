@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ titre }}</title>
 <style>
-@page { size: 100mm 70mm; margin: 4mm; }
+@page { size: 100mm 70mm; margin: 0; }
 {% include "_impression.css" %}
 body { color: #000; }
 .etiquettes { display: flex; flex-direction: column; align-items: center; gap: 6mm; padding: 6mm 0 12mm; }
@@ -22,7 +22,8 @@ body { color: #000; }
 .aucun { width: 92mm; margin: 12mm auto; font-size: 13pt; font-weight: 700; }
 @media print {
   .etiquettes { display: block; padding: 0; }
-  .etiquette { width: auto; height: 62mm; border: 0; padding: 0; break-after: page; page-break-after: always; }
+  /* Pas de marge de page (le navigateur n'y écrit rien) : l'étiquette garde ses 4 mm de bord. */
+  .etiquette { width: auto; height: 70mm; border: 0; padding: 4mm; break-after: page; page-break-after: always; }
   .etiquette:last-child { break-after: auto; page-break-after: auto; }
 }
 </style>
