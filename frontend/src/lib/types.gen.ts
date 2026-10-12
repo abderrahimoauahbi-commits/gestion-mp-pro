@@ -7978,6 +7978,11 @@ export interface components {
       repartition: string
       /** Montant */
       montant: number
+      /**
+       * Taux
+       * @description % appliqué à la base à la saisie, pour mémoire (vide : sans taux)
+       */
+      taux: number | null
       /** Ligne Id */
       ligne_id: number | null
       /** Piece */
@@ -8014,6 +8019,11 @@ export interface components {
        * @description MAD ; négatif : un avoir
        */
       montant: number | string
+      /**
+       * Taux
+       * @description % appliqué à la base ; le montant reste celui saisi
+       */
+      taux?: number | string | null
       /**
        * Ligne Id
        * @description vide : tout le dossier

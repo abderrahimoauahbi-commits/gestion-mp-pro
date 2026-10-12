@@ -80,6 +80,7 @@ def frais_lus(d: Dossier, ctx: Contexte) -> list[FraisDossier]:
                 cle=str(p.cle),
                 repartition=repartition(x, p.recuperable, str(p.cle)),
                 montant=x.montant,
+                taux=x.taux,
                 ligne_id=x.ligne_id,
                 piece=x.piece,
                 prestataire=x.prestataire,

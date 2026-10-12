@@ -55,10 +55,11 @@ LONGUEUR = Nombre("longueur (m)", 8, 3)
 PRIORITE = Nombre("priorité 0–100", 6, 2)
 BOBINES_PAR_METRE = Nombre("bobines par mètre", 10, 3)
 JOURS = Nombre("jours (décimaux)", 10, 2)
+TAUX_FRAIS = Nombre("taux d'un frais (%)", 7, 4)
 
 CATEGORIES: tuple[Nombre, ...] = (
     QUANTITE, PRIX, MONTANT, COURS, TAUX, POURCENTAGE, MESURE, UNITES, SURFACE, COEFFICIENT,
-    MOIS, LONGUEUR, PRIORITE, BOBINES_PAR_METRE, JOURS,
+    MOIS, LONGUEUR, PRIORITE, BOBINES_PAR_METRE, JOURS, TAUX_FRAIS,
 )  # fmt: skip
 
 

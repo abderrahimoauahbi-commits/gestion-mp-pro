@@ -145,6 +145,21 @@
   flex: 0 1 130px;
 }
 
+/* Ligne d'ajout d'un frais (lot TAUX-FRAIS) : la note du taux pend sous son champ, les champs
+   s'alignent par le haut ; la répartition et les boutons, sur la ligne des contrôles (sous un
+   libellé : 12,5 px × 1,45 d'interligne + 5 px d'écart, `Champ.module.css`). */
+.panneauFrais {
+  align-items: flex-start;
+}
+
+.surLesControles {
+  margin-top: calc(12.5px * 1.45 + 5px);
+}
+
+.taux {
+  flex: 0 1 190px;
+}
+
 /* Encarts de contrôle de l'onglet Frais : deux côte à côte. */
 .controles {
   display: grid;

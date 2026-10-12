@@ -198,6 +198,7 @@ class FraisDossier:
     cle: str
     repartition: str
     montant: Decimal
+    taux: Decimal | None
     ligne_id: int | None
     piece: str
     prestataire: str

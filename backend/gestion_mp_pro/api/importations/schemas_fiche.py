@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import datetime as dt
 
+from pydantic import Field
+
 from gestion_mp_pro.api.communs import Nombre, Page, Sortie
 
 
@@ -199,6 +201,9 @@ class FraisDossier(Sortie):
     cle: str
     repartition: str
     montant: Nombre
+    taux: Nombre | None = Field(
+        description="% appliqué à la base à la saisie, pour mémoire (vide : sans taux)"
+    )
     ligne_id: int | None
     piece: str
     prestataire: str

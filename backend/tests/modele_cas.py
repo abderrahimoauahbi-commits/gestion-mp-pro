@@ -227,6 +227,7 @@ CAS: dict[str, tuple[str, Mutation]] = {
     "ck_dossier_ligne_cours_mad": ("dossier_ligne", {"devise": "MAD"}),
     "ck_dossier_ligne_cours_origine": ("dossier_ligne", {"cours_origine": None}),
     "ck_dossier_frais_montant_non_nul": ("dossier_frais", {"montant": 0}),
+    "ck_dossier_frais_taux_borne": ("dossier_frais", {"taux": 0}),
     "ck_dossier_frais_reglement": ("dossier_frais", lambda i: {"payee_par_id": i["utilisateur"]}),
     "ck_reclamation_ligne_de_reception": ("reclamation", {"reception_id": None}),
     "ck_reclamation_quantite_positive": ("reclamation", {"quantite": N}),

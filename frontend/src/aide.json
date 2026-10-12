@@ -126,7 +126,8 @@
       "points": [
         "Le dossier s’ouvre depuis la facture apportée par une réception.",
         "Coût hors TVA (le coût de revient) = achat au cours de la banque + charges non récupérables ; la TVA est à part (Coût TTC).",
-        "Les frais non répartis sont dits à part, partout."
+        "Les frais non répartis sont dits à part, partout.",
+        "Un frais se saisit aussi par son taux (TVA 20 %, droits 2,5 %…) : le montant est proposé sur la valeur en douane (plus droits et TPI pour la TVA) ; corrigé à la main s’il le faut, il est gardé tel quel et n’est jamais recalculé ensuite."
       ]
     },
     "installation": {

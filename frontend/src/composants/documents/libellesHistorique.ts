@@ -49,6 +49,7 @@ const LIBELLES: Readonly<Record<string, string>> = {
   role_id: 'Rôle',
   statut: 'Statut',
   stock_min: 'Stock minimum',
+  taux: 'Taux (%)',
   telephone: 'Téléphone',
   titrage_id: 'Titrage',
   type_fil_id: 'Type',

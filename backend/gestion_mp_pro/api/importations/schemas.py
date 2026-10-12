@@ -4,7 +4,8 @@ Dérivés de `communs.Entree` (champ inconnu refusé : le numéro et la facture 
 `PUT /dossiers/{id}`, anomalie 5.13). Bornes de Gestion MP (`gestion_mp/api/importations.py`) :
 dates de 2000 à 2100 (« date d'arrivée hors période », « date hors période »), kilos ≤ 10⁹,
 valeur ≤ 10¹⁰, cours de 0 à 1 000 (vide : le cours du jour), frais de −10⁹ à 10⁹ MAD, longueurs
-des colonnes. Les sorties sont dans `schemas_fiche.py` et `schemas_analyse.py`.
+des colonnes. Le taux d'un frais (lot TAUX-FRAIS) : plus de 0 et au plus 100 %, vide permis.
+Les sorties sont dans `schemas_fiche.py` et `schemas_analyse.py`.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ MAX_KG = Decimal(10**9)
 MAX_VALEUR = Decimal(10**10)
 MAX_COURS = Decimal(1000)
 MAX_FRAIS = Decimal(10**9)
+MAX_TAUX = Decimal(100)
 MAX_OBSERVATIONS = 2000
 ANNEE_MIN, ANNEE_MAX = 2000, 2100
 
@@ -133,6 +135,13 @@ class FraisEntree(Version):
 
     poste_id: int = Field(ge=1)
     montant: Decimal = Field(ge=-MAX_FRAIS, le=MAX_FRAIS, description="MAD ; négatif : un avoir")
+    taux: Decimal | None = Field(
+        None,
+        gt=0,
+        le=MAX_TAUX,
+        decimal_places=4,
+        description="% appliqué à la base ; le montant reste celui saisi",
+    )
     ligne_id: int | None = Field(None, ge=1, description="vide : tout le dossier")
     piece: str = Field("", max_length=L.PIECE)
     prestataire: str = Field("", max_length=L.PRESTATAIRE)

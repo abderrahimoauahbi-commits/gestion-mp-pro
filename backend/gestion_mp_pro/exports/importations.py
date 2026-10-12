@@ -6,6 +6,7 @@ total, puis lot par lot). Mêmes filtres que l'écran ; statuts en clair, vraies
 
 from __future__ import annotations
 
+from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
 
@@ -84,9 +85,16 @@ def _porte_sur(x: tuple[Any, Any, dict[int, str]]) -> str:
     return str(frais.repartition)
 
 
+def _taux(x: tuple[Any, Any, dict[int, str]]) -> Decimal | None:
+    """Le taux saisi avec le frais, en fraction pour le format « % » d'Excel (vide sans taux)."""
+    taux = x[1].taux
+    return None if taux is None else taux / 100
+
+
 COLONNES_FRAIS = (
     Colonne("Dossier", lambda x: x[0].numero),
     Colonne("Poste", lambda x: x[1].libelle),
+    _m("Taux", _taux, "0.00##%"),
     _m("Montant MAD", lambda x: x[1].montant),
     Colonne("Récupérable", lambda x: x[1].recuperable),
     Colonne("Répartition", _porte_sur),

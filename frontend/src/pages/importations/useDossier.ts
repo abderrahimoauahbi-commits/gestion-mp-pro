@@ -14,6 +14,8 @@ import type { DossierFiche, FraisDossier } from './types'
 /** Le corps d'un frais (route 199–200) : tous les champs, `version` comprise. */
 export interface FraisCorps {
   poste_id: number
+  /** Le % appliqué à la base, pour mémoire : le serveur garde le montant tel quel. */
+  taux: number | null
   montant: number
   ligne_id: number | null
   piece: string
@@ -26,6 +28,7 @@ export interface FraisCorps {
 /** Le corps d'un frais existant, à modifier champ par champ. */
 export const corpsDuFrais = (f: FraisDossier): FraisCorps => ({
   poste_id: f.poste_id,
+  taux: f.taux,
   montant: f.montant,
   ligne_id: f.ligne_id,
   piece: f.piece,

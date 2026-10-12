@@ -104,7 +104,7 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002", "0003", "0004", "0005"]
+    assert installation.migrer() == ["0002", "0003", "0004", "0005", "0006"]
     assert not installation.schema_en_retard()
 
 
@@ -211,6 +211,30 @@ def test_0005_motif_d_abandon_aller_retour(base_vide: None) -> None:
         assert list(c.execute(text(relu)).scalars()) == ["comptage reporté", ""]
         command.upgrade(cfg, "head")
         c.execute(text("DELETE FROM inventaire"))
+    assert not installation.schema_en_retard()
+
+
+def test_0006_taux_des_frais_aller_retour(base_vide: None) -> None:
+    """`dossier_frais.taux` (lot TAUX-FRAIS) : la colonne et ses deux CHECK (bornes, NaN) ; le
+    retour arrière les retire, la remontée les remet."""
+    installation.migrer()
+    cfg = installation.configuration()
+    colonnes = (
+        "SELECT column_name FROM information_schema.columns WHERE table_name = 'dossier_frais'"
+    )
+    contraintes = "SELECT conname FROM pg_constraint WHERE conname LIKE 'ck_dossier_frais_taux%'"
+    with moteur().connect() as c, c.begin():
+        assert "taux" in set(c.execute(text(colonnes)).scalars())
+        assert set(c.execute(text(contraintes)).scalars()) == {
+            "ck_dossier_frais_taux_borne",
+            "ck_dossier_frais_taux_nombre",
+        }
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, "0005")
+        assert "taux" not in set(c.execute(text(colonnes)).scalars())
+        assert list(c.execute(text(contraintes)).scalars()) == []
+        command.upgrade(cfg, "head")
+        assert "taux" in set(c.execute(text(colonnes)).scalars())
     assert not installation.schema_en_retard()
 
 

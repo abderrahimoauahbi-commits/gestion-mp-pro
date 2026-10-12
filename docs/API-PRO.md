@@ -427,7 +427,7 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 | 196 | PUT | `/dossiers/{id}/cours` | D, A | `{devise, cours, version}` | `DossierFiche` | A79 |
 | 197 | POST | `/dossiers/{id}/cours-des-bons` | D, A | `{version}` | `DossierFiche` | A80 |
 | 198 | POST | `/dossiers/{id}/detacher` | D, A | `{reception_id, version}` | `DossierFiche` | A82 |
-| 199 | POST | `/dossiers/{id}/frais` | D, A | `FraisEntree` {poste_id, montant, ligne_id, piece, prestataire, date_piece, echeance, commentaire, version} | `DossierFiche` | A83 |
+| 199 | POST | `/dossiers/{id}/frais` | D, A | `FraisEntree` {poste_id, montant, taux (facultatif, % pour mémoire : le montant reste celui saisi, lot TAUX-FRAIS), ligne_id, piece, prestataire, date_piece, echeance, commentaire, version} | `DossierFiche` | A83 |
 | 200 | PUT | `/dossiers/{id}/frais/{fid}` | D, A | `FraisEntree` (`version` = celle **du frais**) | `DossierFiche` | A84 |
 | 201 | DELETE | `/dossiers/{id}/frais/{fid}` | D, A | `?version=` (celle du frais) | `DossierFiche` | A85 |
 | 202 | POST | `/dossiers/{id}/cloturer` | D, A | `{version, alertes_lues}` (`alertes_lues` vaut confirmation : s'il y a des alertes et qu'il est faux → 422 `confirmation_requise`) | `DossierFiche` | A86 |

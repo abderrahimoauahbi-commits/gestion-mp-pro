@@ -48,7 +48,7 @@ from gestion_mp_pro.modeles.base import (
 from gestion_mp_pro.modeles.enums import OrigineCours, OriginePart, StatutDossier
 from gestion_mp_pro.modeles.receptions import ANNULE_DATE
 from gestion_mp_pro.modeles.stock import fk_lot
-from gestion_mp_pro.modeles.types import COURS, MONTANT, QUANTITE, enumeration
+from gestion_mp_pro.modeles.types import COURS, MONTANT, QUANTITE, TAUX_FRAIS, enumeration
 
 
 class Dossier(AvecVersion, Base):
@@ -138,7 +138,12 @@ class DossierLigne(Base):
 
 
 class DossierFrais(AvecVersion, Base):
-    """Un frais du dossier (← `dossier_charge`) : montant en MAD, négatif pour un avoir."""
+    """Un frais du dossier (← `dossier_charge`) : montant en MAD, négatif pour un avoir.
+
+    `taux` (révision 0006, lot TAUX-FRAIS) : le pourcentage que l'écran a appliqué à sa base
+    pour proposer le montant (20 % de TVA, 2,5 % de droits…), gardé pour mémoire ; le montant
+    reste celui saisi (la douane arrondit), il n'est **jamais** recalculé depuis le taux.
+    """
 
     __tablename__ = "dossier_frais"
     __table_args__ = (
@@ -148,6 +153,7 @@ class DossierFrais(AvecVersion, Base):
             ondelete="RESTRICT",
         ),
         CheckConstraint("montant <> 0", name="montant_non_nul"),
+        CheckConstraint("taux IS NULL OR (taux > 0 AND taux <= 100)", name="taux_borne"),
         CheckConstraint("payee_par_id IS NULL OR payee_le IS NOT NULL", name="reglement"),
         Index(None, "dossier_id"),
         Index(None, "poste_id"),
@@ -161,6 +167,7 @@ class DossierFrais(AvecVersion, Base):
     dossier_id: Mapped[int] = mapped_column(fk("dossier.id", ondelete="CASCADE"))
     poste_id: Mapped[int] = mapped_column(fk("poste_frais.id"))
     montant: Mapped[Decimal] = mapped_column(MONTANT.type_sql())
+    taux: Mapped[Decimal | None] = mapped_column(TAUX_FRAIS.type_sql())
     ligne_id: Mapped[int | None] = mapped_column()
     piece: Mapped[str] = chaine(L.PIECE)
     prestataire: Mapped[str] = chaine(L.PRESTATAIRE)

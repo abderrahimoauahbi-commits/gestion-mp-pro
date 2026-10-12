@@ -905,7 +905,10 @@ colonne** de plus) ; la réouverture remet `cours` **et** `cours_origine` à NUL
 #### 3.8.3 `dossier_frais` ← `dossier_charge`
 
 `id` · `dossier_id` FK CASCADE · `poste_id` FK poste_frais · `montant NUMERIC(16,2)` CK `<> 0`
-(négatif = avoir ; incohérence 20) · `ligne_id` O, FK **composite** `(ligne_id, dossier_id)` →
+(négatif = avoir ; incohérence 20) · `taux NUMERIC(7,4)` O, CK `ck_dossier_frais_taux_borne` :
+`taux IS NULL OR (taux > 0 AND taux <= 100)` (le % que l'écran a appliqué à la base pour proposer le
+montant, gardé pour mémoire ; le montant n'est **jamais** recalculé depuis lui ; révision 0006, lot
+TAUX-FRAIS) · `ligne_id` O, FK **composite** `(ligne_id, dossier_id)` →
 `dossier_ligne(id, dossier_id)` **ON DELETE RESTRICT** (un frais rattaché l'est à une marchandise de **son**
 dossier ; GMP : CASCADE, l'API interdisait déjà) · `piece VARCHAR(64)` · `prestataire VARCHAR(120)` ·
 `date_piece DATE` O · `echeance DATE` O · `payee_le DATE` O · `payee_par_id` O · CK `ck_dossier_frais_reglement` :
@@ -1306,10 +1309,10 @@ Aucune autre différence n'est admise (règle de `PLAN-DE-RECETTE-PRO.md` § 7.6
 | | Gestion MP | PRO |
 |---|---|---|
 | Tables | 49 | **71** (70 tables métier et techniques + `alembic_version`) |
-| Colonnes | 405 | **686** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005) |
+| Colonnes | 405 | **687** (hors `alembic_version` ; 684 + `role_nomenclature.version`, révision 0004, + `inventaire.abandon_motif`, révision 0005, + `dossier_frais.taux`, révision 0006) |
 | Énumérations avec CHECK | 9 CHECK de valeurs | **36** énumérations, 41 colonnes énumérées (CHECK `…_enum`) |
 | Clés étrangères | 73 | **171**, dont 9 composites (`(lot_id, matiere_id)` × 6, `montage → metier_etage`, `dossier_frais → dossier_ligne`, `reclamation → reception_ligne`) |
-| CHECK | 39 | **291** : 176 nommés à la main, 41 `…_enum`, 74 `…_nombre` (refus de NaN) |
+| CHECK | 39 | **293** : 177 nommés à la main, 41 `…_enum`, 75 `…_nombre` (refus de NaN) — dont les 2 de la révision 0006 (`ck_dossier_frais_taux_borne`, `ck_dossier_frais_taux_nombre`) |
 | Unicité | — | **41** contraintes + **3** index uniques partiels (`uq_inventaire_ouvert_magasin`, d'expression ; `uq_dossier_facture` ; `uq_inventaire_ligne_lot_a_creer`) |
 | Index | — | **194** (hors `alembic_version`) : 70 de clé primaire, 41 d'unicité, 8 GIN trigrammes, 7 partiels, le reste simple |
 | Déclencheurs | — | **3** : `tr_mouvement_immuable`, `tr_operation_type_fige`, `tr_matiere_lineaire_densite` |

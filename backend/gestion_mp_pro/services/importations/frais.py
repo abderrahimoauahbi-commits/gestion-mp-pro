@@ -1,6 +1,11 @@
 """Les frais d'un dossier (routes 199–201) : en MAD, négatifs pour un avoir, répartis à la clé
 de leur poste, ou visés sur une seule marchandise — REGLES R-IMP-41 à R-IMP-45 ; défaut B-01.
 
+Le `taux` d'un frais (révision 0006, lot TAUX-FRAIS) est gardé pour mémoire : l'écran en tire
+un montant proposé, que l'utilisateur garde ou corrige (la douane arrondit). Le serveur enregistre
+le montant reçu **tel quel** et ne le recalcule jamais depuis le taux, ni à l'écriture ni à la
+lecture.
+
 Un frais **réglé** est un décaissement constaté (I20) : son poste, son montant et sa
 marchandise ne changent plus, il ne se retire pas, et il ne disparaît pas avec son dossier
 (un dossier s'annule, il ne se supprime plus). L'annulation d'un règlement est réservée à la
@@ -35,6 +40,7 @@ class FraisSaisi:
 
     poste_id: int
     montant: Decimal
+    taux: Decimal | None = None
     ligne_id: int | None = None
     piece: str = ""
     prestataire: str = ""
@@ -87,9 +93,15 @@ def refuser_negatif(s: Session, d: Dossier) -> None:
 
 def _ecrire(x: DossierFrais, e: FraisSaisi) -> None:
     """Les champs du frais (textes sans blancs autour)."""
-    x.poste_id, x.montant, x.ligne_id = e.poste_id, e.montant, e.ligne_id
+    x.poste_id, x.montant, x.ligne_id, x.taux = e.poste_id, e.montant, e.ligne_id, e.taux
     x.piece, x.prestataire = e.piece.strip(), e.prestataire.strip()
     x.date_piece, x.echeance, x.commentaire = e.date_piece, e.echeance, e.commentaire.strip()
+
+
+def _detail(d: Dossier, p: PosteFrais, e: FraisSaisi) -> str:
+    """« 01/26 · TVA 62 104,41 MAD (20 %) » : la ligne du journal d'un frais."""
+    taux = f" ({format(e.taux.normalize(), 'f').replace('.', ',')} %)" if e.taux else ""
+    return f"{d.numero} · {p.code} {mad(e.montant)}{taux}"
 
 
 def ajouter(s: Session, qui: audit.Qui, did: int, version: int, e: FraisSaisi) -> Dossier:
@@ -102,7 +114,7 @@ def ajouter(s: Session, qui: audit.Qui, did: int, version: int, e: FraisSaisi) -
     d.frais.append(x)
     s.flush()
     refuser_negatif(s, d)
-    noter(s, qui, d, "frais", f"{d.numero} · {p.code} {mad(e.montant)}", apres=audit.photo(x))
+    noter(s, qui, d, "frais", _detail(d, p, e), apres=audit.photo(x))
     return d
 
 
@@ -167,7 +179,7 @@ def modifier(
     s.flush()
     refuser_negatif(s, d)
     a, b = audit.differences(avant, audit.photo(x))
-    noter(s, qui, d, "frais modifié", f"{d.numero} · {p.code} {mad(e.montant)}", avant=a, apres=b)
+    noter(s, qui, d, "frais modifié", _detail(d, p, e), avant=a, apres=b)
     return d
 
 

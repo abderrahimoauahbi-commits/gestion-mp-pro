@@ -6,6 +6,10 @@
  * pas : les champs sont grisés avec la raison du serveur (« Frais réglé le … : annuler d'abord le
  * règlement (Analyse › Échéancier) », anomalie 5.5) ; « réglé le » se lit aussi en saisie. Le pied
  * dit les charges dans le coût et, à part, la TVA récupérable.
+ *
+ * Taux (lot TAUX-FRAIS) : le taux enregistré s'affiche avec le montant enregistré, que rien ne
+ * recalcule (ni la réouverture, ni un cours changé). Seul un taux changé recalcule le montant
+ * (base × taux, `tauxFrais.ts`) et enregistre les deux ; un taux vidé garde le montant.
  */
 import { dire } from '../../composants/retour/Messages'
 import { Vide } from '../../composants/retour/Vide'
@@ -18,6 +22,7 @@ import { AjoutFrais, optionsPorteSur, optionsPostes, type BrouillonFrais } from 
 import { DateEnregistree, NombreEnregistre, TexteEnregistre } from './champsEnregistres'
 import { ControlesFrais } from './ControlesFrais'
 import styles from './Importations.module.css'
+import { baseDuTaux, montantAuTaux, TAUX_MAX, tauxLisible } from './tauxFrais'
 import type { DossierFiche, FraisDossier, PosteFiche } from './types'
 import { corpsDuFrais, type FraisCorps, type GestesDossier } from './useDossier'
 
@@ -58,6 +63,42 @@ function Poste({ f, c }: { f: FraisDossier; c: Ctx }) {
         }}
       />
     </span>
+  )
+}
+
+/** Le taux changé (geste explicite) : le montant recalculé sur la base du frais ; vidé, le taux
+ * seul s'efface (le montant reste). Une base nulle ne donne pas de montant : il reste aussi. */
+export function changementDeTaux(
+  d: DossierFiche,
+  postes: readonly PosteFiche[],
+  f: FraisDossier,
+  taux: number | null,
+): Partial<FraisCorps> {
+  if (taux == null || taux <= 0) return { taux }
+  const base = baseDuTaux(
+    d,
+    postes,
+    postes.find((p) => p.id === f.poste_id),
+    f.ligne_id,
+  )
+  const montant = montantAuTaux(base.montant, taux)
+  return montant ? { taux, montant } : { taux }
+}
+
+function Taux({ f, c }: { f: FraisDossier; c: Ctx }) {
+  if (!c.modifiable || f.blocage) {
+    return <span title={f.blocage ?? undefined}>{f.taux == null ? VIDE : tauxLisible(f.taux)}</span>
+  }
+  return (
+    <NombreEnregistre
+      libelle={`Taux du frais ${f.libelle}`}
+      valeur={f.taux}
+      decimales={4}
+      min={0}
+      max={TAUX_MAX}
+      unite="%"
+      onEnregistrer={(v) => modifier(c, f)(changementDeTaux(c.d, c.postes, f, v))}
+    />
   )
 }
 
@@ -142,6 +183,7 @@ function Retirer({ f, c }: { f: FraisDossier; c: Ctx }) {
 function colonnes(c: Ctx): Colonne<FraisDossier>[] {
   return [
     { cle: 'libelle', titre: 'Poste', recherche: (f) => [f.poste], rendu: (f) => <Poste f={f} c={c} /> },
+    { cle: 'taux', titre: 'Taux', droite: true, rendu: (f) => <Taux f={f} c={c} /> },
     {
       cle: 'montant',
       titre: 'Montant (MAD)',
@@ -198,6 +240,7 @@ function Pied({ d }: { d: DossierFiche }) {
   return (
     <tr>
       <td>Charges hors TVA</td>
+      <td />
       <td className={styles.chiffre}>{montantPrecis(cout, 'MAD')}</td>
       <td colSpan={8}>dans le coût · TVA récupérable, hors coût : {montantPrecis(recuperables, 'MAD')}</td>
     </tr>
@@ -219,6 +262,7 @@ export function VoletFrais(p: VoletFraisProps) {
             ...p.brouillon,
             poste_id: dd.id,
             montant: Math.round((d.droits_attendus_mad ?? 0) * 100) / 100,
+            montant_a_la_main: true,
             commentaire: 'proposé par les codes douaniers',
           })
       : null
