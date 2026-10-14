@@ -50,6 +50,7 @@ MONETAIRES = [
     "budget",
     "cours",
     "cours_le",
+    "taux_du_jour",
     "taux_droits",
     "economie_annuelle",
     "revient_kg",

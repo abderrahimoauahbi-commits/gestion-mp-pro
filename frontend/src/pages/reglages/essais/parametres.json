@@ -430,7 +430,7 @@
     "famille": "Réceptions et fournisseurs",
     "unite": "%",
     "echelle": 100.0,
-    "aide": "Une ligne de bon reçoit au plus son reste à livrer plus cette part de la ligne ; au-delà, la réception est refusée (le surplus se reçoit hors commande).",
+    "aide": "Une ligne de bon reçoit au plus son reste à livrer plus cette part de la quantité commandée sur la ligne (pas du reste), tous les camions ensemble : une ligne de 1 000 kg à 5 % reçoit au plus 1 050 kg en tout, même en plusieurs livraisons. Au-delà, la réception est refusée (le surplus se reçoit hors commande).",
     "bas": 0.0,
     "haut": 10.0,
     "texte": false,

@@ -13,6 +13,7 @@ import {
   depuisServeur,
   devisesDe,
   ecart,
+  expliquerEcart,
   palettesDe,
   placeRestante,
   retenues,
@@ -118,6 +119,14 @@ describe('Préparation d’une commande', () => {
     }
     expect(palettesDe(saisie)).toBe(3)
     expect(palettesDe({ ...saisie, unite: 'kg', contenance: 1 })).toBeCloseTo(3.0000011, 6)
+  })
+
+  it('l’infobulle du badge dit pourquoi : rupture sous la suggestion, surstock au-dessus', () => {
+    const l = { ...depuisServeur(lignePreparationEssai()), suggestion: 1000 }
+    expect(expliquerEcart(ecart({ ...l, quantite: 850 }))).toMatch(/15 % sous la suggestion.*rupture/)
+    expect(expliquerEcart(ecart({ ...l, quantite: 1200 }))).toMatch(/20 % au-dessus.*trésorerie/)
+    expect(expliquerEcart(ecart({ ...l, quantite: 1050 }))).toMatch(/^À 5 % de la suggestion/)
+    expect(expliquerEcart(ecart({ ...l, quantite: 1000 }))).toBe('')
   })
 
   it('écart à la suggestion : ok ≤ 10 %, attention au-dessus, critique en dessous', () => {

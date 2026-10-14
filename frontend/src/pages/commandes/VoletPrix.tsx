@@ -1,6 +1,8 @@
 /**
  * Fiche commande › Prix du fournisseur (ECRANS-PRO 4.9) : réservé aux bons **partis** (le cours ne
- * se fige plus avant l'envoi, anom. 4.8) ; les prix confirmés au kilo dans la devise du bon, la date
+ * se fige plus avant l'envoi, anom. 4.8) ; les prix confirmés dans la devise du bon — au kilo, ou
+ * **au mètre** pour une matière dont la fiche est au mètre (décision U2 : le serveur reçoit
+ * `unite: 'ml'` et ramène au kilo par la densité ; l'écran dit l'équivalent au kilo) —, la date
  * promise que le fournisseur confirme avec eux (anom. 4.7), et le report au catalogue.
  */
 import { Badge } from '../../composants/retour/Badge'
@@ -11,7 +13,17 @@ import { Interrupteur } from '../../composants/saisie/Interrupteur'
 import { Nombre } from '../../composants/saisie/Nombre'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
-import { horodatage, metres, montant, nombre, partSignee, prix, prixUnite, VIDE } from '../../lib/format'
+import {
+  arrondi,
+  horodatage,
+  metres,
+  montant,
+  nombre,
+  partSignee,
+  prix,
+  prixUnite,
+  VIDE,
+} from '../../lib/format'
 import { aujourdhui } from '../../lib/heure'
 import styles from '../plan-achat/achats.module.css'
 import { deux } from '../plan-achat/colonnesFournisseurs'
@@ -19,33 +31,51 @@ import { raison, type CommandeFiche, type ConfirmationPrix, type LigneCommande }
 import type { FormeFiche } from './useFormeFiche'
 
 export interface FormePrix {
+  /** Le prix saisi par ligne, dans l'unité de la ligne (`uniteDe`). */
   prix: Record<string, number | null>
   catalogue: boolean
   livraison: string
 }
 
+export type UnitePrix = 'kg' | 'ml'
+
+/** L'unité où le prix de cette ligne se confirme : au mètre quand la fiche est au mètre (U2). */
+export function uniteDe(l: Pick<LigneCommande, 'unite_prix' | 'kg_par_ml'>): UnitePrix {
+  return l.unite_prix === 'ml' && l.kg_par_ml > 0 ? 'ml' : 'kg'
+}
+
+/** Un prix saisi dans l'unité de la ligne, ramené au kilo (÷ densité au mètre). */
+export function enKg(l: LigneCommande, v: number): number {
+  return uniteDe(l) === 'ml' ? v / l.kg_par_ml : v
+}
+
+/** Un prix au kilo (serveur, catalogue) dans l'unité de la ligne (× densité au mètre). */
+export function depuisKg(l: LigneCommande, v: number): number {
+  return uniteDe(l) === 'ml' ? arrondi(v * l.kg_par_ml, 6) : v
+}
+
 export function versFormePrix(c: CommandeFiche): FormePrix {
   return {
     prix: Object.fromEntries(
-      c.lignes.map((l) => [String(l.id), l.prix_confirme && l.prix > 0 ? l.prix : null]),
+      c.lignes.map((l) => [String(l.id), l.prix_confirme && l.prix > 0 ? depuisKg(l, l.prix) : null]),
     ),
     catalogue: true,
     livraison: '',
   }
 }
 
-/** Les prix saisis (> 0), ligne par ligne. */
+/** Les prix saisis (> 0), ligne par ligne, chacun dans son unité. */
 export const saisis = (c: CommandeFiche, f: FormePrix) =>
   c.lignes
     .filter((l) => (f.prix[String(l.id)] ?? 0) > 0)
-    .map((l) => ({ ligne_id: l.id, prix: f.prix[String(l.id)] ?? 0 }))
+    .map((l) => ({ ligne_id: l.id, prix: f.prix[String(l.id)] ?? 0, unite: uniteDe(l) }))
 
-/** Les références dont le prix du catalogue changera. */
+/** Les références dont le prix du catalogue changera (comparé au kilo). */
 export function changeantAuCatalogue(c: CommandeFiche, f: FormePrix): string[] {
   return c.lignes
     .filter((l) => {
       const v = f.prix[String(l.id)]
-      return v != null && v > 0 && Math.abs(v - l.prix_catalogue) > 0.0005
+      return v != null && v > 0 && Math.abs(enKg(l, v) - l.prix_catalogue) > 0.0005
     })
     .map((l) => l.reference)
 }
@@ -53,7 +83,7 @@ export function changeantAuCatalogue(c: CommandeFiche, f: FormePrix): string[] {
 export function corpsPrix(c: CommandeFiche, f: FormePrix, version: number): ConfirmationPrix {
   const corps: ConfirmationPrix = {
     version,
-    lignes: saisis(c, f).map((s) => ({ ...s, unite: 'kg' })),
+    lignes: saisis(c, f),
     mettre_a_jour_catalogue: f.catalogue,
   }
   if (f.livraison) corps.date_livraison_prevue = f.livraison
@@ -65,7 +95,7 @@ export function reprendreCatalogue(c: CommandeFiche, f: FormePrix): FormePrix {
   const p = { ...f.prix }
   for (const l of c.lignes) {
     const cat = l.devise_catalogue === c.devise ? l.prix_catalogue : 0
-    if (p[String(l.id)] == null && cat > 0) p[String(l.id)] = cat
+    if (p[String(l.id)] == null && cat > 0) p[String(l.id)] = depuisKg(l, cat)
   }
   return { ...f, prix: p }
 }
@@ -83,9 +113,23 @@ export function questionPrix(c: CommandeFiche, f: FormePrix): string {
 
 function Ecart({ l, v, devise }: { l: LigneCommande; v: number | null; devise: string }) {
   if (!v || !l.prix_catalogue || l.devise_catalogue !== devise) return <>{VIDE}</>
-  const e = v / l.prix_catalogue - 1
+  const e = enKg(l, v) / l.prix_catalogue - 1
   if (Math.abs(e) < 0.005) return <span className={styles.note}>identique</span>
   return <Badge ton={e > 0 ? 'attention' : 'ok'}>{partSignee(e)}</Badge>
+}
+
+/** Le prix du catalogue dans l'unité de la ligne, et son équivalent dans l'autre unité. */
+function Catalogue({ l }: { l: LigneCommande }) {
+  if (!l.prix_catalogue) return <>{VIDE}</>
+  if (uniteDe(l) === 'ml')
+    return deux(
+      prixUnite(depuisKg(l, l.prix_catalogue), l.devise_catalogue, 'ml'),
+      `soit ${prix(l.prix_catalogue)} / kg`,
+    )
+  return deux(
+    prixUnite(l.prix_catalogue, l.devise_catalogue, 'kg'),
+    l.kg_par_ml ? `soit ${prix(l.prix_catalogue * l.kg_par_ml)} / ml` : null,
+  )
 }
 
 function colonnes1(_c: CommandeFiche, _f: FormeFiche<FormePrix>): Colonne<LigneCommande>[] {
@@ -103,17 +147,9 @@ function colonnes1(_c: CommandeFiche, _f: FormeFiche<FormePrix>): Colonne<LigneC
     },
     {
       cle: 'prix_catalogue',
-      titre: 'Prix catalogue / kg',
+      titre: 'Prix catalogue',
       droite: true,
-      rendu: (l) =>
-        l.prix_catalogue
-          ? deux(
-              prixUnite(l.prix_catalogue, l.devise_catalogue, 'kg'),
-              l.unite_prix === 'ml' && l.kg_par_ml
-                ? `soit ${prix(l.prix_catalogue * l.kg_par_ml)} / ml`
-                : null,
-            )
-          : VIDE,
+      rendu: (l) => <Catalogue l={l} />,
     },
   ]
 }
@@ -123,7 +159,7 @@ function colonnes2(c: CommandeFiche, f: FormeFiche<FormePrix>): Colonne<LigneCom
   return [
     {
       cle: 'saisi',
-      titre: 'Prix confirmé / kg',
+      titre: 'Prix confirmé',
       droite: true,
       triable: false,
       rendu: (l) => (
@@ -132,13 +168,13 @@ function colonnes2(c: CommandeFiche, f: FormeFiche<FormePrix>): Colonne<LigneCom
             valeur={v(l)}
             onChange={(n) => f.maj({ prix: { ...f.forme.prix, [String(l.id)]: n && n > 0 ? n : null } })}
             min={0}
-            decimales={4}
-            unite={`${c.devise} / kg`}
+            decimales={uniteDe(l) === 'ml' ? 6 : 4}
+            unite={`${c.devise} / ${uniteDe(l)}`}
             placeholder="à saisir"
-            libelle={`Prix confirmé de ${l.reference}`}
+            libelle={`Prix confirmé de ${l.reference} (${c.devise} / ${uniteDe(l)})`}
           />
-          {v(l) && l.unite_prix === 'ml' && l.kg_par_ml ? (
-            <span className={styles.note}>soit {prix((v(l) ?? 0) * l.kg_par_ml)} / ml</span>
+          {v(l) && uniteDe(l) === 'ml' ? (
+            <span className={styles.note}>soit {prix(enKg(l, v(l) ?? 0))} / kg</span>
           ) : null}
         </span>
       ),
@@ -154,7 +190,7 @@ function colonnes2(c: CommandeFiche, f: FormeFiche<FormePrix>): Colonne<LigneCom
       cle: 'montant',
       titre: 'Montant',
       droite: true,
-      rendu: (l) => (v(l) ? montant((v(l) ?? 0) * l.quantite, c.devise) : VIDE),
+      rendu: (l) => (v(l) ? montant(enKg(l, v(l) ?? 0) * l.quantite, c.devise) : VIDE),
     },
   ]
 }
@@ -188,15 +224,22 @@ export function VoletPrix({ c, f }: { c: CommandeFiche; f: FormeFiche<FormePrix>
   const refus = raison(c, 'prix')
   if (!c.parti)
     return <Note>Le bon n’est pas encore parti : les prix se confirment au retour du fournisseur.</Note>
+  const auMetre = c.lignes.some((l) => uniteDe(l) === 'ml')
   return (
     <div className={styles.volet}>
       {refus ? <Note ton="attention">{refus}</Note> : null}
       <p className={styles.note}>
-        Recopiez les prix que le fournisseur a confirmés (proforma, courriel),{' '}
-        <strong>au kilo, en {c.devise}</strong> (un fournisseur qui facture au mètre : son prix au mètre ÷ la
-        densité ; l’équivalent au mètre s’affiche sous la saisie). Ce sont eux que la réception retiendra
-        comme prix payé. Quand tous les prix d’un bon envoyé sont confirmés, il passe à « Confirmée » ; le
-        cours de la devise se fige à la première confirmation, avec la livraison promise.
+        Recopiez les prix que le fournisseur a confirmés (proforma, courriel), <strong>en {c.devise}</strong>,
+        tels qu’il les annonce : au kilo
+        {auMetre ? (
+          <>
+            , ou <strong>au mètre</strong> pour une matière dont la fiche est au mètre (le logiciel ramène au
+            kilo par la densité ; l’équivalent au kilo s’affiche sous la saisie)
+          </>
+        ) : null}
+        . Ce sont eux que la réception retiendra comme prix payé. Quand tous les prix d’un bon envoyé sont
+        confirmés, il passe à « Confirmée » ; le cours de la devise se fige à la première confirmation, avec
+        la livraison promise.
       </p>
       <div className={styles.rangee}>
         {c.confirme_le ? null : (

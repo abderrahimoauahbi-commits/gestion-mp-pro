@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import Commande, CommandeLigne, Fournisseur, Matiere
+from gestion_mp_pro.modeles.types import QUANTITE, arrondir
 from gestion_mp_pro.services import horloge, matieres
 
 ETA = (
@@ -60,6 +61,18 @@ def unites_permises(m: Matiere) -> dict[str, Decimal]:
 def _proches(a: Decimal, b: Decimal) -> bool:
     """Deux contenances égales à un millionième relatif près."""
     return abs(a - b) <= TOLERANCE_CONTENANCE * max(Decimal(1), abs(a))
+
+
+def verifier_quantite(m: Matiere, ligne: LigneSaisie) -> None:
+    """Des kilos et une contenance qui restent positifs une fois arrondis au gramme (la base
+    les range au gramme : 0,0001 kg vaudrait 0 et serait refusé par elle, sans un mot clair)."""
+    for quoi, valeur in (("quantité", ligne.quantite), ("contenance", ligne.contenance)):
+        if arrondir(valeur, QUANTITE) <= 0:
+            raise Refus.saisie(
+                f"« {m.reference} » : la {quoi} ({nombre_fr(valeur, 6)} kg) vaut 0 au gramme "
+                "près : saisir au moins 0,001 kg.",
+                code="quantite_invalide",
+            )
 
 
 def verifier_unite(m: Matiere, ligne: LigneSaisie, deja: CommandeLigne | None = None) -> None:
@@ -131,6 +144,7 @@ def verifier_lignes(
             )
         if m.id not in anciennes:
             matieres.commandable(s, m.id)
+        verifier_quantite(m, ligne)
         verifier_unite(m, ligne, anciennes.get(m.id))
         vues.add(m.id)
     return fiches

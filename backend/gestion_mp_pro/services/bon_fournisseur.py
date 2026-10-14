@@ -1,6 +1,7 @@
 """Le bon de commande tel que le fournisseur le lit (routes 164 et 165) : en anglais, sans aucun
 prix, montant ni devise (décision de Mohamed, A22), chaque ligne dans son conditionnement et en
-kilos — avec ses mètres, à titre indicatif, pour un cuir, des franges, un ruban — et les
+kilos — avec ses mètres, à titre indicatif, pour un cuir, des franges, un ruban (le drapeau
+`lineaire` du rôle, pas la seule présence d'une densité) — et les
 remarques au fournisseur à part (`gestion_mp/api/achats.py` : `impression`, `lignes_du_bon` ;
 `exports_achats.py` : `exporter_bon_fournisseur`).
 
@@ -17,7 +18,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.documents.anglais import au_poids, conditionnement_en, nombre_en
 from gestion_mp_pro.documents.format import date_en
-from gestion_mp_pro.services.commandes_socle import charger
+from gestion_mp_pro.services.commandes_socle import charger, kg_par_ml
 
 TITRE = "Purchase order"
 BROUILLON = "Draft — not sent"
@@ -135,7 +136,7 @@ def contenu(
     lignes = []
     for rang, x in enumerate(bon.lignes, start=1):
         m = bon.matieres[x.matiere_id]
-        kg, densite = float(x.quantite), float(m.densite)
+        kg, densite = float(x.quantite), kg_par_ml(m)
         poids = au_poids(x.unite_achat, x.contenance)
         lignes.append(
             LigneBon(

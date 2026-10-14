@@ -37,6 +37,8 @@ from gestion_mp_pro.services import horloge
 from gestion_mp_pro.services.chargeur.achats import en_quarantaine_par_ligne, recu_par_ligne
 from gestion_mp_pro.services.commandes_socle import (
     CLOS,
+    charger_matieres,
+    kg_par_ml,
     lignes_receptionnees,
     prix_catalogue_kg,
     prix_estime,
@@ -175,7 +177,7 @@ def lecture(s: Session, commandes: list[Commande]) -> Lecture:
         seuil=reglage_nombre(s, "seuil_approbation"),
         taux=taux_des_devises(s),
         receptionnees=lignes_receptionnees(s, [x.id for c in commandes for x in c.lignes]),
-        matieres={m.id: m for m in s.scalars(select(Matiere).where(Matiere.id.in_(mids)))},
+        matieres=charger_matieres(s, mids),
         fournisseurs={
             f.id: f for f in s.scalars(select(Fournisseur).where(Fournisseur.id.in_(fids)))
         },
@@ -303,7 +305,7 @@ def lignes(c: Commande, ctx: Lecture) -> list[LigneLue]:
         if reste <= quantite * ctx.tolerance:
             reste = 0.0
         prix = prix_estime(x, m, c.devise, ctx.taux)
-        densite = float(m.densite)
+        densite = kg_par_ml(m)
         resultat.append(
             LigneLue(
                 id=x.id,
