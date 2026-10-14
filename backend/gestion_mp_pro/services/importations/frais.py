@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.calcul import importations as calcul
 from gestion_mp_pro.modeles import Dossier, DossierFrais, PosteFrais
+from gestion_mp_pro.modeles.types import MONTANT, arrondir
 from gestion_mp_pro.services import audit, periode
 from gestion_mp_pro.services.importations.socle import (
     contexte,
@@ -65,10 +66,10 @@ def _poste(s: Session, poste_id: int) -> PosteFrais:
 def _verifier(s: Session, d: Dossier, e: FraisSaisi) -> PosteFrais:
     """Poste connu, montant non nul, marchandise de ce dossier (X-IMP-35 à 37)."""
     p = _poste(s, e.poste_id)
-    if not e.montant:
+    if not e.montant or arrondir(e.montant, MONTANT) == 0:
         raise Refus.saisie(
-            "Un frais a un montant (un avoir se saisit en négatif).",
-            champs={"montant": "non nul"},
+            "Un frais a un montant d'au moins un centime (un avoir se saisit en négatif).",
+            champs={"montant": "au moins un centime"},
         )
     if e.ligne_id is not None and not any(x.id == e.ligne_id for x in d.lignes):
         raise Refus.saisie(

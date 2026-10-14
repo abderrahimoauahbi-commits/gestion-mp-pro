@@ -106,6 +106,8 @@ def _frais(s: Session) -> dict[int, list[c.ChargeImport]]:
                 recuperable_poste=poste.recuperable,
                 cle=str(poste.cle),
                 parts=dict(parts.get(x.id, {})),
+                nature=str(poste.nature),
+                entre_valeur_douane=poste.entre_valeur_douane,
             )
         )
     return resultat

@@ -309,6 +309,11 @@ class DossierFiche(DossierResume):
     actions: Actions
     a_rattacher: list[FactureARattacher]
     nb_pieces: int
+    avis: list[str] = Field(
+        default_factory=list,
+        description="ce que le geste vient de dire (marchandise reprise au cours du bon : le "
+        "cours payé se ressaisit dans Marchandises) ; vide sur une lecture",
+    )
 
 
 class ReceptionSansFacture(Sortie):

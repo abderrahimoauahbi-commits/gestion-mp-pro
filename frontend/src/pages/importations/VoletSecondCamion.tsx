@@ -10,7 +10,7 @@ import { kg, nombre } from '../../lib/format'
 import { ChoixFacture } from './ChoixFacture'
 import styles from './Importations.module.css'
 import type { DossierFiche } from './types'
-import type { GestesDossier } from './useDossier'
+import { direLesAvis, type GestesDossier } from './useDossier'
 
 export function VoletSecondCamion({ d, g }: { d: DossierFiche; g: GestesDossier }) {
   const f = d.a_rattacher.length === 1 ? d.a_rattacher[0] : undefined
@@ -26,10 +26,11 @@ export function VoletSecondCamion({ d, g }: { d: DossierFiche; g: GestesDossier 
         action={() => 'Ajouter au dossier'}
         blocages={() => (d.actions.rattacher ? [d.actions.rattacher] : [])}
         onChoisir={async (f) => {
-          await g.rattacher(f.facture_id)
+          const relu = await g.rattacher(f.facture_id)
           dire(
             `Second camion de la facture ${f.numero} ajouté : ${nombre(f.lots)} lot(s), ${kg(f.quantite)}.`,
           )
+          direLesAvis(relu)
         }}
       />
     </div>

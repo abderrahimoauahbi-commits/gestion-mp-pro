@@ -4,6 +4,7 @@ chacune la **même dépendance de filtres** (filtres = écran)."""
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import asdict
 from datetime import date
 from typing import Annotated
@@ -24,10 +25,11 @@ GESTE = reponses(401, 403, 404, 409, 422)
 """Les refus possibles d'un geste sur un dossier."""
 
 
-def fiche_relue(s: SessionDep, did: int) -> DossierFiche:
-    """La fiche relue après un geste (la session ne s'écrit pas d'elle-même : `autoflush=False`)."""
+def fiche_relue(s: SessionDep, did: int, avis: Sequence[str] = ()) -> DossierFiche:
+    """La fiche relue après un geste (la session ne s'écrit pas d'elle-même : `autoflush=False`),
+    avec ce que le geste vient de dire (`avis`)."""
     s.flush()
-    return DossierFiche.model_validate(asdict(fiche(s, did)))
+    return DossierFiche.model_validate(asdict(fiche(s, did, avis)))
 
 
 TEXTE = Query(max_length=200, description="mots, sans accents")

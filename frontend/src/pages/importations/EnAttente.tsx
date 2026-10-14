@@ -22,6 +22,7 @@ import { ChoixFacture } from './ChoixFacture'
 import type { EtatPage } from './etatPage'
 import styles from './Importations.module.css'
 import type { DossierFiche, EnAttente as Attente, FactureARattacher, ReceptionSansFacture } from './types'
+import { direLesAvis } from './useDossier'
 
 const INFOBULLE =
   'Tant qu’une arrivée n’est dans aucun dossier, son coût est le seul prix de la facture : ses frais (droits, fret, transitaire…) manquent au coût moyen du stock.'
@@ -93,12 +94,14 @@ export function useOuvrirOuRattacher(page: Pick<EtatPage, 'ouvrir' | 'remplacerP
             ? ` Ses marchandises n’ont pas le même cours que les premières (${devises}) : vérifier l’avis de la banque.`
             : ''),
       )
+      direLesAvis(d)
       return (remplacer ? page.remplacerPar : page.ouvrir)(d.id)
     }
     const d = await ecrire.mutateAsync(() =>
       api.post<DossierFiche>('/dossiers', { facture_id: f.facture_id, local_confirme: localConfirme }),
     )
     dire(`Facture ${f.numero} : dossier ${d.numero} ouvert.`)
+    direLesAvis(d)
     return (remplacer ? page.remplacerPar : page.ouvrir)(d.id)
   }
 }

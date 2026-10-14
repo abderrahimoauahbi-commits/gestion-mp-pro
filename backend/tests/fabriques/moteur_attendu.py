@@ -270,8 +270,21 @@ def _production(w: Monde) -> dict[str, object]:
                     )
                 ],
                 [
-                    c.ChargeImport("DD", 3000, None, "DD-1", "", False, "valeur", {ligne: 3000}),
-                    c.ChargeImport("FRET", 1200, ligne, "", "Camion", False, "valeur"),
+                    c.ChargeImport(
+                        "DD",
+                        3000,
+                        None,
+                        "DD-1",
+                        "",
+                        False,
+                        "valeur",
+                        {ligne: 3000},
+                        "droits",
+                        False,
+                    ),
+                    c.ChargeImport(
+                        "FRET", 1200, ligne, "", "Camion", False, "valeur", {}, "fret", True
+                    ),
                 ],
                 [c.FactureImport("F-1", 2160, "USD", [ligne])],
             ),

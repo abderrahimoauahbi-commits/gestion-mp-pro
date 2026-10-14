@@ -258,9 +258,12 @@ export interface VoletFraisProps extends Ctx {
 
 export function VoletFrais(p: VoletFraisProps) {
   const { d, modifiable, postes } = p
-  const dd = postes.find((x) => x.code === 'DD')
+  // Le poste des droits par sa nature (le poste système d'abord), comme les repères du serveur.
+  const droits = postes.filter((x) => x.nature === 'droits')
+  const dd = droits.find((x) => x.systeme) ?? droits[0]
+  const dejaSaisis = d.frais.some((f) => droits.some((p) => p.id === f.poste_id))
   const proposer =
-    modifiable && dd && d.droits_attendus_mad != null && !d.frais.some((f) => f.poste_id === dd.id)
+    modifiable && dd && d.droits_attendus_mad != null && !dejaSaisis
       ? () =>
           p.setBrouillon({
             ...p.brouillon,

@@ -39,6 +39,7 @@ from gestion_mp_pro.modeles.enums import OrigineCours, SerieNumero, StatutDocume
 from gestion_mp_pro.modeles.types import MONTANT, arrondir
 from gestion_mp_pro.services import audit, horloge, numerotation, periode
 from gestion_mp_pro.services.fournisseurs import est_local
+from gestion_mp_pro.services.importations import cours_repris
 from gestion_mp_pro.services.importations.fiche import resumer
 from gestion_mp_pro.services.importations.libres import (
     factures_acceptees,
@@ -239,8 +240,13 @@ def fournisseur_confirme(s: Session, f: Facture, confirme: bool, geste: str) -> 
     return fournisseur.nom, local
 
 
-def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
-    """Le dossier d'une facture : toute sa marchandise libre (R-IMP-19, 21 à 25)."""
+Retour = tuple[Dossier, list[str]]
+"""Le dossier après un geste, et ce que la réponse en dit (`DossierFiche.avis`)."""
+
+
+def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Retour:
+    """Le dossier d'une facture : toute sa marchandise libre (R-IMP-19, 21 à 25), au cours figé
+    de son bon — la réponse le dit (`cours_repris`)."""
     f = facture_libre(s, e.facture_id)
     if e.numero.strip():
         raise Refus.saisie(
@@ -265,10 +271,13 @@ def _depuis_facture(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
         cree_par_id=qui.id,
     )
     lien = DossierFacture(facture_id=f.id, ajoutee_par_id=qui.id)
-    inserer(s, d, marchandises(s, paires), f.id, lien)
+    lignes = marchandises(s, paires)
+    inserer(s, d, lignes, f.id, lien)
+    notes = cours_repris.avis(s, f.numero, lignes)
     detail = f"{numero} · {len(paires)} ligne(s) · facture {f.numero}"
-    journaliser(s, qui, d, detail + (" · fournisseur marocain, confirmé" if local else ""))
-    return d
+    detail += " · fournisseur marocain, confirmé" if local else ""
+    journaliser(s, qui, d, detail + cours_repris.marque(notes))
+    return d, notes
 
 
 def _a_la_main(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
@@ -304,12 +313,12 @@ def journaliser(s: Session, qui: audit.Qui, d: Dossier, detail: str) -> None:
     audit.creation(s, qui, "ouverture dossier", d, numero=d.numero, detail=detail)
 
 
-def creer(s: Session, qui: audit.Qui, e: Ouverture) -> Dossier:
-    """Ouvre un dossier (route 190)."""
+def creer(s: Session, qui: audit.Qui, e: Ouverture) -> Retour:
+    """Ouvre un dossier (route 190) ; rend le dossier et les avis de la réponse."""
     arrivee_constatee(e.date_arrivee)
     if e.facture_id is not None:
         return _depuis_facture(s, qui, e)
-    return _a_la_main(s, qui, e)
+    return _a_la_main(s, qui, e), []
 
 
 def _refus_autre_facture(s: Session, d: Dossier, facture_id: int) -> Refus:
@@ -329,8 +338,10 @@ def _refus_autre_facture(s: Session, d: Dossier, facture_id: int) -> Refus:
     )
 
 
-def rattacher(s: Session, qui: audit.Qui, did: int, version: int, facture_id: int) -> Dossier:
-    """Le second camion d'une facture rejoint son dossier (route 192 ; R-IMP-28 à 30)."""
+def rattacher(s: Session, qui: audit.Qui, did: int, version: int, facture_id: int) -> Retour:
+    """Le second camion d'une facture rejoint son dossier (route 192 ; R-IMP-28 à 30), au cours
+    figé de son bon : la réponse le dit, et propose le dernier cours payé si la marchandise
+    revient (`cours_repris`)."""
     d = ouvert(s, did, version)
     if facture_id not in factures_acceptees(s, d):
         raise Refus.etat(A_LA_MAIN) if a_la_main(d) else _refus_autre_facture(s, d, facture_id)
@@ -339,17 +350,14 @@ def rattacher(s: Session, qui: audit.Qui, did: int, version: int, facture_id: in
         raise Refus.introuvable("Facture inconnue.")
     paires = de_la_facture(s, f)
     periode.cout_hors_periode_close(s, d, "rattachement", [r.date for _, r in paires])
-    inserer(s, d, marchandises(s, paires), f.id)
+    lignes = marchandises(s, paires)
+    inserer(s, d, lignes, f.id)
+    notes = cours_repris.avis(s, f.numero, lignes)
     disparates = ", ".join(
         f"{x.devise} à " + " et ".join(f"{c:g}" for c in x.cours)
         for x in resumer(d, contexte(s, [d])).cours_disparates
     )
     detail = f"{d.numero} · {len(paires)} ligne(s) · facture {f.numero}"
-    noter(
-        s,
-        qui,
-        d,
-        "marchandises dossier",
-        detail + (f" · plusieurs cours : {disparates}" if disparates else ""),
-    )
-    return d
+    detail += f" · plusieurs cours : {disparates}" if disparates else ""
+    noter(s, qui, d, "marchandises dossier", detail + cours_repris.marque(notes))
+    return d, notes

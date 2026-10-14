@@ -35,6 +35,16 @@ TOLERANCE_DES_DOSSIERS = {
 """K1 sur les dossiers : la valeur en devise d'une marchandise est gardée au centime (Gestion
 MP : 946 valeurs à plus de deux décimales), multipliée par le cours puis répartie avec les
 frais ; l'écart reste de quelques centimes de dirham par ligne (au plus 0,55 MAD mesuré)."""
+NATURE_DES_POSTES = {
+    "DD": ("droits", False),
+    "TPI": ("tpi", False),
+    "TVA": ("tva", False),
+    "FRET": ("fret", True),
+    "ASSUR": ("assurance", True),
+}
+"""Nature et « entre dans la valeur en douane » des postes semés (révision 0002) ; les autres
+postes sont « autre », hors valeur en douane. Gestion MP ne connaissait que les codes (en dur) ;
+PRO lit la nature du référentiel (audit n° 2) : même valeur logique, un champ de plus."""
 
 
 def proches(  # noqa: PLR0912 — un comparateur récursif
@@ -77,10 +87,21 @@ def _comme_la_base(jeu: dict[str, Any]) -> dict[str, Any]:
         if not a["contenance_commande"]:
             a["unite_commande"] = ""  # sans contenance, l'unité ne sert pas (`conditionnement`)
     _une_devise_par_reception(jeu)
+    _nature_des_postes(jeu)
     for o in jeu["ordres"]:
         if o["valide_le"] is None:
             o["valide_le"] = datetime.combine(date.fromisoformat(o["date"]), time(12)).isoformat()
     return _trier(jeu)
+
+
+def _nature_des_postes(jeu: dict[str, Any]) -> None:
+    """Chaque frais d'un dossier porte la nature de son poste, lue par PRO dans le référentiel
+    (`ChargeImport.nature`, `entre_valeur_douane`) : le jeu de Gestion MP n'avait que le code."""
+    for d in jeu["dossiers_import"]:
+        for ch in d["charges"]:
+            ch["nature"], ch["entre_valeur_douane"] = NATURE_DES_POSTES.get(
+                ch["poste"], ("autre", False)
+            )
 
 
 def _une_devise_par_reception(jeu: dict[str, Any]) -> None:

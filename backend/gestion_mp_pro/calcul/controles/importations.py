@@ -68,13 +68,13 @@ def dossier_sans_frais(ctx: Contexte) -> tuple[str, list[Ligne]]:
     ),
 )
 def tva_douteuse(ctx: Contexte) -> tuple[str, list[Ligne]]:
-    """La TVA de la douane (seul le poste TVA) face à l'attendue : le taux réglé sur la valeur
-    en douane augmentée des droits et de la TPI, à l'écart toléré près (réglage
+    """La TVA de la douane (les postes de nature `tva`) face à l'attendue : le taux réglé sur
+    la valeur en douane augmentée des droits et de la TPI, à l'écart toléré près (réglage
     `toler_tva_import`, 5 % : Gestion MP 26459d4, E-10)."""
     parametres = ctx.parametres
     lignes: list[Ligne] = []
     for dossier in ctx.donnees.dossiers_import:
-        tva = sum(c.montant for c in dossier.charges if c.poste == "TVA")
+        tva = sum(c.montant for c in dossier.charges if c.est_tva)
         if not tva:
             continue
         attendue = tva_attendue(dossier, parametres)

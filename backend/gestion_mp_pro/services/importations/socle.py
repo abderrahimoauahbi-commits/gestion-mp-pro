@@ -369,6 +369,8 @@ def vue(d: Dossier, ctx: Contexte) -> c.DossierImport:
                 recuperable_poste=ctx.postes[x.poste_id].recuperable,
                 cle=str(ctx.postes[x.poste_id].cle),
                 parts={p.ligne_id: float(p.montant) for p in x.parts},
+                nature=str(ctx.postes[x.poste_id].nature),
+                entre_valeur_douane=ctx.postes[x.poste_id].entre_valeur_douane,
             )
             for x in frais_tries(d)
         ],

@@ -45,9 +45,9 @@ def _frais(corps: FraisEntree) -> frais.FraisSaisi:
     responses=GESTE,
 )
 def rattacher(did: int, corps: Rattachement, qui: QuiDep, s: SessionDep) -> DossierFiche:
-    """Route 192."""
-    ouverture.rattacher(s, qui, did, corps.version, corps.facture_id)
-    return fiche_relue(s, did)
+    """Route 192 ; `avis` dit le cours auquel la marchandise entre (celui du bon)."""
+    _, avis = ouverture.rattacher(s, qui, did, corps.version, corps.facture_id)
+    return fiche_relue(s, did, avis)
 
 
 @routeur.post(
@@ -58,11 +58,12 @@ def rattacher(did: int, corps: Rattachement, qui: QuiDep, s: SessionDep) -> Doss
     responses=GESTE,
 )
 def ajouter_facture(did: int, corps: AjoutFacture, qui: QuiDep, s: SessionDep) -> DossierFiche:
-    """Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme."""
-    factures_dossier.ajouter(
+    """Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme ;
+    `avis` dit qu'elle entre au cours du bon (et, reprise, le dernier cours payé)."""
+    _, avis = factures_dossier.ajouter(
         s, qui, did, corps.version, corps.facture_id, local_confirme=corps.local_confirme
     )
-    return fiche_relue(s, did)
+    return fiche_relue(s, did, avis)
 
 
 @routeur.delete(

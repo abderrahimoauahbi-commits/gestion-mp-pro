@@ -11,6 +11,7 @@ ce module ne fait que lire la base et assembler.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import fields
 from typing import Any
 
@@ -21,6 +22,7 @@ from gestion_mp_pro.calcul import importations as calcul
 from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.importations import LigneRevient
 from gestion_mp_pro.modeles import Dossier, PieceJointe
+from gestion_mp_pro.modeles.enums import NatureFrais
 from gestion_mp_pro.services.importations import attente, parties
 from gestion_mp_pro.services.importations.lignes import Marchandises, lire_marchandises
 from gestion_mp_pro.services.importations.modele import (
@@ -42,9 +44,10 @@ from gestion_mp_pro.services.importations.socle import (
     vue,
 )
 
-TVA = "TVA"
-"""Le seul poste comparé à la TVA attendue : la TVA de la douane (R-IMP-05)."""
-DROITS = "DD"
+TVA = NatureFrais.tva
+"""Les postes comparés à la TVA attendue : la TVA de la douane, par sa nature (R-IMP-05)."""
+DROITS = NatureFrais.droits
+"""Les postes comptés en droits saisis : par leur nature, pas leur code (audit n° 2)."""
 
 
 def _receptions(d: Dossier, ctx: Contexte, lignes: set[int]) -> list[ReceptionCitee]:
@@ -97,8 +100,8 @@ def _sommes(d: Dossier, ctx: Contexte) -> tuple[float, float, float, float]:
             tva += montant
         else:
             charges += montant
-        douane += montant if p.code == TVA else 0.0
-        droits += montant if p.code == DROITS else 0.0
+        douane += montant if p.nature == TVA else 0.0
+        droits += montant if p.nature == DROITS else 0.0
     return charges, tva, douane, droits
 
 
@@ -217,8 +220,9 @@ def nb_pieces(s: Session, did: int) -> int:
     return int(s.scalar(requete) or 0)
 
 
-def fiche(s: Session, did: int) -> DossierFiche:
-    """La fiche complète d'un dossier (route 189)."""
+def fiche(s: Session, did: int, avis: Sequence[str] = ()) -> DossierFiche:
+    """La fiche complète d'un dossier (route 189) ; `avis` : ce qu'un geste vient de dire
+    (une marchandise reprise au cours du bon, `cours_repris`)."""
     d = charger(s, did)
     ctx = contexte(s, [d])
     r, m = resume(d, ctx)
@@ -239,4 +243,5 @@ def fiche(s: Session, did: int) -> DossierFiche:
         actions=parties.actions(d, r, devises),
         a_rattacher=attente.du_dossier(s, d),
         nb_pieces=nb_pieces(s, d.id),
+        avis=list(avis),
     )

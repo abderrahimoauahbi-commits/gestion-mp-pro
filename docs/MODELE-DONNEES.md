@@ -140,7 +140,7 @@ puis 4 qui ferment des colonnes que ce document décrivait en texte (`TypeMotif`
 | `StatutDossier` | `ouvert`, `clos`, `annule` | `dossier.statut` | `annule` ajouté (la suppression trouait la série DOS) |
 | `OrigineCours` | `bon`, `banque`, `clos_au_jour`, `periode_close` (0004 : cours du jour figé par la clôture d'une période ou gardé au changement d'un cours, E-02), `saisi`, `reprise` | `dossier_ligne.cours_origine` | texte du commentaire |
 | `CleRepartition` | `valeur`, `poids` | `poste_frais.cle` | texte libre sans CHECK |
-| `NatureFrais` | `droits`, `tpi`, `tva`, `fret`, `assurance`, `autre` | `poste_frais.nature` | codes en dur dans le moteur (`DD`, `TPI`, `TVA`, `FRET`, `ASSUR`) |
+| `NatureFrais` | `droits`, `tpi`, `tva`, `fret`, `assurance`, `autre` | `poste_frais.nature` | codes en dur dans le moteur (`DD`, `TPI`, `TVA`, `FRET`, `ASSUR`) ; depuis l'audit n° 2 (14/10/2026) le moteur lit la nature (`ChargeImport.nature`), le code ne sert qu'à défaut |
 | `OriginePart` | `changement_cle`, `reprise` | `dossier_frais_part.origine` | — |
 | `StatutReclamation` | `ouverte`, `close` | `reclamation.statut` | identique |
 | `MotifReclamation` | `qualite`, `quantite_manquante`, `poids_bobines`, `bobines_endommagees`, `retard`, `documents`, `autre` | `reclamation.motif` | texte libre (libellés d'écran inchangés) |
@@ -557,8 +557,10 @@ cette table donne le fil monté à toute date (valorisation, cockpit, contrôles
 #### 3.2.11 `poste_frais` ← `poste_frais`
 
 `id` (nouveau) · `code VARCHAR(16)` UQ · `libelle VARCHAR(80)` · `recuperable BOOLEAN` ·
-`nature NatureFrais` (nouveau : sort du code les codes `DD`, `TPI`, `TVA`, `FRET`, `ASSUR`) ·
-`entre_valeur_douane BOOLEAN` (nouveau : FRET, ASSUR ; ← constante `POSTES_VALEUR_EN_DOUANE`) ·
+`nature NatureFrais` (nouveau : sort du code les codes `DD`, `TPI`, `TVA`, `FRET`, `ASSUR` ; lue par
+le moteur pour les droits, la TPI et la TVA attendues — audit n° 2, `calcul/modele/flux.ChargeImport`) ·
+`entre_valeur_douane BOOLEAN` (nouveau : FRET, ASSUR ; lu par le moteur pour la valeur en douane ; la
+constante `POSTES_VALEUR_EN_DOUANE` ne sert qu'à défaut de nature) ·
 `cle CleRepartition` (défaut `valeur`) · `ordre SMALLINT` CK `BETWEEN 0 AND 999` · `systeme BOOLEAN`
 (DD, TPI, TVA, FRET, ASSUR : ni supprimés ni changés de nature) · `version`.
 CK `ck_poste_frais_tva_recuperable` : `nature <> 'tva' OR recuperable`.

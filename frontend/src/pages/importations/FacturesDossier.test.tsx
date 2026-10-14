@@ -80,8 +80,12 @@ describe('Fiche dossier › factures du dossier', () => {
     const d = donnees()
     const [libre] = d.attente.factures
     if (!libre) throw new Error('données')
+    const avis =
+      `Facture ${libre.numero} : reprise de 1 marchandise au cours du bon BC-2026-0007 (10 MAD pour 1 USD) — ` +
+      'le cours payé saisi avant sa sortie ne revient pas (le cours payé à la banque se ressaisit dans ' +
+      'l’onglet Marchandises). Dernier cours payé saisi : USD à 10,05.'
     const appels = ouvrir(d, {
-      [`POST /dossiers/${d.fiche.id}/factures`]: { corps: d.fiche },
+      [`POST /dossiers/${d.fiche.id}/factures`]: { corps: { ...d.fiche, avis: [avis] } },
     })
     await bloc()
     await userEvent.click(screen.getByRole('button', { name: 'Ajouter une facture' }))
@@ -101,6 +105,7 @@ describe('Fiche dossier › factures du dossier', () => {
     expect(
       await screen.findByText(new RegExp(`Facture ${libre.numero} ajoutée au dossier`)),
     ).toBeInTheDocument()
+    expect(await screen.findByText(avis)).toBeInTheDocument()
   })
 
   it('« Ajouter une facture » est grisé avec la raison du serveur', async () => {
