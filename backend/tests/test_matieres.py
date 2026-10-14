@@ -363,3 +363,13 @@ def test_export_des_matieres(achats: TestClient, alimentation: TestClient) -> No
     lignes = list(feuille.iter_rows(min_row=4, values_only=True))
     assert len(lignes) == 1 and lignes[0][0] == ref and lignes[0][8] == nom and lignes[0][9] == 4.1
     assert alimentation.get("/api/export/matieres").status_code == 403
+
+
+def test_l_unite_d_achat_kg_s_ecrit_en_minuscules(achats: TestClient) -> None:
+    """Audit n° 2 : « Kg » ou « KG » (un tableur) est le kilo — pas une unité déclarée de
+    contenance 1 qui ferait un conditionnement « Kg » à côté de « kg »."""
+    m = ok(achats.post("/api/matieres", json=nouvelle(unite_achat="Kg", poids_bobine=2)), 201)
+    assert m["unite_achat"] == "kg" and m["contenance_achat"] == 1
+    assert m["conditionnement"] == {"unite": "Bobine", "contenance": 2.0, "declare": False}
+    m = ok(achats.put(f"/api/matieres/{m['id']}", json=corps(achats, m["id"], unite_achat="KG")))
+    assert m["unite_achat"] == "kg" and not m["conditionnement"]["declare"]

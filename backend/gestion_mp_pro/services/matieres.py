@@ -166,6 +166,8 @@ def _fournisseur(s: Session, e: dict[str, Any], actuel: Matiere | None) -> None:
 def _achat(e: dict[str, Any]) -> None:
     """Unité d'achat (vide = kg, jamais « ml ») et sa contenance (X-REF-28, 29)."""
     e["unite_achat"] = (e.get("unite_achat") or "").strip() or "kg"
+    if e["unite_achat"].lower() == "kg":
+        e["unite_achat"] = "kg"  # « Kg », « KG » (tableur) : le kilo, pas une unité déclarée
     if e["unite_achat"].lower() == "ml":
         raise _refus(
             "La commande se compte en kilos (ou en palettes, fûts… de tant de kilos). Un "
