@@ -41,6 +41,25 @@ describe('Trouver un lot et sa fiche', () => {
     expect(document.body.textContent).not.toMatch(MONETAIRE)
   })
 
+  it('la quarantaine se dit une fois par lot : la ligne du magasin, sans badge en plus (audit 2)', async () => {
+    fauxServeur(reponsesAtelier('alimentation'))
+    monterApp('/atelier/chercher')
+    await screen.findAllByRole('listitem')
+    const fil = (reference: string) =>
+      screen
+        .getAllByRole('region')
+        .find((r) => (r.getAttribute('aria-label') ?? '').includes(reference)) as HTMLElement
+    // Un lot en partie en quarantaine : la ligne « Quarantaine » et sa quantité, rien d'autre.
+    const partiel = within(fil('POIL GRIS 450')).getByRole('link', { name: /lot L-2606/ })
+    expect(partiel.textContent?.match(/quarantaine/gi)).toHaveLength(1)
+    expect(partiel.textContent).toMatch(/Quarantaine\s*10,0\skg/)
+    expect(partiel.textContent).not.toMatch(/en quarantaine/)
+    // Un lot tout en quarantaine : de même, une seule mention.
+    const entier = within(fil('POIL BEIGE 1100')).getByRole('link', { name: /lot L-2607/ })
+    expect(entier.textContent?.match(/quarantaine/gi)).toHaveLength(1)
+    expect(document.body.textContent).not.toMatch(MONETAIRE)
+  })
+
   it('la fiche : reste, magasins, ordres servis, étiquette, déplacer ; aucun prix', async () => {
     fauxServeur(reponsesAtelier('alimentation'))
     monterApp('/atelier/lots/1')

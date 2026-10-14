@@ -76,10 +76,14 @@ export function raisonDeplacer(e: {
   return ''
 }
 
-/** Ce que la saisie donne une fois lue contre le lot et les magasins. */
+/**
+ * Ce que la saisie donne une fois lue contre le lot et les magasins. Un départ choisi qui n'a
+ * plus de matière (tout déplacé, ou saisie gardée d'avant) retombe sur le plus garni (audit 2).
+ */
 export function lireDeplacement(l: LotFiche, s: SaisieDeplacement, mags: readonly MagasinFiche[]) {
   const ds = departs(l)
-  const depuis = s.depuis ?? ds[0]?.magasin_id ?? null
+  const choisi = ds.some((m) => m.magasin_id === s.depuis) ? s.depuis : null
+  const depuis = choisi ?? ds[0]?.magasin_id ?? null
   const dispo = ds.find((m) => m.magasin_id === depuis)?.quantite ?? 0
   const vers = mags.find((m) => m.id === s.vers)
   const depart = mags.find((m) => m.id === depuis)

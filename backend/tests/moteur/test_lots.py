@@ -73,12 +73,14 @@ def test_le_stock_lot_par_lot_retombe_sur_le_journal() -> None:
 
 def test_la_tracabilite_d_un_lot_et_d_un_ordre() -> None:
     """Nouveau (CALCULS B § 6) : d'où vient un lot et où il est parti ; ce qu'un ordre a
-    consommé, tous lots."""
+    consommé, tous lots. Entré et sorti comme dans la liste des lots (audit 2) : le retour des
+    machines réduit le sorti, l'écriture annulée et son annulation ne comptent pas."""
     d = _journal_de_lots()
     lot = tracabilite(d, lot="A")
     assert [m.id for m in lot.mouvements] == [2, 3, 4, 6, 7]
     assert lot.ordres == ["OF-1", "OF-2"] and lot.references == ["P50"]
-    assert lot.entrees == pytest.approx(200 + 10 + 20) and lot.sorties == pytest.approx(50 + 20)
+    assert lot.entrees == pytest.approx(200) and lot.sorties == pytest.approx(50 - 10)
+    assert lot.entrees - lot.sorties == pytest.approx(stock_par_lot(d, "P50")[1].stock)
     ordre = tracabilite(d, ordre="OF-2")
-    assert ordre.lots == ["A", "B"] and ordre.sorties == pytest.approx(50)
+    assert ordre.lots == ["A", "B"] and ordre.sorties == pytest.approx(30)
     assert [m.id for m in tracabilite(d, lot="(sans lot)").mouvements] == [8]

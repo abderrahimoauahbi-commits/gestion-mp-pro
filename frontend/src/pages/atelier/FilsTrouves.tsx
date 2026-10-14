@@ -6,12 +6,14 @@
  */
 import { Link } from 'react-router'
 
+import { classes } from '../../composants/mise-en-page/classes'
 import { Badge } from '../../composants/retour/Badge'
 import { date, kgEtMetres } from '../../lib/format'
 import { correspond, texteDe } from '../../lib/recherche'
 import { bobinesApprochees } from '../../lib/unites'
 import { qte } from './commun'
 import styles from './atelier.module.css'
+import { libelleMagasin } from './LotFiche'
 import type { LotSolde, MetierFiche } from './types'
 
 /** Un fil monté sur un métier en service : ses kilos sur ce métier. */
@@ -96,9 +98,14 @@ export function grouperParFil(
   return [...fils.values()].map((f) => ({ ...f, atelierKg: f.atelier.reduce((t, s) => t + s.kg, 0) }))
 }
 
-/** Un lot : son reste, et ce qu'il porte dans chaque magasin. */
+/**
+ * Un lot : son reste, et ce qu'il porte dans chaque magasin. La quarantaine se dit **une fois**
+ * (audit 2) : la ligne du magasin « Quarantaine » porte le ton critique ; le badge « X en
+ * quarantaine » ne reste que si aucune ligne de magasin ne la montre.
+ */
 export function CarteLot({ l, vers }: { l: LotSolde; vers: string }) {
   const magasins = l.magasins.filter((m) => m.quantite > 0.001)
+  const quarantaineDite = magasins.some((m) => m.type === 'quarantaine')
   return (
     <Link to={vers} className={styles.carteLien}>
       <span className={styles.ligne}>
@@ -109,13 +116,21 @@ export function CarteLot({ l, vers }: { l: LotSolde; vers: string }) {
         <span className={styles.note}>entré le {date(l.entre_le)}</span>
         <span className={styles.note}>{bobinesApprochees(l.quantite, { poidsBobine: l.poids_bobine })}</span>
       </span>
-      {magasins.map((m) => (
-        <span key={m.magasin_id} className={styles.ligne}>
-          <span>{m.magasin}</span>
-          <span className={styles.valeur}>{qte(m.quantite)}</span>
-        </span>
-      ))}
-      {l.quarantaine > 0.001 ? <Badge ton="critique">{`${qte(l.quarantaine)} en quarantaine`}</Badge> : null}
+      {magasins.map((m) => {
+        const x = libelleMagasin(m)
+        const quarantaine = m.type === 'quarantaine'
+        return (
+          <span key={m.magasin_id} className={classes(styles.ligne, quarantaine && styles.critique)}>
+            <span>
+              {x.nom} {x.quarantaine ? <Badge ton="critique">quarantaine</Badge> : null}
+            </span>
+            <span className={styles.valeur}>{qte(m.quantite)}</span>
+          </span>
+        )
+      })}
+      {l.quarantaine > 0.001 && !quarantaineDite ? (
+        <Badge ton="critique">{`${qte(l.quarantaine)} en quarantaine`}</Badge>
+      ) : null}
     </Link>
   )
 }

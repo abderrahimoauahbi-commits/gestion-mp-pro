@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import fields
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.calcul import modele as c
@@ -141,10 +141,35 @@ def magasins(s: Session) -> list[c.Magasin]:
     ]
 
 
+ENTREES_DU_LOT = {
+    TypeMouvement.RECEPTION.value: "reçu",
+    TypeMouvement.OUVERTURE.value: "ouvert",
+    TypeMouvement.AJUSTEMENT.value: "ajusté",
+    TypeMouvement.RETOUR_MACHINE.value: "revenu des machines",
+}
+"""Comment un lot pesé est entré : le type de sa première écriture positive → le mot dit."""
+
+
+def _entrees_des_lots(s: Session) -> dict[int, str]:
+    """Le type de la première écriture positive de chaque lot (comment il est entré)."""
+    premieres = (
+        select(Mouvement.lot_id, func.min(Mouvement.id).label("id"))
+        .where(Mouvement.quantite > 0, Mouvement.contrepasse_id.is_(None))
+        .group_by(Mouvement.lot_id)
+        .subquery()
+    )
+    requete = select(premieres.c.lot_id, Mouvement.type).join(
+        Mouvement, Mouvement.id == premieres.c.id
+    )
+    return {lot: str(type_) for lot, type_ in s.execute(requete)}
+
+
 def poids_bobine_mesures(s: Session) -> dict[int, tuple[float, str, str]]:
     """Le poids d'une bobine pesé, matière par matière (M43) : celui du lot sorti le plus
     récemment vers les machines (une sortie annulée n'a rien monté), sinon celui du dernier
-    lot reçu. {matière : (kg par bobine, n° de lot, « sorti » | « reçu »)}."""
+    lot entré, quelle que soit son entrée — une ouverture ou un ajustement pesés sont réels
+    (audit 2). {matière : (kg par bobine, n° de lot, « sorti » | « reçu » | « ouvert » |
+    « ajusté » | « entré »)} : le mot dit comment le lot est entré, sans mentir."""
     annulees = select(Mouvement.contrepasse_id).where(Mouvement.contrepasse_id.is_not(None))
     pesees: dict[int, tuple[float, str, str]] = {}
     sorties = (
@@ -161,13 +186,19 @@ def poids_bobine_mesures(s: Session) -> dict[int, tuple[float, str, str]]:
     )
     for matiere, poids, numero in s.execute(sorties):
         pesees.setdefault(matiere, (float(poids), numero, "sorti"))
-    recus = (
-        select(Lot.matiere_id, Lot.poids_bobine, Lot.numero)
+    entres = (
+        select(Lot.id, Lot.matiere_id, Lot.poids_bobine, Lot.numero)
         .where(Lot.poids_bobine > 0)
         .order_by(Lot.matiere_id, Lot.entre_le.desc(), Lot.id.desc())
     )
-    for matiere, poids, numero in s.execute(recus):
-        pesees.setdefault(matiere, (float(poids), numero, "reçu"))
+    entrees = None
+    for ident, matiere, poids, numero in s.execute(entres):
+        if matiere in pesees:
+            continue
+        if entrees is None:
+            entrees = _entrees_des_lots(s)
+        genre = ENTREES_DU_LOT.get(entrees.get(ident, ""), "entré")
+        pesees[matiere] = (float(poids), numero, genre)
     return pesees
 
 

@@ -7,18 +7,18 @@ import { Compteur } from '../../composants/atelier/Compteur'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { Champ } from '../../composants/saisie/Champ'
 import { Saisie } from '../../composants/saisie/Saisie'
-import { kgTelephone, nombre } from '../../lib/format'
+import { kgTelephone, nombre, poidsBobine } from '../../lib/format'
 import { Fiche, Ligne, NoteAtelier } from './briques'
 import styles from './atelier.module.css'
 import { bobinesDe, type FilSaisi } from './calculMontage'
 import type { MatiereMontage, MetierFiche } from './types'
 import type { MontageEtage } from './useMontageEtage'
 
-/** « Poil acrylique rouge · 2,495 kg / bobine · lot L-2601 (sorti) ». */
+/** « Poil acrylique rouge · 2,5 kg / bobine · lot L-2601 (sorti) » (poids de bobine : 2 décimales au plus). */
 export function detailFil(f: FilSaisi, poids: number, origine: string): string {
   const debut = f.designation ? `${f.designation} · ` : ''
   if (!poids) return `${debut}poids de bobine inconnu : ce fil ne pèse rien`
-  return `${debut}${nombre(poids, 3)} kg / bobine${origine ? ` · ${origine}` : ''}`
+  return `${debut}${poidsBobine(poids)}${origine ? ` · ${origine}` : ''}`
 }
 
 export function CarteFil({
