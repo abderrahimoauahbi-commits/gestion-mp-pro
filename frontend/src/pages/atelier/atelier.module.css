@@ -67,6 +67,12 @@
   overflow-wrap: anywhere;
 }
 
+/* Une ligne qui dit la quarantaine : le ton critique, sans badge en plus (une seule mention). */
+.critique {
+  color: var(--ton-critique);
+  font-weight: 600;
+}
+
 .grand {
   font-size: 26px;
   font-weight: 700;

@@ -164,8 +164,10 @@ def test_poids_de_bobine_mesure(direction: TestClient, alimentation: TestClient)
     lot = stock_initial(poil, 230)
     peser_lot(lot, "2.3")
     f = lire_metier(alimentation, x["id"])["fils"][0]
-    # Le fil monté se compte au poids pesé du lot (M43), pas au catalogue…
-    assert f["poids_bobine_utilise"] == pytest.approx(2.3) and "(reçu)" in f["source_poids"]
+    # Le fil monté se compte au poids pesé du lot (M43), pas au catalogue ; l'origine dit
+    # comment le lot est entré (ici un stock d'ouverture : « ouvert », pas « reçu » — audit 2)…
+    assert f["poids_bobine_utilise"] == pytest.approx(2.3) and "(ouvert)" in f["source_poids"]
+    assert f["source_poids"].startswith("lot ")
     assert f["poids"] == pytest.approx(f["bobines"] * 2.3)
     assert f["ecart_mesure"] == pytest.approx(0.15) and f["ecart_hors_tolerance"] is True
     # … et le stock « sur les métiers » du moteur compte le même poids.

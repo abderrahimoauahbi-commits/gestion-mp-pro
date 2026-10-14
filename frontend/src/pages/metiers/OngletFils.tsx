@@ -13,7 +13,7 @@ import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { CadreAgrandissable } from '../../composants/tableaux/Cadre'
-import { kg, nombre, part } from '../../lib/format'
+import { kg, nombre, part, poidsBobine } from '../../lib/format'
 import { bobinesDe, poidsRetenu } from '../atelier/calculMontage'
 import { largeurs, type FilForme } from './formeMetier'
 import styles from './metiers.module.css'
@@ -56,11 +56,11 @@ function CelluleReference({ e, f, lienMatiere }: { e: FicheMetierEtat; f: FilFor
     <td>
       <strong>{f.reference}</strong>
       <div className={styles.note}>
-        {[f.designation, poids ? `${nombre(poids, 3)} kg / bobine` : '', lu?.origine_poids ?? '']
+        {[f.designation, poids ? poidsBobine(poids) : '', lu?.origine_poids ?? '']
           .filter(Boolean)
           .join(' · ')}
         {lu && lu.poids_bobine_catalogue !== poids
-          ? ` (catalogue ${nombre(lu.poids_bobine_catalogue, 3)} kg)`
+          ? ` (catalogue ${nombre(lu.poids_bobine_catalogue, 0, 2)} kg)`
           : ''}
       </div>
       <Alertes e={e} f={f} poids={poids} />

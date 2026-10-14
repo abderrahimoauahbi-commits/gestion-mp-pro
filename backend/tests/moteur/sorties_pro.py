@@ -2,12 +2,16 @@
 
 Mêmes sections, mêmes clés : la parité unitaire compare section par section, à l'égalité
 exacte. Les seules différences voulues sont ramenées ici à la forme de Gestion MP, chacune
-nommée : le détail complet des contrôles (Gestion MP en gardait 200 lignes) et l'écart de
-C35 envoyé en fraction (Gestion MP : en pourcent arrondi à 0,1).
+nommée : le détail complet des contrôles (Gestion MP en gardait 200 lignes), l'écart de
+C35 envoyé en fraction (Gestion MP : en pourcent arrondi à 0,1), et les totaux « entré » /
+« sorti » de la traçabilité (PRO compte un retour des machines en moins du sorti et ignore
+une écriture annulée et son annulation, comme la liste des lots — audit 2 ; Gestion MP
+additionnait tout mouvement positif à l'entré, tout mouvement négatif au sorti).
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date
 from typing import Any
 
@@ -134,10 +138,24 @@ def _pilotage(d: Donnees, jour: date, lignes: list[LigneStock], aujourdhui: date
         "evolution_bobines": receptions.evolution_bobines(d),
         "lots": lots.stock_par_lot(d),
         "lots_disponibles": {ref: lots.lots_disponibles(d, ref) for ref in en_stock},
-        "tracabilite": {lot: lots.tracabilite(d, lot=lot) for lot in lots_fournisseur},
+        "tracabilite": {lot: tracabilite_comme_gestion_mp(d, lot) for lot in lots_fournisseur},
         "ordres": production.consommation_par_of(d),
         "realise": production.realise_par_qualite(d, jour, aujourdhui),
     }
+
+
+def tracabilite_comme_gestion_mp(d: Donnees, lot: str) -> lots.Tracabilite:
+    """La traçabilité d'un lot avec les totaux de Gestion MP : tout mouvement positif à
+    l'entré, tout mouvement négatif au sorti (retours des machines et annulations compris).
+    PRO, depuis l'audit 2, compte comme la liste des lots (`stock_par_lot`) : le retour des
+    machines réduit le sorti, une écriture annulée et son annulation ne comptent pas. Les
+    mouvements, références, ordres et lots suivis sont les mêmes des deux côtés."""
+    t = lots.tracabilite(d, lot=lot)
+    return replace(
+        t,
+        entrees=sum(m.quantite_signee for m in t.mouvements if m.quantite_signee > 0),
+        sorties=-sum(m.quantite_signee for m in t.mouvements if m.quantite_signee < 0),
+    )
 
 
 def detail_comme_gestion_mp(code: str, detail: list[dict[str, Any]]) -> list[dict[str, Any]]:

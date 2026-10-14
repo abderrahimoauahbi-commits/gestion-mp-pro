@@ -42,6 +42,10 @@ describe('Déplacer un lot', () => {
     expect(lu.depuis).toBe(1)
     expect(lu.kg).toBe(d.LOT.magasins[0]?.quantite)
     expect(lireDeplacement(d.LOT, { ...deplacementVide(), kg: 3 }, d.MAGASINS).kg).toBe(3)
+    // Un départ choisi qui n'a plus rien (tout déplacé) retombe sur le plus garni (audit 2).
+    const vide = lireDeplacement(d.LOT, { ...deplacementVide(), depuis: 999 }, d.MAGASINS)
+    expect(vide.depuis).toBe(1)
+    expect(vide.dispo).toBeGreaterThan(0)
   })
 
   it('les raisons de griser « Déplacer »', () => {

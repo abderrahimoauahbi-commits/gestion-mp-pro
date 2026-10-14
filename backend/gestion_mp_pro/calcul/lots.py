@@ -142,7 +142,11 @@ class Tracabilite:
 def tracabilite(
     donnees: Donnees, *, lot: str = "", ordre: str = "", reference: str = ""
 ) -> Tracabilite:
-    """D'où vient un lot et où il est parti ; ce qu'un ordre a consommé ; un fil, tous lots."""
+    """D'où vient un lot et où il est parti ; ce qu'un ordre a consommé ; un fil, tous lots.
+
+    Entré et sorti se comptent comme dans `stock_par_lot` et la route 112 : une écriture annulée
+    et son annulation ne comptent pas, un transfert ne fait que déplacer, un retour des machines
+    réduit le sorti au lieu de s'ajouter à l'entré."""
     mouvements = [
         m
         for m in donnees.mouvements
@@ -150,8 +154,16 @@ def tracabilite(
         or (ordre and m.numero_of == ordre)
         or (reference and m.reference == reference)
     ]
-    entrees = [m for m in mouvements if m.quantite_signee > 0]
-    sorties = [m for m in mouvements if m.quantite_signee < 0]
+    annulees = {m.contrepasse_id for m in donnees.mouvements if m.contrepasse_id is not None}
+    comptes = [
+        m
+        for m in mouvements
+        if m.contrepasse_id is None
+        and (m.id is None or m.id not in annulees)
+        and m.type != "TRANSFERT_MAGASIN"
+    ]
+    entrees = [m for m in comptes if m.quantite_signee > 0 and m.type != "RETOUR_PRODUCTION"]
+    sorties = [m for m in comptes if m.quantite_signee < 0 or m.type == "RETOUR_PRODUCTION"]
     return Tracabilite(
         lot=lot,
         ordre=ordre,

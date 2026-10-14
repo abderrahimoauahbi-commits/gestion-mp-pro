@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 import { Champ } from '../../composants/saisie/Champ'
 import { Selecteur } from '../../composants/saisie/Selecteur'
-import { nombre } from '../../lib/format'
+import { nombre, poidsBobine } from '../../lib/format'
 import { largeurs, type FilForme } from './formeMetier'
 import styles from './metiers.module.css'
 import type { FicheMetierEtat } from './useFicheMetier'
@@ -25,9 +25,7 @@ export function AjoutFil({ e }: { e: FicheMetierEtat }) {
     .map((x) => ({
       id: x.matiere_id,
       titre: x.designation ? `${x.reference} — ${x.designation}` : x.reference,
-      sous: x.poids_bobine_compte
-        ? `${nombre(x.poids_bobine_compte, 3)} kg / bobine`
-        : 'poids de bobine inconnu',
+      sous: x.poids_bobine_compte ? poidsBobine(x.poids_bobine_compte) : 'poids de bobine inconnu',
     }))
   const ajouter = (id: number | null) => {
     const x = e.matieres?.find((y) => y.matiere_id === id)
