@@ -6722,6 +6722,12 @@ export interface components {
       role: string
       /** Somme */
       somme: number
+      /**
+       * Sans Matiere
+       * @description aucune matière du catalogue ne porte ce rôle : la créer
+       * @default false
+       */
+      sans_matiere: boolean
     }
     /**
      * Echeance

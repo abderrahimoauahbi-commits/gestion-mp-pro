@@ -80,6 +80,11 @@ de la source : sinon, elle serait « à corriger ». Voici toutes celles qui exi
 - Chaque ligne de stock porte en plus `role_id`, `fournisseur_id` ; la traçabilité porte les
   identifiants des objets liés (pour les liens de l'écran). Ce sont des **ajouts**, jamais des
   valeurs changées.
+- Sur un rôle de recette que **nulle matière du catalogue ne porte** (les Franges de six
+  qualités), le contrôle C01 de PRO dit quoi faire — « Franges (0 % : aucune matière Franges au
+  catalogue — créer la matière Franges, puis la mettre dans la recette) », et l'écart porte
+  `sans_matiere` — là où Gestion MP disait « Franges (0 %) ». Même anomalie, même compte ;
+  forme neutralisée par `conseil_recette` (audit n° 2, décision Franges du 14/10/2026).
 
 > `controle_par` lu comme contrôleur (K5) et l'alimentation sans réglages ni cours (K6) sont
 > sans effet sur les chiffres (`controle_par` est vide dans toute l'année ; l'alimentation ne

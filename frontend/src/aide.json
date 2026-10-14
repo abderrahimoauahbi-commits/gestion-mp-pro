@@ -744,7 +744,7 @@
     },
     "qualite_recette": {
       "grandeur": "État de la recette",
-      "texte": "Juste si, dans chaque rôle utilisé, les parts font 100 % à 0,01 point près et si chaque rôle qui pèse a au moins une matière. Faux : la somme d’un rôle s’écarte de 100 %. Sans matière : un rôle a un poids au m² mais aucune matière."
+      "texte": "Juste si, dans chaque rôle utilisé, les parts font 100 % à 0,01 point près et si chaque rôle qui pèse a au moins une matière. Faux : la somme d’un rôle s’écarte de 100 %. Sans matière : un rôle a un poids au m² mais aucune matière ; si aucune matière de ce rôle n’existe au catalogue, le badge dit « créer la matière » (Matières, classification, fournisseurs), puis la mettre dans la recette."
     },
     "qualites_fabriquees": {
       "grandeur": "Qualités fabriquées",

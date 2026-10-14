@@ -10,6 +10,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import lzma
+import re
 import types
 import typing
 from datetime import date, datetime
@@ -144,17 +145,53 @@ def propre(x: Any) -> Any:
 CHAMPS_DE_STATUT = ("statut", "statut_couverture")
 """Les champs où PRO rend un code de statut et Gestion MP son libellé à émoji (RESTES3, S3)."""
 
+CONSEIL_C01 = re.compile(
+    r" : aucune matière [^)]+? au catalogue — créer la matière [^)]+?, puis la mettre dans la "
+    r"recette\)"
+)
+PHRASE_C01 = (
+    " Si la ligne dit « aucune matière … au catalogue » (les Franges, par exemple), créer "
+    "d'abord cette matière (Matières, classification, fournisseurs : son rôle, sa densité en "
+    "kg/ml, son fournisseur), puis la mettre dans la recette."
+)
+"""Audit n° 2 (décision Franges, 14/10/2026) : sur un rôle pesant que nulle matière du
+catalogue ne porte, PRO dit « créer la matière Franges » — sur la ligne de C01 (`roles`), dans
+le « quoi faire » de C01 et par `sans_matiere` sur l'écart (`controle_recettes`). Gestion MP
+disait « Franges (0 %) » sans plus. Même anomalie, même compte : seule la forme est voulue
+différente, elle est neutralisée ici (`sans_conseil_recette`)."""
+
+
+def sans_conseil_recette(x: Any) -> Any:
+    """Une sortie de PRO sans le conseil « créer la matière » de l'audit n° 2 (voir
+    `CONSEIL_C01`) : les écarts perdent `sans_matiere`, les textes de C01 leur phrase ajoutée."""
+    if isinstance(x, list):
+        return [sans_conseil_recette(v) for v in x]
+    if isinstance(x, str):
+        return CONSEIL_C01.sub(")", x).replace(PHRASE_C01, "")
+    if not isinstance(x, dict):
+        return x
+    rendu = {k: sans_conseil_recette(v) for k, v in x.items()}
+    if {"role", "somme", "sans_matiere"} <= set(rendu):
+        rendu.pop("sans_matiere")
+    return rendu
+
 
 def comme_gestion_mp(x: Any) -> Any:
     """Les sorties PRO mises à plat (`propre`), codes ramenés à la forme de Gestion MP : statut
     « CRITIQUE » → « 🔴 CRITIQUE », action « CREER_BC » → « 📝 Créer BC - <fournisseur> »,
-    « AUCUNE » → « — », relance du plan d'achat « CRITIQUE — … » → « 🔴 CRITIQUE — … ». Même
-    valeur logique, autre forme (seule différence voulue)."""
+    « AUCUNE » → « — », relance du plan d'achat « CRITIQUE — … » → « 🔴 CRITIQUE — … » ;
+    conseil « créer la matière » de C01 retiré (`CONSEIL_C01`). Même valeur logique, autre
+    forme (seules différences voulues)."""
     if isinstance(x, list):
         return [comme_gestion_mp(v) for v in x]
     if not isinstance(x, dict):
         return x
     rendu = {k: comme_gestion_mp(v) for k, v in x.items()}
+    if {"role", "somme", "sans_matiere"} <= set(rendu):
+        rendu.pop("sans_matiere")
+    for cle in ("roles", "quoi_faire"):
+        if isinstance(rendu.get(cle), str):
+            rendu[cle] = sans_conseil_recette(rendu[cle])
     for cle in CHAMPS_DE_STATUT:
         if isinstance(rendu.get(cle), str) and rendu[cle] in LIBELLES_GESTION_MP:
             rendu[cle] = LIBELLES_GESTION_MP[rendu[cle]]

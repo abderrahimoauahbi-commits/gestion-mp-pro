@@ -18,13 +18,23 @@ import { useEtatListe } from '../catalogue/etatListe'
 import { recetteJuste, rolesSansMatiere } from './indicateurs'
 import type { Qualite } from './types'
 
-/** « Poil 98,0 % · Ruban 0,0 % », « juste · 4 matière(s) », « aucune matière ». */
+/**
+ * « Poil 98,0 % · Ruban 0,0 % (sans matière) », « juste · 4 matière(s) », « aucune matière ». Un
+ * rôle pesant que nulle matière du catalogue ne porte dit quoi faire : « créer la matière
+ * Franges ».
+ */
 export function BadgeRecette({ q }: { q: Qualite }) {
   if (!q.recette.length) return <Badge ton="attention">aucune matière</Badge>
   if (recetteJuste(q)) return <Badge ton="ok">{`juste · ${nombre(q.recette.length)} matière(s)`}</Badge>
+  const sansMatiere = rolesSansMatiere(q)
+  const dits = new Set(q.controle.ecarts.map((e) => e.role))
   const fautes = [
-    ...q.controle.ecarts.map((e) => `${e.role} ${nombre(e.somme, 1)} %`),
-    ...rolesSansMatiere(q).map((r) => `${r} sans matière`),
+    ...q.controle.ecarts.map((e) =>
+      e.sans_matiere
+        ? `créer la matière ${e.role}`
+        : `${e.role} ${nombre(e.somme, 1)} %${sansMatiere.includes(e.role) ? ' (sans matière)' : ''}`,
+    ),
+    ...sansMatiere.filter((r) => !dits.has(r)).map((r) => `${r} sans matière`),
   ]
   return <Badge ton="critique">{fautes.join(' · ')}</Badge>
 }

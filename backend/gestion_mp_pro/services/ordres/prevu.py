@@ -76,11 +76,12 @@ def oublis(s: Session, qualites: dict[int, str]) -> list[str]:
     """Les qualités de l'ordre dont la recette oublie un rôle pesant (`recettes.oublies`, le
     message de la fiche qualité) : un prévu figé sans ce rôle serait faux pour toujours."""
     roles = recettes.codes_des_roles(s)
+    sans_matiere = recettes.roles_sans_matiere(s)
     raisons = []
     for qid, code in sorted(qualites.items(), key=lambda x: x[1]):
         manque = recettes.oublies(recettes.poids_de(s, qid), recettes.roles_portes(s, qid), roles)
         if manque:
-            raisons.append(f"{code} : {recettes.message_oublies(manque)}")
+            raisons.append(f"{code} : {recettes.message_oublies(manque, sans_matiere)}")
     return raisons
 
 

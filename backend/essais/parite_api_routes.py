@@ -22,7 +22,11 @@ PLAN_ACHAT_TETE = (
 CONTROLE = Liste(
     ("code",),
     renommes={"vers": "lien", "detail": "lignes"},
-    formes={"vers": f.adresse_ecran, "quoi_faire": f.texte_aide, "detail": f.surcout_en_pourcent},
+    formes={
+        "vers": f.adresse_ecran,
+        "quoi_faire": f.suite(f.texte_aide, f.conseil_recette),
+        "detail": f.suite(f.surcout_en_pourcent, f.conseil_recette),
+    },
 )
 
 
@@ -207,7 +211,9 @@ def _tout_le_reste_1() -> list[RouteMoteur]:
                     formes={"ml_m2": f.nul},
                     deplaces={"poids_categorie": POIDS},
                 ),
-                entete=Liste((), sous={"controle": Liste(("qualite",))}),
+                entete=Liste(
+                    (), sous={"controle": Liste(("qualite",), formes={"ecarts": f.conseil_recette})}
+                ),
             ),
             Appel(pg, "nomenclature"),
         ),

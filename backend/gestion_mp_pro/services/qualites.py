@@ -84,12 +84,15 @@ def toucher(q: Qualite, qui: Qui) -> None:
 
 
 def _code_libre(s: Session, code: str, qualite_id: int | None = None) -> None:
-    """Deux qualités ne portent pas le même code (409, X-REF-39)."""
-    requete = select(Qualite.id).where(Qualite.code == code)
+    """Deux qualités ne portent pas le même code, quelle que soit sa casse (409, X-REF-39,
+    A-12 : « 8m » et « 8M » seraient deux qualités sur les ordres de fabrication)."""
+    requete = select(Qualite.code).where(func.lower(Qualite.code) == code.lower())
     if qualite_id is not None:
         requete = requete.where(Qualite.id != qualite_id)
-    if s.scalar(requete) is not None:
-        raise Refus.etat(f"La qualité « {code} » existe déjà.", code="doublon")
+    autre = s.scalar(requete)
+    if autre is not None:
+        en_plus = f" (« {code} »)" if autre != code else ""
+        raise Refus.etat(f"La qualité « {autre} » existe déjà{en_plus}.", code="doublon")
 
 
 def ecrire_poids(s: Session, q: Qualite, poids: Sequence[PoidsSaisi]) -> None:
@@ -145,28 +148,39 @@ def avertir_oublis(s: Session, q: Qualite) -> str:
     manquants = recettes.oublies(recettes.poids_de(s, q.id), recettes.roles_portes(s, q.id), roles)
     if not manquants:
         return ""
+    sans_matiere = recettes.roles_sans_matiere(s)
     commencee = s.scalar(
         select(func.count())
         .select_from(Recette)
         .where(Recette.qualite_id == q.id, Recette.pourcentage > 0)
     )
     if q.actif and commencee:
-        raise Refus.saisie(recettes.message_oublies(manquants), code="recette_incomplete")
+        raise Refus.saisie(
+            recettes.message_oublies(manquants, sans_matiere), code="recette_incomplete"
+        )
+    a_creer = " ni ".join(code for code, _ in manquants if code in sans_matiere)
     return (
         "Rôle(s) avec un poids au m² mais sans matière dans la recette : "
         + ", ".join(code for code, _ in manquants)
         + ". Les besoins et la sortie vers les machines ne les comptent pas tant que la "
         "recette ne les nomme pas."
+        + (
+            f" Aucune matière {a_creer} n'existe au catalogue : la créer d'abord (Matières, "
+            "classification, fournisseurs)."
+            if a_creer
+            else ""
+        )
     )
 
 
-def avertissement_arretee(oublies: Sequence[tuple[str, Decimal]]) -> str:
+def avertissement_arretee(s: Session, oublies: Sequence[tuple[str, Decimal]]) -> str:
     """L'avertissement d'une recette incomplète enregistrée sur une qualité arrêtée."""
     if not oublies:
         return ""
+    message = recettes.message_oublies(oublies, recettes.roles_sans_matiere(s))
     return (
-        "Qualité arrêtée : recette enregistrée telle quelle. "
-        f"{recettes.message_oublies(oublies)} À faire avant de la remettre en service."
+        f"Qualité arrêtée : recette enregistrée telle quelle. {message} À faire avant de la "
+        "remettre en service."
     )
 
 
@@ -194,7 +208,7 @@ def modifier(s: Session, qui: Qui, qualite_id: int, f: FicheSaisie, version: int
     q.code, q.nom, q.actif = f.code, f.nom, f.actif
     ecrire_poids(s, q, f.poids)
     oublies = recettes.remplacer(s, q, f.recette) if f.recette is not None else []
-    avertissement = avertissement_arretee(oublies) or avertir_oublis(s, q)
+    avertissement = avertissement_arretee(s, oublies) or avertir_oublis(s, q)
     if _journal(s, qui, "modification qualité", q, avant):
         toucher(q, qui)
     if plan_avant.actif != q.actif:
@@ -245,7 +259,7 @@ def ecrire_recette(
     detail = f"{q.code} : {len(lignes)} ligne(s)" + (f" — {motif}" if motif else "")
     audit.journal(s, qui, "recette", ObjetJournal.qualite, q.id, detail=detail)
     recettes.enregistrer_version(s, q, qui.id, motif=motif)
-    return Resultat(q, avertissement_arretee(oublies))
+    return Resultat(q, avertissement_arretee(s, oublies))
 
 
 def _poids_a_restaurer(s: Session, v: RecetteVersion) -> dict[int, Decimal]:
@@ -292,7 +306,7 @@ def restaurer(
     recettes.enregistrer_version(
         s, q, qui.id, origine=OrigineVersion.restauration, motif=motif, restauree_de_id=v.id
     )
-    return Resultat(q, avertissement_arretee(oublies))
+    return Resultat(q, avertissement_arretee(s, oublies))
 
 
 def ecrire_plan(

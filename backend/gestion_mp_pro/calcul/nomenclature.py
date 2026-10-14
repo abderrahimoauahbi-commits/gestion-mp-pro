@@ -120,10 +120,27 @@ def nomenclature(donnees: Donnees) -> list[LigneNomenclature]:
 
 @dataclass
 class EcartRole:
-    """Un rôle de la recette dont les parts ne font pas 100 %."""
+    """Un rôle de la recette dont les parts ne font pas 100 %.
+
+    `sans_matiere` : aucune matière du catalogue ne porte ce rôle (la recette ne peut pas le
+    nommer tant que la matière n'est pas créée — le cas des Franges à la reprise).
+    """
 
     role: str
     somme: float
+    sans_matiere: bool = False
+
+
+def texte_ecart(e: EcartRole) -> str:
+    """« Poil (60 %) » ; un rôle sans matière au catalogue dit quoi faire : « Franges (0 % :
+    aucune matière Franges au catalogue — créer la matière Franges, puis la mettre dans la
+    recette) »."""
+    if not e.sans_matiere:
+        return f"{e.role} ({e.somme:.4g} %)"
+    return (
+        f"{e.role} ({e.somme:.4g} % : aucune matière {e.role} au catalogue — créer la matière "
+        f"{e.role}, puis la mettre dans la recette)"
+    )
 
 
 @dataclass
@@ -150,6 +167,7 @@ def _somme_du_role(donnees: Donnees, qualite: str, role: str) -> float:
 def controle_recettes(donnees: Donnees) -> list[ControleRecette]:
     """`Recettes!O6:R26` : la somme des % vaut 100 (à 0,01 point) dans chaque rôle utilisé."""
     resultats = []
+    roles_portes = {a.role_bom for a in donnees.articles}
     for qualite in donnees.qualites:
         ecarts = []
         total_roles = 0
@@ -159,7 +177,7 @@ def controle_recettes(donnees: Donnees) -> list[ControleRecette]:
             total_roles += 1
             somme = _somme_du_role(donnees, qualite.code, role)
             if abs(somme - CENT) > TOLERANCE_RECETTE:
-                ecarts.append(EcartRole(role=role, somme=somme))
+                ecarts.append(EcartRole(role, somme, sans_matiere=role not in roles_portes))
         resultats.append(
             ControleRecette(
                 qualite=qualite.code,

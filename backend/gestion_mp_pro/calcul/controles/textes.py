@@ -22,7 +22,9 @@ QUOI_FAIRE: dict[str, str] = {
     "C01": "La direction ouvre la qualité (Qualités et recettes › Recette) et corrige les "
     "pourcentages du rôle signalé jusqu'à 100 % (les achats, qui la lisent seulement, le lui "
     "signalent) : tant que ce n'est pas fait, le besoin en fil de cette qualité est faux, "
-    "et le plan d'achat avec lui.",
+    "et le plan d'achat avec lui. Si la ligne dit « aucune matière … au catalogue » (les "
+    "Franges, par exemple), créer d'abord cette matière (Matières, classification, fournisseurs : "
+    "son rôle, sa densité en kg/ml, son fournisseur), puis la mettre dans la recette.",
     "C02": HORS_SAISIE,
     "C03": "Ouvrir le retour et vérifier son motif : un retour des machines porte R1, R2 ou R4, "
     "un retour au fournisseur R3, R5 ou R6. S'il manque, annuler le retour "

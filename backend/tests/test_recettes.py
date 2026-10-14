@@ -296,3 +296,33 @@ def test_la_recette_se_saisit_en_metres_par_m2(achats: TestClient, direction: Te
     assert recette[cuir]["densite"] == 0.014
     assert (recette[cuir]["prix"], recette[cuir]["unite_prix"]) == (0.5, "ml")
     assert recette[poil]["ml_m2"] is None and recette[poil]["kg_m2"] == pytest.approx(2.0)
+
+
+def test_un_role_sans_matiere_au_catalogue_dit_de_creer_la_matiere(direction: TestClient) -> None:
+    """Audit n° 2 (décision Franges) : quand nulle matière du catalogue ne porte le rôle oublié,
+    le refus dit de créer la matière d'abord ; quand une matière existe, il dit de la nommer."""
+    role = ok(direction.post("/api/classification/roles", json={"code": unique("Velours")}), 201)
+    poil = matiere()
+    q = creer_qualite(direction, poids_m2={"Poil": 1}, parts={poil: 100})
+    corps = corps_fiche(
+        q, poids=[{"role_id": role_id("Poil"), "poids": 1}, {"role_id": role["id"], "poids": 2}]
+    )
+    r = direction.put(f"/api/qualites/{q['id']}", json=corps)
+    detail = refus(r, 422, f"La recette oublie le rôle {role['code']} (2 au m²)")["detail"]
+    assert f"aucune matière {role['code']} n'existe au catalogue" in detail
+    assert f"créer d'abord la matière {role['code']}" in detail
+    # Une matière de ce rôle créée : le refus redevient « y mettre ses matières ».
+    matiere(role=role["code"])
+    detail = refus(direction.put(f"/api/qualites/{q['id']}", json=corps), 422)["detail"]
+    assert detail.endswith(": y mettre ses matières, ou ramener son poids au m² à 0 dans la fiche.")
+    # La liste des qualités le dit aussi (badge de l'écran) : `sans_matiere` sur l'écart.
+    sans = creer_qualite(direction, poids_m2={"Poil": 1})
+    autre = ok(direction.post("/api/classification/roles", json={"code": unique("Lisiere")}), 201)
+    sans = ok(
+        direction.put(
+            f"/api/qualites/{sans['id']}",
+            json=corps_fiche(sans, poids=[{"role_id": autre["id"], "poids": "0.5"}]),
+        )
+    )
+    assert f"Aucune matière {autre['code']} n'existe au catalogue" in sans["avertissement"]
+    assert sans["controle"]["ecarts"] == [{"role": autre["code"], "somme": 0, "sans_matiere": True}]

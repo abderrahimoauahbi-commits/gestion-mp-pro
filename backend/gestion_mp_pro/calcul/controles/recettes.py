@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from gestion_mp_pro.calcul.controles.base import Contexte, Ligne, colonne, controle
-from gestion_mp_pro.calcul.nomenclature import controle_recettes
+from gestion_mp_pro.calcul.nomenclature import controle_recettes, texte_ecart
 
 
 @controle(
@@ -13,11 +13,12 @@ from gestion_mp_pro.calcul.nomenclature import controle_recettes
     colonnes=(colonne("qualite", "texte"), colonne("roles", "texte")),
 )
 def recette_hors_cent(ctx: Contexte) -> tuple[str, list[Ligne]]:
-    """La nomenclature doit sommer à 100 % dans chaque rôle utilisé."""
+    """La nomenclature doit sommer à 100 % dans chaque rôle utilisé ; un rôle qu'aucune matière
+    du catalogue ne porte le dit (« créer la matière Franges »)."""
     lignes: list[Ligne] = [
         {
             "qualite": r.qualite,
-            "roles": ", ".join(f"{e.role} ({e.somme:.4g} %)" for e in r.ecarts),
+            "roles": ", ".join(texte_ecart(e) for e in r.ecarts),
         }
         for r in controle_recettes(ctx.donnees)
         if not r.conforme
