@@ -29,6 +29,7 @@ from gestion_mp_pro.modeles import (
 )
 from gestion_mp_pro.modeles.enums import OrigineCours, StatutDocument
 from gestion_mp_pro.services import audit, horloge, lots, periode
+from gestion_mp_pro.services.importations import cours_repris
 from gestion_mp_pro.services.importations.parties import refus_saisie
 from gestion_mp_pro.services.importations.socle import (
     DIRHAM,
@@ -293,7 +294,9 @@ def _facture_sortie(s: Session, d: Dossier, r: Reception) -> str:
 
 def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: int) -> Dossier:
     """Détache toute une réception du dossier : sa marchandise attend de nouveau son dossier,
-    les frais restent ici (R-IMP-39, 40) ; la facture qui n'y a plus rien le quitte."""
+    les frais restent ici (R-IMP-39, 40) ; la facture qui n'y a plus rien le quitte. Le cours
+    payé des marchandises sorties reste au journal (`avant.cours_payes`) : un rattachement
+    le propose (`cours_repris`)."""
     d = ouvert(s, did, version)
     r = s.get(Reception, reception_id)
     if r is None:
@@ -313,6 +316,7 @@ def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: i
     periode.cout_hors_periode_close(s, d, "détachement d'une réception")
     sans_parts_sur(d, sortants)
     s.flush()
+    garde = cours_repris.cours_payes(sortantes)
     for x in sortantes:
         d.lignes.remove(x)
     s.flush()
@@ -321,5 +325,5 @@ def detacher(s: Session, qui: audit.Qui, did: int, version: int, reception_id: i
         f"{d.numero} · {r.numero} · {len(sortantes)} ligne(s) · {len(d.frais)} frais gardés "
         f"({mad(total)})"
     ) + _facture_sortie(s, d, r)
-    noter(s, qui, d, "réception détachée", detail)
+    noter(s, qui, d, "réception détachée", detail, avant=garde or None)
     return d

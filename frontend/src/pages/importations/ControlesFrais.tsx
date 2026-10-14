@@ -3,8 +3,8 @@
  * - Droits de douane : saisis · attendus (taux du code douanier × valeur en douane = achat + fret +
  *   assurance), écart signalé par le serveur (`droits_ecart_mad`, seuils réglés), matières sans code
  *   actif en liens vers leur fiche (pour y poser le code) ; « Proposer les droits ».
- * - TVA à l'importation : saisie (le **poste TVA seul**, anomalie 5.2 ; les autres récupérables à
- *   part) · attendue (taux réglé × (valeur en douane + droits + TPI)), écart au-delà de l'écart
+ * - TVA à l'importation : saisie (les **postes de nature TVA** seuls, anomalie 5.2 ; les autres
+ *   récupérables à part) · attendue (taux réglé × (valeur en douane + droits + TPI)), écart au-delà de l'écart
  *   toléré réglé (`toler_tva_import`). Les taux sont ceux des réglages, jamais écrits en dur.
  */
 import { Link } from 'react-router'

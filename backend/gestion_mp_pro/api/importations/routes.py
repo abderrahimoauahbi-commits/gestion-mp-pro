@@ -115,8 +115,8 @@ def lire(did: int, s: SessionDep) -> DossierFiche:
 )
 def creer(corps: DossierCreation, qui: QuiDep, s: SessionDep) -> DossierFiche:
     """Route 190."""
-    d = ouverture.creer(s, qui, ouverture.Ouverture(**corps.model_dump()))
-    return fiche_relue(s, d.id)
+    d, avis = ouverture.creer(s, qui, ouverture.Ouverture(**corps.model_dump()))
+    return fiche_relue(s, d.id, avis)
 
 
 @routeur.put(

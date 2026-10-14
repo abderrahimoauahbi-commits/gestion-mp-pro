@@ -8,7 +8,6 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from gestion_mp_pro.calcul.constantes import POSTES_VALEUR_EN_DOUANE
 from gestion_mp_pro.calcul.importations import LigneRevient
 from gestion_mp_pro.modeles import CodeDouanier, Dossier, DossierLigne
 from gestion_mp_pro.services.importations.modele import (
@@ -122,12 +121,14 @@ class _Lecteur:
         self.ctx = ctx
         self.revient = revient
         self.m = Marchandises()
+        self.douane = {p.code for p in ctx.postes.values() if p.entre_valeur_douane}
 
     def droits(
         self, x: DossierLigne, r: LigneRevient
     ) -> tuple[float, float | None, CodeDouanier | None]:
-        """Valeur en douane (achat + fret + assurance), droits attendus, code actif."""
-        douane = r.valeur_mad + sum(r.detail.get(p, 0.0) for p in POSTES_VALEUR_EN_DOUANE)
+        """Valeur en douane (achat + les frais qui y entrent : fret, assurance — le drapeau
+        `entre_valeur_douane` du poste), droits attendus, code actif."""
+        douane = r.valeur_mad + sum(r.detail.get(p, 0.0) for p in self.douane)
         matiere = self.ctx.matieres[x.matiere_id]
         code = self.ctx.codes.get(matiere.code_douanier_id) if matiere.code_douanier_id else None
         if code is not None and not code.actif:

@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 
+import { dire } from '../../composants/retour/Messages'
 import { api } from '../../lib/api'
 import { heureServeur } from '../../lib/heure'
 import { useEcriture } from '../../lib/requetes'
@@ -44,6 +45,14 @@ export interface EnTeteCorps {
   banque: string
   commentaire: string
   date_arrivee: string | null
+}
+
+/**
+ * Ce que le serveur dit d'un geste (`avis` de la fiche relue) : une marchandise entrée ou **reprise**
+ * au cours du bon, le cours payé à ressaisir dans Marchandises (audit n° 2). Un message par avis.
+ */
+export function direLesAvis(d: Pick<DossierFiche, 'avis'>): void {
+  for (const a of d.avis ?? []) dire(a, 'info')
 }
 
 /** « Enregistré à 14:05 », quatre secondes. */

@@ -6,7 +6,9 @@
  * (liens), rapprochement avec ce qu'elle a apporté (C36), et « Retirer » — grisé avec la raison du
  * serveur quand il ne se peut pas (un frais vise sa marchandise, dossier clos). « Ajouter une
  * facture » ouvre une fenêtre qui reprend `ChoixFacture` : les factures reçues qui n'attendent
- * encore aucun dossier (la liste « En attente ») ; toute leur marchandise entre au dossier.
+ * encore aucun dossier (la liste « En attente ») ; toute leur marchandise entre au dossier, au cours
+ * figé de son bon — le serveur le dit (`avis`), et une facture qui revient après un retrait n'y revient
+ * plus en silence : le dernier cours payé est rappelé, à ressaisir dans Marchandises (audit n° 2).
  */
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -27,7 +29,7 @@ import { useLecture } from '../../lib/requetes'
 import { ChoixFacture } from './ChoixFacture'
 import styles from './Importations.module.css'
 import type { DossierFiche, EnAttente, FactureDossier } from './types'
-import type { GestesDossier } from './useDossier'
+import { direLesAvis, type GestesDossier } from './useDossier'
 
 const arreter = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
@@ -157,10 +159,11 @@ function FenetreAjout({ d, g, fermer }: { d: DossierFiche; g: GestesDossier; fer
             action={() => 'Ajouter au dossier'}
             blocages={() => (d.actions.ajouter_facture ? [d.actions.ajouter_facture] : [])}
             onChoisir={async (f, localConfirme) => {
-              await g.ajouterFacture(f.facture_id, localConfirme)
+              const relu = await g.ajouterFacture(f.facture_id, localConfirme)
               dire(
                 `Facture ${f.numero} ajoutée au dossier ${d.numero} : ${nombre(f.lots)} lot(s), ${kg(f.quantite)}.`,
               )
+              direLesAvis(relu)
               fermer()
             }}
           />

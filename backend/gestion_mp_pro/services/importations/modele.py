@@ -8,7 +8,7 @@ toute clé monétaire suit les motifs du filtre des prix (`securite.CLES_MONETAI
 from __future__ import annotations
 
 import datetime as dt
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 
 from gestion_mp_pro.calcul.importations import EcartFacture
@@ -303,6 +303,9 @@ class DossierFiche(DossierResume):
     actions: Actions
     a_rattacher: list[FactureARattacher]
     nb_pieces: int
+    avis: list[str] = field(default_factory=list)
+    """Ce que le geste qui rend cette fiche vient de dire (une marchandise reprise au cours du
+    bon : le cours payé se ressaisit) ; vide sur une lecture."""
 
 
 @dataclass

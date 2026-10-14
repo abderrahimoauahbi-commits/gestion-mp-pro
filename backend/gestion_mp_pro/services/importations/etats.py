@@ -25,7 +25,7 @@ from gestion_mp_pro.modeles import Devise, Dossier, Facture
 from gestion_mp_pro.modeles.enums import OrigineCours, StatutDossier
 from gestion_mp_pro.modeles.types import COURS, arrondir
 from gestion_mp_pro.services import audit, horloge, periode
-from gestion_mp_pro.services.importations import parties
+from gestion_mp_pro.services.importations import cours_repris, parties
 from gestion_mp_pro.services.importations.fiche import resume
 from gestion_mp_pro.services.importations.ouverture import (
     arrivee_constatee,
@@ -160,6 +160,7 @@ def annuler(s: Session, qui: audit.Qui, did: int, version: int, motif: str) -> D
         lien.liberee_le = quand
         f = s.get(Facture, lien.facture_id)
         liberees.append(f.numero if f else str(lien.facture_id))
+    garde = cours_repris.cours_payes(d.lignes)
     for x in d.lignes:
         x.reception_ligne_id = None
     d.statut, d.annule_le, d.annule_par_id = StatutDossier.annule, quand, qui.id
@@ -171,5 +172,5 @@ def annuler(s: Session, qui: audit.Qui, did: int, version: int, motif: str) -> D
         detail += f" · {quoi} {', '.join(liberees)} libérée{'s' if len(liberees) > 1 else ''}"
     if d.frais:
         detail += f" · {len(d.frais)} frais ({mad(total)}) sortis du coût"
-    noter(s, qui, d, "annulation dossier", detail, avant={"statut": "ouvert"})
+    noter(s, qui, d, "annulation dossier", detail, avant={"statut": "ouvert", **garde})
     return d

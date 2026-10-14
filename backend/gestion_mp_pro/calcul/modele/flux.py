@@ -8,7 +8,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
-from gestion_mp_pro.calcul.constantes import POSTES_IMPORT, TYPES_MOUVEMENT
+from gestion_mp_pro.calcul.constantes import (
+    POSTES_IMPORT,
+    POSTES_VALEUR_EN_DOUANE,
+    TYPES_MOUVEMENT,
+)
 
 
 @dataclass(slots=True)
@@ -188,7 +192,15 @@ class Reception:
 
 @dataclass
 class ChargeImport:
-    """Un frais du dossier ; `ligne` le rattache à une seule marchandise."""
+    """Un frais du dossier ; `ligne` le rattache à une seule marchandise.
+
+    Les repères du dossier (droits et TVA attendus, valeur en douane) suivent la **nature** du
+    poste (`droits`, `tpi`, `tva`, `fret`, `assurance`) et `entre_valeur_douane`, comme l'écran et
+    le vérificateur indépendant (audit n° 2, 14/10/2026) : un poste sur mesure de nature
+    « droits » compte avec les droits. Sans nature (jeux du moteur, données d'origine), le code
+    (`DD`, `TPI`, `TVA`, `FRET`, `ASSUR`) fait foi : les cinq postes système donnent le même
+    résultat par les deux chemins (parité conservée).
+    """
 
     poste: str
     montant: float = 0.0
@@ -198,6 +210,8 @@ class ChargeImport:
     recuperable_poste: bool | None = None
     cle: str = "valeur"
     parts: dict[int, float] = field(default_factory=dict)
+    nature: str | None = None
+    entre_valeur_douane: bool | None = None
 
     @property
     def recuperable(self) -> bool:
@@ -205,6 +219,33 @@ class ChargeImport:
         if self.recuperable_poste is not None:
             return self.recuperable_poste
         return POSTES_IMPORT.get(self.poste, ("", False))[1]
+
+    def _est(self, nature: str, code: str) -> bool:
+        """De cette nature (référentiel), ou de ce code à défaut de nature."""
+        return self.nature == nature if self.nature is not None else self.poste == code
+
+    @property
+    def est_droits(self) -> bool:
+        """Des droits de douane (nature `droits`, à défaut le code DD)."""
+        return self._est("droits", "DD")
+
+    @property
+    def est_tpi(self) -> bool:
+        """La taxe parafiscale (nature `tpi`, à défaut le code TPI)."""
+        return self._est("tpi", "TPI")
+
+    @property
+    def est_tva(self) -> bool:
+        """La TVA de la douane (nature `tva`, à défaut le code TVA)."""
+        return self._est("tva", "TVA")
+
+    @property
+    def dans_valeur_douane(self) -> bool:
+        """Entre dans la valeur en douane (CAF : fret, assurance) — le drapeau du poste, à
+        défaut les codes FRET et ASSUR."""
+        if self.entre_valeur_douane is not None:
+            return self.entre_valeur_douane
+        return self.poste in POSTES_VALEUR_EN_DOUANE
 
 
 @dataclass

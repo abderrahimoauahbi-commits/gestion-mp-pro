@@ -179,9 +179,11 @@ def _verifier_nature(p: PosteFrais, e: PosteSaisi, nature: NatureFrais, u: Usage
         return
     if p.systeme:
         nature_lue = "récupérable" if p.recuperable else "un coût"
+        douane = " et entre dans la valeur en douane" if p.entre_valeur_douane else ""
         raise Refus.etat(
-            f"« {p.libelle} » est {nature_lue} par nature : les calculs du dossier (TVA "
-            "attendue) le lisent ainsi."
+            f"« {p.libelle} » est un poste système : il reste {nature_lue}, de nature "
+            f"« {p.nature} »{douane} — les calculs du dossier (valeur en douane, droits et TVA "
+            "attendus) le lisent ainsi. Une autre nature se crée comme un autre poste."
         )
     if u.dossiers_clos:
         raise Refus.etat(

@@ -166,8 +166,9 @@ def test_un_poste_systeme_garde_sa_nature(direction: TestClient) -> None:
     }
     r = direction.put(f"/api/postes-frais/{tva}", json=corps)
     assert r.json()["detail"] == (
-        "« TVA à l'importation » est récupérable par nature : les calculs du dossier (TVA "
-        "attendue) le lisent ainsi."
+        "« TVA à l'importation » est un poste système : il reste récupérable, de nature « tva » "
+        "— les calculs du dossier (valeur en douane, droits et TVA attendus) le lisent ainsi. "
+        "Une autre nature se crée comme un autre poste."
     )
 
 

@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from gestion_mp_pro.calcul.constantes import (
     CENTIME,
     ECART_DROITS_MINIMUM,
-    POSTES_VALEUR_EN_DOUANE,
     RECUPERABLES,
     TOLERANCE_DROITS_IMPORT,
     TOLERANCE_TVA_IMPORT,
@@ -82,14 +81,16 @@ def valeur_ligne_import(ligne: LigneImport, parametres: Parametres) -> float:
 
 
 def tva_attendue(dossier: DossierImport, parametres: Parametres) -> float:
-    """TVA = taux × (valeur en douane + droits + TPI), valeur en douane = marchandise + fret +
-    assurance (CAF) ; la TPI saisie se prend telle quelle, sinon elle se calcule."""
+    """TVA = taux × (valeur en douane + droits + TPI), valeur en douane = marchandise + les
+    frais qui y entrent (CAF : fret, assurance) ; droits et TPI par la **nature** de leur poste
+    (`ChargeImport.est_droits`, `est_tpi`) ; la TPI saisie se prend telle quelle, sinon elle se
+    calcule."""
     if not dossier.lignes:
         return 0.0
     douane = sum(valeur_ligne_import(x, parametres) for x in dossier.lignes)
-    douane += sum(c.montant for c in dossier.charges if c.poste in POSTES_VALEUR_EN_DOUANE)
-    droits = sum(c.montant for c in dossier.charges if c.poste == "DD")
-    tpi_saisie = [c.montant for c in dossier.charges if c.poste == "TPI"]
+    douane += sum(c.montant for c in dossier.charges if c.dans_valeur_douane)
+    droits = sum(c.montant for c in dossier.charges if c.est_droits)
+    tpi_saisie = [c.montant for c in dossier.charges if c.est_tpi]
     tpi = sum(tpi_saisie) if tpi_saisie else douane * parametres.taux_tpi_import
     return (douane + droits + tpi) * parametres.taux_tva_import
 

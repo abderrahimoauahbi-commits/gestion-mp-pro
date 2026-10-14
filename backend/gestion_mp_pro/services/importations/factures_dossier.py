@@ -14,7 +14,8 @@ elle, une ligne reçue ne sort qu'avec toute sa réception.
   perdant reçoit un 409 qui nomme le dossier gagnant.
 - **Retirer** une facture : sa marchandise sort du dossier et attend de nouveau (les frais
   restent, répartis sur ce qui reste) ; refusé si un frais vise une marchandise qu'elle a
-  apportée (il sortirait avec elle, I19).
+  apportée (il sortirait avec elle, I19). Son cours payé sort avec elle : le journal le garde
+  (`avant.cours_payes`) et un ré-ajout le propose, sans le remettre (`cours_repris`).
 """
 
 from __future__ import annotations
@@ -27,7 +28,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.modeles import Dossier, DossierFacture, Facture, Reception, ReceptionLigne
 from gestion_mp_pro.services import audit, periode
-from gestion_mp_pro.services.importations import parties
+from gestion_mp_pro.services.importations import cours_repris, parties
 from gestion_mp_pro.services.importations.fiche import resumer
 from gestion_mp_pro.services.importations.marchandises import sans_parts_sur
 from gestion_mp_pro.services.importations.ouverture import (
@@ -58,9 +59,10 @@ def _disparates(s: Session, d: Dossier) -> str:
 
 def ajouter(
     s: Session, qui: audit.Qui, did: int, version: int, facture_id: int, *, local_confirme: bool
-) -> Dossier:
+) -> tuple[Dossier, list[str]]:
     """Ajoute au dossier une facture reçue qui n'est dans aucun dossier : toute sa marchandise
-    libre y entre (route 253)."""
+    libre y entre (route 253), au cours figé de son bon — la réponse le dit, et une reprise
+    propose le dernier cours payé (`avis`)."""
     d = ouvert(s, did, version)
     if a_la_main(d):
         raise Refus.etat(parties.A_LA_MAIN_AJOUT)
@@ -69,13 +71,16 @@ def ajouter(
     paires = de_la_facture(s, f)
     periode.cout_hors_periode_close(s, d, "ajout d'une facture", [r.date for _, r in paires])
     lien = DossierFacture(facture_id=f.id, ajoutee_par_id=qui.id)
-    inserer(s, d, marchandises(s, paires), f.id, lien)
+    lignes = marchandises(s, paires)
+    inserer(s, d, lignes, f.id, lien)
+    notes = cours_repris.avis(s, f.numero, lignes)
     if local:
         d.local_confirme = True
     detail = f"{d.numero} · facture {f.numero} · {nom} · {len(paires)} ligne(s)"
     detail += " · fournisseur marocain, confirmé" if local else ""
-    noter(s, qui, d, "facture ajoutée", detail + _disparates(s, d), apres={"facture": f.numero})
-    return d
+    detail += _disparates(s, d) + cours_repris.marque(notes)
+    noter(s, qui, d, "facture ajoutée", detail, apres={"facture": f.numero})
+    return d, notes
 
 
 def _apportees(s: Session, d: Dossier, facture_id: int) -> set[int]:
@@ -108,7 +113,9 @@ def retirer(s: Session, qui: audit.Qui, did: int, version: int, facture_id: int)
     periode.cout_hors_periode_close(s, d, "retrait d'une facture")
     sans_parts_sur(d, sortants)
     s.flush()
-    for x in [y for y in d.lignes if y.id in sortants]:
+    sortantes = [y for y in d.lignes if y.id in sortants]
+    garde = cours_repris.cours_payes(sortantes)
+    for x in sortantes:
         d.lignes.remove(x)
     d.factures.remove(lien)
     s.flush()
@@ -117,5 +124,5 @@ def retirer(s: Session, qui: audit.Qui, did: int, version: int, facture_id: int)
         f"{d.numero} · facture {f.numero} · {len(sortants)} ligne(s) sortie(s) · "
         f"{len(d.frais)} frais gardés ({mad(total)})"
     )
-    noter(s, qui, d, "facture retirée", detail, avant={"facture": f.numero})
+    noter(s, qui, d, "facture retirée", detail, avant={"facture": f.numero, **garde})
     return d

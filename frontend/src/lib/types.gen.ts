@@ -3417,7 +3417,7 @@ export interface paths {
     put?: never
     /**
      * Ajouter au dossier le second camion de sa facture (toute sa marchandise libre).
-     * @description Route 192.
+     * @description Route 192 ; `avis` dit le cours auquel la marchandise entre (celui du bon).
      */
     post: operations['rattacher_api_dossiers__did__rattacher_post']
     delete?: never
@@ -3437,7 +3437,8 @@ export interface paths {
     put?: never
     /**
      * Ajouter au dossier une facture reçue qui n'est dans aucun dossier (sa marchandise).
-     * @description Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme.
+     * @description Route 253 : toute sa marchandise libre entre ; un fournisseur marocain se confirme ;
+     *     `avis` dit qu'elle entre au cours du bon (et, reprise, le dernier cours payé).
      */
     post: operations['ajouter_facture_api_dossiers__did__factures_post']
     delete?: never
@@ -6490,6 +6491,11 @@ export interface components {
       a_rattacher: components['schemas']['FactureARattacher'][]
       /** Nb Pieces */
       nb_pieces: number
+      /**
+       * Avis
+       * @description ce que le geste vient de dire (marchandise reprise au cours du bon : le cours payé se ressaisit dans Marchandises) ; vide sur une lecture
+       */
+      avis?: string[]
     }
     /**
      * DossierModification
