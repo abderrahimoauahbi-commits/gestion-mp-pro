@@ -1,6 +1,8 @@
 /**
  * L'accueil de l'atelier (`/atelier`) : ce que l'atelier a sorti aujourd'hui (net des retours,
- * an. 22), sept tuiles (« Envoyer aux machines » sur toute la largeur, les six autres par deux, aux
+ * an. 22), sept tuiles dans l'ordre du travail de l'homme de l'atelier (Mohamed, 14/10/2026) :
+ * envoyer, retour, transfert, montage, stock des fils, puis ordres et signaler (« Envoyer aux
+ * machines » sur toute la largeur, les six autres par deux, aux
  * détails courts : elles tiennent toutes à 360 × 640), une astuce, « Se déconnecter » loin des tuiles et confirmé. Les compteurs
  * des signalements sont ceux du compte connecté (filtrés au serveur par identifiant, an. 25).
  */
@@ -73,24 +75,29 @@ function TuilesAtelier({ moi }: { moi: number }) {
         detail="Ce qui revient, lot par lot."
       />
       <Tuile
+        titre="Transfert entre magasins"
+        icone="lots"
+        vers="/atelier/deplacer"
+        detail="D’un magasin à un autre."
+      />
+      <Tuile
+        titre="Montage des machines"
+        icone="usine"
+        vers="/atelier/montage"
+        detail="Fils montés et leur %, étage par étage."
+      />
+      <Tuile
+        titre="Stock des fils"
+        icone="recherche"
+        vers="/atelier/chercher"
+        detail="Où est un fil : magasins et atelier."
+      />
+      <Tuile
         titre="Ordres"
         icone="document"
         vers="/atelier/ordres"
         ton={nb ? 'attention' : undefined}
         detail={nb ? `${nombre(nb)} brouillon(s) à finir` : 'Les sorties récentes'}
-      />
-      <Tuile
-        titre="Trouver un lot"
-        icone="recherche"
-        vers="/atelier/chercher"
-        detail="Chercher, scanner l’étiquette."
-      />
-      <Tuile titre="Déplacer" icone="lots" vers="/atelier/deplacer" detail="D’un magasin à un autre." />
-      <Tuile
-        titre="Monter les fils"
-        icone="usine"
-        vers="/atelier/montage"
-        detail="Par métier, étage par étage."
       />
       <Tuile
         titre="Signaler un besoin"

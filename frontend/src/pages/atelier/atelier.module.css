@@ -199,3 +199,19 @@
   padding: 0;
   list-style: none;
 }
+
+/* « Trouver un lot » par fil : l'en-tête du fil (en stock, à l'atelier), puis ses lots. */
+.blocFil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}
+
+.enteteFil {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--espace-3);
+  border-radius: var(--rayon);
+  background: var(--ton-accent-clair);
+}

@@ -4,7 +4,7 @@
  * en nouvel onglet, aucun prix (an. 27) ; déplacement en une requête validée, mise en quarantaine
  * au motif imposé avec observations obligatoires, libération jamais proposée ((d)).
  */
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -27,7 +27,14 @@ describe('Trouver un lot et sa fiche', () => {
     await screen.findAllByRole('listitem')
     await u.type(screen.getByRole('searchbox', { name: 'Chercher un lot' }), 'rouge')
     await waitFor(() => expect(appels.some((a) => a.chemin.includes('q=rouge'))).toBe(true))
-    expect(screen.getByRole('link', { name: /POIL ROUGE 2900.*lot L-2601/ })).toHaveAttribute(
+    // Regroupé par fil : l'en-tête dit le stock et l'atelier, chaque lot ses magasins.
+    const fil = screen
+      .getAllByRole('region')
+      .find((r) => /POIL ROUGE 2900/.test(r.getAttribute('aria-label') ?? ''))
+    expect(fil).toBeDefined()
+    expect(fil?.textContent).toMatch(/En stock/)
+    expect(fil?.textContent).toMatch(/À l’atelier \(sur les métiers\)/)
+    expect(within(fil as HTMLElement).getByRole('link', { name: /lot L-2601/ })).toHaveAttribute(
       'href',
       '/atelier/lots/1',
     )
