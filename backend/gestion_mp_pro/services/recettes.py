@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -88,16 +88,49 @@ def etat(s: Session, qualite_id: int) -> Etat:
     return Etat(lignes=lignes_de(s, qualite_id), poids=poids_de(s, qualite_id))
 
 
-def message_oublies(oublies: Sequence[tuple[str, Decimal]]) -> str:
-    """Le refus (ou l'avertissement) d'un rôle pesant sans matière (X-REF-48, mot pour mot)."""
+def roles_sans_matiere(s: Session) -> frozenset[str]:
+    """Les rôles qu'aucune matière du catalogue ne porte (désactivées comprises) : une recette
+    ne peut pas les nommer tant que la matière n'est pas créée (les Franges à la reprise)."""
+    portes = select(Matiere.role_id).distinct()
+    requete = select(RoleNomenclature.code).where(RoleNomenclature.id.not_in(portes))
+    return frozenset(s.scalars(requete))
+
+
+def _suite_oublies(oublies: Sequence[tuple[str, Decimal]], sans_matiere: Collection[str]) -> str:
+    """Ce qu'il faut faire : nommer les matières, ou d'abord créer celle qui manque au catalogue."""
+    a_creer = [code for code, _ in oublies if code in sans_matiere]
+    un = len(oublies) == 1
+    if not a_creer:
+        return (
+            " : y mettre ses matières, ou ramener son poids au m² à 0 dans la fiche."
+            if un
+            else " : y mettre leurs matières, ou ramener leur poids au m² à 0 dans la fiche."
+        )
+    if len(a_creer) == 1:
+        role = a_creer[0]
+        poids = "son poids" if un else f"le poids de {role}"
+        return (
+            f" : aucune matière {role} n'existe au catalogue — créer d'abord la matière {role} "
+            "(Matières, classification, fournisseurs : son rôle, sa densité en kg/ml, son "
+            f"fournisseur), puis la mettre dans la recette ; ou ramener {poids} au m² à 0 dans "
+            "la fiche."
+        )
+    return (
+        " : aucune matière " + " ni ".join(a_creer) + " n'existe au catalogue — créer d'abord "
+        "ces matières (Matières, classification, fournisseurs), puis les mettre dans la recette ; "
+        "ou ramener leur poids au m² à 0 dans la fiche."
+    )
+
+
+def message_oublies(
+    oublies: Sequence[tuple[str, Decimal]], sans_matiere: Collection[str] = ()
+) -> str:
+    """Le refus (ou l'avertissement) d'un rôle pesant sans matière (X-REF-48) ; un rôle que
+    nulle matière du catalogue ne porte (`sans_matiere`) dit « créer d'abord la matière »."""
     un = len(oublies) == 1
     roles = ", ".join(f"{code} ({texte(poids)} au m²)" for code, poids in oublies)
-    suite = (
-        " : y mettre ses matières, ou ramener son poids au m² à 0 dans la fiche."
-        if un
-        else " : y mettre leurs matières, ou ramener leur poids au m² à 0 dans la fiche."
-    )
-    return ("La recette oublie le rôle " if un else "La recette oublie les rôles ") + roles + suite
+    debut = "La recette oublie le rôle " if un else "La recette oublie les rôles "
+    return debut + roles + _suite_oublies(oublies, sans_matiere)
 
 
 def _matieres(s: Session, lignes: Sequence[LigneSaisie]) -> dict[int, Matiere]:
@@ -164,7 +197,9 @@ def remplacer(s: Session, q: Qualite, lignes: Sequence[LigneSaisie]) -> list[tup
         )
     manquants = oublies(poids_de(s, q.id), set(sommes), roles)
     if manquants and q.actif:
-        raise Refus.saisie(message_oublies(manquants), code="recette_incomplete")
+        raise Refus.saisie(
+            message_oublies(manquants, roles_sans_matiere(s)), code="recette_incomplete"
+        )
     s.execute(delete(Recette).where(Recette.qualite_id == q.id))
     for x in lignes:
         s.add(Recette(qualite_id=q.id, matiere_id=x.matiere_id, pourcentage=x.pourcentage))

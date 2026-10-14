@@ -4,7 +4,7 @@
  * du serveur, conflit rechargeable, retour à une version avec un motif exigé, onglet de la liste
  * gardé sous la fiche.
  */
-import { screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -17,6 +17,7 @@ import {
 } from '../../essais/monter'
 import { qualiteEssai, reponsesQualites } from './donneesEssai'
 import { synthese } from './indicateurs'
+import { BadgeRecette } from './OngletQualites'
 import { ficheDe } from './Qualites'
 
 beforeAll(prechargerPages)
@@ -33,6 +34,27 @@ async function ficheChargee() {
 }
 
 describe('Qualités', () => {
+  it('le badge d’une recette dit de créer la matière d’un rôle que nul fil du catalogue ne porte', () => {
+    const q = qualiteEssai({
+      poids: [
+        { role_id: 1, role: 'Poil', lineaire: false, poids: 1.2 },
+        { role_id: 6, role: 'Franges', lineaire: true, poids: 0.8 },
+        { role_id: 5, role: 'Cuir', lineaire: true, poids: 2 },
+      ],
+      controle: {
+        roles_utilises: 3,
+        roles_conformes: 1,
+        conforme: false,
+        ecarts: [
+          { role: 'Franges', somme: 0, sans_matiere: true },
+          { role: 'Cuir', somme: 90, sans_matiere: false },
+        ],
+      },
+    })
+    render(<BadgeRecette q={q} />)
+    expect(screen.getByText('créer la matière Franges · Cuir 90,0 %')).toBeInTheDocument()
+  })
+
   it('synthèse sur les qualités en service ; arrêtées à part', () => {
     const s = synthese([
       qualiteEssai(),
@@ -43,7 +65,7 @@ describe('Qualités', () => {
         controle: {
           roles_utilises: 1,
           roles_conformes: 0,
-          ecarts: [{ role: 'Poil', somme: 90 }],
+          ecarts: [{ role: 'Poil', somme: 90, sans_matiere: false }],
           conforme: false,
         },
       }),

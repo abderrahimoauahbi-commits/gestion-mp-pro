@@ -55,11 +55,17 @@ export function Liste({
   )
 }
 
-/** Un texte principal et sa note dessous (référence et rôle, date et heure de saisie…). */
+/** Un texte principal et sa note dessous (référence et rôle, date et heure de saisie…) ; un
+ * texte coupé par la largeur de sa colonne (« … ») se lit entier au survol. */
 export function Double({ haut, bas, mono }: { haut: ReactNode; bas?: ReactNode; mono?: boolean }) {
   return (
     <span className={styles.double}>
-      <span className={classes(styles.fort, mono && styles.mono)}>{haut}</span>
+      <span
+        className={classes(styles.fort, mono && styles.mono)}
+        title={typeof haut === 'string' ? haut : undefined}
+      >
+        {haut}
+      </span>
       {bas ? <span className={styles.dessous}>{bas}</span> : null}
     </span>
   )

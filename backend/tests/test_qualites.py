@@ -173,3 +173,22 @@ def test_journal_avant_apres_d_une_qualite(direction: TestClient) -> None:
         == (lue["version"])
     )
     assert len(ok(direction.get(f"/api/historique/qualite/{q['id']}"))) == len(lignes_histo)
+
+
+def test_le_code_d_une_qualite_est_unique_sans_tenir_compte_de_la_casse(
+    direction: TestClient,
+) -> None:
+    """Audit n° 2 : « 8m » après « 8M » ferait deux qualités sur les ordres de fabrication ;
+    refus 409 `doublon` qui nomme la qualité existante (comme les matières, A-12)."""
+    q = creer_qualite(direction, unique("Qc").upper())
+    r = direction.post("/api/qualites", json={"code": q["code"].lower(), "nom": "", "poids": []})
+    assert (
+        refus(r, 409, f"La qualité « {q['code']} » existe déjà (« {q['code'].lower()} »)")["code"]
+        == "doublon"
+    )
+    autre = creer_qualite(direction)
+    bas = q["code"].lower()
+    r = direction.put(f"/api/qualites/{autre['id']}", json=corps_fiche(autre, code=bas))
+    assert refus(r, 409, "existe déjà")["code"] == "doublon"
+    # Sa propre casse se corrige.
+    ok(direction.put(f"/api/qualites/{q['id']}", json=corps_fiche(q, code=q["code"].lower())))

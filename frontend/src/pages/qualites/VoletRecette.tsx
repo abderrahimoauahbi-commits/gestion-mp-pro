@@ -98,7 +98,10 @@ export function VoletRecette(p: VoletRecetteProps) {
     () => f.forme.lignes.filter((l) => l.disparue).map((l) => l.reference),
     [f.forme.lignes],
   )
-  const sansMatiere = groupes.filter((g) => g.etat === 'vide' && g.poids > 0).map((g) => g.role)
+  const vides = groupes.filter((g) => g.etat === 'vide' && g.poids > 0)
+  const portes = new Set(p.matieres.map((m) => m.role_id))
+  const aCreer = vides.filter((g) => !portes.has(g.role_id)).map((g) => g.role)
+  const sansMatiere = vides.filter((g) => portes.has(g.role_id)).map((g) => g.role)
   return (
     <div className={styles.volet}>
       <BlocFiche {...p} />
@@ -112,11 +115,19 @@ export function VoletRecette(p: VoletRecetteProps) {
           {disparues.join(', ')}) : elles seront retirées à l’enregistrement.
         </Note>
       ) : null}
-      {sansMatiere.length ? (
+      {vides.length ? (
         <Blocages
           titre="Rôle(s) avec un poids au m² mais sans matière :"
           blocages={[
-            `${sansMatiere.join(', ')} — leurs kilos manqueraient aux besoins et aux sorties : ajouter une matière avant d’enregistrer`,
+            ...aCreer.map(
+              (r) =>
+                `${r} — aucune matière ${r} n’existe au catalogue : créer la matière ${r} (Matières, classification, fournisseurs : son rôle, sa densité, son fournisseur), puis la mettre ici`,
+            ),
+            ...(sansMatiere.length
+              ? [
+                  `${sansMatiere.join(', ')} — leurs kilos manqueraient aux besoins et aux sorties : ajouter une matière avant d’enregistrer`,
+                ]
+              : []),
           ]}
         />
       ) : null}

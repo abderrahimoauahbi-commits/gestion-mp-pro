@@ -13,6 +13,7 @@ from gestion_mp_pro.calcul.nomenclature import (
     metres_du_role,
     nomenclature,
     poids_du_role,
+    texte_ecart,
 )
 
 
@@ -83,3 +84,23 @@ def test_les_kilos_au_m2_d_un_role_au_poids_et_d_un_role_au_metre() -> None:
     assert fr.cout_m2_mad == pytest.approx(0.01 * 50 * 11 * 1.02)
     assert po.cout_m2_mad == pytest.approx(1.5 * 20 * 1.02) and po.poids_categorie == 2.0
     assert (absent.kg_m2, absent.cout_m2_mad, absent.role_bom) == (0, 0, "")
+
+
+def test_un_role_pesant_sans_aucune_matiere_au_catalogue_dit_de_creer_la_matiere() -> None:
+    """Audit n° 2 (décision Franges) : six qualités pèsent 0,8 ml/m² de Franges alors que nulle
+    matière Franges n'existe ; l'écart le dit (« créer la matière Franges ») au lieu d'un
+    « Franges (0 %) » obscur. Un rôle à 0 % dont une matière existe garde l'ancien texte."""
+    d = Donnees(
+        articles=[Article(reference="P", role_bom="Poil"), Article(reference="C", role_bom="Cuir")],
+        qualites=[Qualite(code="8M", poids={"Poil": 1.0, "Franges": 0.8, "Cuir": 0.5})],
+        recettes=[LigneRecette("8M", "P", 100)],
+    )
+    (q,) = controle_recettes(d)
+    ecarts = {e.role: e for e in q.ecarts}
+    assert ecarts["Franges"].sans_matiere and ecarts["Franges"].somme == 0
+    assert not ecarts["Cuir"].sans_matiere
+    assert texte_ecart(ecarts["Cuir"]) == "Cuir (0 %)"
+    assert texte_ecart(ecarts["Franges"]) == (
+        "Franges (0 % : aucune matière Franges au catalogue — créer la matière Franges, puis la "
+        "mettre dans la recette)"
+    )

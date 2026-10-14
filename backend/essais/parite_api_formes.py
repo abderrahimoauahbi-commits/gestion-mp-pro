@@ -13,6 +13,7 @@ ne reconnaît pas reste telle quelle et l'écart se voit.
 | code sans émoji | « ⚪ Attendu », « 🟢 Stratégique » | `attendu`, « Stratégique » | P8-23 |
 | renvoi | `["BC-2026-0024"]` | `[{"id": 102, "numero": "BC-2026-0024"}]` | API-PRO § 0 |
 | statut | « Confirmée », `validee`… | codes de la base | table `STATUTS` |
+| conseil de recette | « Franges (0 %) » | « … créer la matière Franges » (C01) | audit n° 2 |
 """
 
 from __future__ import annotations
@@ -180,6 +181,22 @@ def surcout_en_pourcent(g: Any, p: Any) -> tuple[Any, Any]:
         copie["surcout_pct"] = None if fraction is None else round(fraction * 100, 1)
         rendu.append(copie)
     return g, rendu
+
+
+def conseil_recette(g: Any, p: Any) -> tuple[Any, Any]:
+    """Audit n° 2 (décision Franges) : PRO dit « créer la matière Franges » sur un rôle pesant
+    que nulle matière du catalogue ne porte (ligne et « quoi faire » de C01, `sans_matiere` sur
+    un écart de recette) ; Gestion MP disait « Franges (0 %) ». Même anomalie, même compte :
+    la forme de PRO est ramenée à celle de Gestion MP (`tests/moteur/jeux_outils.CONSEIL_C01`)."""
+    import sys
+    from pathlib import Path
+
+    tests = str(Path(__file__).resolve().parents[1] / "tests")
+    if tests not in sys.path:
+        sys.path.insert(0, tests)
+    from moteur.jeux_outils import sans_conseil_recette
+
+    return g, sans_conseil_recette(p)
 
 
 def pesee_comme_gestion_mp(p: dict[str, Any]) -> dict[str, Any]:

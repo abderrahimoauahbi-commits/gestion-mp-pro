@@ -123,6 +123,9 @@ class EcartRole(Sortie):
 
     role: str
     somme: float
+    sans_matiere: bool = Field(
+        default=False, description="aucune matière du catalogue ne porte ce rôle : la créer"
+    )
 
 
 class ControleQualite(Sortie):
