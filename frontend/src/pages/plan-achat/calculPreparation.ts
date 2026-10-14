@@ -197,6 +197,17 @@ export function ecart(l: LigneSaisie): Ecart {
   return { genre: 'ecart', valeur: e, ton: Math.abs(e) <= 0.1 ? 'ok' : e > 0 ? 'attention' : 'critique' }
 }
 
+/** Pourquoi le badge de l'écart a ce ton (son infobulle) : la suggestion couvre le besoin calculé. */
+export function expliquerEcart(e: Ecart): string {
+  if (e.genre !== 'ecart') return ''
+  const part = `${Math.round(Math.abs(e.valeur) * 100)} %`
+  if (e.ton === 'critique')
+    return `Commandé ${part} sous la suggestion du calcul : le besoin ne serait pas couvert jusqu’à la commande suivante, risque de rupture.`
+  if (e.ton === 'attention')
+    return `Commandé ${part} au-dessus de la suggestion du calcul : plus de stock et de trésorerie immobilisés que le besoin.`
+  return `À ${part} de la suggestion du calcul (10 % près : le besoin reste couvert sans surstock).`
+}
+
 /** L'avertissement de la ligne (non bloquant) : sous le minimum, ou unité entamée. */
 export function avertissement(l: LigneSaisie): string {
   if (l.retenue && l.minimum > 0 && l.quantite > 0 && l.quantite < l.minimum)

@@ -168,8 +168,10 @@ _RECEPTION = (
             "(contrôle C08). Sans bon de livraison, une pesée franchement sous le reste à livrer "
             "est une livraison partielle, pas un écart."),
     _n("toler_excedent", "Excédent de livraison toléré", RECEPTION, 0.1, 0, 10, P, 100,
-       aide="Une ligne de bon reçoit au plus son reste à livrer plus cette part de la ligne ; "
-            "au-delà, la réception est refusée (le surplus se reçoit hors commande)."),
+       aide="Une ligne de bon reçoit au plus son reste à livrer plus cette part de la quantité "
+            "commandée sur la ligne (pas du reste), tous les camions ensemble : une ligne de "
+            "1 000 kg à 5 % reçoit au plus 1 050 kg en tout, même en plusieurs livraisons. "
+            "Au-delà, la réception est refusée (le surplus se reçoit hors commande)."),
     _n("toler_poids_bobine", "Tolérance du poids de bobine", RECEPTION, 0.05, 0, 1, P, 100,
        aide="Un poids de bobine reçu éloigné du catalogue de plus de ce taux est signalé "
             "(contrôle C30)."),

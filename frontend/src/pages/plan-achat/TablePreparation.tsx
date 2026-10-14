@@ -13,7 +13,7 @@ import { cleStock } from '../../lib/statuts'
 import styles from './achats.module.css'
 import { deux } from './colonnesFournisseurs'
 import { libelleUnite, quantiteEnUnite } from './libelles'
-import { avertissement, changerUnite, ecart, type LigneSaisie } from './calculPreparation'
+import { avertissement, changerUnite, ecart, expliquerEcart, type LigneSaisie } from './calculPreparation'
 
 export interface Edition {
   modifier: (id: number, changement: Partial<LigneSaisie>) => void
@@ -45,7 +45,11 @@ function Ecart({ l }: { l: LigneSaisie }) {
   if (e.genre === 'hors_calcul') return <Badge ton="neutre">hors calcul</Badge>
   if (e.genre === 'suggestion') return <span className={styles.note}>suggestion</span>
   if (e.genre === 'aucun') return <>{VIDE}</>
-  return <Badge ton={e.ton}>{partSignee(e.valeur, 0)}</Badge>
+  return (
+    <Badge ton={e.ton} titre={expliquerEcart(e)}>
+      {partSignee(e.valeur, 0)}
+    </Badge>
+  )
 }
 
 function Kilos({ l, ed }: { l: LigneSaisie; ed: Edition }) {
@@ -56,7 +60,7 @@ function Kilos({ l, ed }: { l: LigneSaisie; ed: Edition }) {
         valeur={arrondi(l.quantite, 1)}
         onChange={(v) => ed.modifier(l.matiere_id, { quantite: Math.max(0, v ?? 0) })}
         min={0}
-        decimales={3}
+        decimales={2}
         libelle={`Kilos de ${l.reference}`}
         className={styles.champCourt}
       />

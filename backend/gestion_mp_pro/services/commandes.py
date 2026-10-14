@@ -339,6 +339,11 @@ def confirmer_prix(s: Session, qui: audit.Qui, cid: int, e: Confirmation) -> Bon
             raise Refus.saisie("Ligne étrangère à ce bon.", code="valeur_inconnue")
         m = bon.matieres[x.matiere_id]
         x.prix = arrondir(_prix_au_kg(m, p), PRIX)
+        if x.prix <= 0:
+            raise Refus.saisie(
+                f"« {m.reference} » : {nombre_fr(p.prix, 7)} {c.devise} / {p.unite} vaut 0 au kilo "
+                "une fois arrondi au millionième : saisir le prix réel."
+            )
         x.prix_confirme, x.confirme_le, x.confirme_par_id = True, horloge.maintenant(), qui.id
         if e.mettre_a_jour_catalogue:
             _au_catalogue(s, qui, bon, m, float(x.prix))

@@ -79,6 +79,20 @@ def prix_catalogue_kg(m: Matiere) -> float:
     return float(m.prix)
 
 
+def kg_par_ml(m: Matiere) -> float:
+    """La densité d'une matière d'un rôle au mètre (`lineaire` : cuir, franges, ruban), 0 sinon —
+    la règle du moteur (`calcul.modele.Article.kg_par_ml`) : les mètres indicatifs de la fiche et
+    du bon fournisseur suivent le rôle, pas la seule présence d'une densité. La fiche doit avoir
+    été chargée avec son rôle (`charger_matieres`)."""
+    return float(m.densite or 0) if m.role.lineaire else 0.0
+
+
+def charger_matieres(s: Session, ids: Iterable[int]) -> dict[int, Matiere]:
+    """Les fiches de ces matières, avec leur rôle (pour `kg_par_ml`)."""
+    requete = select(Matiere).where(Matiere.id.in_(list(ids))).options(selectinload(Matiere.role))
+    return {m.id: m for m in s.scalars(requete)}
+
+
 def prix_catalogue_en(m: Matiere, devise: str, taux: dict[str, float]) -> float:
     """Le prix du catalogue dans la devise voulue, converti au cours du jour (R-CMD-09)."""
     prix = prix_catalogue_kg(m)
@@ -145,8 +159,7 @@ def charger(s: Session, cid: int, *, verrou: bool = False) -> Bon:
 
 def completer(s: Session, c: Commande) -> Bon:
     """Le fournisseur et les fiches des matières d'un bon chargé."""
-    ids = {x.matiere_id for x in c.lignes}
-    matieres = {m.id: m for m in s.scalars(select(Matiere).where(Matiere.id.in_(ids)))}
+    matieres = charger_matieres(s, {x.matiere_id for x in c.lignes})
     fournisseur = s.get(Fournisseur, c.fournisseur_id)
     if fournisseur is None:  # pragma: no cover — clé étrangère
         raise Refus.introuvable("Fournisseur inconnu.")

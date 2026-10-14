@@ -36,6 +36,7 @@ CLES_MONETAIRES: tuple[str, ...] = (
     "cmup*",
     "budget*",
     "cours*",
+    "taux_du_jour",
     "taux_droits",
     "economie*",
     "revient*",
