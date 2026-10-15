@@ -8,16 +8,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from fabrique import *  # noqa: F403
 from fabriques.exploitation import *  # noqa: F403
 from fabriques.exploitation import Dossiers
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
 from gestion_mp_pro.db import fabrique
 from gestion_mp_pro.modeles import Journal
 from gestion_mp_pro.services import sauvegarde_outils as o
+from gestion_mp_pro.services.sauvegarde_etat import _fichier as _fichier_du_service
 
 ANCIENNE = "gestion-mp-pro-2026-10-01-000500-quotidienne.dump"
 RECENTE = "gestion-mp-pro-2026-10-14-000500-quotidienne.dump"
@@ -60,7 +63,12 @@ def test_la_plus_recente_se_garde(direction: TestClient, dossiers: Dossiers) -> 
 def test_inconnue_ou_hors_du_dossier_introuvable(direction: TestClient, dossiers: Dossiers) -> None:
     _deux(dossiers)
     assert direction.delete("/api/sauvegardes/inconnue.dump").status_code == 404
-    assert direction.delete("/api/sauvegardes/..%2F..%2Fx.dump").status_code == 404
+    # Une remontée de dossier ne sort pas du dossier de cette base (testée sur le service : par
+    # l'URL, un « %2F » n'arrive pas toujours à la route, selon que l'écran est construit ou non).
+    dehors = _fichier(dossiers.sauvegardes.parent, "gestion-mp-pro-2026-09-01-000500-manuelle.dump")
+    with pytest.raises(Refus) as refus:
+        _fichier_du_service(f"../{dehors.name}")
+    assert refus.value.http == 404 and dehors.exists()
 
 
 def test_achats_et_atelier_n_y_ont_pas_droit(
