@@ -18,7 +18,7 @@ endef
 
 .PHONY: aide installer verifier verifier-rapide verifier-serveur verifier-ecran verifier-outils \
 	essais matrice types notice parite comparer miroir construire docker demarrer verrouiller \
-	poste-installer coexistence verifier-chiffres
+	poste-installer coexistence verifier-chiffres paquet-windows
 
 aide: ## Liste des cibles
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed -E 's/:.*## /\t/' | expand -t 20
@@ -80,6 +80,9 @@ poste-installer: ## Installe ou met à jour le poste Mac (base, copie figée, ra
 	$(call exige,deploiement/mac/installer.sh,X2)
 	deploiement/mac/installer.sh $(ARGS)
 
+paquet-windows: ## Paquet du serveur Windows (code, écran construit, kit) : scripts/paquet_windows.sh
+	scripts/paquet_windows.sh $(ARGS)
+
 coexistence: ## Vérifie que PRO (8050) et Gestion MP (8030) cohabitent sur ce Mac
 	$(call exige,essais/coexistence.sh,X2)
 	essais/coexistence.sh
@@ -100,8 +103,12 @@ demarrer: ## Serveur de développement sur 127.0.0.1:8050 (rechargement automati
 	cd $(BACK) && .venv/bin/uvicorn gestion_mp_pro.main:app --host $(ECOUTE) --port $(PORT) \
 		--reload --no-access-log
 
-verrouiller: ## Refige les versions (requirements.lock, requirements-dev.lock) avec uv
+verrouiller: ## Refige les versions (requirements.lock, -dev, -windows) avec uv
 	test -x $(BIN)/uv || $(BIN)/python -m pip install -q uv
 	cd $(BACK) && .venv/bin/uv pip compile pyproject.toml -p .venv/bin/python -o requirements.lock -q
 	cd $(BACK) && .venv/bin/uv pip compile pyproject.toml --extra dev -p .venv/bin/python \
 		-o requirements-dev.lock -q
+	# Serveur Windows (docs/INSTALLATION-WINDOWS.md) : mêmes versions que requirements.lock,
+	# sans uvloop, avec tzdata ; roues binaires Windows 64 bits exigées (aucune compilation).
+	cd $(BACK) && .venv/bin/uv pip compile pyproject.toml --python-platform x86_64-pc-windows-msvc \
+		--python-version 3.12 -c requirements.lock --only-binary :all: -o requirements-windows.lock -q
