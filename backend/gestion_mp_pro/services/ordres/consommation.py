@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import datetime as dt
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -21,6 +21,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
+from gestion_mp_pro.calcul.modele import Donnees
 from gestion_mp_pro.calcul.production import OrdreAjuste, ajuster_ordre, consommation_par_of
 from gestion_mp_pro.modeles import Lot, Mouvement, Ordre, ParametreHistorique, Qualite
 from gestion_mp_pro.modeles.enums import DocumentMouvement, StatutOrdre, TypeMouvement
@@ -71,7 +72,21 @@ def taux_perte_au(s: Session, actuel: float) -> Callable[[datetime], float]:
 
 def consommations(s: Session) -> dict[str, OrdreAjuste]:
     """Chaque ordre du journal, tel que l'atelier le lit, par numéro (P80)."""
-    d = donnees_moteur.charger(s)
+    return _ajustees(s, donnees_moteur.charger(s))
+
+
+def consommations_de(s: Session, ordres: Sequence[Ordre]) -> dict[str, OrdreAjuste]:
+    """Les mêmes chiffres que `consommations`, pour ces ordres seulement : leur journal et
+    leur prévu, lus par `donnees_moteur.charger_ordres`, sans recharger le moteur entier — la
+    fiche d'un ordre après sa validation, la page d'une liste (stress « 3 ans », A4)."""
+    ids = [o.id for o in ordres if o.numero]
+    if not ids:
+        return {}
+    return _ajustees(s, donnees_moteur.charger_ordres(s, ids))
+
+
+def _ajustees(s: Session, d: Donnees) -> dict[str, OrdreAjuste]:
+    """Les ordres du journal de `d`, ajustés (taux de perte à leur validation, densités)."""
     perte_au = taux_perte_au(s, d.parametres.taux_perte)
     densites = {x.reference: float(x.kg_par_ml) for x in lots_lecture.lire(s).matieres.values()}
     instants = {

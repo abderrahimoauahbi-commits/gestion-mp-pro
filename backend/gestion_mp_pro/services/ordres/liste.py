@@ -34,7 +34,7 @@ from gestion_mp_pro.modeles import (
 )
 from gestion_mp_pro.modeles.enums import StatutOrdre
 from gestion_mp_pro.services import recherche
-from gestion_mp_pro.services.ordres import blocages, regles
+from gestion_mp_pro.services.ordres import blocages, consommation, regles
 from gestion_mp_pro.services.ordres.lecture import (
     FiltresOrdres,
     OrdreLu,
@@ -223,16 +223,43 @@ def _net_total(o: OrdreLu) -> float:
 
 def _agregats(s: Session, f: FiltresOrdres) -> tuple[float, float, float, float]:
     """Les sommes du moteur sur les ordres affichés (filtre entier) : net, revenu, prévu, sorti.
-    Les blocages ne servent pas aux agrégats : on les saute (une requête par ordre en moins)."""
-    ordres = list(
-        s.scalars(filtrer(f).options(selectinload(Ordre.qualites), selectinload(Ordre.lignes)))
-    )
-    affiches = _lus(s, ordres, avec_blocages=False)
-    net = sum(_net_total(o) for o in affiches)
-    revenu = sum(float(o.revenu) for o in affiches)
-    avec_recette = [o for o in affiches if o.prevu]
-    prevu = sum(o.prevu for o in avec_recette)
-    sorti = sum(o.net for o in avec_recette)
+
+    Un ordre validé ou annulé est sommé depuis le journal lu une fois pour tous
+    (`consommations`, `retours_par_ordre`), sans charger ses lignes ni le lire un à un : lu
+    ordre par ordre, l'aperçu croissait avec le nombre d'OF depuis l'origine (stress « 10 ans » :
+    0,8 s après un an, 1,8 s après deux). Les brouillons, peu nombreux, et un ordre numéroté
+    sans journal passent par le moteur comme avant (sorti net d'un brouillon = total de ses
+    lignes). Les blocages ne servent pas aux agrégats."""
+    tetes = list(s.execute(filtrer(f).with_only_columns(Ordre.id, Ordre.numero, Ordre.statut)))
+    numerotes = [(i, n, st) for i, n, st in tetes if st != StatutOrdre.brouillon and n]
+    conso = consommation.consommations(s) if numerotes else {}
+    retours = consommation.retours_par_ordre(s, [i for i, _, _ in numerotes]) if numerotes else {}
+    net = revenu = prevu = sorti = 0.0
+    par_le_moteur = [i for i, n, st in tetes if st == StatutOrdre.brouillon or not n]
+    for i, n, st in numerotes:
+        c = conso.get(n)
+        revenu += sum(float(r.quantite) for r in retours.get(i, []))
+        if c is None:
+            if st != StatutOrdre.annule:
+                par_le_moteur.append(i)
+            continue
+        net += c.net
+        if c.theorique:
+            prevu += c.theorique
+            sorti += c.net
+    if par_le_moteur:
+        ordres = list(
+            s.scalars(
+                select(Ordre)
+                .where(Ordre.id.in_(par_le_moteur))
+                .options(selectinload(Ordre.qualites), selectinload(Ordre.lignes))
+            )
+        )
+        lus = _lus(s, ordres, avec_blocages=False)
+        net += sum(_net_total(o) for o in lus)
+        revenu += sum(float(o.revenu) for o in lus if o.statut == StatutOrdre.brouillon)
+        prevu += sum(o.prevu for o in lus if o.prevu)
+        sorti += sum(o.net for o in lus if o.prevu)
     return net, revenu, prevu, sorti
 
 

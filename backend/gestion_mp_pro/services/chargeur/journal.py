@@ -9,6 +9,8 @@ réception — par lot, date et pesée.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -106,8 +108,18 @@ def _motifs(s: Session) -> dict[int, str]:
     }
 
 
-def journal(s: Session, noms: Noms) -> list[c.Mouvement]:
-    """Le journal du moteur, dans l'ordre (date d'effet, numéro)."""
+def journal(s: Session, noms: Noms, ordres: Sequence[int] | None = None) -> list[c.Mouvement]:
+    """Le journal du moteur, dans l'ordre (date d'effet, numéro).
+
+    `ordres` : seulement les écritures de ces ordres et celles qui en annulent une (la fiche
+    d'un ordre n'a pas besoin des 38 000 lignes du journal, stress « 3 ans » A4) — traduites
+    exactement comme dans le journal entier, dans le même ordre."""
+    requete = select(*COLONNES).order_by(Mouvement.date_effet, Mouvement.id)
+    if ordres is not None:
+        des_ordres = select(Mouvement.id).where(Mouvement.ordre_id.in_(ordres))
+        requete = requete.where(
+            Mouvement.ordre_id.in_(ordres) | Mouvement.contrepasse_id.in_(des_ordres)
+        )
     numeros_of = dict(
         s.execute(select(Ordre.id, Ordre.numero).where(Ordre.numero.is_not(None))).all()
     )
@@ -120,7 +132,7 @@ def journal(s: Session, noms: Noms) -> list[c.Mouvement]:
     )
     motifs, lignes = _motifs(s), lignes_de_reception(s)
     ecritures = []
-    for x in s.execute(select(*COLONNES).order_by(Mouvement.date_effet, Mouvement.id)):
+    for x in s.execute(requete):
         fournisseur = noms.fournisseur_du_lot.get(x.lot_id)
         ecritures.append(
             EcritureLue(
