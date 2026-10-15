@@ -129,7 +129,7 @@ Etape '8. Démarrage'
 if ($SansDemarrageAutomatique) {
     Dire 'Démarrage : enregistrer la tâche (relancer sans -SansDemarrageAutomatique).'
 } else {
-    if (@(Pids-Pro).Count -eq 0) { Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache }
+    if (@(Pids-Pro).Count -eq 0) { Demarrer-Tache }
     $e = Attendre-Sante $version 180
     if ($e.Code -ne 200) { Echouer "le serveur ne répond pas sur le port $Port : voir $($Script:Journaux)\demarrage.log et lanceur.log." }
     Dire "Gestion MP PRO $version répond (/api/sante : $($e.Sante.etat))."

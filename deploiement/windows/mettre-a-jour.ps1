@@ -59,7 +59,7 @@ function Revenir([string]$Ancienne, [string]$Fautive, [string]$Sauvegarde, [stri
             $Confirmation, '--motif', "retour arrière de la mise à jour $Fautive vers $Ancienne")
         if ($code -ne 0) { Echouer "restauration de $Sauvegarde impossible (voir ci-dessus) : la version $Ancienne est en place, serveur arrêté." }
     }
-    Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache
+    Demarrer-Tache
     $e = Attendre-Sante $Ancienne 180
     if ($e.Code -ne 200) { Echouer "la version $Ancienne ne répond pas non plus : voir $($Script:Journaux)." }
     Dire "Retour arrière fait : la version $Ancienne est en service."
@@ -102,7 +102,7 @@ Arreter-Serveur
 $sortie = Poste -Arguments @('sauvegarder', '--genre', 'avant-mise-a-jour') -Version $actuelle
 foreach ($l in $sortie.Sortie) { Dire $l }
 if ($sortie.Code -ne 0) {
-    Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache
+    Demarrer-Tache
     Echouer "sauvegarde « avant mise à jour » impossible : la version $actuelle reste en service (redémarrée)."
 }
 $sauvegarde = Split-Path ([string]($sortie.Sortie | Select-Object -Last 1)) -Leaf
@@ -111,7 +111,7 @@ Etape "3. Mise en service de $nouvelle"
 Ecrire-Texte $Script:FichierPrecedente "$actuelle`r`n"
 Ecrire-Texte $Script:FichierActuelle "$nouvelle`r`n"
 Mettre-Outils-En-Place $nouvelle
-Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache
+Demarrer-Tache
 
 Etape '4. Contrôle'
 $e = Attendre-Sante $nouvelle 180

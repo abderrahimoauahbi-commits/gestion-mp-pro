@@ -18,13 +18,7 @@ if (@(Pids-Pro).Count -gt 0) {
     exit 0
 }
 if (Port-Pris-Par-Un-Autre) { Echouer "le port $env:GESTIONMPPRO_PORT est pris par un autre programme : rien n'est fait." }
-$tache = Get-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache -ErrorAction SilentlyContinue
-if (-not $tache) { Echouer 'tâche planifiée absente : relancer installer.ps1.' }
-if ($tache.State -eq 'Disabled') {
-    Enable-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache | Out-Null
-    Dire 'Démarrage automatique réactivé.'
-}
-Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache
+Demarrer-Tache
 Dire "Démarrage de la version $version…"
 $e = Attendre-Sante $version 180
 if ($e.Code -ne 200) {

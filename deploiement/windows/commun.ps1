@@ -18,6 +18,7 @@
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'  # la barre de progression ralentit Invoke-WebRequest
 
 $Script:Appli = Join-Path $env:ProgramFiles 'Gestion MP PRO'
 $Script:Donnees = Join-Path $env:ProgramData 'Gestion MP PRO'
@@ -80,8 +81,11 @@ function Lire-Environnement {
     # Les lignes GESTIONMPPRO_NOM=valeur du fichier « environnement » deviennent des variables
     # de ce processus (une variable déjà posée par l'appelant l'emporte, comme sur le Mac).
     $valeurs = @{}
-    if (-not (Test-Path -LiteralPath $Script:FichierEnvironnement)) { return $valeurs }
-    foreach ($ligne in (Get-Content -LiteralPath $Script:FichierEnvironnement -Encoding UTF8)) {
+    $lignes = @()
+    if (Test-Path -LiteralPath $Script:FichierEnvironnement) {
+        $lignes = @(Get-Content -LiteralPath $Script:FichierEnvironnement -Encoding UTF8)
+    }
+    foreach ($ligne in $lignes) {
         if ($ligne -notmatch '^(GESTIONMPPRO_[A-Z_]+)=(.*)$') { continue }
         $nom = $Matches[1]
         $valeur = $Matches[2]
@@ -171,7 +175,9 @@ function Etat-Http([int]$Port = 0, [int]$Delai = 5) {
     if ($Port -eq 0) { $Port = [int]$env:GESTIONMPPRO_PORT }
     try {
         $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec $Delai -Uri "http://127.0.0.1:$Port/api/sante"
-        return @{ Code = [int]$r.StatusCode; Sante = ($r.Content | ConvertFrom-Json) }
+        # Lu en UTF-8 : sans « charset » dans la réponse, PowerShell 5.1 lirait de l'ISO-8859-1.
+        $texte = [System.Text.Encoding]::UTF8.GetString($r.RawContentStream.ToArray())
+        return @{ Code = [int]$r.StatusCode; Sante = ($texte | ConvertFrom-Json) }
     } catch {
         $reponse = $null
         if ($_.Exception.PSObject.Properties['Response']) { $reponse = $_.Exception.Response }
@@ -230,6 +236,17 @@ function Arreter-Serveur([switch]$Force) {
     }
     for ($i = 0; $i -lt 40 -and @(Pids-Pro).Count -gt 0; $i++) { Start-Sleep -Milliseconds 500 }
     if (@(Pids-Pro).Count -gt 0) { Echouer 'le serveur ne s''est pas arrêté.' }
+}
+
+function Demarrer-Tache {
+    # Démarre la tâche planifiée (réactivée si arreter.ps1 -Desactiver l'avait désactivée).
+    $tache = Get-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache -ErrorAction SilentlyContinue
+    if (-not $tache) { Echouer 'tâche planifiée absente : relancer installer.ps1.' }
+    if ($tache.State -eq 'Disabled') {
+        Enable-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache | Out-Null
+        Dire 'Démarrage automatique réactivé.'
+    }
+    Start-ScheduledTask -TaskName $Script:NomTache -TaskPath $Script:CheminTache
 }
 
 function Attendre-Sante([string]$Version, [int]$Secondes = 180) {
