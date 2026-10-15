@@ -131,6 +131,29 @@ def test_agregats_du_moteur(alimentation: TestClient, jeu: dict) -> None:
     assert apercu_b["net"] == pytest.approx(sum(x["total"] for x in brouillons))
 
 
+def test_l_apercu_ne_lit_pas_les_ordres_valides_un_a_un(
+    alimentation: TestClient, jeu: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Stress « 10 ans » : l'aperçu lisait chaque OF validé par le moteur (`lire_un`), d'où un
+    temps linéaire au nombre d'OF depuis l'origine (0,8 s après un an, 1,8 s après deux). Les
+    validés sont sommés depuis le journal lu une fois ; seuls les brouillons passent par
+    `lire_un`. Les agrégats restent ceux de `test_agregats_du_moteur`."""
+    from gestion_mp_pro.services.ordres import liste
+
+    lus: list[int] = []
+    vrai = liste.lire_un
+
+    def compter(s: object, o: Any, *args: Any, **kwargs: Any) -> Any:
+        lus.append(o.id)
+        return vrai(s, o, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(liste, "lire_un", compter)
+    _ok(alimentation.get("/api/ordres/apercu", params={"statut": "valide", "q": MARQUE}))
+    assert lus == []
+    _ok(alimentation.get("/api/ordres/apercu", params={"q": MARQUE}))
+    assert lus == [jeu["b1"]["id"]]
+
+
 def test_recherche_et_filtres_au_serveur(alimentation: TestClient, jeu: dict) -> None:
     """La recherche (commentaire marqué) et les filtres (statut, qualité) filtrent au serveur."""
     marques = _page(alimentation, q=MARQUE, limite=5000)["elements"]

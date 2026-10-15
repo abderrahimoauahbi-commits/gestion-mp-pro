@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import date, timedelta
+from typing import Any
 
 import pytest
 
@@ -56,7 +57,7 @@ def _echeancier(
     factures: list[FactureAPayer],
     pesees: list[PeseeFacturee] | None = None,
     frais: list[FraisAPayer] | None = None,
-    **periode: date,
+    **periode: Any,
 ) -> Echeancier:
     return echeancier(
         factures,
@@ -214,6 +215,25 @@ def test_les_reglees_par_date_decroissante_300_au_plus() -> None:
     ]
     e = _echeancier(factures)
     assert len(e.reglees) == 300 and e.reglees[0].piece == "R304" and e.reglees[-1].piece == "R5"
+
+
+def test_une_periode_rend_toutes_les_reglees_de_la_periode() -> None:
+    """La période (`du`/`au`) borne les réglées par leur date de règlement, bornes incluses,
+    sans plafond ; `reglees_au_plus=None` les rend toutes sans période. Les dues suivent toujours
+    leur échéance, pas la période des réglées."""
+    factures = [
+        FactureAPayer(i, "F", f"R{i}", "MAD", montant=1, payee_le=date(2026, 1, 1) + timedelta(i))
+        for i in range(305)
+    ]
+    frais = [FraisAPayer(1, "TRANSIT", "26/01", 50, piece="T", payee_le=date(2026, 1, 3))]
+    due = FactureAPayer(900, "F", "DUE", "MAD", montant=7, echeance=date(2026, 1, 2))
+    e = _echeancier([*factures, due], frais=frais, du=date(2026, 1, 2), au=date(2026, 1, 4))
+    assert [x.piece for x in e.reglees] == ["R3", "R2", "26/01 · T", "R1"]
+    assert [x.piece for x in e.lignes] == ["DUE"]
+    tout = _echeancier(factures, frais=frais, du=date(2026, 1, 1))
+    assert len(tout.reglees) == 306 and tout.reglees[-1].piece == "R0"
+    assert len(_echeancier(factures, frais=frais, au=date(2026, 1, 1)).reglees) == 1
+    assert len(_echeancier(factures, reglees_au_plus=None).reglees) == 305
 
 
 # ── Photo du jour ────────────────────────────────────────────────────────────

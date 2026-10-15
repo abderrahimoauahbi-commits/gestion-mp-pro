@@ -6866,6 +6866,16 @@ export interface components {
       a_dater_mad: number
       /** Reglees */
       reglees: components['schemas']['EcheanceLigne'][]
+      /**
+       * Reglees Total
+       * @description Pièces réglées retenues par les filtres, avant le plafond.
+       */
+      reglees_total: number
+      /**
+       * Reglees Plafond
+       * @description Sans période : `reglees` ne porte que ce nombre de règlements, les plus récents (300). Avec une période du/au (date de règlement) : nul, toutes sont rendues.
+       */
+      reglees_plafond: number | null
       /** Ecartees */
       ecartees: components['schemas']['EcheanceLigne'][]
     }

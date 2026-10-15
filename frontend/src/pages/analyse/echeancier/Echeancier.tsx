@@ -3,7 +3,9 @@
  * factures des fournisseurs et frais d'importation. **Tous** les filtres partent au serveur
  * (recherche, nature, du, au) et les indicateurs les suivent ; « Par mois » a son total (P8-21).
  * Quatre vues : Échéances, Par mois, À dater, Réglées (`evue`). Adresse : `eq`, `nature`, `du`, `au`.
- * L'échu reste compté quelle que soit la période (A-21).
+ * L'échu reste compté quelle que soit la période (A-21). « Réglées » : sans période, les 300
+ * règlements les plus récents et l'écran le dit (`reglees_plafond`, `reglees_total`) ; avec une
+ * période Du / Au — qui porte alors sur la **date de règlement** —, toutes celles de la période.
  */
 import { Bascule } from '../../../composants/mise-en-page/Bascule'
 import { Carte } from '../../../composants/mise-en-page/Carte'
@@ -16,7 +18,7 @@ import { DateChamp } from '../../../composants/saisie/DateChamp'
 import type { Colonne } from '../../../composants/tableaux/colonnes'
 import { DataTable } from '../../../composants/tableaux/DataTable'
 import { formule } from '../../../lib/aide'
-import { mois, montant, montantCourt, nombre } from '../../../lib/format'
+import { date, mois, montant, montantCourt, nombre } from '../../../lib/format'
 import { moisCourant } from '../../../lib/heure'
 import { useSession } from '../../../lib/session'
 import { useEtatListe } from '../../catalogue/etatListe'
@@ -104,7 +106,10 @@ function Outils({ etat, n }: { etat: ReturnType<typeof useEtatListe>; n: number 
         ]}
         onChange={(v) => etat.choix.poser('nature', v || null)}
       />
-      <DateFiltre libelle="Du" titre="Échéances à partir de ce jour">
+      <DateFiltre
+        libelle="Du"
+        titre="Échéances à partir de ce jour ; vue Réglées : règlements à partir de ce jour"
+      >
         <DateChamp
           libelle="Du"
           valeur={du}
@@ -113,7 +118,10 @@ function Outils({ etat, n }: { etat: ReturnType<typeof useEtatListe>; n: number 
           onChange={(v) => etat.choix.poser('du', v || null)}
         />
       </DateFiltre>
-      <DateFiltre libelle="Au" titre="Échéances jusqu’à ce jour inclus">
+      <DateFiltre
+        libelle="Au"
+        titre="Échéances jusqu’à ce jour inclus ; vue Réglées : règlements jusqu’à ce jour inclus"
+      >
         <DateChamp
           libelle="Au"
           valeur={au}
@@ -154,7 +162,32 @@ function Ecartees({ e }: { e: E }) {
   )
 }
 
+type Reglees = Pick<E, 'reglees' | 'reglees_plafond' | 'reglees_total'>
+
+/** Les réglées sont-elles plafonnées (sans période, au-delà de 300 règlements) ? */
+export function plafonnees(e: Reglees): boolean {
+  return e.reglees_plafond !== null && e.reglees_total > e.reglees_plafond
+}
+
+/**
+ * Ce que la vue « Réglées » porte, toujours dit : « les 300 dernières sur 1 540 » et comment les
+ * voir toutes, ou « toutes celles réglées du … au … » (la période porte sur la date de règlement).
+ */
+export function mentionReglees(e: Reglees, du: string, au: string): string {
+  const n = nombre(e.reglees_total)
+  if (e.reglees_plafond === null) {
+    const bornes = [du && `du ${date(du)}`, au && `au ${date(au)}`].filter(Boolean).join(' ')
+    return `Réglées : toutes les pièces réglées ${bornes} (${n}, date de règlement).`
+  }
+  const p = nombre(e.reglees_plafond)
+  if (!plafonnees(e)) {
+    return `Réglées : toutes (${n}). Au-delà de ${p}, seules les ${p} dernières paraissent sans période (Du / Au, date de règlement).`
+  }
+  return `Réglées : les ${p} dernières sur ${n}. Pour toutes les voir, poser une période (Du / Au) : elle s’applique à la date de règlement.`
+}
+
 function Vues({ e, vue, onChange }: { e: E; vue: VueEcheancier; onChange: (v: VueEcheancier) => void }) {
+  const reglees = plafonnees(e) ? `les ${nombre(e.reglees_plafond ?? 0)} dernières` : nombre(e.reglees.length)
   return (
     <Bascule
       libelle="Vue de l’échéancier"
@@ -165,7 +198,7 @@ function Vues({ e, vue, onChange }: { e: E; vue: VueEcheancier; onChange: (v: Vu
         },
         { cle: 'mois', libelle: 'Par mois' },
         { cle: 'a_dater', libelle: `À dater (${nombre(e.a_dater.length)})` },
-        { cle: 'reglees', libelle: `Réglées (${nombre(e.reglees.length)})` },
+        { cle: 'reglees', libelle: `Réglées (${reglees})` },
       ]}
       valeur={vue}
       onChange={onChange}
@@ -235,6 +268,11 @@ export function Echeancier() {
     <>
       <IndicateursEcheancier e={e} filtre={n > 0} />
       <Ecartees e={e} />
+      {vue === 'reglees' ? (
+        <Note ton={plafonnees(e) ? 'attention' : 'info'}>
+          {mentionReglees(e, etat.lire('du'), etat.lire('au'))}
+        </Note>
+      ) : null}
       <Carte
         titre="Ce qu’il faudra payer"
         actions={

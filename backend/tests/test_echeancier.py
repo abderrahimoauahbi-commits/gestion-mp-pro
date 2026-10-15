@@ -17,6 +17,7 @@ from fabriques.pilotage import Usine, fixture_usine, jour, ok  # noqa: F401
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
 
+from gestion_mp_pro.calcul import suivi
 from gestion_mp_pro.modeles import DossierFrais
 from gestion_mp_pro.modeles.enums import StatutDossier
 
@@ -136,6 +137,53 @@ def test_filtres_et_indicateurs_suivent_l_ecran(usine: Usine) -> None:
     assert futur["echu_mad"] == 100 and {x["piece"] for x in futur["lignes"]} == {"FX-2", d.numero}
     assert u.achats.get("/api/echeancier", params={"du": jour(2), "au": jour(1)}).status_code == 422
     assert u.alimentation.get("/api/echeancier").status_code == 403
+
+
+def test_les_reglees_plafonnees_sans_periode_toutes_avec(
+    usine: Usine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Sans période : les `REGLEES_AU_PLUS` règlements les plus récents parmi les lignes gardées
+    (ici 2), et la réponse le dit ; une période `du`/`au` (date de règlement, bornes incluses)
+    les rend toutes, factures et frais, sans plafond ; le classeur suit et le dit ; régler une
+    pièce au-delà du plafond rend quand même sa ligne ; l'alimentation : 403."""
+    u = usine
+    monkeypatch.setattr(suivi, "REGLEES_AU_PLUS", 1)
+    f = u.fournisseur("REGLEE FILATURE")
+    for n in ("RG-1", "RG-2"):
+        camion(u, f, 10, 10, numero=n, date=jour(-30).isoformat(), montant=100,
+               echeance=jour(-5).isoformat())  # fmt: skip
+    d = u.dossier(frais={"TRANSIT": 300})
+    ch = u.s.query(DossierFrais).filter_by(dossier_id=d.id).one()
+    ch.payee_le = jour(-10)
+    e = echeancier(u)
+    payer(u.achats, piece(e["lignes"], "RG-2"), jour(-1).isoformat())
+    ancienne = payer(u.achats, piece(e["lignes"], "RG-1"), jour(-20).isoformat())
+    assert ancienne["etat"] == "reglee" and ancienne["payee_le"] == jour(-20).isoformat()
+    monkeypatch.setattr(suivi, "REGLEES_AU_PLUS", 2)
+    sans = echeancier(u)
+    assert [x["piece"] for x in sans["reglees"]] == ["RG-2", d.numero]
+    assert (sans["reglees_total"], sans["reglees_plafond"]) == (3, 2)
+    avec = echeancier(u, du=jour(-20).isoformat(), au=jour(-10).isoformat())
+    assert [x["piece"] for x in avec["reglees"]] == [d.numero, "RG-1"]
+    assert (avec["reglees_total"], avec["reglees_plafond"]) == (2, None)
+    assert len(echeancier(u, du=jour(-20).isoformat())["reglees"]) == 3
+    factures = echeancier(u, nature="facture")
+    assert [x["piece"] for x in factures["reglees"]] == ["RG-2", "RG-1"]
+    assert (factures["reglees_total"], factures["reglees_plafond"]) == (2, 2)
+    assert u.alimentation.get("/api/echeancier", params={"du": jour(-20)}).status_code == 403
+    r = u.achats.get("/api/export/echeancier")
+    lignes = list(load_workbook(BytesIO(r.content))["Réglées"].iter_rows(values_only=True))
+    assert lignes[1][0] == (
+        "Réglées : les 2 dernières sur 3. Pour toutes les voir, poser une période (du / au) : "
+        "elle s'applique à la date de règlement."
+    )
+    assert "RG-1" not in {x[4] for x in lignes}
+    r = u.achats.get("/api/export/echeancier", params={"du": jour(-20), "au": jour(-10)})
+    lignes = list(load_workbook(BytesIO(r.content))["Réglées"].iter_rows(values_only=True))
+    attendu = f"du {jour(-20):%d/%m/%Y} au {jour(-10):%d/%m/%Y} (2, date de règlement)."
+    assert lignes[1][0].startswith("Filtres — du :")
+    assert lignes[2][0] == f"Réglées : toutes les pièces réglées {attendu}"
+    assert {x[4] for x in lignes} >= {"RG-1", d.numero}
 
 
 def test_un_frais_se_regle_au_journal_de_son_dossier(usine: Usine) -> None:

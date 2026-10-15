@@ -108,6 +108,25 @@ class Contexte:
     taux: float
 
 
+CIBLES_MAX = 300
+"""Jusqu'à ce nombre d'ordres numérotés, leur consommation se lit sur leur journal seul
+(`consommations_de`) : la fiche, la page d'une liste, les ordres du jour. Au-delà (liste
+entière de l'atelier, classeur), sur le moteur entier, gardé en cache tant que rien ne change.
+Mesuré sur la base « 3 ans » (38 000 écritures, 2 543 ordres) : la lecture ciblée coûte ~30 ms
++ ~0,3 ms par ordre (1 ordre 33 ms, 50 : 46 ms, 200 : 79 ms, 500 : 191 ms) ; le moteur entier
+0,85 s à froid (après toute écriture) et 0,15 s à chaud — au-delà de 300 ordres il fait mieux."""
+
+
+def _consommations(s: Session, ordres: list[Ordre]) -> dict[str, OrdreAjuste]:
+    """Les chiffres du moteur pour ces ordres : ciblés s'ils sont peu nombreux, sinon entiers."""
+    numerotes = [o for o in ordres if o.numero]
+    if not numerotes:
+        return {}
+    if len(numerotes) <= CIBLES_MAX:
+        return consommation.consommations_de(s, numerotes)
+    return consommation.consommations(s)
+
+
 def contexte(s: Session, ordres: list[Ordre]) -> Contexte:
     """Les référentiels et les chiffres des ordres à lire."""
     ids_lots = {x.lot_id for o in ordres for x in o.lignes}
@@ -120,7 +139,7 @@ def contexte(s: Session, ordres: list[Ordre]) -> Contexte:
         lots={x.id: x for x in s.scalars(select(Lot).where(Lot.id.in_(ids_lots)))},
         lus=lots_lecture.lire(s),
         retours=consommation.retours_par_ordre(s, valides) if valides else {},
-        conso=consommation.consommations(s) if valides else {},
+        conso=_consommations(s, ordres),
         dernier=regles.dernier_ordre(s),
         taux=float(prevu.taux_perte(s)),
     )

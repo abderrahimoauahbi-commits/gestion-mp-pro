@@ -5,6 +5,9 @@ n'a changé (ARCHITECTURE § 7, CALCULS A § 4 ; `gestion_mp/depot.py`).
   lu en requêtes groupées — leur nombre ne dépend pas de la taille de la base.
 - `charger_au(s, jour)` : les données telles qu'elles étaient le soir du `jour`
   (`calcul.a_la_date`, avec la date du jour de l'horloge de l'usine).
+- `charger_ordres(s, ids)` : les données réduites à ces ordres (référentiels des recettes,
+  leur journal, eux seuls), sans cache : la fiche d'un ordre après sa validation ne recharge
+  pas le moteur entier (stress « 3 ans », A4).
 - **Cache** par processus, clé = `signature(s)`, lue **en base** à chaque appel : le jour,
   `max(journal.id)`, `max(mouvement.id)`, `max(parametre.modifie_le)`, `Σ parametre.version`,
   `Σ devise.version`, `count(mouvement)`, `Σ solde.quantite`. Tout geste écrit au journal (S2),
@@ -24,7 +27,7 @@ n'a changé (ARCHITECTURE § 7, CALCULS A § 4 ; `gestion_mp/depot.py`).
 from __future__ import annotations
 
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Any
 
@@ -48,6 +51,7 @@ from gestion_mp_pro.services.chargeur.referentiels import parametres, poids_bobi
 __all__ = [
     "charger",
     "charger_au",
+    "charger_ordres",
     "deriver",
     "en_quarantaine_par_ligne",
     "invalider",
@@ -125,6 +129,28 @@ def charger(s: Session, avec_journal: bool = True) -> c.Donnees:
         donnees = lire(s, avec_journal)
         _cache[avec_journal] = (cle, donnees)
         return donnees
+
+
+def charger_ordres(s: Session, ids: Sequence[int]) -> c.Donnees:
+    """Les données du moteur **réduites à ces ordres**, sans cache : le catalogue, les qualités,
+    les recettes et leur histoire, les réglages ; le journal de ces ordres seuls (et les
+    écritures qui en annulent une) ; ces ordres s'ils sont validés. De quoi calculer leur
+    consommation (`calcul.production.consommation_par_of`) aux mêmes chiffres que sur le
+    moteur entier, sans relire les 38 000 lignes du journal après chaque validation (stress
+    « 3 ans », A4). Rien d'autre n'y est : ni bons, ni réceptions, ni dossiers, ni soldes."""
+    noms = lire_noms(s)
+    q = qualites.qualites(s, noms)
+    return c.Donnees(
+        parametres=ref.parametres(s),
+        articles=ref.articles(s, noms),
+        qualites=q.qualites,
+        recettes=q.recettes,
+        plan=q.plan,
+        mouvements=journal.journal(s, noms, ids),
+        ordres=production.ordres(s, noms, ids),
+        versions_plan=q.versions_plan,
+        versions_recette=q.versions_recette,
+    )
 
 
 def charger_au(s: Session, jour: date, avec_journal: bool = True) -> c.Donnees:

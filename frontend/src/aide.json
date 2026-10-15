@@ -987,7 +987,7 @@
         {
           "nom": "Échéancier",
           "onglet": "echeancier",
-          "texte": "Ce qu’il faudra payer, et quand : factures des fournisseurs et frais d’importation, en retard en rouge, par mois ; et ce qui est dû sans échéance (« À dater »)."
+          "texte": "Ce qu’il faudra payer, et quand : factures des fournisseurs et frais d’importation, en retard en rouge, par mois ; et ce qui est dû sans échéance (« À dater »). La vue « Réglées » montre les 300 derniers règlements et le dit ; pour tous les voir sur une période, poser « Du » et « Au » : la période s’applique alors à la date de règlement, et l’export Excel suit."
         },
         {
           "nom": "Contrôles",

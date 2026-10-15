@@ -20,7 +20,7 @@ from gestion_mp_pro.calcul.pilotage_valeurs import Cockpit
 from gestion_mp_pro.calcul.stock import etat_stock
 
 REGLEES_AU_PLUS = 300
-"""L'échéancier ne rend que les 300 règlements les plus récents."""
+"""Sans période, l'échéancier ne rend que les 300 règlements les plus récents (et le dit)."""
 RAISON_AVOIR = "réglée, réception annulée : avoir à demander"
 """Une facture réglée dont toutes les réceptions sont annulées."""
 RAISON_PLUS_DUE = "réception annulée : plus due"
@@ -215,6 +215,19 @@ def _jour(x: Echeance) -> dt.date:
     return x.date or dt.date.min
 
 
+def _reglees(
+    reglees: list[Echeance], du: dt.date | None, au: dt.date | None, au_plus: int | None
+) -> list[Echeance]:
+    """Les réglées par date de règlement décroissante : celles de la période (bornes incluses)
+    quand `du` ou `au` est posé, sinon les `au_plus` plus récentes (`None` : toutes)."""
+    if du:
+        reglees = [x for x in reglees if x.payee_le is not None and x.payee_le >= du]
+    if au:
+        reglees = [x for x in reglees if x.payee_le is not None and x.payee_le <= au]
+    reglees.sort(key=lambda x: x.payee_le or dt.date.min, reverse=True)
+    return reglees if (du or au or au_plus is None) else reglees[:au_plus]
+
+
 def echeancier(
     factures: list[FactureAPayer],
     frais: list[FraisAPayer],
@@ -224,6 +237,7 @@ def echeancier(
     aujourdhui: dt.date,
     du: dt.date | None = None,
     au: dt.date | None = None,
+    reglees_au_plus: int | None = REGLEES_AU_PLUS,
 ) -> Echeancier:
     """Ce qu'il faudra payer, et quand : factures (par id) puis frais d'importation (par id).
 
@@ -231,6 +245,10 @@ def echeancier(
     apporté (« estimé ») ; une facture dont toutes les réceptions sont annulées est écartée
     (réglée : un avoir est à demander) ; une facture qui ne porte que des brouillons n'est pas
     encore due. L'échu se compte sur toutes les échéances, **avant** le filtre `du`/`au`.
+
+    `du`/`au` bornent les échéances par leur date, et les réglées par leur **date de règlement**
+    (bornes incluses). Sans période, `reglees` garde les `reglees_au_plus` plus récentes (300 ;
+    `None` : toutes) ; avec une période, toutes celles de la période.
     """
     c = _Classement()
     _classer_factures(factures, dues, taux, c)
@@ -242,7 +260,7 @@ def echeancier(
     if au:
         lignes = [x for x in lignes if _jour(x) <= au]
     lignes.sort(key=_jour)
-    c.reglees.sort(key=lambda x: x.payee_le or dt.date.min, reverse=True)
+    reglees = _reglees(c.reglees, du, au, reglees_au_plus)
     par_mois: dict[str, float] = defaultdict(float)
     for x in lignes:
         par_mois[_jour(x).strftime("%Y-%m")] += x.montant_mad
@@ -255,7 +273,7 @@ def echeancier(
         echues=len(echues),
         a_dater=c.a_dater,
         a_dater_mad=sum(x.montant_mad for x in c.a_dater),
-        reglees=c.reglees[:REGLEES_AU_PLUS],
+        reglees=reglees,
         ecartees=c.ecartees,
         total_mad=sum(x.montant_mad for x in lignes),
     )

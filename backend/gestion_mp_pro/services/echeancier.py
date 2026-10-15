@@ -10,6 +10,11 @@ suivent ; l'échu reste compté quelle que soit la période affichée (une péri
 demain ne le cache pas). Chaque ligne porte sa `version` (règlement, route 229) et la fiche
 qu'elle ouvre (réception ou dossier).
 
+Réglées : sans période, les `REGLEES_AU_PLUS` (300) règlements les plus récents **parmi les
+lignes gardées** par la recherche et la nature, et la réponse le dit (`reglees_plafond`,
+`reglees_total`) ; avec une période `du`/`au`, **toutes** les pièces réglées dans la période
+(date de règlement, bornes incluses), factures et frais, sans plafond (`reglees_plafond` nul).
+
 Règlement (229) : une facture passe par `services.factures.regler` (lot D4) ; un frais suit les
 mêmes règles (`verifier_date_reglement`, annulation par la direction seule avec un motif :
 `verifier_annulation_reglement`) et s'écrit au journal de **son dossier** (l'historique de la
@@ -70,6 +75,8 @@ class Echeancier:
     a_dater: list[dict[str, Any]]
     a_dater_mad: float
     reglees: list[dict[str, Any]]
+    reglees_total: int
+    reglees_plafond: int | None
     ecartees: list[dict[str, Any]]
     aujourdhui: date = field(default_factory=horloge.aujourd_hui)
 
@@ -192,13 +199,16 @@ def _garde(x: suivi.Echeance, f: Filtres) -> bool:
     )
 
 
-def calculer(s: Session, f: Filtres) -> Echeancier:
-    """Route 228 : l'échéancier filtré (recherche et nature avant le calcul, période dedans)."""
+def calculer(s: Session, f: Filtres, *, plafonner: bool = True) -> Echeancier:
+    """Route 228 : l'échéancier filtré (recherche et nature après le calcul, période dedans) ;
+    sans période, les réglées plafonnées aux `REGLEES_AU_PLUS` plus récentes (`plafonner`)."""
     p = _Pieces()
     fac, frais, dues = _factures(s, p), _frais(s, p), _dues(s)
     taux = {code: float(c) for code, c in s.execute(select(Devise.code, Devise.cours))}
     jour = horloge.aujourd_hui()
-    e = suivi.echeancier(fac, frais, dues, taux=taux, aujourdhui=jour, du=f.du, au=f.au)
+    e = suivi.echeancier(
+        fac, frais, dues, taux=taux, aujourdhui=jour, du=f.du, au=f.au, reglees_au_plus=None
+    )
     toutes = suivi.echeancier(fac, frais, dues, taux=taux, aujourdhui=jour).lignes
     echues = [x for x in toutes if x.en_retard and _garde(x, f)]
 
@@ -217,6 +227,8 @@ def calculer(s: Session, f: Filtres) -> Echeancier:
         cle = f"{x['date']:%Y-%m}"
         par_mois[cle] = par_mois.get(cle, 0.0) + x["montant_mad"]
     limite = jour + timedelta(days=DANS_30_JOURS)
+    reglees = rendre(e.reglees)
+    plafond = suivi.REGLEES_AU_PLUS if plafonner and not (f.du or f.au) else None
     return Echeancier(
         lignes=lignes,
         par_mois=dict(sorted(par_mois.items())),
@@ -226,15 +238,18 @@ def calculer(s: Session, f: Filtres) -> Echeancier:
         dans_30_jours_mad=sum(x["montant_mad"] for x in lignes if jour <= x["date"] <= limite),
         a_dater=a_dater,
         a_dater_mad=sum(x["montant_mad"] for x in a_dater),
-        reglees=rendre(e.reglees),
+        reglees=reglees if plafond is None else reglees[:plafond],
+        reglees_total=len(reglees),
+        reglees_plafond=plafond,
         ecartees=rendre(e.ecartees + _ecartes(p.annules)),
         aujourdhui=jour,
     )
 
 
 def ligne(s: Session, genre: Genre, ident: int) -> dict[str, Any]:
-    """La ligne d'une pièce, avec la vue où elle se range (`etat`)."""
-    e = calculer(s, Filtres(nature=genre))
+    """La ligne d'une pièce, avec la vue où elle se range (`etat`) ; une réglée se retrouve
+    quel que soit son rang parmi les règlements (pas de plafond ici)."""
+    e = calculer(s, Filtres(nature=genre), plafonner=False)
     vues = (
         ("a_payer", e.lignes),
         ("a_dater", e.a_dater),

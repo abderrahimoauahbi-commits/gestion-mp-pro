@@ -7,6 +7,7 @@ annulé n'existe plus pour les calculs (K3 : gardé en base pour ne pas trouer l
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -31,24 +32,23 @@ from gestion_mp_pro.modeles.enums import StatutDossier, StatutOrdre
 from gestion_mp_pro.services.chargeur.contexte import Noms, a_l_usine, nombre
 
 
-def ordres(s: Session, noms: Noms) -> list[c.OrdreFabrication]:
-    """Les ordres validés : (qualité, m²) et, s'il a été figé, le prévu hors perte."""
+def ordres(s: Session, noms: Noms, ids: Sequence[int] | None = None) -> list[c.OrdreFabrication]:
+    """Les ordres validés : (qualité, m²) et, s'il a été figé, le prévu hors perte.
+    `ids` : ceux-là seulement (la fiche d'un ordre), lus exactement comme dans la liste entière."""
     codes = dict(s.execute(select(Qualite.id, Qualite.code)).all())
+    qualites = select(OrdreQualite.ordre_id, OrdreQualite.qualite_id, OrdreQualite.m2)
+    prevu = select(OrdrePrevu.ordre_id, OrdrePrevu.matiere_id, OrdrePrevu.kg_hors_perte)
+    requete = select(Ordre).where(Ordre.statut == StatutOrdre.valide)
+    if ids is not None:
+        qualites = qualites.where(OrdreQualite.ordre_id.in_(ids))
+        prevu = prevu.where(OrdrePrevu.ordre_id.in_(ids))
+        requete = requete.where(Ordre.id.in_(ids))
     fabrications: dict[int, list[tuple[str, float]]] = defaultdict(list)
-    for o, q, m2 in s.execute(
-        select(OrdreQualite.ordre_id, OrdreQualite.qualite_id, OrdreQualite.m2).order_by(
-            OrdreQualite.id
-        )
-    ):
+    for o, q, m2 in s.execute(qualites.order_by(OrdreQualite.id)):
         fabrications[o].append((codes[q], float(m2)))
     prevus: dict[int, dict[str, float]] = defaultdict(dict)
-    for o, m, kg in s.execute(
-        select(OrdrePrevu.ordre_id, OrdrePrevu.matiere_id, OrdrePrevu.kg_hors_perte).order_by(
-            OrdrePrevu.ordre_id, OrdrePrevu.matiere_id
-        )
-    ):
+    for o, m, kg in s.execute(prevu.order_by(OrdrePrevu.ordre_id, OrdrePrevu.matiere_id)):
         prevus[o][noms.references[m]] = float(kg)
-    requete = select(Ordre).where(Ordre.statut == StatutOrdre.valide).order_by(Ordre.id)
     return [
         c.OrdreFabrication(
             numero=b.numero or "",
@@ -59,7 +59,7 @@ def ordres(s: Session, noms: Noms) -> list[c.OrdreFabrication]:
             perte=float(b.taux_perte_fige) if b.taux_perte_fige is not None else None,
             valide_le=a_l_usine(b.valide_le),
         )
-        for b in s.scalars(requete)
+        for b in s.scalars(requete.order_by(Ordre.id))
     ]
 
 
