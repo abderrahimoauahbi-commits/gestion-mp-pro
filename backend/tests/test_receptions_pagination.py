@@ -58,14 +58,14 @@ def _toutes(c: TestClient, **filtres: object) -> list[dict]:
 def jeu(poste: TestClient, decor: dict) -> dict:
     """Sept réceptions variées (validées, brouillons, une annulée, deux fournisseurs)."""
     a, autre = decor["a"], decor["autre"]
-    v1 = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m1", "PA-1", 10)], numero_bl="BL-A1")
-    v2 = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m2", "PA-2", 20)])
-    v3 = recevoir(poste, autre.fournisseur_id, [_ligne(decor, "m1", "PA-3", 30)])
-    an = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m1", "PA-4", 5)])
+    v1 = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m1", "LP9-1", 10)], numero_bl="BL-A1")
+    v2 = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m2", "LP9-2", 20)])
+    v3 = recevoir(poste, autre.fournisseur_id, [_ligne(decor, "m1", "LP9-3", 30)])
+    an = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m1", "LP9-4", 5)])
     geste(poste, an, "annuler", motif="erreur de saisie")
-    b1 = camion(poste, a.fournisseur_id, [_ligne(decor, "m2", "PA-5", 7)])
-    b2 = camion(poste, autre.fournisseur_id, [_ligne(decor, "m1", "PA-6", 8)])
-    res = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m2", "PA-7", 9, qualite="reserve")])
+    b1 = camion(poste, a.fournisseur_id, [_ligne(decor, "m2", "LP9-5", 7)])
+    b2 = camion(poste, autre.fournisseur_id, [_ligne(decor, "m1", "LP9-6", 8)])
+    res = recevoir(poste, a.fournisseur_id, [_ligne(decor, "m2", "LP9-7", 9, qualite="reserve")])
     return {"v1": v1, "v2": v2, "v3": v3, "an": an, "b1": b1, "b2": b2, "res": res}
 
 
@@ -114,11 +114,11 @@ def test_filtres_lies_au_serveur(poste: TestClient, decor: dict, jeu: dict) -> N
 
 def test_recherche_suit_tous_les_champs(poste: TestClient, jeu: dict) -> None:
     """La recherche porte sur le n°, le BL, le lot et le motif d'annulation (tous onglets)."""
-    par_lot = _page(poste, q="PA-3", limite=5000)["elements"]
+    par_lot = _page(poste, q="LP9-3", limite=5000)["elements"]
     assert [x["id"] for x in par_lot] == [jeu["v3"]["id"]]
     par_bl = _page(poste, q="bl-a1", limite=5000)["elements"]
     assert [x["id"] for x in par_bl] == [jeu["v1"]["id"]]
     par_motif = _page(poste, q="erreur de saisie", limite=5000)["elements"]
     assert jeu["an"]["id"] in {x["id"] for x in par_motif}
-    apercu = ok(poste.get("/api/receptions/apercu", params={"q": "PA-3"}))
+    apercu = ok(poste.get("/api/receptions/apercu", params={"q": "LP9-3"}))
     assert apercu["total"] == 1
