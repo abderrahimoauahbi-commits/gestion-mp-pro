@@ -276,6 +276,8 @@ export function OngletPlan({
         colonnes={colonnesPlan(contexte)}
         cle={(x) => x.id}
         recherche={false}
+        serre
+        figee
         marquee={(x) => Boolean(brouillon[x.id])}
         pied={lignes.length ? <Pied lignes={lignes} valeurs={e.valeurs} /> : undefined}
         vide={plan.qualites.length ? 'Aucune qualité ne correspond.' : VIDE_PLAN}

@@ -56,7 +56,8 @@ hors bornes, tableur vide ou texte, recherche « % », « _ », ponctuation, 404
    le cadre (1 552 et 2 269 px pour 1 142) ; le tableau défile dans son cadre (règle E4) mais la
    barre horizontale est invisible sur Mac tant qu'on ne fait pas glisser : les mois d'été
    sont hors de vue sans que rien ne le dise. Non changé (choix de présentation à trancher :
-   mois en abrégé plus serrés, ou colonnes figées).
+   mois en abrégé plus serrés, ou colonnes figées). → **Traité** par le lot PRODUCTION-DOUZE-MOIS
+   (`docs/lots/PRODUCTION-DOUZE-MOIS.md`) : les douze mois tiennent à 1 440 px dans les deux onglets.
 3. **Unité de titrage avec une lettre accentuée** (« Nè ») acceptée par `str.isalpha` ; sans
    effet connu (elle se lit dans une référence), laissé tel quel.
 4. **Titrage créé par l'API** (pas par l'écran) avec un code « 150 Dtx » : l'unité « Dtx » est

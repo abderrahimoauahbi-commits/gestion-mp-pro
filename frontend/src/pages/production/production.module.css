@@ -1,8 +1,19 @@
 /* Production et besoins (lot F2) : seulement des jetons (stylelint). */
 
-.cellule {
-  width: 62px;
-  min-width: 56px;
+/* Un mois du plan : douze côte à côte tiennent à 1 440 px ; le champ garde 44 px de texte (40
+   avant : « 42 000 », « 0,833 » se lisent entiers) ; la classe redoublée passe devant `.controle`. */
+.cellule.cellule {
+  width: 54px;
+  min-width: 54px;
+  padding-inline: 4px;
+  text-align: right;
+}
+
+/* La base / mois : décimales possibles (« 12 345,5 »). */
+.base.base {
+  width: 76px;
+  min-width: 70px;
+  padding-inline: 5px;
   text-align: right;
 }
 
@@ -13,9 +24,53 @@
   white-space: nowrap;
 }
 
+/* Le code et le nom d'une qualité : un nom long finit en « … », entier au survol. */
+.nomQualite {
+  display: inline-flex;
+  flex-direction: column;
+  max-width: 104px;
+}
+
+.nomQualite > * > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* « Enregistrer » et « Annuler » passent l'un sous l'autre plutôt que d'élargir la colonne. */
 .gestes {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
+  max-width: 104px;
+}
+
+/* L'état au plan : « recette incomplète » passe sur deux lignes plutôt que de pousser la
+   dernière colonne hors du cadre. */
+.etat {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.etat > * {
+  white-space: normal;
+}
+
+/* Le total de l'année et son coefficient moyen, chacun sur une ligne. */
+.annuel {
+  white-space: nowrap;
+}
+
+/* La référence des besoins, plus étroite qu'au stock : les douze mois passent devant. */
+.reference {
+  display: inline-flex;
+  flex-direction: column;
+  max-width: 190px;
+  white-space: nowrap;
+}
+
+.reference > * > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .titre {

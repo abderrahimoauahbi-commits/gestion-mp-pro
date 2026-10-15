@@ -46,7 +46,9 @@ function Qualite({ q, c }: { q: QualitePlan; c: ContextePlan }) {
   const v = c.valeurs(q)
   return (
     <span className={styles.qualite}>
-      <Double haut={q.code} bas={q.nom} />
+      <span className={styles.nomQualite} title={`${q.code} — ${q.nom}`}>
+        <Double haut={q.code} bas={q.nom} />
+      </span>
       {c.modifiable && c.modifiee(q) ? (
         <span className={styles.gestes}>
           <Bouton
@@ -111,11 +113,19 @@ function Etat({ q, c }: { q: QualitePlan; c: ContextePlan }) {
   const etat = etatAuPlan(q, c.valeurs(q))
   if (etat === 'recette_incomplete' || etat === 'sans_recette')
     return (
-      <Link to={`/qualites/${q.id}?onglet=recette`} title="Ouvrir la recette de la qualité">
+      <Link
+        to={`/qualites/${q.id}?onglet=recette`}
+        title="Ouvrir la recette de la qualité"
+        className={styles.etat}
+      >
         <Badge famille="qualite_plan" valeur={etat} />
       </Link>
     )
-  return <Badge famille="qualite_plan" valeur={etat} />
+  return (
+    <span className={styles.etat}>
+      <Badge famille="qualite_plan" valeur={etat} />
+    </span>
+  )
 }
 
 function colonnesMois(c: ContextePlan): Colonne<QualitePlan>[] {
@@ -135,7 +145,7 @@ function Base({ q, c }: { q: QualitePlan; c: ContextePlan }) {
   if (!c.modifiable) return <>{nombre(v.base_mensuelle)}</>
   return (
     <Nombre
-      className={styles.cellule}
+      className={styles.base}
       valeur={v.base_mensuelle}
       min={0}
       decimales={2}
@@ -145,15 +155,23 @@ function Base({ q, c }: { q: QualitePlan; c: ContextePlan }) {
   )
 }
 
+/** Le total de l'année ; dessous, le coefficient moyen s'il s'écarte de 1 (« moy. 0,66 », le mot
+ * entier au survol : la colonne reste étroite pour que les douze mois tiennent). */
 function Annuel({ v }: { v: SaisiePlan }) {
   const moyenne = somme(v.saisonnalite) / 12
   return (
-    <Double
-      haut={nombre(somme(v.saisonnalite.map((k) => k * v.base_mensuelle)))}
-      bas={
-        v.base_mensuelle > 0 && Math.abs(moyenne - 1) > 0.05 ? `coef. moyen ${nombre(moyenne, 2)}` : undefined
-      }
-    />
+    <span className={styles.annuel}>
+      <Double
+        haut={nombre(somme(v.saisonnalite.map((k) => k * v.base_mensuelle)))}
+        bas={
+          v.base_mensuelle > 0 && Math.abs(moyenne - 1) > 0.05 ? (
+            <span title={`Coefficient moyen de l’année : ${nombre(moyenne, 2)} (1 = la base)`}>
+              moy. {nombre(moyenne, 2)}
+            </span>
+          ) : undefined
+        }
+      />
+    </span>
   )
 }
 

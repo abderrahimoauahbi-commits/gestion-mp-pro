@@ -301,3 +301,23 @@ describe('DataTable — vide filtré et lignes de groupe', () => {
     expect(within(table).getAllByRole('rowheader')[0]).toHaveAttribute('colspan', String(COLONNES.length))
   })
 })
+
+describe('DataTable — tableau large (douze mois)', () => {
+  it('« serre » et « figee » : cellules resserrées, première colonne figée, débordement dit au cadre', () => {
+    monter({ serre: true, figee: true })
+    const table = screen.getByRole('table', { name: 'Lots' })
+    expect(table).toHaveClass('table', 'serre', 'figee')
+    const cadre = table.parentElement
+    expect(cadre).toHaveClass('horizontal')
+    expect(cadre?.parentElement).toHaveClass('enveloppe')
+  })
+
+  it('sans ces options, ni classe ni enveloppe : les autres listes ne changent pas', () => {
+    monter()
+    const table = screen.getByRole('table', { name: 'Lots' })
+    expect(table).not.toHaveClass('serre')
+    expect(table).not.toHaveClass('figee')
+    expect(table.parentElement).not.toHaveClass('horizontal')
+    expect(table.parentElement?.parentElement).not.toHaveClass('enveloppe')
+  })
+})

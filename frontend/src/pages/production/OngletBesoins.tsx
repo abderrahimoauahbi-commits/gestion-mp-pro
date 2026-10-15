@@ -43,11 +43,14 @@ const DEBUT: Colonne<BesoinMatiere>[] = [
     titre: 'Référence',
     valeur: (x) => x.reference,
     recherche: (x) => [x.nature, x.designation, ...x.qualites.map((q) => q.qualite)],
-    rendu: (x) => (
-      <span className={stock.ref}>
-        <Double haut={x.reference} bas={[x.nature, x.designation].filter(Boolean).join(' · ')} />
-      </span>
-    ),
+    rendu: (x) => {
+      const bas = [x.nature, x.designation].filter(Boolean).join(' · ')
+      return (
+        <span className={styles.reference} title={bas ? `${x.reference} — ${bas}` : x.reference}>
+          <Double haut={x.reference} bas={bas} />
+        </span>
+      )
+    },
   },
   { cle: 'role_', titre: 'Rôle', valeur: (x) => x.role },
   { cle: 'fournisseur_', titre: 'Fournisseur', valeur: (x) => x.fournisseur },
@@ -97,10 +100,12 @@ const A_COMMANDER: Colonne<BesoinMatiere> = {
 function colonnes(b: BesoinsDetailles, lecture: Lecture, voitAchats: boolean): Colonne<BesoinMatiere>[] {
   const mois: Colonne<BesoinMatiere>[] = b.mois.map((m, i) => ({
     cle: `m${i}`,
-    titre: `${moisCourt(m)}${i === 0 ? ' (en cours)' : ''}`,
+    titre: `${moisCourt(m)}${i === 0 ? ' ●' : ''}`,
+    aide: `${moisCourt(m)} : kg${i === 0 ? ' (mois en cours)' : ''}`,
     droite: true,
     unite: 'kg',
-    total: true,
+    // Des kilos entiers, comme les cellules : douze mois tiennent côte à côte.
+    total: (somme) => nombre(somme),
     valeur: (x) => kgDe(x, lecture)[i] ?? 0,
     rendu: (x) => (kgDe(x, lecture)[i] ? nombre(kgDe(x, lecture)[i]) : VIDE),
   }))
@@ -262,6 +267,8 @@ export function OngletBesoins({
         recherche={table.recherche}
         choix={table.choix}
         placeholder="Référence, couleur, fournisseur, qualité…"
+        serre
+        figee
         cliquable={(x) => (x.matiere_id != null ? onOuvrir(x.matiere_id) : undefined)}
         vide={
           besoins.lignes.length

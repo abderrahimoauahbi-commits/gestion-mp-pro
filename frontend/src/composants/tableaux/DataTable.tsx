@@ -13,6 +13,9 @@
  *   (un mois de l'échéancier et ce qui y reste à payer).
  * - Liste vide : `vide` dit pourquoi elle l'est ; `videFiltre`, ce que ne trouvent pas les critères.
  * - Export : le classeur du serveur avec la vue (onglet, recherche, filtres), ou ce qui est affiché.
+ * - Tableau large (douze mois) : `serre` resserre les cellules (en-têtes sur deux lignes au besoin),
+ *   `figee` fige la première colonne à gauche et dit le débordement (barre horizontale toujours
+ *   visible, ombre au bord où il reste des colonnes à voir).
  *
  * L'état (recherche, filtres) est local par défaut ; `useEtatTableAdresse` le met dans l'adresse.
  * `serveur` : la recherche et les filtres sont appliqués par le serveur (liste paginée), pas ici.
@@ -60,6 +63,10 @@ export interface DataTableProps<T> {
   outils?: ReactNode
   hauteur?: 'page' | 'court' | 'fenetre'
   triInitial?: Tri
+  /** Cellules resserrées (douze mois côte à côte) ; les en-têtes passent sur deux lignes au besoin. */
+  serre?: boolean
+  /** La première colonne reste à gauche quand le tableau défile en largeur ; le débordement se voit. */
+  figee?: boolean
   libelle?: string
   placeholder?: string
 }
@@ -146,6 +153,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const { retenues, dansRecherche } = useLignes(props, q, choix.valeurs, tri)
   const total = props.total ?? lignes.length
   const agrandir = useAgrandir<HTMLDivElement>()
+  const classeTable = classes(styles.table, props.serre && styles.serre, props.figee && styles.figee)
   return (
     <div ref={agrandir.boite} className={classes(styles.dataTable, agrandir.classe)}>
       <div className={styles.outils}>
@@ -175,8 +183,8 @@ export function DataTable<T>(props: DataTableProps<T>) {
           <Exporter exporter={exporter} q={q} choix={choix.valeurs} colonnes={colonnes} lignes={retenues} />
         ) : null}
       </div>
-      <Cadre hauteur={hauteur}>
-        <table className={styles.table} aria-label={props.libelle}>
+      <Cadre hauteur={hauteur} horizontal={props.figee}>
+        <table className={classeTable} aria-label={props.libelle}>
           <Tete colonnes={colonnes} tri={tri} onTri={setTri} />
           <Corps
             colonnes={colonnes}

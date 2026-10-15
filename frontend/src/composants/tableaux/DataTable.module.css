@@ -130,3 +130,67 @@
     padding: 8px;
   }
 }
+
+/* Un tableau large (douze mois, `serre`) : cellules resserrées, un en-tête long passe sur deux
+   lignes (« Total / an » au-dessus de « (m²) ») plutôt que d'élargir sa colonne. Spécificités
+   croissantes, à la fin du fichier : elles passent devant les règles communes. */
+.table.serre thead th {
+  padding: 8px 4px;
+  white-space: normal;
+}
+
+.table.serre tbody td:nth-child(n),
+.table.serre tfoot td:nth-child(n) {
+  padding: 6px 4px;
+}
+
+.table.serre thead th:first-child,
+.table.serre tbody td:first-child,
+.table.serre tfoot td:first-child {
+  padding-left: 12px;
+}
+
+/* La première colonne figée (`figee`) : elle reste à gauche quand on fait défiler les mois. Fond
+   plein (les colonnes passent dessous), un filet à droite, une ombre dès que des colonnes sont
+   passées dessous (`data-gauche`, posé par le `Cadre`). */
+.table.figee thead th:first-child,
+.table.figee tbody td:first-child,
+.table.figee tfoot td:first-child {
+  position: sticky;
+  left: 0;
+  box-shadow: inset -1px 0 0 var(--bord);
+}
+
+.table.figee thead th:first-child {
+  z-index: 3;
+}
+
+.table.figee tbody td:first-child {
+  z-index: 1;
+  background: var(--surface);
+}
+
+.table.figee tfoot td:first-child {
+  z-index: 2;
+  background: var(--surface-2);
+}
+
+[data-gauche] .table.figee thead th:first-child,
+[data-gauche] .table.figee tbody td:first-child,
+[data-gauche] .table.figee tfoot td:first-child {
+  box-shadow:
+    inset -1px 0 0 var(--bord-fort),
+    6px 0 8px -4px var(--bord-fort);
+}
+
+.table.figee tbody .marquee td:first-child {
+  background: var(--ligne-marquee);
+}
+
+.table.figee tbody .cliquable:hover td:first-child,
+.table.figee tbody .cliquable:focus-visible td:first-child {
+  background: var(--survol);
+  box-shadow:
+    inset var(--filet-ton) 0 0 var(--accent),
+    inset -1px 0 0 var(--bord);
+}

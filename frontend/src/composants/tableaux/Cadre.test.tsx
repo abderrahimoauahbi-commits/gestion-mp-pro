@@ -1,9 +1,10 @@
-/** Essais du Cadre : hauteur restante mesurée jusqu'au bas de la fenêtre, plancher, hauteur fixe en fenêtre. */
-import { render, screen } from '@testing-library/react'
+/** Essais du Cadre : hauteur restante mesurée jusqu'au bas de la fenêtre, plancher, hauteur fixe en
+ * fenêtre ; débordement en largeur dit (ombre, data-droite / data-gauche). */
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { Fenetre } from '../mise-en-page/Fenetre'
-import { Cadre, hauteurRestante, PLANCHER } from './Cadre'
+import { Cadre, debord, hauteurRestante, PLANCHER } from './Cadre'
 
 /** Pose la boîte d'un élément (jsdom ne calcule pas la mise en page). */
 function boite(el: Element, haut: number, hauteur: number) {
@@ -70,5 +71,46 @@ describe('Cadre', () => {
     expect(dansFenetre).toHaveAttribute('data-hauteur', 'fenetre')
     expect(dansFenetre).toHaveClass('fenetre')
     expect(dansFenetre?.style.maxHeight).toBe('')
+  })
+})
+
+/** Pose les largeurs de défilement d'un cadre (jsdom ne calcule pas la mise en page). */
+function largeurs(el: HTMLElement, v: { scrollWidth: number; clientWidth: number; offsetWidth: number }) {
+  for (const [cle, valeur] of Object.entries(v))
+    Object.defineProperty(el, cle, { configurable: true, value: valeur })
+}
+
+describe('Cadre horizontal (douze mois)', () => {
+  it('dit ce qui déborde : à droite au départ, des deux côtés au milieu, à gauche au bout', () => {
+    const el = { scrollWidth: 1400, clientWidth: 1134, offsetWidth: 1142 }
+    expect(debord({ ...el, scrollLeft: 0 })).toEqual({ gauche: false, droite: true, barre: 8 })
+    expect(debord({ ...el, scrollLeft: 100 })).toEqual({ gauche: true, droite: true, barre: 8 })
+    expect(debord({ ...el, scrollLeft: 266 })).toEqual({ gauche: true, droite: false, barre: 8 })
+    expect(debord({ ...el, scrollWidth: 1134, scrollLeft: 0 })).toEqual({
+      gauche: false,
+      droite: false,
+      barre: 8,
+    })
+  })
+
+  it('pose data-droite / data-gauche sur son enveloppe au défilement, et l’ombre devant la barre', () => {
+    render(
+      <Cadre horizontal>
+        <table aria-label="Besoins" />
+      </Cadre>,
+    )
+    const cadre = screen.getByRole('table').parentElement
+    if (!cadre?.parentElement) throw new Error('montage')
+    const enveloppe = cadre.parentElement
+    expect(cadre).toHaveClass('horizontal')
+    largeurs(cadre, { scrollWidth: 1400, clientWidth: 1134, offsetWidth: 1142 })
+    fireEvent.scroll(cadre)
+    expect(enveloppe).toHaveAttribute('data-droite', 'true')
+    expect(enveloppe).not.toHaveAttribute('data-gauche')
+    expect(enveloppe.querySelector<HTMLElement>('.ombreDroite')?.style.right).toBe('8px')
+    cadre.scrollLeft = 266
+    fireEvent.scroll(cadre)
+    expect(enveloppe).toHaveAttribute('data-gauche', 'true')
+    expect(enveloppe).not.toHaveAttribute('data-droite')
   })
 })

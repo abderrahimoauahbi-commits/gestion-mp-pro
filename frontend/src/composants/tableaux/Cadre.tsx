@@ -5,8 +5,13 @@
  * c'est la page qui défile plutôt qu'un tableau réduit à quelques lignes. Dans une fenêtre
  * (`hauteur="fenetre"`, ou posé dans un `role="dialog"`), aucune borne : toutes ses lignes, et
  * c'est la fenêtre qui défile.
+ *
+ * `horizontal` : un tableau plus large que son cadre (douze mois) dit qu'il déborde. Sur Mac la
+ * barre de défilement ne se montre qu'au glissement : ici elle reste visible, et une ombre au bord
+ * droit dit qu'il reste des colonnes à voir (`data-droite`) ; `data-gauche` dit que des colonnes
+ * sont passées à gauche (la colonne figée d'un `DataTable` prend alors son ombre).
  */
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 
 import { classes } from '../mise-en-page/classes'
 import { useAgrandir } from './Agrandir'
@@ -43,6 +48,46 @@ export function hauteurRestante(el: HTMLElement, hauteurFenetre = window.innerHe
   return Math.max(PLANCHER, Math.round(hauteurFenetre - haut - hauteurDessous(el)))
 }
 
+/** Ce qui déborde du cadre en largeur : des colonnes passées à gauche, d'autres encore à droite ;
+ * `barre`, la largeur de la barre verticale (l'ombre droite se pose devant elle, pas dessus). */
+export function debord(el: Pick<HTMLElement, 'scrollLeft' | 'scrollWidth' | 'clientWidth' | 'offsetWidth'>) {
+  return {
+    gauche: el.scrollLeft > 1,
+    droite: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    barre: Math.max(0, el.offsetWidth - el.clientWidth),
+  }
+}
+
+type Bords = ReturnType<typeof debord>
+
+const memes = (a: Bords, b: Bords) => a.gauche === b.gauche && a.droite === b.droite && a.barre === b.barre
+
+/** Le débordement suivi au défilement, au redimensionnement et quand le tableau change de largeur. */
+function useDebord(boite: RefObject<HTMLDivElement | null>, actif: boolean) {
+  const [bords, setBords] = useState<Bords>({ gauche: false, droite: false, barre: 0 })
+  useLayoutEffect(() => {
+    const el = boite.current
+    if (!actif || !el) return
+    const lire = () =>
+      setBords((avant) => {
+        const b = debord(el)
+        return memes(avant, b) ? avant : b
+      })
+    lire()
+    el.addEventListener('scroll', lire, { passive: true })
+    window.addEventListener('resize', lire)
+    const observateur = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(lire)
+    observateur?.observe(el)
+    if (el.firstElementChild) observateur?.observe(el.firstElementChild)
+    return () => {
+      el.removeEventListener('scroll', lire)
+      window.removeEventListener('resize', lire)
+      observateur?.disconnect()
+    }
+  }, [boite, actif])
+  return bords
+}
+
 /**
  * Un tableau écrit à la main (sans `DataTable`) posé dans une fenêtre, avec au-dessus de lui le
  * bouton « Agrandir » (plein écran, `useAgrandir`) ; `DataTable` a déjà le sien.
@@ -63,23 +108,13 @@ export function CadreAgrandissable({
   )
 }
 
-export function Cadre({
-  children,
-  hauteur = 'page',
-  className,
-}: {
-  children: ReactNode
-  hauteur?: 'page' | 'court' | 'fenetre'
-  className?: string
-}) {
-  const boite = useRef<HTMLDivElement>(null)
+/**
+ * La hauteur restante du cadre, mesurée après chaque rendu (ce qui précède a pu changer de
+ * hauteur), au redimensionnement de la fenêtre du navigateur, et quand la page change de taille ;
+ * `null` dans une fenêtre (aucune borne).
+ */
+function useHauteurRestante(boite: RefObject<HTMLDivElement | null>, enFenetre: boolean) {
   const [mesure, setMesure] = useState<number | null>(null)
-  const [enFenetre, setEnFenetre] = useState(hauteur === 'fenetre')
-  useLayoutEffect(() => {
-    setEnFenetre(hauteur === 'fenetre' || Boolean(boite.current?.closest('[role="dialog"]')))
-  }, [hauteur])
-  // Mesurée après chaque rendu (ce qui précède a pu changer de hauteur), au redimensionnement de
-  // la fenêtre du navigateur, et quand la page change de taille.
   useLayoutEffect(() => {
     const el = boite.current
     if (!el || enFenetre) return
@@ -97,14 +132,51 @@ export function Cadre({
       observateur?.disconnect()
     }
   })
-  return (
+  return mesure
+}
+
+export function Cadre({
+  children,
+  hauteur = 'page',
+  className,
+  horizontal = false,
+}: {
+  children: ReactNode
+  hauteur?: 'page' | 'court' | 'fenetre'
+  className?: string
+  horizontal?: boolean
+}) {
+  const boite = useRef<HTMLDivElement>(null)
+  const [enFenetre, setEnFenetre] = useState(hauteur === 'fenetre')
+  useLayoutEffect(() => {
+    setEnFenetre(hauteur === 'fenetre' || Boolean(boite.current?.closest('[role="dialog"]')))
+  }, [hauteur])
+  const mesure = useHauteurRestante(boite, enFenetre)
+  const bords = useDebord(boite, horizontal)
+  const cadre = (
     <div
       ref={boite}
-      className={classes(styles.cadre, enFenetre ? styles.fenetre : styles[hauteur], className)}
+      className={classes(
+        styles.cadre,
+        enFenetre ? styles.fenetre : styles[hauteur],
+        horizontal && styles.horizontal,
+        className,
+      )}
       style={!enFenetre && mesure != null ? { maxHeight: mesure } : undefined}
       data-hauteur={enFenetre ? 'fenetre' : hauteur}
     >
       {children}
+    </div>
+  )
+  if (!horizontal) return cadre
+  return (
+    <div
+      className={styles.enveloppe}
+      data-gauche={bords.gauche || undefined}
+      data-droite={bords.droite || undefined}
+    >
+      {cadre}
+      <span className={styles.ombreDroite} style={{ right: bords.barre }} aria-hidden="true" />
     </div>
   )
 }

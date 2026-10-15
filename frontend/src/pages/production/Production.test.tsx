@@ -119,6 +119,19 @@ describe('Production › Besoins matière', () => {
     expect(document.querySelector('main')?.textContent).not.toMatch(/À commander|\b(MAD|USD|EUR)\b/)
   })
 
+  it('douze mois côte à côte : en-têtes courts, totaux des mois en kilos entiers, référence figée', async () => {
+    servir('direction')
+    monterApp('/production?onglet=besoins')
+    const tableau = await screen.findByRole('table', { name: 'Besoins matière' })
+    expect(tableau).toHaveClass('serre', 'figee')
+    const enCours = within(tableau).getByRole('columnheader', { name: 'oct. 2026 ●' })
+    expect(enCours).toHaveAttribute('title', 'oct. 2026 : kg (mois en cours)')
+    const rang = within(tableau).getAllByRole('columnheader').indexOf(enCours)
+    const pied = tableau.querySelector('tfoot tr')?.children[rang]
+    // 454,716 kg au premier mois : un entier, l'unité est dans l'infobulle et le titre de la carte.
+    expect(pied?.textContent).toBe('455')
+  })
+
   it('d’où vient le besoin : chaque mois, les qualités s’additionnent au besoin du plan', async () => {
     servir('direction')
     const { adresse } = monterApp('/production?onglet=besoins')
