@@ -121,6 +121,10 @@ def _recu_des_commandes(a: Acces, r: Releve, taux: dict[str, float]) -> None:
         )
 
 
+REGLEES_AU_PLUS = 300
+"""Les règlements que l'échéancier rend (constante du moteur, relue sans l'importer)."""
+
+
 def factures_dues(a: Acces) -> dict[int, dict[str, Any]]:
     """Chaque facture d'au moins une réception validée : montant (saisi, sinon pesé × prix),
     devise, échéance, règlement."""
@@ -146,7 +150,9 @@ def factures_dues(a: Acces) -> dict[int, dict[str, Any]]:
 
 
 def _echeancier(a: Acces, r: Releve, taux: dict[str, float], jour: date) -> None:
-    """L'échéancier = les factures et les frais dus, à leur montant et à leur échéance."""
+    """L'échéancier = les factures et les frais dus, à leur montant et à leur échéance. Les
+    règlements : l'écran ne rend que les 300 plus récents (`calcul.suivi.REGLEES_AU_PLUS`,
+    voulu) ; au-delà, un règlement plus ancien que le plus ancien rendu n'est pas un écart."""
     nom = "Échéancier = factures et frais dus (montant, échéance, totaux)"
     e = a.get("/echeancier", du="2000-01-01", au="2100-12-31")
     vus: dict[tuple[str, int], list[tuple[str, dict[str, Any]]]] = defaultdict(list)
@@ -162,11 +168,16 @@ def _echeancier(a: Acces, r: Releve, taux: dict[str, float], jour: date) -> None
             "f.payee_le IS NOT NULL"
         )
     }
+    plafond = len(e["reglees"]) >= REGLEES_AU_PLUS
+    plus_ancienne = min((x["payee_le"] or "" for x in e["reglees"]), default="")
     for objet, attendus in (("facture", dues), ("frais", frais)):
         for ident, b in attendus.items():
             liste = "reglees" if b["payee_le"] else ("lignes" if b["echeance"] else "a_dater")
             trouves = vus.get((objet, ident), [])
             sujet = f"{objet} {ident}"
+            if liste == "reglees" and not trouves and plafond and b["payee_le"] is not None:
+                if b["payee_le"].isoformat() <= plus_ancienne:
+                    continue  # l'écran ne rend que les 300 règlements les plus récents (voulu)
             if not r.juger(
                 nom,
                 sujet,
