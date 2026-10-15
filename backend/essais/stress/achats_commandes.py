@@ -116,7 +116,7 @@ def confirmer_les_prix(m: Monde) -> None:
         if len(a_faire) > 1 and m.chance(0.3):
             a_faire = a_faire[: len(a_faire) // 2]
         lignes = []
-        catalogue_a_jour = False
+        catalogue_a_jour = True  # vrai seulement si TOUTES les lignes sont des matières d'essai
         for x in a_faire:
             fiche = m.matiere(x["matiere_id"])
             prix = round(float(x["prix_catalogue"] or x["prix"] or 1) * m.entre(0.97, 1.08), 4)
@@ -124,7 +124,7 @@ def confirmer_les_prix(m: Monde) -> None:
                 prix = round(prix * 1.25, 4)  # une vraie hausse : la direction revoit le bon
             unite = "ml" if fiche.get("unite_prix") == "ml" else "kg"
             lignes.append({"ligne_id": x["id"], "prix": prix, "unite": unite})
-            catalogue_a_jour = catalogue_a_jour or m.catalogue.de_stress(fiche)
+            catalogue_a_jour = catalogue_a_jour and m.catalogue.de_stress(fiche)
         corps = {
             "version": bon["version"],
             "lignes": lignes,
