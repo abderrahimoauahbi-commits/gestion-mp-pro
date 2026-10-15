@@ -29,7 +29,7 @@ fond · 13. Exploitation · 14. Coexistence et comparaison avec Gestion MP · 15
                                    │  SQLAlchemy 2 (typé) / psycopg 3
                                    ▼
         PostgreSQL 16 — base gestion_mp_pro (Alembic)       ← reprise lecture seule ← base gestion_mp
-          sauvegarde quotidienne relue (pg_dump -Fc) + pièces jointes + copie externe
+          sauvegardes à 22 h relues (pg_dump -Fc) + pièces jointes + copie externe
 ```
 
 | Couche | Technologie (versions minimales) | Rôle |
@@ -618,7 +618,7 @@ isolée (`try`), état écrit dans `tache_execution` (lu par `/api/sante` et l'�
 
 | Tâche | Quand | Effet |
 |---|---|---|
-| `sauvegarde_du_jour` | si la quotidienne du jour manque | `pg_dump -Fc` relu (`pg_restore --list`), pièces jointes, copie externe, purge (14 + 12 ; manuelles et « avant » jamais) |
+| `sauvegarde_du_jour` | si une automatique est due (22:00 chaque soir, le dimanche, le dernier jour du mois ; rattrapage) | `pg_dump -Fc` relu (`pg_restore --list`), pièces jointes, copie externe, purge (14 / 8 / 12, fin décembre gardée ; manuelles et « avant » jamais) |
 | `photo_du_jour` | si `indicateur_jour` du jour manque | photo des indicateurs |
 | `courriels` | chaque passage | lundi : met en file le courriel de la semaine (une fois, clé `lundi:AAAA-MM-JJ`) ; envoie la file (reprises) |
 | `alertes` | une fois par jour | notifications : ruptures/critiques, commandes en retard, dossiers sans frais, contrôles bloquants, sauvegarde en échec |
@@ -658,9 +658,11 @@ Docker : `deploiement/gestion-mp-pro.service` (systemd).
 
 ### 13.3 Sauvegardes et restauration
 
-Quotidienne relue + manuelle + « avant restauration » + « avant reprise » + « avant vidage » +
-« avant mise à jour » + « base vide de référence » (seules les quotidiennes sont purgées) ; dossier propre à la base (`~/gestion-mp-pro-sauvegardes/<base>/`) ; pièces jointes
-**incluses** dans une archive à côté du dump (`.pieces.tar`) ; copie externe ; purge 14 + 12.
+Automatiques relues à 22 h de l'usine (quotidienne chaque soir, hebdomadaire le dimanche,
+mensuelle le dernier jour du mois, rattrapées ; décision X7, `services/sauvegarde_calendrier.py`)
++ manuelle + « avant restauration » + « avant reprise » + « avant vidage » + « avant mise à jour »
++ « base vide de référence » (seules les automatiques sont purgées) ; dossier propre à la base (`~/gestion-mp-pro-sauvegardes/<base>/`) ; pièces jointes
+**incluses** dans une archive à côté du dump (`.pieces.tar`) ; copie externe ; purge 14 / 8 / 12 (mensuelle de fin décembre gardée).
 Restauration (écran ou `scripts/restaurer.sh`) : tout ou rien (`pg_restore --list` d'abord, puis
 `pg_restore -f script` et `psql -1 -v ON_ERROR_STOP=1` après `DROP SCHEMA public CASCADE`, pour
 qu'aucune table née après la sauvegarde ne reste), sauvegarde « avant restauration », coupure des autres connexions,
