@@ -286,10 +286,15 @@ def dernieres_automatiques() -> list[Path]:
 def _purger_dossier(d: Path) -> list[str]:
     """Purge les automatiques d'un dossier (et leurs pièces) ; rend les noms effacés."""
     trouves = _automatiques_du_dossier(d)
-    effaces = calendrier.a_effacer((f.name, lu.genre, lu.instant) for f, lu in trouves)
-    for nom in effaces:
-        (d / nom).unlink(missing_ok=True)
-        o.archive_de(d / nom).unlink(missing_ok=True)
+    effaces = []
+    for nom in calendrier.a_effacer((f.name, lu.genre, lu.instant) for f, lu in trouves):
+        try:  # Windows : un fichier ouvert ailleurs (antivirus, copie) ne s'efface pas
+            (d / nom).unlink(missing_ok=True)
+            o.archive_de(d / nom).unlink(missing_ok=True)
+        except OSError as exc:
+            JOURNAL.warning("Sauvegarde %s non purgée (réessayée ensuite) : %s", nom, exc)
+            continue
+        effaces.append(nom)
     return effaces
 
 

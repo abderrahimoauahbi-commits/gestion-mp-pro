@@ -180,6 +180,26 @@ def test_purge_14_8_12_fin_decembre_gardee_manuelles_jamais(dossiers: Dossiers) 
         assert archives == {f.name for f in d.glob("*.dump")}
 
 
+def test_un_fichier_ouvert_ailleurs_ne_fait_pas_echouer_la_purge(
+    dossiers: Dossiers, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows : un fichier à purger tenu ouvert (antivirus, copie) refuse l'effacement ; il
+    reste, n'est pas annoncé effacé, et les autres s'effacent quand même."""
+    noms = [_vide(dossiers.sauvegardes, "quotidienne", _a("2024-06-01") + timedelta(days=i))
+            for i in range(16)]  # fmt: skip
+    tenu = dossiers.sauvegardes / noms[0]
+    efface = Path.unlink
+
+    def unlink(self: Path, missing_ok: bool = False) -> None:
+        if self == tenu:
+            raise PermissionError(32, "fichier utilisé par un autre processus")
+        efface(self, missing_ok=missing_ok)
+
+    monkeypatch.setattr(Path, "unlink", unlink)
+    assert service.purger() == [noms[1]]
+    assert tenu.exists() and not (dossiers.sauvegardes / noms[1]).exists()
+
+
 @avec_outils_pg
 def test_trois_fichiers_le_dimanche_31_puis_rien_puis_copie_refaite(dossiers: Dossiers) -> None:
     from gestion_mp_pro.taches import sauvegarde_du_jour
