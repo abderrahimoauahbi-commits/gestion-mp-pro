@@ -109,3 +109,12 @@ la carte « Fond de lot » et l'écriture « Ajustement d'inventaire · Rebut »
 La parité (`make parite`) ne compare pas la proposition de sortie ; aucun chiffre du moteur ne
 change (le fond reste compté et valorisé). Les champs nouveaux (`fond_de_lot`, `version`,
 `fonds_de_lot`, `seuil_rebut`) sont des ajouts de PRO, pas des champs de Gestion MP renommés.
+
+Rejouée le 15/10/2026 contre Gestion MP 3fee171, sur la branche (7a77fc8) **et** sur main
+(47cd679) : **3 052 « à corriger » des deux côtés, ligne pour ligne identiques** (dossiers
+d'importation `entre_valeur_douane`/`nature` 508 + 508, contrôles 76 et 20, `ecart_facture` 19,
+réceptions 1 820 — dont le champ `non_livrees` de Gestion MP, absent de PRO —, dossiers 1,
+gestes de réception 2 + 2). Ces écarts viennent de Gestion MP, qui a avancé depuis le dernier
+rapport (88a66b3 → 3fee171) ; ils ne sont pas de ce lot. **Aucun écart nouveau**, aucune
+neutralisation à nommer : la ligne `lots` compare 250 711 valeurs, 0 à corriger. Les rapports
+ne sont pas versionnés (`backend/essais/resultat-parite.txt` reste celui du 10/10).
