@@ -69,6 +69,7 @@ def completer_facture(s: Session, qui: audit.Qui, rid: int, e: FactureCorrigee) 
             ):
                 r.facture_id = None
                 s.flush()
+            factures.oublier_si_orpheline(s, qui, actuelle.id, reception_id=r.id)
         return r
     cible = factures.preparer_cible(s, r, actuelle, numero)
     factures.corriger(s, qui, r, cible, factures.Correction(e.version, e.valeurs))
@@ -84,4 +85,6 @@ def completer_facture(s: Session, qui: audit.Qui, rid: int, e: FactureCorrigee) 
             r.facture_id = cible.id
         toucher(r)
         s.flush()
+    if actuelle is not None and actuelle.id != cible.id:
+        factures.oublier_si_orpheline(s, qui, actuelle.id, reception_id=r.id)
     return r
