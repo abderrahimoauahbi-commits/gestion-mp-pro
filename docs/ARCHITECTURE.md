@@ -792,9 +792,9 @@ la partie rapide échoue.
 | `GESTIONMPPRO_PROCESSUS` | `2` | workers uvicorn (Docker, systemd) |
 | `GESTIONMPPRO_TACHES` | `1` | ce processus tente de porter les tâches |
 | `GESTIONMPPRO_SESSION_JOURS` | `30` | durée de session |
-| `GESTIONMPPRO_SAUVEGARDES` | `~/gestion-mp-pro-sauvegardes` (+ `/<base>`) | sauvegardes |
+| `GESTIONMPPRO_SAUVEGARDES` | `~/gestion-mp-pro-sauvegardes` (+ `/<base>`) ; Windows : `C:\ProgramData\Gestion MP PRO\sauvegardes` | sauvegardes |
 | `GESTIONMPPRO_SAUVEGARDES_COPIE` | vide | copie externe |
-| `GESTIONMPPRO_PIECES` | `~/gestion-mp-pro-pieces` (+ `/<base>`) | pièces jointes |
+| `GESTIONMPPRO_PIECES` | `~/gestion-mp-pro-pieces` (+ `/<base>`) ; Windows : `C:\ProgramData\Gestion MP PRO\pieces` | pièces jointes |
 | `GESTIONMPPRO_PG_BIN` | vide | dossier de `pg_dump`/`pg_restore` |
 | `GESTIONMPPRO_ECRAN` | `frontend/dist` | écran construit (servi par l'application hors Docker+Caddy) |
 | `GESTIONMPPRO_SMTP_HOTE`, `_PORT` (587), `_UTILISATEUR`, `_MOT_DE_PASSE`, `_EXPEDITEUR` | vide | courriels |

@@ -28,6 +28,7 @@ Réécriture professionnelle de Gestion MP (`~/gestion-mp`), au standard de GMAO
 | Le rapport de recette : verdict critère par critère (A1–A14), anomalies corrigées, état des défauts de Gestion MP, questions ouvertes | [`docs/RECETTE.md`](docs/RECETTE.md) |
 | La preuve que PRO dit les mêmes chiffres que Gestion MP, et comment le vérifier soi-même | [`docs/COMPARAISON-GESTION-MP.md`](docs/COMPARAISON-GESTION-MP.md) |
 | Installer, sauvegarder, restaurer, surveiller (poste Mac et serveur Linux) | [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) |
+| Installer sur un serveur Windows, y transférer les données du Mac, recette | [`docs/INSTALLATION-WINDOWS.md`](docs/INSTALLATION-WINDOWS.md) |
 | Le rapport de livraison, en une page (pour Mohamed) | [`docs/LIVRAISON.md`](docs/LIVRAISON.md) |
 | Comment c'est fait (couches, modèle de données, API, écrans) | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
@@ -61,7 +62,7 @@ module qui lit l'environnement). Les plus courantes :
 | `GESTIONMPPRO_FUSEAU` | `Africa/Casablanca` (passé à PostgreSQL et à `zoneinfo`, jamais au processus) |
 | `GESTIONMPPRO_TACHES` | `1` (`0` : ce processus ne porte pas les tâches de fond) |
 | `GESTIONMPPRO_JOURNAL_NIVEAU` / `_FICHIER` | `INFO` / sortie standard |
-| `GESTIONMPPRO_SAUVEGARDES`, `_PIECES` | `~/gestion-mp-pro-sauvegardes/<base>`, `~/gestion-mp-pro-pieces/<base>` |
+| `GESTIONMPPRO_SAUVEGARDES`, `_PIECES` | `~/gestion-mp-pro-sauvegardes/<base>`, `~/gestion-mp-pro-pieces/<base>` (Windows : `C:\ProgramData\Gestion MP PRO\sauvegardes\<base>`, `…\pieces\<base>`) |
 
 Les essais lisent `GESTIONMPPRO_BASE_ESSAI` (défaut `postgresql+psycopg:///gestion_mp_pro_essai`)
 et refusent toute base dont le nom ne finit pas par `_essai`.
