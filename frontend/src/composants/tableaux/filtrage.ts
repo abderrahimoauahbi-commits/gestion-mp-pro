@@ -16,6 +16,10 @@ export interface Filtre<T> {
   libelleValeur?: (valeur: string) => string
   /** Liste fixée (liste paginée au serveur : les options ne se déduisent pas des lignes chargées). */
   options?: readonly string[]
+  /** Le mot de « tous » quand le libellé est féminin (« Nature : toutes »). */
+  tous?: string
+  /** Le rang d'une valeur dans la liste (ordre métier) ; sans lui, l'ordre alphabétique. */
+  rang?: (valeur: string) => number
 }
 
 /** Les valeurs choisies, par clé de filtre ('' ou absent : pas de filtre). */
@@ -79,7 +83,10 @@ export function optionsLiees<T>(
   const nom = filtre.libelleValeur ?? ((v: string) => v)
   return [...comptes.entries()]
     .map(([valeur, nombre]) => ({ valeur, libelle: nom(valeur), nombre }))
-    .sort((a, b) => comparer(a.libelle, b.libelle))
+    .sort(
+      (a, b) =>
+        (filtre.rang ? filtre.rang(a.valeur) - filtre.rang(b.valeur) : 0) || comparer(a.libelle, b.libelle),
+    )
 }
 
 /** Le nombre de filtres posés. */

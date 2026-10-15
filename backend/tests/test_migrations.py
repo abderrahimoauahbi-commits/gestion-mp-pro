@@ -105,7 +105,7 @@ def test_aller_retour_complet(base_vide: None) -> None:
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
     assert installation.migrer() == [
-        "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009",
+        "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "0010",
     ]  # fmt: skip
     assert not installation.schema_en_retard()
 

@@ -121,6 +121,37 @@ describe('Administration', () => {
     expect(post?.corps).toEqual({ confirmation: 'restaurer', motif: 'Essai' })
   }, 10000)
 
+  it('sauvegardes : chaque nature en clair, filtre « Nature » avec son nombre, règle des 22 h', async () => {
+    servir('direction')
+    monterApp('/administration?onglet=sauvegardes')
+    const tableau = await screen.findByRole('table', { name: 'Sauvegardes' })
+    for (const nature of ['quotidienne', 'hebdomadaire', 'mensuelle', 'manuelle', 'avant une restauration']) {
+      expect(within(tableau).getAllByText(nature).length).toBeGreaterThan(0)
+    }
+    expect(
+      screen.getByText(
+        /le dimanche \(8 semaines\), le dernier jour du mois \(12 mois, fin décembre gardée\)/,
+      ),
+    ).toBeInTheDocument()
+    const filtre = screen.getByRole('combobox', { name: 'Nature' })
+    expect(
+      within(filtre)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual([
+      'Nature : toutes',
+      'quotidienne (2)',
+      'hebdomadaire (1)',
+      'mensuelle (1)',
+      'manuelle (1)',
+      'avant une restauration (1)',
+    ])
+    await userEvent.selectOptions(filtre, 'quotidienne')
+    expect(within(tableau).getAllByRole('row')).toHaveLength(3) // l'en-tête et les deux quotidiennes
+    expect(within(tableau).queryByText('mensuelle')).toBeNull()
+    expect(screen.getByText('2 / 6')).toBeInTheDocument()
+  })
+
   it('supprimer : confirmé sur la ligne, DELETE du fichier ; la plus récente est grisée', async () => {
     const nom = 'gestion-mp-pro-2026-10-09-113410-manuelle.dump'
     const appels = servir('direction', {

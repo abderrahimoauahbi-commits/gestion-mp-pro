@@ -20,6 +20,8 @@ from gestion_mp_pro.modeles.enums import GenreSauvegarde
 
 GENRES_DU_REGISTRE = {
     "quotidienne": GenreSauvegarde.quotidienne,
+    "hebdomadaire": GenreSauvegarde.hebdomadaire,
+    "mensuelle": GenreSauvegarde.mensuelle,
     "manuelle": GenreSauvegarde.manuelle,
     "avant-restauration": GenreSauvegarde.avant_restauration,
     "avant-reprise": GenreSauvegarde.avant_reprise,
@@ -28,7 +30,7 @@ GENRES_DU_REGISTRE = {
     "reference-vide": GenreSauvegarde.reference_vide,
 }
 """Le genre d'un nom de fichier → sa valeur au registre : tous les genres du disque
-(`sauvegarde_outils.GENRES`) depuis la révision 0004."""
+(`sauvegarde_outils.GENRES`) : révisions 0004 et 0010."""
 
 
 @dataclass(frozen=True)

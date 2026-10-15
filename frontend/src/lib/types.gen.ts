@@ -7200,7 +7200,7 @@ export interface components {
       outils: boolean
       /**
        * Fichiers
-       * @description les 30 plus récentes
+       * @description les 100 plus récentes
        */
       fichiers: components['schemas']['FichierSauvegarde'][]
     }
@@ -7709,12 +7709,12 @@ export interface components {
       nom: string
       /**
        * Genre
-       * @description quotidienne, manuelle, avant-restauration…
+       * @description quotidienne, hebdomadaire, mensuelle, manuelle, avant-…
        */
       genre: string
       /**
        * Nature
-       * @description « automatique », « manuelle », « avant une restauration »…
+       * @description « quotidienne », « mensuelle », « avant une restauration »…
        */
       nature: string
       /**

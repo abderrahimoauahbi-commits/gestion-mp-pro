@@ -1,7 +1,8 @@
 """Sauvegardes de cette base : relues, avec leurs pièces, copiées, purgées, surveillées (lot D10).
 
-Routes 1, 43, 44 ; décision X2 de Mohamed (quotidienne relue, 14 + 12, manuelles et « avant-* »
-jamais purgées, copie purgée de même, échec en rouge à la direction) ; défauts G-03, G-05,
+Routes 1, 43, 44 ; décision X2 de Mohamed (sauvegarde relue, manuelles et « avant-* » jamais
+purgées, copie purgée de même, échec en rouge à la direction) ; le calendrier et la rotation de
+la décision X7 (22 h, 14 / 8 / 12) sont dans `test_sauvegarde_calendrier.py` ; défauts G-03, G-05,
 G-06, G-09 de Gestion MP. Les restaurations réelles (base jetable, vrai serveur) sont dans
 `test_restauration.py`. Dossiers temporaires seulement (`fabriques.exploitation.dossiers`).
 """
@@ -9,7 +10,7 @@ G-06, G-09 de Gestion MP. Les restaurations réelles (base jetable, vrai serveur
 from __future__ import annotations
 
 import tarfile
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from fabrique import *  # noqa: F403
@@ -99,65 +100,6 @@ def test_les_sauvegardes_sont_a_la_direction_et_a_l_administrateur(
         assert client.post("/api/sauvegardes").status_code == 403
         corps = {"confirmation": "RESTAURER", "motif": "essai"}
         assert client.post("/api/sauvegardes/x.dump/restaurer", json=corps).status_code == 403
-
-
-def test_purge_14_quotidiennes_12_mensuelles_et_la_copie(dossiers: Dossiers) -> None:
-    """X2 et G-09 : même rotation dans la copie ; manuelles et « avant-* » jamais purgées."""
-    debut, fin = date(2025, 6, 1), date(2026, 10, 8)
-    jamais = [
-        "gestion-mp-pro-2025-01-01-120000-manuelle.dump",
-        "gestion-mp-pro-2025-02-01-120000-avant-restauration.dump",
-        "gestion-mp-pro-2025-03-01-120000-avant-vidage.dump",
-        "gestion-mp-pro-2025-04-01-120000-avant-mise-a-jour.dump",
-        "gestion-mp-pro-2025-05-01-120000-avant-reprise.dump",
-        "gestion-mp-pro-2025-05-02-120000-reference-vide.dump",
-    ]
-    for d in (dossiers.sauvegardes, dossiers.copie):
-        jour = debut
-        while jour <= fin:
-            _vide(d, f"gestion-mp-pro-{jour}-020000-quotidienne.dump")
-            jour += timedelta(days=1)
-        for nom in jamais:
-            _vide(d, nom)
-    effaces = service.purger()
-    attendus = {fin - timedelta(days=i) for i in range(14)}
-    attendus |= {
-        date(a, m, 1) for a, m in [(2025, 11), (2025, 12)] + [(2026, k) for k in range(1, 11)]
-    }
-    assert len(attendus) == 25
-    for d in (dossiers.sauvegardes, dossiers.copie):
-        gardes = {f.name for f in d.glob("*.dump")}
-        quotidiennes = {o.lire_nom(n).jour for n in gardes if "quotidienne" in n}  # type: ignore[union-attr]
-        assert quotidiennes == attendus
-        assert set(jamais) <= gardes
-        archives = {f.name.removesuffix(o.SUFFIXE_PIECES) for f in d.glob("*" + o.SUFFIXE_PIECES)}
-        assert archives == gardes  # chaque archive part avec sa sauvegarde
-    assert len(effaces) == (fin - debut).days + 1 - 25
-
-
-@avec_outils_pg
-def test_quotidienne_une_fois_par_jour_puis_purge(dossiers: Dossiers) -> None:
-    for jour in range(1, 21):  # 20 quotidiennes de janvier
-        _vide(dossiers.sauvegardes, f"gestion-mp-pro-2026-01-{jour:02d}-020000-quotidienne.dump")
-    premiere = service.du_jour()
-    assert premiere is not None and premiere.genre == "quotidienne"
-    assert premiere.quand == horloge.maintenant()
-    assert service.du_jour() is None  # une fois par jour
-    lus = [o.lire_nom(f.name) for f in dossiers.sauvegardes.glob("*.dump")]
-    jours = {x.jour for x in lus if x is not None}
-    janvier = {date(2026, 1, j) for j in (1, *range(8, 21))}  # la 1re du mois, les 13 dernières
-    assert jours == {date(2026, 10, 8), *janvier}
-
-
-@avec_outils_pg
-def test_quotidienne_faite_copie_manquante_refaite(dossiers: Dossiers) -> None:
-    from gestion_mp_pro.taches import sauvegarde_du_jour
-
-    service.du_jour()
-    for f in dossiers.copie.iterdir():
-        f.unlink()
-    sauvegarde_du_jour.executer()
-    assert len(list(dossiers.copie.glob("*.dump"))) == 1
 
 
 def _sauvegarde_datee(dossiers: Dossiers, il_y_a_h: float) -> None:

@@ -7,13 +7,15 @@ mêmes refus, même en-tête `X-Heure-Serveur` (c'est lui qui donne « aujourd'h
 
     GESTIONMPPRO_STRESS_DATE=2036-10-14 uvicorn essais.stress.app_figee:app --port 8121
 
-Sans la variable, l'horloge reste au temps réel. Réservé aux essais : jamais en service.
+Un instant se donne aussi, à l'heure de l'usine (`GESTIONMPPRO_STRESS_DATE=2027-01-31T22:05`,
+lot SAUVEGARDES-CALENDRIER : la tâche des sauvegardes à 22 h). Sans la variable, l'horloge reste
+au temps réel. Réservé aux essais : jamais en service.
 """
 
 from __future__ import annotations
 
 import os
-from datetime import date
+from datetime import date, datetime
 
 from gestion_mp_pro.main import app
 from gestion_mp_pro.services import horloge
@@ -22,4 +24,4 @@ __all__ = ["app"]
 
 _FIGEE = os.environ.get("GESTIONMPPRO_STRESS_DATE", "").strip()
 if _FIGEE:
-    horloge.fixer(date.fromisoformat(_FIGEE))
+    horloge.fixer(datetime.fromisoformat(_FIGEE) if "T" in _FIGEE else date.fromisoformat(_FIGEE))
