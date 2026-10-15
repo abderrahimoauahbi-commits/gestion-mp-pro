@@ -9,13 +9,19 @@ n'a changé (ARCHITECTURE § 7, CALCULS A § 4 ; `gestion_mp/depot.py`).
   leur journal, eux seuls), sans cache : la fiche d'un ordre après sa validation ne recharge
   pas le moteur entier (stress « 3 ans », A4).
 - **Cache** par processus, clé = `signature(s)`, lue **en base** à chaque appel : le jour,
-  `max(journal.id)`, `max(mouvement.id)`, `max(parametre.modifie_le)`, `Σ parametre.version`,
-  `Σ devise.version`, `count(mouvement)`, `Σ solde.quantite`. Tout geste écrit au journal (S2),
+  `max(journal.id)` (hors comptages d'inventaire, voir `SANS_EFFET`), `max(mouvement.id)`,
+  `max(parametre.modifie_le)`, `Σ parametre.version`, `Σ devise.version`, `count(mouvement)`,
+  `Σ solde.quantite`. Tout geste écrit au journal (S2),
   tout mouvement change le journal du stock, tout réglage et tout cours leur `version` (même à
   horloge figée, ou deux écritures dans la même microseconde), et un solde touché hors du
   chemin d'écriture change la somme : un chiffre n'est jamais périmé, même avec plusieurs
   processus (la signature n'est pas en mémoire). Les identifiants ne se réutilisent jamais :
   une transaction annulée ne peut pas laisser en cache une signature qui reviendrait.
+- Un **comptage d'inventaire** (route 129) n'écrit que les lignes de l'inventaire, sa version
+  et sa ligne de journal : rien que le moteur, les contrôles, le Cockpit ou la lecture du stock
+  ne lisent. Sa ligne de journal ne change donc pas la signature (`SANS_EFFET`) : enregistrer
+  un comptage ne fait plus relire tout le moteur à la fiche, à la liste et au menu qui suivent
+  (1,3 s à trois ans, lot CONFORT-LENTEURS). La validation, elle, écrit des mouvements.
 - **Ne jamais modifier en place** des `Donnees` rendues ici, ni ce que le moteur en tire : elles
   sont partagées entre les requêtes (`dataclasses.replace` pour une variante).
 - `deriver(s, nom, cle, calcul)` : un résultat tiré de la base seule (contrôles, lecture du
@@ -31,12 +37,13 @@ from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.calcul import modele as c
 from gestion_mp_pro.calcul.a_la_date import a_la_date
 from gestion_mp_pro.modeles import Devise, Journal, Mouvement, Parametre, Solde
+from gestion_mp_pro.modeles.enums import ObjetJournal
 from gestion_mp_pro.services import horloge
 from gestion_mp_pro.services.chargeur import achats, journal, production, qualites, receptions
 from gestion_mp_pro.services.chargeur import referentiels as ref
@@ -49,6 +56,7 @@ from gestion_mp_pro.services.chargeur.contexte import lire_noms
 from gestion_mp_pro.services.chargeur.referentiels import parametres, poids_bobine_mesures
 
 __all__ = [
+    "SANS_EFFET",
     "charger",
     "charger_au",
     "charger_ordres",
@@ -66,6 +74,10 @@ __all__ = [
 Signature = tuple[Any, ...]
 """Ce qui change à la moindre écriture : la clé du cache."""
 
+SANS_EFFET = (ObjetJournal.inventaire, "comptage")
+"""La seule ligne de journal (objet, action) qui ne change pas la signature : un comptage
+d'inventaire ne touche aucune donnée lue sous elle (voir l'en-tête)."""
+
 _cache: dict[bool, tuple[Signature, c.Donnees]] = {}
 _verrou = threading.Lock()
 _derives: dict[tuple[Any, ...], Any] = {}
@@ -79,7 +91,9 @@ def signature(s: Session) -> Signature:
     """La signature lue en base (une requête), précédée du jour de l'usine."""
     ligne = s.execute(
         select(
-            select(func.max(Journal.id)).scalar_subquery(),
+            select(func.max(Journal.id))
+            .where(~and_(Journal.objet == SANS_EFFET[0], Journal.action == SANS_EFFET[1]))
+            .scalar_subquery(),
             select(func.max(Mouvement.id)).scalar_subquery(),
             select(func.max(Parametre.modifie_le)).scalar_subquery(),
             select(func.sum(Parametre.version)).scalar_subquery(),
