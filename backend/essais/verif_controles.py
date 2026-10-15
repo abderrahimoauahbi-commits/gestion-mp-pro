@@ -39,9 +39,9 @@ def _requetes() -> dict[str, str]:
         "C04": f"SELECT {UNE_PAR_TRANSFERT} FROM mouvement WHERE auteur_id IS NULL "  # noqa: S608
         "AND date_effet <= %(jour)s",
         "C05": "SELECT count(*) FROM matiere WHERE fournisseur_id IS NULL",
-        "C07": "SELECT count(*) FROM matiere m WHERE NOT EXISTS (SELECT 1 FROM recette r WHERE "
-        "r.matiere_id = m.id) AND NOT EXISTS (SELECT 1 FROM mouvement x WHERE x.matiere_id = m.id "
-        "AND x.date_effet <= %(jour)s)",
+        "C07": "SELECT count(*) FROM matiere m WHERE m.actif AND NOT EXISTS (SELECT 1 FROM recette "
+        "r WHERE r.matiere_id = m.id) AND NOT EXISTS (SELECT 1 FROM mouvement x WHERE "
+        "x.matiere_id = m.id AND x.date_effet <= %(jour)s)",
         "C12": "SELECT count(*) FROM solde s FULL JOIN (SELECT lot_id, magasin_id, SUM(quantite) "
         "AS q FROM mouvement GROUP BY 1, 2) j ON j.lot_id = s.lot_id AND j.magasin_id = "
         "s.magasin_id WHERE abs(COALESCE(s.quantite, 0) - COALESCE(j.q, 0)) > 0.0005",
