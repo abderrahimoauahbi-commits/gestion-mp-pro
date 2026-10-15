@@ -5,9 +5,8 @@ Corps : `{"detail": "<phrase française>", "code": "<code>"}` (+ `"champs"` pour
 503 indisponible ; jamais de 500 pour une saisie ni pour un refus de la base (contrainte,
 version périmée : 409), et un 500 imprévu dit sa référence.
 
-Les codes sont tous déclarés dans `CODES` (fichier du lot S0 ; un ajout se demande). Ce module
-n'importe FastAPI qu'à l'installation des gestionnaires : les services y prennent `Refus` sans
-charger la couche HTTP.
+Codes tous déclarés dans `CODES` (lot S0 ; un ajout se demande). FastAPI n'est importé qu'à
+l'installation des gestionnaires : les services prennent `Refus` sans charger la couche HTTP.
 """
 
 from __future__ import annotations
