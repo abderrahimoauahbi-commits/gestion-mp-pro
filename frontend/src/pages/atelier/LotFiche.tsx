@@ -69,6 +69,7 @@ function Mouvements({ l }: { l: Lot }) {
         <div key={m.id} className={styles.ligne}>
           <span>
             {date(m.date)} · {m.libelle}
+            {m.motif ? ` · ${m.motif}` : ''}
             <br />
             <span className={styles.note}>
               <NumeroMouvement m={m} />

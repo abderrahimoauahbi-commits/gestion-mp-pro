@@ -115,6 +115,26 @@ describe('Trouver un lot et sa fiche', () => {
     expect(document.body.textContent).not.toMatch(MONETAIRE)
   })
 
+  it('l’historique dit le motif comme le bureau : « Ajustement d’inventaire · Rebut »', async () => {
+    const d = donnees()
+    const rebut = {
+      ...d.LOT.mouvements[0]!,
+      id: 99,
+      date: '2099-01-01',
+      type: 'AJUSTEMENT',
+      libelle: 'Ajustement d’inventaire',
+      motif: 'Rebut',
+      quantite: -0.04,
+    }
+    fauxServeur(
+      reponsesAtelier('alimentation', {
+        'GET /lots/1': { corps: { ...d.LOT, mouvements: [...d.LOT.mouvements, rebut] } },
+      }),
+    )
+    monterApp('/atelier/lots/1')
+    expect(await screen.findByText(/Ajustement d’inventaire · Rebut/)).toBeInTheDocument()
+  })
+
   it('un lot en quarantaine ne se déplace pas d’ici, et le dit', async () => {
     const d = donnees()
     fauxServeur(
