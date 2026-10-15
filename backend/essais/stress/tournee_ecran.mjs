@@ -33,6 +33,8 @@ mkdirSync(CAPTURES, { recursive: true })
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const FILTRE = (process.env.TOURNEE_ROLES ?? '').split(',').filter(Boolean)
 const SANS_ONGLETS = process.env.TOURNEE_SANS_ONGLETS === '1'
+// TOURNEE_ECRANS="/receptions,/operations" : seulement les écrans du bureau dont le chemin commence ainsi.
+const FILTRE_ECRANS = (process.env.TOURNEE_ECRANS ?? '').split(',').filter(Boolean)
 const SEUIL_LENT_MS = 1000
 const SEUIL_BLOQUANT_MS = 3000
 const DELAI_ECRAN_MS = 30000
@@ -171,10 +173,11 @@ ws.addEventListener('message', (e) => {
     r.fin = m.params.timestamp
     r.octets = m.params.encodedDataLength
   }
-  if (m.method === 'Network.loadingFailed' && reseau.has(m.params.requestId) && !m.params.canceled) {
+  if (m.method === 'Network.loadingFailed' && reseau.has(m.params.requestId)) {
+    // Un appel annulé par la page elle-même (changement de critères) n'est ni en vol ni une faute.
     const r = reseau.get(m.params.requestId)
     r.fin = m.params.timestamp
-    r.statut = r.statut || 'échec'
+    r.statut = m.params.canceled ? 'annulé' : r.statut || 'échec'
   }
   if (m.method === 'Page.javascriptDialogOpening') cdp('Page.handleJavaScriptDialog', { accept: true })
 })
@@ -267,8 +270,13 @@ async function attendreCalme(t0, delai = DELAI_ECRAN_MS) {
     } else pret = null
     await attendre(40)
   }
-  return null // chargement bloqué (délai)
+  // Chargement bloqué (délai) : on note pourquoi (appels en vol, roue, texte absent).
+  const enVol = [...reseau.values()].filter((r) => r.fin === null).map((r) => r.url)
+  const dom = await evaluer(`(()=>{const m=document.querySelector('main')??document.querySelector('[data-atelier]');return {roue:!!document.querySelector('[role=status] [class*=roue]'), texte:!!(m&&m.innerText.trim().length>1)}})()`)
+  derniereRaison = `en vol : ${enVol.slice(0, 4).join(', ') || 'aucun'} ; roue : ${dom?.roue} ; texte : ${dom?.texte}`
+  return null
 }
+let derniereRaison = ''
 
 async function ouvrir(url, { tactile } = {}) {
   jsErreurs.length = 0
@@ -280,7 +288,7 @@ async function ouvrir(url, { tactile } = {}) {
   await attendre(tactile ? 300 : 150)
   const info = await evaluer(ANALYSE)
   const appels = [...reseau.values()].filter((r) => !/\/api\/(connexion|deconnexion)$/.test(r.url))
-  const durees = appels.filter((r) => r.fin !== null).map((r) => ({ url: r.url, ms: Math.round((r.fin - r.debut) * 1000), statut: r.statut, octets: r.octets }))
+  const durees = appels.filter((r) => r.fin !== null && r.statut !== 'annulé').map((r) => ({ url: r.url, ms: Math.round((r.fin - r.debut) * 1000), statut: r.statut, octets: r.octets }))
   const lent = durees.reduce((a, r) => (a === null || r.ms > a.ms ? r : a), null)
   const fautes = appels.filter((r) => r.statut >= 400 || r.statut === 'échec').map((r) => `${r.statut} ${r.url}`)
   return { ...(info ?? { vide: true, final: url, tableaux: [], fenetres: [], exports: [], documents: [], recherche: [], texte: '' }), tAffiche: tAffiche === null ? null : Math.round(tAffiche), apiLente: lent, nbApi: appels.length, octets: durees.reduce((a, r) => a + r.octets, 0), api: fautes, js: [...jsErreurs] }
@@ -292,7 +300,7 @@ function problemes(url, role, r) {
   if (r.js.length) pbs.push('js: ' + r.js.join(' ; '))
   if (r.erreurUI) pbs.push('écran d’erreur')
   if (r.vide) pbs.push('page vide')
-  if (r.tAffiche === null) pbs.push(`chargement bloqué (> ${DELAI_ECRAN_MS / 1000} s)`)
+  if (r.tAffiche === null) pbs.push(`chargement bloqué (> ${DELAI_ECRAN_MS / 1000} s) — ${derniereRaison}`)
   else if (r.tAffiche > SEUIL_BLOQUANT_MS) pbs.push(`BLOQUANT ${r.tAffiche} ms`)
   else if (r.tAffiche > SEUIL_LENT_MS) pbs.push(`lent ${r.tAffiche} ms`)
   if (r.debordeH) pbs.push(`défilement horizontal ${r.largeurPage}` + (r.debordent?.length ? ' — ' + r.debordent.join(', ') : ''))
@@ -414,7 +422,7 @@ async function passeBureau(role, w, h, { tactile } = {}) {
   await connecter(role)
   const pass = { role, taille: `${w}×${h}`, zone: tactile ? 'bureau au téléphone' : 'bureau', ecrans: [] }
   resultat.passes.push(pass)
-  for (const e of ECRANS.filter((e) => e.roles.includes(role))) {
+  for (const e of ECRANS.filter((e) => e.roles.includes(role) && (!FILTRE_ECRANS.length || FILTRE_ECRANS.some((p) => e.ch.startsWith(p))))) {
     const ongs = SANS_ONGLETS ? [] : ongletsPermis(e, role)
     const urls = ongs.length ? ongs.map((o) => avecOnglet(e.ch, o)) : [e.ch]
     for (const url of urls) await visiter(pass, role, url, { tactile, nom: `${CTX.etiquette}-${role}-${w}` })

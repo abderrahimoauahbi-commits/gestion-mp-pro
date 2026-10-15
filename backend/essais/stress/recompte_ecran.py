@@ -46,9 +46,12 @@ def _stock(p: Poste, adresse: str, lignes: list[dict[str, Any]]) -> None:
     elements = stock["elements"] if isinstance(stock, dict) and "elements" in stock else stock
     if isinstance(stock, dict) and "lignes" in stock:
         elements = stock["lignes"]
-    total = sum(float(x.get("stock_net") or 0) for x in elements)
-    _juger(lignes, "Stock par matière : Σ stock (kg) = valorisation (kg)", total,
-           v["total_kg"], KG)  # fmt: skip
+    net = sum(float(x.get("stock_net") or 0) for x in elements)
+    machine = sum(float(x.get("stock_machine") or 0) for x in elements)
+    _juger(lignes, "Stock par matière : Σ stock net (kg) = valorisation en magasin (kg)", net,
+           v["total_kg_magasin"], KG)  # fmt: skip
+    _juger(lignes, "Stock par matière : Σ sur les métiers (kg) = valorisation métiers (kg)",
+           machine, v["total_kg_machine"], KG)  # fmt: skip
     c = p.get("/api/cockpit")
     valeur = c.get("stock", {}).get("valeur_magasins_mad")
     if valeur is not None:
@@ -120,9 +123,13 @@ def _listes(p: Poste, adresse: str, lignes: list[dict[str, Any]]) -> None:
 def _echeancier(p: Poste, adresse: str, lignes: list[dict[str, Any]]) -> None:
     e = p.get("/api/echeancier")
     factures = [x for x in e["lignes"] if x.get("objet") == "facture"]
-    non_reglees = _sql(adresse, "SELECT count(*) FROM facture WHERE payee_le IS NULL")
-    _juger(lignes, "Échéancier : factures non réglées = factures sans règlement", len(factures),
-           non_reglees)  # fmt: skip
+    non_reglees = _sql(
+        adresse,
+        "SELECT count(*) FROM facture f WHERE f.payee_le IS NULL AND EXISTS (SELECT 1 FROM "
+        "reception r WHERE r.facture_id = f.id AND r.statut = 'validee')",
+    )
+    _juger(lignes, "Échéancier : factures non réglées = factures (réception validée) sans "
+           "règlement", len(factures), non_reglees)  # fmt: skip
     montants = [float(x.get("montant_mad") or 0) for x in e["lignes"]]
     echus = [float(x.get("montant_mad") or 0) for x in e["lignes"] if x.get("en_retard")]
     _juger(lignes, "Échéancier : total MAD = Σ des lignes", e["total_mad"], sum(montants), 1)
