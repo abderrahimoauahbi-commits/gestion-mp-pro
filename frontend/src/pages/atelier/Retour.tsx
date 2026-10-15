@@ -2,7 +2,10 @@
  * Retour des machines (`/atelier/retour`) : de quel ordre revient la matière ? Les 10 derniers
  * ordres validés, ou la recherche au serveur (sans accents) dès qu'il y en a plus de 10 ; ce qui
  * n'est pas montré est dit (an. 18). `?ordre=ID` ouvre la saisie du retour (`RetourSaisie`).
+ * Le téléphone ne lit que ce qu'il montre, le total en plus (route 135, le plus récent d'abord) :
+ * plus tous les ordres validés depuis l'origine (3 Mo, 1,1 s à trois ans ; lot CONFORT-LENTEURS).
  */
+import { keepPreviousData, type QueryKey } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 
@@ -11,10 +14,11 @@ import { Vide } from '../../composants/retour/Vide'
 import { Recherche } from '../../composants/tableaux/Recherche'
 import { nombre } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
+import type { Page } from '../../lib/types'
 import { attente, NoteAtelier } from './briques'
 import { useDiffere } from './commun'
 import styles from './atelier.module.css'
-import { CarteOrdre, ChargerSuivants, trierOrdres } from './Ordres'
+import { CarteOrdre, ChargerSuivants } from './Ordres'
 import { RetourSaisie } from './RetourSaisie'
 import type { OrdreResume } from './types'
 
@@ -28,20 +32,36 @@ export function piedRetour(montres: number, total: number, cherche: boolean): st
   return `les ${nombre(montres)} derniers sur ${nombre(total)} : chercher un ordre plus ancien`
 }
 
+/** Les mots d'une lecture déjà faite (sa clé), pour ne garder ses résultats que pour eux. */
+export function motsDe(cle: QueryKey | undefined): string | undefined {
+  const params = cle?.[1]
+  return params && typeof params === 'object' && 'q' in params ? String(params.q) : undefined
+}
+
 function ChoixOrdre() {
   const [q, setQ] = useState('')
   const mots = useDiffere(q.trim())
-  const tous = useLecture<OrdreResume[]>('/ordres/ouverts', { statut: 'valide' })
-  const trouves = useLecture<OrdreResume[]>(mots ? '/ordres/ouverts' : null, { statut: 'valide', q: mots })
   const [nb, setNb] = useState(0)
-  const lecture = mots ? trouves : tous
-  const liste = trierOrdres(lecture.data ?? [])
   const pas = mots ? AVEC_RECHERCHE : SANS_RECHERCHE
-  const montres = Math.min(liste.length, pas + nb)
+  const tous = useLecture<Page<OrdreResume>>(
+    '/ordres',
+    { statut: 'valide', limite: SANS_RECHERCHE + (mots ? 0 : nb) },
+    { placeholderData: keepPreviousData },
+  )
+  // « Charger les suivants » garde les cartes affichées ; une autre recherche, non.
+  const trouves = useLecture<Page<OrdreResume>>(
+    mots ? '/ordres' : null,
+    { statut: 'valide', q: mots, limite: AVEC_RECHERCHE + nb },
+    { placeholderData: (avant, requete) => (motsDe(requete?.queryKey) === mots ? avant : undefined) },
+  )
+  const lecture = mots ? trouves : tous
+  const liste = lecture.data?.elements ?? []
+  const total = lecture.data?.total ?? 0
+  const montres = Math.min(total, pas + nb)
   return (
     <EcranAtelier titre="Retour des machines" retour="/atelier">
       <NoteAtelier>De quel ordre revient la matière ?</NoteAtelier>
-      {(tous.data?.length ?? 0) > SANS_RECHERCHE ? (
+      {(tous.data?.total ?? 0) > SANS_RECHERCHE ? (
         <Recherche
           valeur={q}
           onChange={(v) => {
@@ -62,10 +82,10 @@ function ChoixOrdre() {
               </li>
             ))}
           </ul>
-          {piedRetour(montres, liste.length, Boolean(mots)) ? (
-            <NoteAtelier>{piedRetour(montres, liste.length, Boolean(mots))}</NoteAtelier>
+          {piedRetour(montres, total, Boolean(mots)) ? (
+            <NoteAtelier>{piedRetour(montres, total, Boolean(mots))}</NoteAtelier>
           ) : null}
-          <ChargerSuivants montres={montres} total={liste.length} onCharger={() => setNb(nb + pas)} />
+          <ChargerSuivants montres={montres} total={total} onCharger={() => setNb(nb + pas)} />
         </>
       )}
     </EcranAtelier>

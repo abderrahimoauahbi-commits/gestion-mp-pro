@@ -11,9 +11,9 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { fauxServeur, monterApp, prechargerPages, stockageMemoire } from '../../essais/monter'
 import { aujourdhui } from '../../lib/heure'
 import { astuce, compteSignalements } from './Accueil'
-import { donnees, MONETAIRE, reponsesAtelier } from './essaiAtelier'
+import { donnees, MONETAIRE, pageOrdres, reponsesAtelier } from './essaiAtelier'
 import { questionAnnuler } from './Ordre'
-import { PAGE_ATELIER, trierOrdres } from './Ordres'
+import { PAGE_ATELIER, premiersOrdres, trierOrdres } from './Ordres'
 import type { OrdreResume } from './types'
 
 beforeAll(prechargerPages)
@@ -110,13 +110,41 @@ describe('Ordres de l’atelier', () => {
     )
   })
 
+  it('les brouillons et une page des plus récents donnent les mêmes cartes que la liste entière', () => {
+    const statuts = ['brouillon', 'valide', 'valide', 'annule'] as const
+    const tous = Array.from({ length: 40 }, (_, i) =>
+      ordre({
+        id: i + 1,
+        statut: statuts[(i * 7) % 4],
+        date: `2029-10-${String(1 + ((i * 11) % 9)).padStart(2, '0')}`,
+      }),
+    )
+    const brouillons = tous.filter((o) => o.statut === 'brouillon')
+    const parDate = [...tous].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+    for (let nb = 1; nb <= 45; nb++)
+      expect(premiersOrdres(brouillons, parDate.slice(0, nb), nb)).toEqual(trierOrdres(tous).slice(0, nb))
+  })
+
   it('au-delà de 50, « charger les suivants » dit combien il en reste', async () => {
     const beaucoup = Array.from({ length: 60 }, (_, i) => ordre({ id: 100 + i, numero: `OF-${i}` }))
-    fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres/ouverts': { corps: beaucoup } }))
+    const appels = fauxServeur(
+      reponsesAtelier('alimentation', {
+        'GET /ordres': pageOrdres(beaucoup),
+        'GET /ordres/ouverts': { corps: [] },
+      }),
+    )
     monterApp('/atelier/ordres')
     expect(await screen.findAllByRole('listitem')).toHaveLength(PAGE_ATELIER)
     await userEvent.setup().click(screen.getByRole('button', { name: '50 sur 60 — charger les suivants' }))
-    expect(screen.getAllByRole('listitem')).toHaveLength(60)
+    await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(60))
+    // Le téléphone ne lit que ce qu'il montre : jamais la liste entière des ordres.
+    expect(appels.filter((a) => a.chemin.startsWith('/ordres/ouverts?')).map((a) => a.chemin)).toEqual([
+      '/ordres/ouverts?statut=brouillon',
+    ])
+    expect(appels.filter((a) => a.chemin.startsWith('/ordres?')).map((a) => a.chemin)).toEqual([
+      '/ordres?limite=50',
+      '/ordres?limite=100',
+    ])
   })
 
   it('un ordre validé : retour et annulation (question qui nomme les retours) ; aucun prix', async () => {

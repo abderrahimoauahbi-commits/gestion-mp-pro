@@ -8,8 +8,10 @@ API-PRO 135, 135bis, 135ter).
 - `apercu` (135bis) donne à l'écran Sorties, sans lui envoyer toute la liste : les comptes par
   onglet (sur la période), les options des filtres liés (métier, magasin, qualité), les agrégats
   du moteur des indicateurs (sorti net, revenu, prévu, écart) et le compte des brouillons bloqués.
-- `ouverts` (135ter) rend la liste **entière** d'un statut, plafonnée : l'atelier (téléphone) et
-  la saisie des retours la lisent et la filtrent eux-mêmes ; au volume réel elle est petite.
+- `ouverts` (135ter) rend la liste **entière** d'un statut, plafonnée, pour ce qui est petit par
+  nature (brouillons, sorties du jour, « Nouveau retour » du bureau) ; la liste des ordres et le
+  retour au téléphone lisent `lister` (lot CONFORT-LENTEURS : la liste entière pesait 3 Mo à
+  trois ans).
 Le classeur (144) garde la liste entière, non paginée (`toutes`).
 """
 
@@ -162,8 +164,8 @@ def toutes(s: Session, f: FiltresOrdres) -> list[OrdreLu]:
 
 
 def ouverts(s: Session, f: FiltresOrdres, limite: int = OUVERTS_MAX) -> list[OrdreLu]:
-    """Route 135ter : la liste entière d'un statut (ou tous), plafonnée, le plus récent d'abord.
-    L'atelier et la saisie des retours la filtrent eux-mêmes ; au volume réel elle est petite."""
+    """Route 135ter : la liste entière d'un statut (ou tous), plafonnée, le plus récent d'abord ;
+    pour les listes petites par nature (brouillons, sorties du jour)."""
     s.flush()
     ordres = list(
         s.scalars(

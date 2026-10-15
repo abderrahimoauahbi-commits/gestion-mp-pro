@@ -30,7 +30,7 @@ from gestion_mp_pro.modeles import (
     Magasin,
     Matiere,
 )
-from gestion_mp_pro.services import audit, horloge
+from gestion_mp_pro.services import audit, donnees_moteur, horloge
 from gestion_mp_pro.services.comptes import Acteur
 from gestion_mp_pro.services.inventaires.document import encore_ouvert, relire, toucher
 
@@ -88,8 +88,8 @@ def compter(
     audit.journal(
         s,
         qui,
-        "comptage",
-        "inventaire",
+        donnees_moteur.SANS_EFFET[1],  # « comptage » : ne périme pas le cache du moteur
+        donnees_moteur.SANS_EFFET[0],
         i.id,
         numero=i.numero,
         detail=f"{i.numero} · {len(comptages)} ligne(s)",

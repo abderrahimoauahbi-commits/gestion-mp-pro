@@ -2,7 +2,11 @@
  * Les ordres de l'atelier (`/atelier/ordres`) : brouillons d'abord, puis du plus récent au plus
  * ancien ; 50 cartes puis « charger les suivants » qui dit combien il en reste (an. 18). Un
  * brouillon s'appelle « Brouillon », sa date en note (an. 6).
+ * Le téléphone ne lit que ce qu'il montre : les brouillons (peu nombreux) et les `nb` plus
+ * récents de la liste paginée (route 135, qui donne aussi le total) — plus la liste entière de
+ * trois ans d'ordres (3 Mo, 1,2 s ; lot CONFORT-LENTEURS).
  */
+import { keepPreviousData } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
@@ -13,6 +17,7 @@ import { Vide } from '../../composants/retour/Vide'
 import { Bouton } from '../../composants/saisie/Bouton'
 import { date, kgTelephone, nombre } from '../../lib/format'
 import { useLecture } from '../../lib/requetes'
+import type { Page } from '../../lib/types'
 import { attente } from './briques'
 import styles from './atelier.module.css'
 import type { OrdreResume } from './types'
@@ -23,6 +28,19 @@ export const PAGE_ATELIER = 50
 export function trierOrdres(ordres: readonly OrdreResume[]): OrdreResume[] {
   const rang = (o: OrdreResume) => (o.statut === 'brouillon' ? 0 : 1)
   return [...ordres].sort((a, b) => rang(a) - rang(b) || b.date.localeCompare(a.date) || b.id - a.id)
+}
+
+/**
+ * Les `nb` premières cartes, comme `trierOrdres` sur la liste entière : tous les brouillons, puis
+ * les plus récents des autres, lus sur une page des `nb` plus récents (tous statuts) dont on
+ * écarte les brouillons déjà là.
+ */
+export function premiersOrdres(
+  brouillons: readonly OrdreResume[],
+  recents: readonly OrdreResume[],
+  nb: number,
+): OrdreResume[] {
+  return trierOrdres([...brouillons, ...recents.filter((o) => o.statut !== 'brouillon')]).slice(0, nb)
 }
 
 /** « ATL-01 100 m² » ou « hors recette ». */
@@ -81,25 +99,31 @@ export function ChargerSuivants({
 }
 
 export default function Ordres() {
-  const ordres = useLecture<OrdreResume[]>('/ordres/ouverts')
   const [nb, setNb] = useState(PAGE_ATELIER)
-  const enAttente = attente([ordres], 'les ordres')
-  const liste = trierOrdres(ordres.data ?? [])
+  const brouillons = useLecture<OrdreResume[]>('/ordres/ouverts', { statut: 'brouillon' })
+  const recents = useLecture<Page<OrdreResume>>(
+    '/ordres',
+    { limite: nb },
+    { placeholderData: keepPreviousData },
+  )
+  const enAttente = attente([brouillons, recents], 'les ordres')
+  const liste = premiersOrdres(brouillons.data ?? [], recents.data?.elements ?? [], nb)
+  const total = recents.data?.total ?? 0
   return (
     <EcranAtelier titre="Ordres" retour="/atelier">
       {enAttente ?? (
         <>
           {!liste.length ? <Vide>Aucune sortie pour l’instant.</Vide> : null}
           <ul className={styles.liste}>
-            {liste.slice(0, nb).map((o) => (
+            {liste.map((o) => (
               <li key={o.id}>
                 <CarteOrdre o={o} vers={`/atelier/ordres/${o.id}`} />
               </li>
             ))}
           </ul>
           <ChargerSuivants
-            montres={Math.min(nb, liste.length)}
-            total={liste.length}
+            montres={Math.min(nb, total)}
+            total={total}
             onCharger={() => setNb(nb + PAGE_ATELIER)}
           />
         </>

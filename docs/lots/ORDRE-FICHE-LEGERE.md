@@ -81,4 +81,6 @@ touchée ; la réponse qui suivait passe de ~1 s à ~0,05 s, et ne croît plus a
   tire qu'une date (`dernierOrdre`). Correctif propre, hors « sans tracas » car il touche l'écran et
   l'API : un paramètre `limite` (défaut 5 000 inchangé) passé par les écrans, ou `/ordres` paginé ;
   `useEmpechements` n'a besoin que de la date du dernier ordre (une requête). À dix ans : ~3 s.
-- Le reste de A5 (bilan, export des mouvements, comptages) : inchangé.
+  → **Fait** le 15/10/2026 (docs/lots/CONFORT-LENTEURS.md), côté écran, sans changer la route.
+- Le reste de A5 (bilan, export des mouvements, comptages) : inchangé ici ; les comptages sont
+  corrigés par CONFORT-LENTEURS.

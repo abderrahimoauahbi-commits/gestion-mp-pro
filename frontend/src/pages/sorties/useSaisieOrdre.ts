@@ -7,12 +7,12 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 
+import { useDernierOrdre } from '../../lib/dernierOrdre'
 import { aujourdhui } from '../../lib/heure'
 import {
   blocagesSaisie,
   corpsOrdre,
   demanderProposition,
-  dernierOrdre,
   enregistrerOrdre,
   filsDe,
   manqueBrouillon,
@@ -29,7 +29,7 @@ import { useSession } from '../../lib/session'
 import type { Unite } from '../../lib/unites'
 import type { LotSolde, Magasin } from '../stock/types'
 import { estQuarantaine } from '../stock/types'
-import { useOrdres, type LigneProposee, type OrdreFiche } from './donnees'
+import { type LigneProposee, type OrdreFiche } from './donnees'
 
 /** Le magasin proposé d'abord : le plus garni des magasins courants actifs. */
 function magasinParDefaut(magasins: readonly Magasin[] | undefined): number | null {
@@ -188,13 +188,13 @@ export function useSaisieOrdre(fiche: OrdreFiche | null) {
   const { contexte } = useSession()
   const d = useDemande(fiche)
   const m = useMagasin(d)
-  const ordres = useOrdres()
   const [sale, setSale] = useState(false)
   const [demandeChangee, setDemandeChangee] = useState(false)
   const toucher = () => setSale(true)
   const p = usePrises(fiche, toucher)
   const pr = useProposition(fiche, m.magasinChoisi, d.jour)
   const e = useEnregistrer(fiche, () => corpsOrdre(d, m.magasinChoisi, p.prises), setSale)
+  const dernier = useDernierOrdre(e.cible?.id ?? fiche?.id)
   const changer = (f: () => void) => {
     f()
     setDemandeChangee(true)
@@ -212,7 +212,7 @@ export function useSaisieOrdre(fiche: OrdreFiche | null) {
     jour: d.jour,
     aujourdhui: aujourdhui(),
     cloture: contexte.date_cloture,
-    dernier: dernierOrdre(ordres.data, e.cible?.id ?? fiche?.id),
+    dernier,
     magasin: { code: m.magasinCode, nom: m.magasinNom },
     inventaires: contexte.inventaires_ouverts,
     dispo: m.dispo,
