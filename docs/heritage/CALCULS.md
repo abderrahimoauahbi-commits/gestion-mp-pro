@@ -2096,6 +2096,17 @@ décroissante. Route `GET /receptions/bobines` : `hors_tolerance` = nb.
 
 ## 6. Lots et traçabilité
 
+> **Règle nouvelle de PRO (lot FOND-DE-LOT, décision de Mohamed du 15/10/2026, DECISIONS U22, O14) —
+> absente de Gestion MP.** Un *fond de lot* est un solde (lot, magasin) `0 < q < seuil_rebut`
+> (réglage, 0,100 kg par défaut ; 0 = jamais). Il ne change **aucun chiffre** du moteur (stock,
+> valeur, disponible, projeté, bilan : le fond reste compté et valorisé) ; il change **la
+> proposition FIFO** de `POST /ordres/proposition` (`services/ordres/proposition._servir`) : le lot
+> est sauté dans `lots` (le lot suivant est servi), gardé dans `disponibles` avec `fond_de_lot:
+> true`, nommé dans `fonds_de_lot`. Le rebut (`POST /lots/{id}/rebut`) est un **ajustement
+> ordinaire** en moins (motif « Rebut »), valorisé au coût moyen comme tout ajustement (§ B.1) ;
+> le bilan le compte dans « ajustements ». La parité avec Gestion MP ne compare pas la proposition ;
+> sur les données de l'année d'essai aucun chiffre comparé ne change.
+
 ### 6.1 `LigneLot` (`moteur.py:3176-3199`)
 
 `reference, lot, entrees, sorties, stock, premiere_entree, dernier_mouvement, fournisseur,

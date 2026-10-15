@@ -79,6 +79,42 @@ describe('Trouver un lot et sa fiche', () => {
     expect(document.body.textContent).not.toMatch(MONETAIRE)
   })
 
+  it('un fond de lot : marqué, « Mettre au rebut » hors quarantaine envoie la version ; aucun prix', async () => {
+    const d = donnees()
+    const fond = {
+      ...d.LOT,
+      quantite: 0.056,
+      disponible: 0.056,
+      magasins: [{ ...d.LOT.magasins[0], quantite: 0.056, fond_de_lot: true }],
+      fond_de_lot: true,
+      fond_de_lot_kg: 0.056,
+      version: 3,
+    }
+    const appels = fauxServeur(
+      reponsesAtelier('alimentation', {
+        'GET /lots/1': { corps: fond },
+        'POST /lots/1/rebut': {
+          statut: 201,
+          corps: { id: 9, numero: 'AJU-2026-0002', statut: 'validee', type: 'ajustement', lignes: [] },
+        },
+      }),
+    )
+    const u = userEvent.setup()
+    monterApp('/atelier/lots/1')
+    expect(await screen.findByRole('heading', { name: 'Lot L-2601' })).toBeInTheDocument()
+    expect(screen.getAllByText('fond de lot (< 100 g)').length).toBeGreaterThan(0)
+    await u.click(screen.getByRole('button', { name: /Mettre au rebut \(56 g, Magasin principal\)/ }))
+    await u.click(screen.getByRole('button', { name: 'Oui, mettre au rebut' }))
+    await waitFor(() =>
+      expect(appels.find((a) => a.methode === 'POST' && a.chemin === '/lots/1/rebut')?.corps).toEqual({
+        magasin_id: 1,
+        version: 3,
+        motif: '',
+      }),
+    )
+    expect(document.body.textContent).not.toMatch(MONETAIRE)
+  })
+
   it('un lot en quarantaine ne se déplace pas d’ici, et le dit', async () => {
     const d = donnees()
     fauxServeur(

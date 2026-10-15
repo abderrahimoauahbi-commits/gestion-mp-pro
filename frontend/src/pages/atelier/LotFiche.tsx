@@ -1,8 +1,10 @@
 /**
  * La fiche d'un lot à l'atelier (`/atelier/lots/:id`, arrivée du QR `/lot/:id`) : ce qui reste,
  * où, les ordres servis, ce qu'il a vécu (30 mouvements puis « charger les suivants ») ;
- * « Déplacer ce lot », « Imprimer l'étiquette » (100 × 70 mm, nouvel onglet). « Lot introuvable »
- * sur un 404 seulement ; une coupure dit « Pas de réseau » (an. 3). Aucun prix (an. 27).
+ * « Déplacer ce lot », « Imprimer l'étiquette » (100 × 70 mm, nouvel onglet) ; sur un fond de lot
+ * (reste sous le seuil de rebut, marqué), « Mettre au rebut » par magasin, hors quarantaine
+ * (lot FOND-DE-LOT ; aucun montant). « Lot introuvable » sur un 404 seulement ; une coupure dit
+ * « Pas de réseau » (an. 3). Aucun prix (an. 27).
  */
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
@@ -16,6 +18,8 @@ import { permis } from '../../lib/droits'
 import { useLecture } from '../../lib/requetes'
 import { useSession } from '../../lib/session'
 import { bobinesApprochees } from '../../lib/unites'
+import { marqueFond, soldesFonds } from '../stock/fonds'
+import { BoutonRebut } from '../stock/Rebut'
 import { attente, Fiche, LienBouton, Ligne, NoteAtelier } from './briques'
 import { estIntrouvable, qte } from './commun'
 import styles from './atelier.module.css'
@@ -88,9 +92,16 @@ function Mouvements({ l }: { l: Lot }) {
 }
 
 function Identite({ l }: { l: Lot }) {
+  const { contexte } = useSession()
   return (
     <Fiche titre={l.reference} ton={l.quantite <= 0.001 ? 'alerte' : undefined}>
       <Badge famille="lot" valeur={l.statut} />
+      {l.fond_de_lot ? (
+        <>
+          {' '}
+          <Badge ton="attention">{marqueFond(contexte.seuil_rebut) || 'fond de lot'}</Badge>
+        </>
+      ) : null}
       <NoteAtelier>
         {[l.role, l.fournisseur, `entré le ${date(l.entre_le)}`].filter(Boolean).join(' · ')}
       </NoteAtelier>
@@ -109,7 +120,8 @@ function Identite({ l }: { l: Lot }) {
             key={m.magasin_id}
             libelle={
               <>
-                {x.nom} {x.quarantaine ? <Badge ton="critique">quarantaine</Badge> : null}
+                {x.nom} {x.quarantaine ? <Badge ton="critique">quarantaine</Badge> : null}{' '}
+                {m.fond_de_lot ? <Badge ton="attention">fond de lot</Badge> : null}
               </>
             }
           >
@@ -170,7 +182,16 @@ export default function LotFiche() {
                 libelle="Imprimer l’étiquette"
                 titre="L’étiquette 100 × 70 mm s’ouvre dans un nouvel onglet, prête à imprimer"
               />
+              {soldesFonds(l).map((g) => (
+                <BoutonRebut key={g.magasin_id} l={l} g={g} taille="atelier" />
+              ))}
             </div>
+            {soldesFonds(l).length ? (
+              <NoteAtelier>
+                Fond de lot : ce reste n’est plus proposé par « Envoyer aux machines ». « Mettre au rebut » le
+                sort du stock (ajustement « Rebut », validé tout de suite).
+              </NoteAtelier>
+            ) : null}
             <Mouvements l={l} />
             <NoteAtelier>{`${nombre(l.mouvements.length)} mouvement(s) en tout.`}</NoteAtelier>
           </>

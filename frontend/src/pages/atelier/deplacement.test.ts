@@ -23,7 +23,7 @@ describe('Déplacer un lot', () => {
       ...d.LOT,
       magasins: [
         ...d.LOT.magasins,
-        { magasin_id: 2, magasin: 'Quarantaine', type: 'quarantaine', quantite: 5 },
+        { magasin_id: 2, magasin: 'Quarantaine', type: 'quarantaine', quantite: 5, fond_de_lot: false },
       ],
     }
     expect(departs(lot).map((m) => m.magasin_id)).toEqual([1])

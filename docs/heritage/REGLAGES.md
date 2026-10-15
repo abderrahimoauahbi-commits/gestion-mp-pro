@@ -244,6 +244,7 @@ Pas d'aide de famille à l'écran (`AIDES_FAMILLE` n'a pas d'entrée « Stock et
 
 | Clé (ligne) | Libellé | Type / défaut / bornes / unité | Aide | Où il agit |
 |---|---|---|---|---|
+| `seuil_rebut` (**PRO**, révision 0009) | Seuil de rebut | nombre ; 0,1 ; 0–1000 ; kg | « Sous ce poids (100 g par défaut), ce qui reste d'un lot dans un magasin est un « fond de lot » : la proposition « Envoyer aux machines » ne le propose plus (il reste en stock, compté et valorisé), il est marqué dans le Stock et sur le téléphone, et « Mettre au rebut » le sort du stock par un ajustement au motif « Rebut ». 0 = désactivé : aucun fond de lot. » | **Absent de Gestion MP** (décision de Mohamed du 15/10/2026, DECISIONS U22). `services/fonds_de_lot.seuil` ; lu par `lots.lister` (107, marque), `lots_lecture.disponibles` (111), `ordres/proposition` (134, saute le fond), `operations/rebut` (258, refus au-dessus du seuil hors direction). |
 | `tolerance_inventaire` (94) | Tolérance d'écart d'inventaire | nombre ; 0,02 ; 0–100 ; % | « Proposée à l'ouverture d'un inventaire : au-delà, un écart de comptage se justifie avant la validation. » | `inventaires.py:182` (`GET /inventaires/defauts`) ; `inventaires.py:289` : défaut de la tolérance d'un inventaire ouvert (`POST /inventaires`), **chaque inventaire peut en porter une autre** et la garde. |
 
 ### 3.7 Prix (`PRIX`)

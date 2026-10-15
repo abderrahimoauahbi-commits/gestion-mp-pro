@@ -111,6 +111,7 @@ def contexte(requete: Request, qui: QuiDep, s: SessionDep) -> Contexte:
         base_essai=c.base_essai,
         compteurs=c.compteurs,
         alerte_serveur=c.alerte_serveur,
+        seuil_rebut=c.seuil_rebut,
     )
 
 

@@ -1,4 +1,4 @@
-"""Réglages : registre des 57 clés, lecture par rôle, écriture tout ou rien (routes 23–25, D1).
+"""Réglages : registre des 58 clés, lecture par rôle, écriture tout ou rien (routes 23–25, D1).
 
 Héritage K60–K66, KR30–KR41 (REGLES B.5.7), REGLAGES § 2 ; défauts E-01, E-15, E-16.
 Chaque essai remet les réglages comme il les a trouvés.
@@ -48,9 +48,10 @@ def ecrire(client: TestClient, valeurs: dict[str, Any], version: int | None = No
     return client.put("/api/parametres", json={"valeurs": valeurs, "version_globale": version})
 
 
-def test_le_registre_declare_exactement_les_57_cles() -> None:
-    """Hérité : K60 — liste fermée, toutes en base dès l'installation ; 0003 : toler_tva_import."""
-    assert len(REGLAGES) == 57 and set(PAR_CLE) == set(CLES_REGLAGES)
+def test_le_registre_declare_exactement_les_58_cles() -> None:
+    """Hérité : K60 — liste fermée, toutes en base dès l'installation ; 0003 : toler_tva_import ;
+    0009 : seuil_rebut (0,1 kg, 0–1000)."""
+    assert len(REGLAGES) == 58 and set(PAR_CLE) == set(CLES_REGLAGES)
     with sessions()() as s:
         semes = dict(s.execute(select(Parametre.cle, Parametre.valeur)).all())
     assert set(semes) == set(CLES_REGLAGES)
@@ -59,6 +60,7 @@ def test_le_registre_declare_exactement_les_57_cles() -> None:
             assert r.bas is not None and r.haut is not None and r.bas <= float(r.defaut) <= r.haut
     assert PAR_CLE["toler_tva_import"].defaut == 0.05 and PAR_CLE["toler_tva_import"].haut == 1
     assert PAR_CLE["delai_frais_import_jours"].bas == 1
+    assert PAR_CLE["seuil_rebut"].defaut == 0.1 and PAR_CLE["seuil_rebut"].unite == "kg"
 
 
 def test_lecture_par_role(
@@ -67,7 +69,7 @@ def test_lecture_par_role(
     """Hérité : test_defauts_f::test_alimentation_ne_lit_ni_parametres_ni_devises (E-01) ;
     K62 (forme) ; l'administrateur ne lit que la famille technique, valeurs comprises."""
     d = lire(direction)
-    assert len(d) == 57 and lire(achats).keys() == d.keys()
+    assert len(d) == 58 and lire(achats).keys() == d.keys()
     assert d["taux_perte"]["echelle"] == 100 and d["taux_perte"]["valeur"] == "0.02"
     assert d["secteur"]["texte"] and d["secteur"]["defaut"] == "Fabrication de tapis mécaniques"
     assert not d["seuil_bc_urgent"]["modifiable"] and not d["date_cloture"]["modifiable"]

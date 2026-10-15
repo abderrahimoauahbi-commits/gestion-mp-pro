@@ -47,7 +47,8 @@
         "Les quantités se saisissent en kg, en bobines ou en palettes : une bobine se compte entière, et toute conversion arrondie est dite.",
         "Monter un fil n’écrit aucun mouvement : la confirmation annonce ce que devient le stock sur les métiers.",
         "Sans réseau, l’écran le dit (« Pas de réseau ») et propose « Réessayer » : jamais une liste vide à la place.",
-        "Aucun prix ni montant n’y est jamais montré."
+        "Aucun prix ni montant n’y est jamais montré.",
+        "« Envoyer aux machines » ne propose jamais un fond de lot (reste sous le seuil de rebut, 100 g par défaut) : il est nommé, et se met au rebut depuis la fiche du lot (« Stock des fils »), hors quarantaine."
       ]
     },
     "catalogue": {
@@ -159,7 +160,8 @@
       "points": [
         "« Où ce lot est-il allé ? » ouvre la traçabilité.",
         "Libérer une quarantaine est une décision des achats ou de la direction, après contrôle de la matière.",
-        "L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche."
+        "L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche.",
+        "Un fond de lot (reste sous le seuil de rebut) se met au rebut depuis la fiche : direction et achats au bureau ; la direction aussi au-dessus du seuil, en écrivant pourquoi. Au téléphone, l’alimentation met au rebut un fond de lot hors quarantaine."
       ]
     },
     "matiere": {
@@ -294,7 +296,8 @@
       "resume": "Les paramètres de calcul, les devises et leurs cours, les magasins, les postes de frais, les codes douaniers et la période close.",
       "points": [
         "La direction règle tout ; les achats tiennent les devises et lisent le reste.",
-        "Chaque changement de paramètre est daté, signé et recalcule tout le pilotage."
+        "Chaque changement de paramètre est daté, signé et recalcule tout le pilotage.",
+        "« Seuil de rebut » (Stock et inventaire, kg, 100 g par défaut, 0 = désactivé) : sous ce poids, un reste de lot est un fond de lot."
       ]
     },
     "sorties": {
@@ -312,7 +315,8 @@
       "points": [
         "Le stock se tient en kilos ; le cuir, les franges et le ruban disent aussi leurs mètres, à titre indicatif.",
         "{{sur_les_metiers}}",
-        "La pastille du menu compte l’alerte rouge : matières en rupture ou critiques."
+        "La pastille du menu compte l’alerte rouge : matières en rupture ou critiques.",
+        "Un reste de lot plus petit que le seuil de rebut (100 g par défaut) est un « fond de lot » : marqué dans les lots, compté dans l’indicateur « Fonds de lot » (case « Fonds de lot seulement »), plus jamais proposé aux machines ; « Mettre au rebut » (direction, achats) le sort du stock par un ajustement « Rebut » validé tout de suite."
       ]
     },
     "tableur_matieres": {
@@ -521,6 +525,10 @@
     "fabrication_ordre": {
       "grandeur": "Fabrication d’un ordre",
       "texte": "Les m² de chaque qualité tissée sous l’ordre ; un ordre hors recette (échantillons, série spéciale) n’en a pas."
+    },
+    "fonds_de_lot": {
+      "grandeur": "Fonds de lot",
+      "texte": "Les restes de lot (un par lot et par magasin) plus petits que le seuil de rebut (réglage « Seuil de rebut », 100 g par défaut ; 0 = jamais). Un fond de lot ne sert plus à rien : la proposition « Envoyer aux machines » ne le propose plus (il reste dans « + un autre lot… », marqué), il reste compté et valorisé jusqu’à « Mettre au rebut », qui le sort du stock par un ajustement au motif « Rebut », au coût moyen."
     },
     "fournisseur_delai": {
       "grandeur": "Délai d’un fournisseur",

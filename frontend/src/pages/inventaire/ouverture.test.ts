@@ -58,8 +58,8 @@ describe('ouvrir un inventaire', () => {
         lot_id: 12,
         matiere_id: 2,
         magasins: [
-          { magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 10 },
-          { magasin_id: 2, magasin: 'QUAR', type: 'quarantaine', quantite: 5 },
+          { magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 10, fond_de_lot: false },
+          { magasin_id: 2, magasin: 'QUAR', type: 'quarantaine', quantite: 5, fond_de_lot: false },
         ],
       }),
     ]

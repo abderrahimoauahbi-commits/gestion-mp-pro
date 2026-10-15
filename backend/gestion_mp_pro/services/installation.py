@@ -32,8 +32,9 @@ JOURNAL = logging.getLogger("gestion_mp_pro.installation")
 MIGRATIONS = Path(__file__).resolve().parents[1] / "migrations"
 """Le dossier des migrations, dans le paquet (aucun `alembic.ini` nécessaire au serveur)."""
 
-SEMENCES = {"roles": 8, "postes": 11, "motifs": 16}
-"""Ce que sème la révision 0002 (et les 57 réglages de `modeles.CLES_REGLAGES`, 0002 et 0003)."""
+SEMENCES = {"roles": 8, "postes": 11, "motifs": 17}
+"""Ce que sème la révision 0002 (16 motifs ; « Rebut » par 0009), et les 58 réglages de
+`modeles.CLES_REGLAGES` (0002, 0003, 0009)."""
 
 
 def configuration() -> Config:

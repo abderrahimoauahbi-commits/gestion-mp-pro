@@ -1,4 +1,4 @@
-"""Routes du domaine « Stock et lots » (API-PRO § 1.12 : routes 103–113 ; § 1.24 : 236).
+"""Routes du domaine « Stock et lots » (API-PRO § 1.12 : routes 103–113 ; § 1.24 : 236, 258).
 
 Routes minces : chemin, droits, schémas, `summary` ; un appel de service. La route 114
 (`GET /documents/etiquettes`) est rendue par le lot D9 (`api/documents`) à partir de
@@ -21,6 +21,7 @@ from gestion_mp_pro.api.dependances import (
     borner_date,
 )
 from gestion_mp_pro.api.erreurs import Refus, reponses
+from gestion_mp_pro.api.operations.schemas import OperationFiche
 from gestion_mp_pro.api.stock.schemas import (
     ControleSoldes,
     EtatStock,
@@ -32,6 +33,7 @@ from gestion_mp_pro.api.stock.schemas import (
     LotSolde,
     MouvementLigne,
     PageMouvements,
+    RebutEntree,
     Tracabilite,
 )
 from gestion_mp_pro.exports import stock as classeurs
@@ -47,6 +49,8 @@ from gestion_mp_pro.services import (
     stock_lecture,
     tracabilite,
 )
+from gestion_mp_pro.services.operations import lecture as operations_lecture
+from gestion_mp_pro.services.operations import rebut
 
 routeur = nouveau_routeur("stock")
 
@@ -281,6 +285,24 @@ def modifier_lot(lot_id: int, corps: LotModification, qui: QuiDep, s: SessionDep
     """Route 109."""
     fiche = lots_fiche.modifier_commentaire(s, qui, lot_id, corps.commentaire, corps.version)
     return _fiche(fiche, qui.voit_prix)
+
+
+@routeur.post(
+    "/lots/{lot_id}/rebut",
+    response_model=OperationFiche,
+    status_code=201,
+    dependencies=[droit(*C)],
+    summary="Met au rebut un fond de lot : un ajustement « Rebut » validé sur tout le reste du "
+    "lot dans ce magasin.",
+    responses=reponses(401, 403, 404, 409, 422),
+)
+def mettre_au_rebut(lot_id: int, corps: RebutEntree, qui: QuiDep, s: SessionDep) -> OperationFiche:
+    """Route 258 (lot FOND-DE-LOT) : fond de lot pour tous (quarantaine : pas l'alimentation) ;
+    au-dessus du seuil, la direction seule, avec un motif (409 `pas_un_fond_de_lot` sinon)."""
+    o = rebut.mettre_au_rebut(
+        s, qui, rebut.DemandeRebut(lot_id, corps.magasin_id, corps.version, corps.motif)
+    )
+    return OperationFiche.model_validate(asdict(operations_lecture.fiche(s, o.id, qui.role)))
 
 
 @routeur.get(

@@ -78,9 +78,22 @@ def _decision_des_achats(s: Session, qui: Acteur, o: Operation, geste: str) -> N
         )
 
 
-def creer(s: Session, qui: Acteur, e: SaisieOperation, *, valider: bool = False) -> Operation:
-    """Route 117 : un brouillon (sans numéro, sans effet) ; `valider` le valide aussitôt."""
-    droits.autoriser(qui.role, e.type)
+def creer(
+    s: Session,
+    qui: Acteur,
+    e: SaisieOperation,
+    *,
+    valider: bool = False,
+    droit_tranche: bool = False,
+) -> Operation:
+    """Route 117 : un brouillon (sans numéro, sans effet) ; `valider` le valide aussitôt.
+
+    `droit_tranche` : le droit du type a déjà été tranché par le geste appelant — le seul cas est
+    le rebut d'un fond de lot (`operations.rebut`), un ajustement que l'alimentation fait au
+    téléphone sur un fond de lot hors quarantaine, et rien d'autre.
+    """
+    if not droit_tranche:
+        droits.autoriser(qui.role, e.type)
     o = Operation(
         type=e.type, date=e.date, cree_par_id=qui.id, cree_le=horloge.maintenant(), lignes=[]
     )
@@ -92,7 +105,7 @@ def creer(s: Session, qui: Acteur, e: SaisieOperation, *, valider: bool = False)
         detail=nom(o),
     )  # fmt: skip
     if valider:
-        return _valider(s, qui, o)
+        return _valider(s, qui, o, droit_tranche=droit_tranche)
     return o
 
 
@@ -127,15 +140,15 @@ def valider(s: Session, qui: Acteur, ident: int, version: int) -> Operation:
     return _valider(s, qui, _relire(s, ident, version, qui))
 
 
-def _valider(s: Session, qui: Acteur, o: Operation) -> Operation:
-    """Valide un brouillon verrouillé (OR32–OR35, S114–S118)."""
+def _valider(s: Session, qui: Acteur, o: Operation, *, droit_tranche: bool = False) -> Operation:
+    """Valide un brouillon verrouillé (OR32–OR35, S114–S118) ; `droit_tranche` : voir `creer`."""
     if o.statut == StatutDocument.annulee:
         raise Refus.etat("Cette opération est annulée : elle ne se valide plus.", "deja_annule")
     if o.statut != StatutDocument.brouillon:
         raise Refus.etat("Cette opération est déjà validée.", code="deja_valide")
     periode.date_permise(s, o.date)
     peut, raison = lecture.droit_d_agir(o, qui.role, b.contexte(s, [o]))
-    if not peut:
+    if not peut and not droit_tranche:
         raise Refus.droit(raison)
     type_ = TypeOperation(o.type)
     if type_ is TypeOperation.retour_machine:

@@ -4,10 +4,13 @@
 Besoin par matière = Σ kg/m² × m² × (1 + perte) sur les qualités demandées — **perte
 comprise**, comme Production et besoins ; une matière qui sert plusieurs qualités n'apparaît
 qu'une fois (`par_qualite`). Les lots sont pris du plus ancien au plus récent (FIFO), hors
-quarantaine, **tels qu'ils étaient à la date de l'ordre** (`lots_lecture.disponibles`). Le
-magasin (connu, hors quarantaine) et la date (permise) sont contrôlés d'abord (D-11). Les
-empêchements connus d'avance (inventaire en cours sur une matière proposée, ordre validé à
-une date postérieure) sont rendus dans `blocages`.
+quarantaine, **tels qu'ils étaient à la date de l'ordre** (`lots_lecture.disponibles`). Un
+**fond de lot** (reste sous le seuil de rebut, lot FOND-DE-LOT, décision de Mohamed du
+15/10/2026) n'est plus proposé : il reste dans `disponibles`, marqué, et la proposition le
+nomme dans `fonds_de_lot` (l'atelier n'en fait rien, il se met au rebut). Le magasin (connu,
+hors quarantaine) et la date (permise) sont contrôlés d'abord (D-11). Les empêchements connus
+d'avance (inventaire en cours sur une matière proposée, ordre validé à une date postérieure)
+sont rendus dans `blocages`.
 """
 
 from __future__ import annotations
@@ -31,7 +34,7 @@ from gestion_mp_pro.modeles import (
 )
 from gestion_mp_pro.modeles.enums import StatutInventaire
 from gestion_mp_pro.modeles.types import QUANTITE, arrondir
-from gestion_mp_pro.services import donnees_moteur, horloge, lots_lecture, periode
+from gestion_mp_pro.services import donnees_moteur, fonds_de_lot, horloge, lots_lecture, periode
 from gestion_mp_pro.services.ordres import prevu, regles
 from gestion_mp_pro.services.ordres.saisie import SaisieQualite
 
@@ -59,6 +62,8 @@ class LotPropose:
     disponible: Decimal
     poids_bobine: Decimal
     propose: Decimal = ZERO
+    fond_de_lot: bool = False
+    """Sous le seuil de rebut : jamais proposé, laissé en stock (FOND-DE-LOT)."""
 
 
 @dataclass
@@ -101,6 +106,8 @@ class Proposition:
     manques: list[LigneProposee]
     recettes_incompletes: list[str]
     blocages: list[str]
+    fonds_de_lot: list[str] = field(default_factory=list)
+    """Les fonds de lot laissés en stock, nommés (« HT-… : 56 g dans Morocco, fond de lot »)."""
 
 
 def _matieres(s: Session, ids: set[int]) -> dict[int, tuple[Matiere, RoleNomenclature]]:
@@ -113,19 +120,30 @@ def _matieres(s: Session, ids: set[int]) -> dict[int, tuple[Matiere, RoleNomencl
     return {m.id: (m, r) for m, r in s.execute(requete).all()}
 
 
-def _servir(ligne: LigneProposee, presents: list[lots_lecture.LotDisponible]) -> None:
-    """Les lots du plus ancien au plus récent, jusqu'à couvrir le prévu (P12)."""
+def _servir(
+    ligne: LigneProposee, presents: list[lots_lecture.LotDisponible], seuil: Decimal
+) -> list[str]:
+    """Les lots du plus ancien au plus récent, jusqu'à couvrir le prévu (P12) ; un fond de lot
+    est sauté et nommé (FOND-DE-LOT)."""
     reste = ligne.prevu
+    sautes = []
     for x in presents:
         poids = x.poids_bobine if x.poids_bobine > 0 else ligne.poids_bobine
-        lot = LotPropose(x.lot_id, x.lot, x.entre_le, x.quantite, poids)
+        lot = LotPropose(x.lot_id, x.lot, x.entre_le, x.quantite, poids, fond_de_lot=x.fond_de_lot)
         ligne.disponibles.append(lot)
+        if x.fond_de_lot:
+            sautes.append(
+                f"{ligne.reference} — lot {x.lot} : {fonds_de_lot.poids_lisible(x.quantite)} dans "
+                f"{x.magasin}, {fonds_de_lot.marque(seuil)}, laissé en stock (à mettre au rebut)."
+            )
+            continue
         if reste > SEUIL:
             pris = min(x.quantite, reste)
             lot.propose = arrondir(pris, QUANTITE)
             ligne.lots.append(lot)
             reste -= pris
     ligne.manque = arrondir(max(ZERO, reste), QUANTITE)
+    return sautes
 
 
 def inventaires_ouverts(s: Session, magasin_id: int, matieres: set[int]) -> list[Inventaire]:
@@ -189,7 +207,9 @@ def proposer(s: Session, demande: Demande) -> Proposition:
     k = 1 + prevu.taux_perte(s)
     besoins = prevu.par_matiere(s, d, m2)
     fiches = _matieres(s, set(besoins))
-    lignes = []
+    seuil = fonds_de_lot.seuil(s)
+    lignes: list[LigneProposee] = []
+    fonds: list[str] = []
     for mid, par_qualite in besoins.items():
         m, role = fiches[mid]
         ligne = LigneProposee(
@@ -202,7 +222,7 @@ def proposer(s: Session, demande: Demande) -> Proposition:
                 for c, v in sorted(par_qualite.items())
             ],
         )  # fmt: skip
-        _servir(ligne, lots_lecture.disponibles(s, mid, demande.magasin_id, jour))
+        fonds += _servir(ligne, lots_lecture.disponibles(s, mid, demande.magasin_id, jour), seuil)
         lignes.append(ligne)
     lignes.sort(key=lambda x: (x.role, x.reference))
     return Proposition(
@@ -211,4 +231,5 @@ def proposer(s: Session, demande: Demande) -> Proposition:
         lignes=lignes, manques=[x for x in lignes if x.manque > 0],
         recettes_incompletes=prevu.incompletes(d, m2),
         blocages=empechements(s, demande.magasin_id, jour, set(besoins)),
+        fonds_de_lot=fonds,
     )  # fmt: skip

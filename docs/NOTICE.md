@@ -234,6 +234,7 @@ Le stock par matière, lot par lot, chaque mouvement de stock, les ordres de fab
 - Le stock se tient en kilos ; le cuir, les franges et le ruban disent aussi leurs mètres, à titre indicatif.
 - Sur les métiers : le fil monté, pas encore tissé. C’est du stock : il compte dans le stock, sa valeur, le disponible et le stock projeté. Monter n’écrit aucun mouvement : le fil a déjà été sorti par un ordre.
 - La pastille du menu compte l’alerte rouge : matières en rupture ou critiques.
+- Un reste de lot plus petit que le seuil de rebut (100 g par défaut) est un « fond de lot » : marqué dans les lots, compté dans l’indicateur « Fonds de lot » (case « Fonds de lot seulement »), plus jamais proposé aux machines ; « Mettre au rebut » (direction, achats) le sort du stock par un ajustement « Rebut » validé tout de suite.
 
 ### Sorties vers les machines (`/sorties`)
 
@@ -253,6 +254,7 @@ Au pied du métier : envoyer aux machines, retour des machines, trouver un lot (
 - Monter un fil n’écrit aucun mouvement : la confirmation annonce ce que devient le stock sur les métiers.
 - Sans réseau, l’écran le dit (« Pas de réseau ») et propose « Réessayer » : jamais une liste vide à la place.
 - Aucun prix ni montant n’y est jamais montré.
+- « Envoyer aux machines » ne propose jamais un fond de lot (reste sous le seuil de rebut, 100 g par défaut) : il est nommé, et se met au rebut depuis la fiche du lot (« Stock des fils »), hors quarantaine.
 
 ### Plan d’achat (`/plan-achat`)
 
@@ -355,6 +357,7 @@ Les paramètres de calcul, les devises et leurs cours, les magasins, les postes 
 
 - La direction règle tout ; les achats tiennent les devises et lisent le reste.
 - Chaque changement de paramètre est daté, signé et recalcule tout le pilotage.
+- « Seuil de rebut » (Stock et inventaire, kg, 100 g par défaut, 0 = désactivé) : sous ce poids, un reste de lot est un fond de lot.
 
 ### Administration (`/administration`)
 
@@ -398,6 +401,7 @@ Où est le lot, combien il en reste, d’où il vient, quels ordres il a servis 
 - « Où ce lot est-il allé ? » ouvre la traçabilité.
 - Libérer une quarantaine est une décision des achats ou de la direction, après contrôle de la matière.
 - L’étiquette QR mène au téléphone à la fiche de l’atelier, au bureau à cette fiche.
+- Un fond de lot (reste sous le seuil de rebut) se met au rebut depuis la fiche : direction et achats au bureau ; la direction aussi au-dessus du seuil, en écrivant pourquoi. Au téléphone, l’alimentation met au rebut un fond de lot hors quarantaine.
 
 ### Fiche fournisseur (`/fournisseurs/nouveau`)
 

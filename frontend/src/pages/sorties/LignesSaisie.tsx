@@ -41,6 +41,7 @@ function AutreLot({ f, s }: { f: Fil; s: SaisieOrdre }) {
       {autres.map((d) => (
         <option key={d.lot_id} value={d.lot_id}>
           {d.lot} — {kg(d.disponible)}
+          {d.fond_de_lot ? ' · fond de lot' : ''}
         </option>
       ))}
     </select>

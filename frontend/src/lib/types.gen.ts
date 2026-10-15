@@ -1881,6 +1881,27 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/lots/{lot_id}/rebut': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Met au rebut un fond de lot : un ajustement « Rebut » validé sur tout le reste du lot dans ce magasin.
+     * @description Route 258 (lot FOND-DE-LOT) : fond de lot pour tous (quarantaine : pas l'alimentation) ;
+     *     au-dessus du seuil, la direction seule, avec un motif (409 `pas_un_fond_de_lot` sinon).
+     */
+    post: operations['mettre_au_rebut_api_lots__lot_id__rebut_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/tracabilite': {
     parameters: {
       query?: never
@@ -5832,6 +5853,12 @@ export interface components {
        * @description direction et administrateur
        */
       alerte_serveur?: string | null
+      /**
+       * Seuil Rebut
+       * @description kg ; sous ce poids un reste de lot est un fond de lot (0 : jamais)
+       * @default 0
+       */
+      seuil_rebut: number
     }
     /**
      * ControleNomenclature
@@ -10008,6 +10035,12 @@ export interface components {
       entre_le: string
       /** Poids Bobine */
       poids_bobine: number
+      /**
+       * Fond De Lot
+       * @description sous le seuil de rebut : la proposition FIFO le saute
+       * @default false
+       */
+      fond_de_lot: boolean
     }
     /**
      * LotFiche
@@ -10054,6 +10087,24 @@ export interface components {
       /** Statut */
       statut: string
       historique: components['schemas']['HistoriqueLot']
+      /**
+       * Fond De Lot
+       * @description au moins un solde sous le seuil de rebut (lot FOND-DE-LOT)
+       * @default false
+       */
+      fond_de_lot: boolean
+      /**
+       * Fond De Lot Kg
+       * @description ce que pèsent ses fonds de lot
+       * @default 0
+       */
+      fond_de_lot_kg: number
+      /**
+       * Version
+       * @description 1 + les lignes du journal du lot (le rebut la vérifie : 409)
+       * @default 1
+       */
+      version: number
       /** Poids Bobine Le */
       poids_bobine_le: string | null
       /** Commentaire */
@@ -10061,8 +10112,6 @@ export interface components {
       reception: components['schemas']['ReceptionDuLot'] | null
       /** Mouvements */
       mouvements: components['schemas']['MouvementLigne'][]
-      /** Version */
-      version: number
     }
     /**
      * LotModification
@@ -10094,6 +10143,12 @@ export interface components {
       poids_bobine: number
       /** Propose */
       propose: number
+      /**
+       * Fond De Lot
+       * @description sous le seuil de rebut : jamais proposé, laissé en stock (lot FOND-DE-LOT)
+       * @default false
+       */
+      fond_de_lot: boolean
     }
     /**
      * LotResume
@@ -10156,6 +10211,24 @@ export interface components {
       /** Statut */
       statut: string
       historique: components['schemas']['HistoriqueLot']
+      /**
+       * Fond De Lot
+       * @description au moins un solde sous le seuil de rebut (lot FOND-DE-LOT)
+       * @default false
+       */
+      fond_de_lot: boolean
+      /**
+       * Fond De Lot Kg
+       * @description ce que pèsent ses fonds de lot
+       * @default 0
+       */
+      fond_de_lot_kg: number
+      /**
+       * Version
+       * @description 1 + les lignes du journal du lot (le rebut la vérifie : 409)
+       * @default 1
+       */
+      version: number
     }
     /**
      * LotSorti
@@ -12638,6 +12711,11 @@ export interface components {
       recettes_incompletes: string[]
       /** Blocages */
       blocages: string[]
+      /**
+       * Fonds De Lot
+       * @description les fonds de lot laissés en stock par la proposition, nommés
+       */
+      fonds_de_lot?: string[]
     }
     /**
      * PropositionClassement
@@ -12896,6 +12974,25 @@ export interface components {
        * @description fraction, sur les mois clos
        */
       ecart: number | null
+    }
+    /**
+     * RebutEntree
+     * @description Route 258 : mettre au rebut ce que le lot porte dans un magasin (lot FOND-DE-LOT).
+     */
+    RebutEntree: {
+      /** Magasin Id */
+      magasin_id: number
+      /**
+       * Version
+       * @description la version du lot lue (fiche ou liste)
+       */
+      version: number
+      /**
+       * Motif
+       * @description exigé de la direction au-dessus du seuil (cinq caractères au moins)
+       * @default
+       */
+      motif: string
     }
     /**
      * ReceptionCitee
@@ -14106,6 +14203,12 @@ export interface components {
       type: string
       /** Quantite */
       quantite: number
+      /**
+       * Fond De Lot
+       * @description reste > 0 et sous le seuil de rebut (lot FOND-DE-LOT)
+       * @default false
+       */
+      fond_de_lot: boolean
     }
     /**
      * StatutDocument
@@ -20982,6 +21085,77 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['LotFiche']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Saisie refusée */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  mettre_au_rebut_api_lots__lot_id__rebut_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        lot_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RebutEntree']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['OperationFiche']
         }
       }
       /** @description Non connecté */

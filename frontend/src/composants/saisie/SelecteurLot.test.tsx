@@ -16,6 +16,7 @@ const lot = (lot_id: number, quantite: number, entre_le: string, magasin_id = 1,
   quantite,
   entre_le,
   poids_bobine: 5,
+  fond_de_lot: false,
 })
 const LOTS = [lot(7, 120.5, '2026-09-02'), lot(12, 300, '2026-10-01')]
 

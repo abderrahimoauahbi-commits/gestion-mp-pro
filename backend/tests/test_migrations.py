@@ -104,7 +104,9 @@ def test_aller_retour_complet(base_vide: None) -> None:
     assert installation.schema_en_retard()
     with moteur().connect() as c:
         assert c.execute(text("SELECT count(*) FROM parametre")).scalar() == 0
-    assert installation.migrer() == ["0002", "0003", "0004", "0005", "0006", "0007", "0008"]
+    assert installation.migrer() == [
+        "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009",
+    ]  # fmt: skip
     assert not installation.schema_en_retard()
 
 
@@ -124,7 +126,7 @@ def test_0003_tolerance_tva_import_aller_retour(base_vide: None) -> None:
     installation.migrer()
     cfg = installation.configuration()
     with moteur().connect() as c, c.begin():
-        assert _cles_reglages(c) == (57, 57)
+        assert _cles_reglages(c) == (58, 58)
         c.execute(
             text(
                 "INSERT INTO parametre_historique (cle, avant, apres)"
@@ -139,9 +141,41 @@ def test_0003_tolerance_tva_import_aller_retour(base_vide: None) -> None:
             c.execute(text("INSERT INTO parametre (cle) VALUES ('toler_tva_import')"))
         refus.rollback()
         command.upgrade(cfg, "head")
-        assert _cles_reglages(c) == (57, 57)
+        assert _cles_reglages(c) == (58, 58)
         valeur = "SELECT valeur FROM parametre WHERE cle = 'toler_tva_import'"
         assert c.execute(text(valeur)).scalar() == "0.05"
+    assert not installation.schema_en_retard()
+
+
+def test_0009_seuil_rebut_aller_retour(base_vide: None) -> None:
+    """0009 (lot FOND-DE-LOT) : la clé `seuil_rebut` (0.1) et le motif « Rebut » ; le retour
+    arrière retire la clé, son historique et le motif tant que rien ne le cite ; rejouable."""
+    installation.migrer()
+    cfg = installation.configuration()
+    motif = "SELECT count(*) FROM motif WHERE type_operation = 'ajustement' AND libelle = 'Rebut'"
+    valeur = "SELECT valeur FROM parametre WHERE cle = 'seuil_rebut'"
+    with moteur().connect() as c, c.begin():
+        assert _cles_reglages(c) == (58, 58)
+        assert c.execute(text(valeur)).scalar() == "0.1"
+        assert c.execute(text(motif)).scalar() == 1
+        c.execute(
+            text(
+                "INSERT INTO parametre_historique (cle, avant, apres)"
+                " VALUES ('seuil_rebut', '0.1', '2')"
+            )
+        )
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, "0008")
+        assert _cles_reglages(c) == (57, 57)
+        assert c.execute(text(motif)).scalar() == 0
+        refus = c.begin_nested()
+        with pytest.raises(SQLAlchemyError):
+            c.execute(text("INSERT INTO parametre (cle) VALUES ('seuil_rebut')"))
+        refus.rollback()
+        command.upgrade(cfg, "head")
+        assert _cles_reglages(c) == (58, 58)
+        assert c.execute(text(valeur)).scalar() == "0.1"
+        assert c.execute(text(motif)).scalar() == 1
     assert not installation.schema_en_retard()
 
 

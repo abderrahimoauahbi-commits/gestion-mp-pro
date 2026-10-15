@@ -80,14 +80,16 @@ const lotBleuPrincipal = lotEssai({
   reference: 'IMP LISSE BLEU',
   quantite: 100,
   disponible: 100,
-  magasins: [{ magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 100 }],
+  magasins: [
+    { magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 100, fond_de_lot: false },
+  ],
 })
 const lotRougeAtelier = lotEssai({
   lot_id: 30,
   lot: 'L24-300',
   quantite: 50,
   disponible: 50,
-  magasins: [{ magasin_id: 3, magasin: 'ATELIER', type: 'stock_courant', quantite: 50 }],
+  magasins: [{ magasin_id: 3, magasin: 'ATELIER', type: 'stock_courant', quantite: 50, fond_de_lot: false }],
 })
 
 /** `/lots` rendu comme le serveur : par dépôt (`magasin`, toutes matières) ou par matière. */

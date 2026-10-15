@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from gestion_mp_pro.config import reglages
 from gestion_mp_pro.modeles import Inventaire, InventaireMatiere, Magasin, RoleNomenclature
 from gestion_mp_pro.modeles.enums import Role, StatutInventaire
-from gestion_mp_pro.services import comptes, periode
+from gestion_mp_pro.services import comptes, fonds_de_lot, periode
 
 COMPTEURS: dict[str, Callable[[Session, str], int | None]] = {}
 """Compteurs des pastilles du menu, par nom (déclarés par les domaines)."""
@@ -55,6 +55,8 @@ class Contexte:
     base_essai: bool
     compteurs: dict[str, int] = field(default_factory=dict)
     alerte_serveur: str | None = None
+    seuil_rebut: float = 0
+    """Le seuil de rebut (kg) : l'écran marque les fonds de lot « fond de lot (< 100 g) »."""
 
 
 def inventaires_ouverts(s: Session) -> list[InventaireOuvert]:
@@ -116,4 +118,5 @@ def contexte(s: Session, role: str) -> Contexte:
         base_essai=reglages().nom_base.endswith("_essai"),
         compteurs=compteurs(s, role),
         alerte_serveur=alerte_serveur(s) if role in VOIENT_LE_SERVEUR else None,
+        seuil_rebut=float(fonds_de_lot.seuil(s)),
     )

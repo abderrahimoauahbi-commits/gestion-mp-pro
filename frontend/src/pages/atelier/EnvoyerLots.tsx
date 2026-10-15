@@ -17,6 +17,7 @@ import { Selecteur } from '../../composants/saisie/Selecteur'
 import { kgEtMetres, nombre } from '../../lib/format'
 import { filConforme, priseDuSolde, type Fil } from '../../lib/ordre'
 import { useLecture } from '../../lib/requetes'
+import { fondsLaisses } from '../stock/fondsProposes'
 import { enHaut, Fiche, NoteAtelier } from './briques'
 import { dateLisible, qte, useMagasins, useNomMetier } from './commun'
 import { useEmpechements } from './empechements'
@@ -185,6 +186,12 @@ export function EnvoyerLots({ s, onFait }: { s: SaisieSortie; onFait: (o: OrdreF
             {s.e.incompletes.map((x) => (
               <div key={x}>Recette incomplète — {x}</div>
             ))}
+          </Note>
+        ) : null}
+        {fondsLaisses(s.e.besoins).length ? (
+          <Note ton="attention">
+            Fonds de lot laissés en stock (pas proposés) : {fondsLaisses(s.e.besoins).join(' · ')}. À mettre
+            au rebut depuis la fiche du lot.
           </Note>
         ) : null}
         {!s.e.horsRecette ? (

@@ -292,13 +292,14 @@ def test_codes_douaniers(
 
 
 def test_motifs_une_seule_source(alimentation: TestClient) -> None:
-    """Hérité : S80–S85, U2 — types et rôles, 16 motifs (R1–R6), motifs et issues des
-    réclamations ; lisible par l'alimentation."""
+    """Hérité : S80–S85, U2 — types et rôles, 16 motifs (R1–R6) et « Rebut » (0009), motifs et
+    issues des réclamations ; lisible par l'alimentation."""
     m = ok(alimentation.get("/api/motifs"))
     types = {x["type"]: x for x in m["types"]}
     assert types["retour_machine"]["roles"] == ["direction", "alimentation"]
     assert types["transfert"]["libelle"] == "Transfert entre magasins"
-    assert len(m["motifs"]) == 16
+    assert len(m["motifs"]) == 17
+    assert any(x["libelle"] == "Rebut" and x["type"] == "ajustement" for x in m["motifs"])
     liberation = next(x for x in m["motifs"] if x["libelle"] == "Libération de quarantaine")
     assert liberation["impose_role"] == "achats"
     codes = {x["libelle"]: x["code_r"] for x in m["motifs"]}

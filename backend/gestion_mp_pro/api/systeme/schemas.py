@@ -75,6 +75,9 @@ class Contexte(Sortie):
     base_essai: bool
     compteurs: dict[str, int]
     alerte_serveur: str | None = Field(default=None, description="direction et administrateur")
+    seuil_rebut: float = Field(
+        default=0, description="kg ; sous ce poids un reste de lot est un fond de lot (0 : jamais)"
+    )
 
 
 class AdresseAcces(Sortie):

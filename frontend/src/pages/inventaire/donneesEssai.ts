@@ -194,10 +194,15 @@ export function lotEssai(autres: Partial<LotSolde> = {}): LotSolde {
     quantite: 420,
     disponible: 420,
     quarantaine: 0,
-    magasins: [{ magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 420 }],
+    magasins: [
+      { magasin_id: 1, magasin: 'PRINCIPAL', type: 'stock_courant', quantite: 420, fond_de_lot: false },
+    ],
     bobines: 168,
     statut: 'disponible',
     historique: { entre: 420, sorti: 0, dernier_mouvement: '2026-08-01', ordres: [] },
+    fond_de_lot: false,
+    fond_de_lot_kg: 0,
+    version: 1,
     ...autres,
   }
 }

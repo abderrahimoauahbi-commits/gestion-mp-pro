@@ -1,9 +1,10 @@
 /**
- * Les colonnes de l'onglet « Lots » : la case des étiquettes, le lot et son statut, la référence,
- * le dernier mouvement, l'entré, le sorti (net des retours), le reste, les bobines, les magasins
- * (quarantaine en rouge), les ordres servis, « Suivre ».
+ * Les colonnes de l'onglet « Lots » : la case des étiquettes, le lot et son statut (et la marque
+ * « fond de lot (< 100 g) »), la référence, le dernier mouvement, l'entré, le sorti (net des
+ * retours), le reste, les bobines, les magasins (quarantaine en rouge, fond de lot marqué), les
+ * ordres servis, « Suivre », et le geste « Mettre au rebut » d'un fond de lot (lot FOND-DE-LOT).
  */
-import type { Dispatch, SetStateAction } from 'react'
+import type { Dispatch, ReactNode, SetStateAction } from 'react'
 
 import { LienDocument } from '../../composants/documents/LienDocument'
 import { Badge } from '../../composants/retour/Badge'
@@ -15,11 +16,19 @@ import type { Suivi } from './donnees'
 import styles from './stock.module.css'
 import { estQuarantaine, type LotSolde } from './types'
 
-function Lot({ l }: { l: LotSolde }) {
+function Lot({ l, marque }: { l: LotSolde; marque: string }) {
   return (
     <span className={styles.nowrap}>
       <Double haut={l.lot} bas={`entré le ${date(l.entre_le)}`} mono />{' '}
       {l.statut !== 'disponible' ? <Badge famille="lot" valeur={l.statut} /> : null}
+      {l.fond_de_lot ? (
+        <Badge
+          ton="attention"
+          titre="Reste sous le seuil de rebut : la proposition « Envoyer aux machines » ne le propose plus"
+        >
+          {marque || 'fond de lot'}
+        </Badge>
+      ) : null}
     </span>
   )
 }
@@ -30,7 +39,8 @@ function Magasins({ l }: { l: LotSolde }) {
       {l.magasins.map((g) => (
         <span key={g.magasin_id} className={styles.dessous}>
           {estQuarantaine(g.type) ? <Badge ton="critique">{g.magasin}</Badge> : g.magasin}{' '}
-          {nombre(g.quantite, 0, 2)}
+          {nombre(g.quantite, 0, 3)}
+          {g.fond_de_lot ? <Badge ton="attention">fond</Badge> : null}
         </span>
       ))}
     </span>
@@ -72,8 +82,8 @@ const kgLot = (
   rendu: (l) => <Kg v={valeur(l)} kgParMl={l.kg_par_ml} />,
 })
 
-const COLONNES: Colonne<LotSolde>[] = [
-  { cle: 'lot', titre: 'Lot', valeur: (l) => l.lot, rendu: (l) => <Lot l={l} /> },
+const colonnesFixes = (marque: string): Colonne<LotSolde>[] => [
+  { cle: 'lot', titre: 'Lot', valeur: (l) => l.lot, rendu: (l) => <Lot l={l} marque={marque} /> },
   {
     cle: 'reference',
     titre: 'Référence',
@@ -121,10 +131,16 @@ export function colonnesLots({
   coches,
   setCoches,
   onSuivre,
+  marque = '',
+  rebut,
 }: {
   coches: ReadonlySet<number>
   setCoches: Dispatch<SetStateAction<ReadonlySet<number>>>
   onSuivre: (s: Suivi) => void
+  /** La marque d'un fond de lot (« fond de lot (< 100 g) »). */
+  marque?: string
+  /** Le geste « Mettre au rebut » d'une ligne (null : rien). */
+  rebut?: (l: LotSolde) => ReactNode
 }): Colonne<LotSolde>[] {
   const basculer = (id: number, oui: boolean) =>
     setCoches((avant) => {
@@ -154,8 +170,9 @@ export function colonnesLots({
     titre: '',
     triable: false,
     exporte: false,
+    largeur: rebut ? 260 : undefined,
     rendu: (l) => (
-      <span onClick={(e) => e.stopPropagation()}>
+      <span className={styles.rangee} onClick={(e) => e.stopPropagation()}>
         <Bouton
           taille="petit"
           titre="D’où vient ce lot, quels ordres il a servis, et quand"
@@ -163,8 +180,9 @@ export function colonnesLots({
         >
           Suivre
         </Bouton>
+        {rebut?.(l)}
       </span>
     ),
   }
-  return [caseLot, ...COLONNES, suivre]
+  return [caseLot, ...colonnesFixes(marque), suivre]
 }

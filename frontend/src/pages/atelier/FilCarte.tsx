@@ -95,7 +95,11 @@ function AutreLot({ s, f }: { s: SaisieSortie; f: Fil }) {
       libelle={`Prendre aussi un autre lot de ${f.reference}`}
       placeholder="+ Prendre aussi un autre lot…"
       valeur={null}
-      options={autres.map((d) => ({ id: d.lot_id, titre: d.lot, sous: q(d.disponible, f.kg_par_ml) }))}
+      options={autres.map((d) => ({
+        id: d.lot_id,
+        titre: d.lot,
+        sous: `${q(d.disponible, f.kg_par_ml)}${d.fond_de_lot ? ' · fond de lot' : ''}`,
+      }))}
       onChange={(id) => {
         const d = autres.find((x) => x.lot_id === id)
         if (d) s.poser({ prises: [...s.e.prises, priseDe(besoin, d)] })

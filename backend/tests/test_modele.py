@@ -173,7 +173,8 @@ def test_semences_motifs(lien: Connection) -> None:
     motifs = lien.execute(
         text("SELECT type_operation, libelle, code_r, impose_role FROM motif ORDER BY id")
     ).all()
-    assert len(motifs) == 16
+    assert len(motifs) == 17  # 16 de la révision 0002, « Rebut » (ajustement) de 0009
+    assert ("ajustement", "Rebut", None, None) in [tuple(m) for m in motifs]
     codes = {m.libelle: m.code_r for m in motifs if m.code_r}
     assert codes == {
         "Reliquat de fin d'ordre": "R1",
@@ -189,7 +190,7 @@ def test_semences_motifs(lien: Connection) -> None:
     assert par_type == {
         "retour_machine": 3,
         "retour_fournisseur": 4,
-        "ajustement": 4,
+        "ajustement": 5,  # « Rebut », révision 0009
         "transfert": 4,
         "inventaire": 1,
     }
@@ -197,8 +198,9 @@ def test_semences_motifs(lien: Connection) -> None:
 
 def test_semences_reglages(lien: Connection) -> None:
     valeurs = dict(lien.execute(text("SELECT cle, valeur FROM parametre")).all())
-    assert len(valeurs) == 57
+    assert len(valeurs) == 58
     assert set(valeurs) == set(modeles.CLES_REGLAGES)
+    assert valeurs["seuil_rebut"] == "0.1"
     assert valeurs["seuil_critique"] == "60"
     assert valeurs["marge_securite"] == "0.2"
     assert valeurs["taux_tpi_import"] == "0.0025"

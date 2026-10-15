@@ -79,6 +79,10 @@ class LotPropose(Sortie):
     disponible: Nombre
     poids_bobine: Nombre
     propose: Nombre
+    fond_de_lot: bool = Field(
+        default=False,
+        description="sous le seuil de rebut : jamais proposé, laissé en stock (lot FOND-DE-LOT)",
+    )
 
 
 class ParQualite(Sortie):
@@ -118,6 +122,10 @@ class Proposition(Sortie):
     manques: list[LigneProposee]
     recettes_incompletes: list[str]
     blocages: list[str]
+    fonds_de_lot: list[str] = Field(
+        default_factory=list,
+        description="les fonds de lot laissés en stock par la proposition, nommés",
+    )
 
 
 class QualiteOrdre(Sortie):

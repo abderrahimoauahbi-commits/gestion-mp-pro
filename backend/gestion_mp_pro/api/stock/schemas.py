@@ -1,4 +1,4 @@
-"""Schémas Pydantic du domaine « Stock et lots » (API-PRO § 1.12, routes 103–113 et 236).
+"""Schémas Pydantic du domaine « Stock et lots » (API-PRO § 1.12, routes 103–113, 236 et 258).
 
 Les noms des champs monétaires suivent les motifs du filtre des prix (`prix*`, `cours*`,
 `*_mad`, `valeur*`, `montant*`, `cout*`) : l'alimentation les reçoit à `null`. `LigneStock`
@@ -57,6 +57,9 @@ class SoldeMagasin(Sortie):
     magasin: str
     type: str
     quantite: Nombre
+    fond_de_lot: bool = Field(
+        default=False, description="reste > 0 et sous le seuil de rebut (lot FOND-DE-LOT)"
+    )
 
 
 class OrdreServi(Sortie):
@@ -97,6 +100,13 @@ class LotSolde(Sortie):
     bobines: int | None
     statut: str
     historique: HistoriqueLot
+    fond_de_lot: bool = Field(
+        default=False, description="au moins un solde sous le seuil de rebut (lot FOND-DE-LOT)"
+    )
+    fond_de_lot_kg: Nombre = Field(default=0, description="ce que pèsent ses fonds de lot")
+    version: int = Field(
+        default=1, description="1 + les lignes du journal du lot (le rebut la vérifie : 409)"
+    )
 
 
 class BesoinDeQualite(Sortie):
@@ -189,7 +199,6 @@ class LotFiche(LotSolde):
     commentaire: str
     reception: ReceptionDuLot | None
     mouvements: list[MouvementLigne]
-    version: int
 
 
 class LotModification(Entree):
@@ -219,6 +228,21 @@ class LotDisponible(Sortie):
     quantite: Nombre
     entre_le: date
     poids_bobine: Nombre
+    fond_de_lot: bool = Field(
+        default=False, description="sous le seuil de rebut : la proposition FIFO le saute"
+    )
+
+
+class RebutEntree(Entree):
+    """Route 258 : mettre au rebut ce que le lot porte dans un magasin (lot FOND-DE-LOT)."""
+
+    magasin_id: int = Field(ge=1)
+    version: int = Field(ge=1, description="la version du lot lue (fiche ou liste)")
+    motif: str = Field(
+        default="",
+        max_length=L.COMMENTAIRE,
+        description="exigé de la direction au-dessus du seuil (cinq caractères au moins)",
+    )
 
 
 class EtapeTracee(Sortie):

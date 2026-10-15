@@ -1134,6 +1134,7 @@ Gestion MP : `Stock.tsx:179-404` → PRO : `Indicateurs`, `Recherche`, `Filtres`
 | Ligne → fiche de lot ; pas de pied, pas de pagination | ligne → `/lots/{id}` ; pied Σ Reste | pied ajouté |
 | Vides « Aucun lot ne correspond. » / « Aucun lot : les lots naissent des réceptions et des stocks d'ouverture. » ; chargement « … les lots… » | identiques | — |
 | Pas d'export | `ExportExcel` (route ajoutée, API-PRO § 1.24 : GET `export/lots`) | P2-19 |
+| — | **Fonds de lot** (lot FOND-DE-LOT, DECISIONS U22) : KPI « Fonds de lot » (« N », « X kg à mettre au rebut (< 100 g) », ton attention, pose `?fonds=1`) ; case « Fonds de lot seulement » ; badge « fond de lot (< 100 g) » sur le lot (`LotSolde.fond_de_lot`, marque écrite d'après `contexte.seuil_rebut`), badge « fond » sur le solde du magasin ; vide « Aucun fond de lot : rien en stock sous le seuil de rebut. » | nouveau |
 
 **Gestes**
 
@@ -1145,6 +1146,7 @@ Gestion MP : `Stock.tsx:179-404` → PRO : `Indicateurs`, `Recherche`, `Filtres`
 | clic ligne | C | GET `lots/{id}` | — | `/lots/{id}` |
 | Effacer les filtres | C | — | — | — |
 | (nouveau) Exporter en Excel | C | (route ajoutée, API-PRO § 1.24 : GET `export/lots`) | — | — |
+| (nouveau) Mettre au rebut (sur une ligne « fond de lot », un bouton par magasin) | D, A | POST `lots/{id}/rebut` {magasin_id, version, motif} (route 258) | `Confirmer` « Mettre au rebut 56 g du lot … dans « Morocco » ? Le stock baisse d'autant, par un ajustement « Rebut » validé tout de suite. » ; refus du serveur dits tels quels (409 version, période close, inventaire) | lot FOND-DE-LOT |
 
 Document « Étiquettes de lots » : voir Partie 1 (`GET /api/documents/etiquettes`).
 
@@ -1169,6 +1171,7 @@ compris pour transferts et retours machine], `/receptions/{id}`, `/inventaires/{
 | Libérer | D, A | POST `operations (valider: true)` | `Confirmer` « Libérer X kg : la matière devient disponible pour les machines ? » ; refus GMP gardés (dont « Un transfert va d'un magasin à un autre. », « L'inventaire INV-… est en cours sur « MAG »… », « Le lot « N » de « REF » ne porte que X kg… », date) | tous magasins de quarantaine (P1-17) |
 | Page du lot | C | — | — | supprimé (adresse `/lots/:id`) |
 | Imprimer l'étiquette | C | GET `/api/documents/etiquettes?lots={id}` | — | — |
+| (nouveau) Mettre au rebut (carte « Fond de lot » : un bouton par magasin où le reste est sous le seuil ; la direction voit aussi « Mettre au rebut » sur les autres soldes, motif exigé de 5 caractères) | D, A (au-dessus du seuil : D) | POST `lots/{id}/rebut` (258) | `Confirmer` sur place ; badge « fond de lot (< 100 g) » dans le sous-titre et sur le solde | lot FOND-DE-LOT |
 
 ---
 
@@ -1830,7 +1833,7 @@ Ce qu'on voit
 | Bandeaux d'empêchement (comme étape 1) | `BandeauBlocages` | (b) |
 | Carte récapitulative « {CODE} {m²} m² · … » / « Ordre hors recette » ; note « Le {jj/mm/aaaa (aujourd'hui/hier)} · {magasin} · {CODE · Nom} · {commentaire} » ; bouton « Modifier la demande » | `ResumeValidation` en tête, même contenu (« observations ») | — |
 | Recettes incomplètes (2 textes « Recette incomplète — {CODE} : le rôle … ») | `Note` alerte par recette, mêmes textes, titre « Recettes incomplètes » | vocabulaire |
-| Note « Les quantités proposées suivent la recette, perte matière comprise… Corrigez au réel avant de valider. » | idem | — |
+| Note « Les quantités proposées suivent la recette, perte matière comprise… Corrigez au réel avant de valider. » | idem ; au-dessus, `Note` attention « Fonds de lot laissés en stock (pas proposés) : {lot} ({56 g}, {réf})… À mettre au rebut depuis la fiche du lot. » quand la proposition en a sauté (`LotPropose.fond_de_lot`) ; « + Prendre aussi un autre lot… » dit « · fond de lot » sur ces lots (le bureau, `/sorties`, fait de même) | lot FOND-DE-LOT |
 | Une carte par fil, ouverte, toutes affichées (5 800 px pour 16 fils) | **Vue repliée** : les fils conformes (écart « conforme », sans manque, sans dépassement ni contenance manquante) regroupés dans une carte « {n} fil(s) conforme(s) — tout est conforme » (toucher déplie) ; restent ouverts les fils en écart, en manque, en dépassement, sans poids de bobine et hors recette ; tout conforme → une seule carte « Tout est conforme : {n} fils, {total} » | (e), REGLES 6.1 |
 | Titre de carte = référence ; carte rouge si manque > 0,05 kg | idem | — |
 | Fil de recette : « {rôle} · prévu {q} » (+ « {CODE} : {q} · … » si plusieurs qualités, aussi en infobulle) ; à droite « pris {q} » + `EcartFil` | idem ; détail par qualité en texte (pas d'infobulle au doigt) | — |
@@ -2008,7 +2011,7 @@ Gestion MP : `Chercher.tsx` (`Scanner`) → PRO : `/atelier/chercher`, `EcranAte
 | Caméra si `BarcodeDetector` : « 📷 Scanner une étiquette » / « Fermer la caméra » ; sinon note « Pour scanner : ouvrez l'appareil photo… » | `ScanQR` : « Scanner une étiquette » / « Fermer la caméra » ; même note de repli | sans émoji |
 | Scanner : caméra arrière, vidéo pleine largeur, détection 250 ms ; `/lot/{n}` → fiche ; sinon `GET /lots/scan?code=` : 1 lot → fiche ; 0 ou plusieurs → **rien** | idem ; 0 → « Aucun lot pour cette étiquette ({texte lu}). » ; plusieurs → « {n} lots portent ce numéro : choisir ci-dessous » et la liste filtrée ; le scan continue | an. 19 |
 | Échec caméra « La caméra n'est pas accessible ici (elle demande une adresse sécurisée https). Utilisez l'appareil photo du téléphone. » | idem | — |
-| Liste **80 premiers** sans le dire ; carte « **{réf}** » ; « lot {n°} · entré le » / quantité (0 déc.) ; magasins / « ≈ N bobines » ; étiquette rouge « {q} en quarantaine » | 50 + `ChargerPlus` ; même carte ; « Reste » ; `Badge` quarantaine | an. 18 |
+| Liste **80 premiers** sans le dire ; carte « **{réf}** » ; « lot {n°} · entré le » / quantité (0 déc.) ; magasins / « ≈ N bobines » ; étiquette rouge « {q} en quarantaine » | 50 + `ChargerPlus` ; même carte ; « Reste » ; `Badge` quarantaine ; `Badge` « fond de lot » sur un lot dont un reste est sous le seuil de rebut (lot FOND-DE-LOT) | an. 18 |
 | Chargement « les lots » ; vide « Aucun lot en stock ne correspond. » (aussi sur coupure) | `Chargement` ; `Vide` ; coupure → « Pas de réseau » | (e), an. 3 |
 
 | Geste GMP (libellé exact) | Rôles | Route API PRO | Confirmation / blocages | Changement PRO |
@@ -2038,6 +2041,7 @@ Gestion MP : `LotFiche.tsx`, `/atelier/lot/:id` → PRO : `/atelier/lots/:id`, `
 |---|---|---|---|---|
 | « Déplacer ce lot » | L, D | — | disponible hors quarantaine > 0, sinon raison sous le bouton « Rien de disponible hors quarantaine » | → `/atelier/deplacer?lot={id}` |
 | « Imprimer l'étiquette » | L, D | `GET documents/etiquettes?lots={id}` (nouvel onglet) | — | `BoutonImprimer` |
+| (nouveau) « Mettre au rebut (56 g, Morocco) » — un bouton par magasin où le reste est un fond de lot, hors quarantaine (grisé avec la raison sur une quarantaine) ; badge « fond de lot (< 100 g) » sur la carte et le solde ; note « Fond de lot : ce reste n'est plus proposé par « Envoyer aux machines »… » ; **aucun montant** | L, D | POST `lots/{id}/rebut` (258) | `Confirmer` taille atelier ; refus du serveur dits tels quels | lot FOND-DE-LOT |
 | Lien n° d'ordre | L, D | — | — | → `/atelier/ordres/{id}` |
 | (nouveau) « Charger les suivants » (mouvements) | L, D | `GET mouvements?lot_id=` page suivante | — | an. 18 |
 

@@ -2,7 +2,9 @@
  * Fiche de lot (`/lots/:id`, fenêtre sur `/stock?onglet=lots`) : la fiche unique d'un lot (Partie 1
  * et Partie 2 d'ECRANS-PRO) — reste, disponible, entré et sorti (net des retours), kg par bobine,
  * entrée ; la réception d'où il vient ; ses soldes par magasin et les ordres servis ; la libération
- * de quarantaine (direction, achats) ; ses mouvements, le plus récent d'abord ; l'étiquette.
+ * de quarantaine (direction, achats) ; les fonds de lot et « Mettre au rebut » (direction, achats ;
+ * la direction aussi au-dessus du seuil, avec un motif — lot FOND-DE-LOT) ; ses mouvements, le
+ * plus récent d'abord ; l'étiquette.
  */
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -10,6 +12,7 @@ import { Link } from 'react-router'
 import { BoutonImprimer } from '../../composants/documents/BoutonImprimer'
 import { Historique } from '../../composants/documents/Historique'
 import { LienDocument } from '../../composants/documents/LienDocument'
+import { Carte } from '../../composants/mise-en-page/Carte'
 import { Fenetre, useFermerFenetre } from '../../composants/mise-en-page/Fenetre'
 import { Indicateurs } from '../../composants/mise-en-page/Indicateurs'
 import { Badge } from '../../composants/retour/Badge'
@@ -25,8 +28,10 @@ import { useSession } from '../../lib/session'
 import { statut } from '../../lib/statuts'
 import type { Suivi } from './donnees'
 import { useLot } from './donnees'
+import { marqueFond, poidsFond, soldesFonds } from './fonds'
 import { Liberation } from './Liberation'
 import { MouvementsDuLot } from './MouvementsDuLot'
+import { BoutonRebut } from './Rebut'
 import styles from './stock.module.css'
 import { estQuarantaine, POUSSIERE, type LotFiche } from './types'
 
@@ -99,6 +104,37 @@ function Origine({ l }: { l: LotFiche }) {
   )
 }
 
+/**
+ * Les fonds de lot de la fiche et « Mettre au rebut » par magasin (direction, achats) ; la
+ * direction peut aussi mettre au rebut un solde au-dessus du seuil, avec un motif.
+ */
+function FondsDeLot({ l }: { l: LotFiche }) {
+  const { role, contexte } = useSession()
+  if (role !== 'direction' && role !== 'achats') return null
+  const fonds = soldesFonds(l)
+  const autres =
+    role === 'direction' ? l.magasins.filter((g) => !g.fond_de_lot && g.quantite > POUSSIERE) : []
+  if (!fonds.length && !autres.length) return null
+  const marque = marqueFond(contexte.seuil_rebut)
+  return (
+    <Carte
+      titre={fonds.length ? 'Fond de lot' : 'Mettre au rebut'}
+      ton={fonds.length ? 'attention' : undefined}
+      sous={
+        fonds.length
+          ? `${fonds.map((g) => `${poidsFond(g.quantite)} dans « ${g.magasin} »`).join(' · ')} — ${marque} : la proposition « Envoyer aux machines » ne le propose plus ; il reste compté et valorisé jusqu’au rebut.`
+          : 'Au-dessus du seuil de rebut : la direction seule, avec un motif.'
+      }
+    >
+      <div className={styles.rangee}>
+        {[...fonds, ...autres].map((g) => (
+          <BoutonRebut key={g.magasin_id} l={l} g={g} taille="normal" />
+        ))}
+      </div>
+    </Carte>
+  )
+}
+
 function Soldes({ l, onSuivre }: { l: LotFiche; onSuivre: (s: Suivi) => void }) {
   return (
     <div className={styles.rangee}>
@@ -106,6 +142,12 @@ function Soldes({ l, onSuivre }: { l: LotFiche; onSuivre: (s: Suivi) => void }) 
         <span key={s.magasin_id}>
           {estQuarantaine(s.type) ? <Badge ton="critique">{s.magasin}</Badge> : <strong>{s.magasin}</strong>}{' '}
           {kgEtMetres(s.quantite, l.kg_par_ml)}
+          {s.fond_de_lot ? (
+            <>
+              {' '}
+              <Badge ton="attention">fond de lot</Badge>
+            </>
+          ) : null}
         </span>
       ))}
       {l.historique.ordres.length ? (
@@ -130,6 +172,23 @@ function Soldes({ l, onSuivre }: { l: LotFiche; onSuivre: (s: Suivi) => void }) 
   )
 }
 
+/** Le sous-titre de la fenêtre : référence, rôle, fournisseur, statut, marque de fond de lot. */
+function SousTitre({ l }: { l: LotFiche }) {
+  const { contexte } = useSession()
+  return (
+    <>
+      {[l.reference, l.role, l.fournisseur].filter(Boolean).join(' · ')}{' '}
+      <Badge famille="lot" valeur={l.statut} />
+      {l.fond_de_lot ? (
+        <>
+          {' '}
+          <Badge ton="attention">{marqueFond(contexte.seuil_rebut) || 'fond de lot'}</Badge>
+        </>
+      ) : null}
+    </>
+  )
+}
+
 export function FicheLot({
   id,
   onFermer,
@@ -144,12 +203,7 @@ export function FicheLot({
   const [sale, setSale] = useState(false)
   const l = fiche.data
   const titre = l ? `${l.reference} — lot ${l.lot}` : 'Lot'
-  const sous = l ? (
-    <>
-      {[l.reference, l.role, l.fournisseur].filter(Boolean).join(' · ')}{' '}
-      <Badge famille="lot" valeur={l.statut} />
-    </>
-  ) : undefined
+  const sous = l ? <SousTitre l={l} /> : undefined
   const introuvable = fiche.error instanceof ErreurApi && fiche.error.statut === 404
   const pied = (
     <>
@@ -174,6 +228,7 @@ export function FicheLot({
           <IndicateursLot l={l} />
           <Origine l={l} />
           <Soldes l={l} onSuivre={onSuivre} />
+          <FondsDeLot l={l} />
           {role !== 'alimentation' &&
           l.magasins.some((s) => estQuarantaine(s.type) && s.quantite > POUSSIERE) ? (
             <Liberation l={l} onSale={setSale} />

@@ -109,7 +109,9 @@ export function CarteLot({ l, vers }: { l: LotSolde; vers: string }) {
   return (
     <Link to={vers} className={styles.carteLien}>
       <span className={styles.ligne}>
-        <strong>lot {l.lot}</strong>
+        <strong>
+          lot {l.lot} {l.fond_de_lot ? <Badge ton="attention">fond de lot</Badge> : null}
+        </strong>
         <span className={styles.valeur}>{kgEtMetres(l.quantite, l.kg_par_ml, true)}</span>
       </span>
       <span className={styles.ligne}>

@@ -20,6 +20,7 @@ import { Selecteur } from '../../composants/saisie/Selecteur'
 import { date, jourRelatif, kg, kgEtMetres } from '../../lib/format'
 import { ajouterJours } from '../../lib/heure'
 import { useSession } from '../../lib/session'
+import { fondsLaisses } from '../stock/fondsProposes'
 import styles from '../stock/stock.module.css'
 import {
   dernierOrdre,
@@ -295,6 +296,7 @@ export function SaisieOrdre({
   const metiers = useMetiers()
   const metier = metiers.data?.find((m) => m.id === s.metier)
   const manques = s.besoins.filter((b) => b.manque > 0.05)
+  const fonds = fondsLaisses(s.besoins)
   return (
     <Fenetre
       titre={fiche ? 'Modifier l’ordre — Brouillon' : 'Nouvel ordre — Brouillon'}
@@ -317,6 +319,12 @@ export function SaisieOrdre({
           Il manque dans ce magasin :{' '}
           {manques.map((b) => `${b.reference} (${kgEtMetres(b.manque, b.kg_par_ml)})`).join(' · ')}. Les
           transférer d’abord, ou sortir ce qu’il y a : l’écart restera visible sur l’ordre.
+        </Note>
+      ) : null}
+      {fonds.length ? (
+        <Note ton="attention">
+          Fonds de lot laissés en stock (sous le seuil de rebut, pas proposés) : {fonds.join(' · ')}. À mettre
+          au rebut depuis le Stock.
         </Note>
       ) : null}
       <LignesSaisie s={s} />

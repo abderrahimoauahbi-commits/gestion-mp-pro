@@ -571,7 +571,7 @@ CK `ck_poste_frais_tva_recuperable` : `nature <> 'tva' OR recuperable`.
 `code_r CHAR(2)` O CK `code_r ~ '^R[1-6]$'` · `ordre SMALLINT` CK `>= 0` · `impose_role VARCHAR(16) Role` O
 (rôle exigé en plus de la direction, qui passe toujours : « Libération de quarantaine » → `achats` ;
 « Mise en quarantaine » : NULL, le transfert étant déjà permis à l'alimentation) ·
-UQ `(type_operation, libelle)`. Semée par la migration 0002 (16 motifs), non modifiable par l'écran (F22).
+UQ `(type_operation, libelle)`. Semée par la migration 0002 (16 motifs) puis 0009 (« Rebut », ajustement, lot FOND-DE-LOT : recréé par `services/operations/rebut.motif_rebut` s'il manque), non modifiable par l'écran (F22).
 « Refus après quarantaine » garde `R3` (deux motifs R3, voulu : incohérence 31 documentée).
 
 ### 3.3 Lots, soldes, journal du stock

@@ -16,16 +16,16 @@ from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from gestion_mp_pro.api.erreurs import Refus
-from gestion_mp_pro.modeles import Lot, Mouvement, Ordre, Solde
-from gestion_mp_pro.modeles.enums import SerieNumero, TypeMagasin, TypeMouvement
+from gestion_mp_pro.modeles import Journal, Lot, Mouvement, Ordre, Solde
+from gestion_mp_pro.modeles.enums import ObjetJournal, SerieNumero, TypeMagasin, TypeMouvement
 from gestion_mp_pro.modeles.recherche import normaliser, recalculer
 from gestion_mp_pro.modeles.types import MESURE, arrondir
-from gestion_mp_pro.services import horloge, numerotation
+from gestion_mp_pro.services import fonds_de_lot, horloge, numerotation
 from gestion_mp_pro.services.lots_lecture import Lus, lire, presents_au
 
 ZERO = Decimal(0)
@@ -133,6 +133,8 @@ class SoldeMagasin:
     magasin: str
     type: str
     quantite: Decimal
+    fond_de_lot: bool = False
+    """Ce solde est > 0 et sous le seuil de rebut (lot FOND-DE-LOT)."""
 
 
 @dataclass(frozen=True)
@@ -223,6 +225,12 @@ class LotSolde:
     bobines: int | None = None
     statut: str = "epuise"
     historique: Historique = field(default_factory=Historique)
+    fond_de_lot: bool = False
+    """Au moins un de ses soldes est un fond de lot (lot FOND-DE-LOT)."""
+    fond_de_lot_kg: Decimal = ZERO
+    """Ce que pèsent ses fonds de lot, tous magasins."""
+    version: int = 1
+    """1 + les lignes du journal du lot (la fiche la rend aussi ; le rebut la relit)."""
 
 
 def _texte(x: LotSolde) -> str:
@@ -252,12 +260,32 @@ def _nouveau(lu: Lus, lot: Lot) -> LotSolde:
     )
 
 
-def _completer(x: LotSolde, h: Historique | None) -> LotSolde:
-    """Bobines (au poids mesuré, sinon catalogue), statut et histoire."""
+def _completer(
+    x: LotSolde, h: Historique | None, seuil: Decimal = ZERO, version: int = 1
+) -> LotSolde:
+    """Bobines (au poids mesuré, sinon catalogue), statut, histoire, fonds de lot, version."""
     x.bobines = round(x.quantite / x.poids_bobine) if x.poids_bobine > 0 else None
     x.statut = statut_lot(x.disponible, x.quarantaine)
     x.historique = h or Historique()
+    for g in x.magasins:
+        g.fond_de_lot = fonds_de_lot.est_fond(g.quantite, seuil)
+    x.fond_de_lot_kg = sum((g.quantite for g in x.magasins if g.fond_de_lot), ZERO)
+    x.fond_de_lot = x.fond_de_lot_kg > 0
+    x.version = version
     return x
+
+
+def versions(s: Session, ids: set[int]) -> dict[int, int]:
+    """La version de chaque lot (1 + ses lignes de journal), en une requête."""
+    if not ids:
+        return {}
+    lignes = s.execute(
+        select(Journal.objet_id, func.count())
+        .where(Journal.objet == ObjetJournal.lot, Journal.objet_id.in_(ids))
+        .group_by(Journal.objet_id)
+    ).all()
+    comptes = {int(i): int(n) for i, n in lignes if i is not None}
+    return {i: 1 + comptes.get(i, 0) for i in ids}
 
 
 @dataclass(frozen=True)
@@ -306,8 +334,9 @@ def lister(s: Session, f: FiltresLots = FiltresLots()) -> list[LotSolde]:  # noq
     if f.q.strip():
         mots = normaliser(f.q).split()
         lignes = [x for x in lignes if all(m in _texte(x) for m in mots)]
-    histoires = historique(s, {x.lot_id for x in lignes})
-    lignes = [_completer(x, histoires.get(x.lot_id)) for x in lignes]
+    ids = {x.lot_id for x in lignes}
+    histoires, numeros, seuil = historique(s, ids), versions(s, ids), fonds_de_lot.seuil(s)
+    lignes = [_completer(x, histoires.get(x.lot_id), seuil, numeros[x.lot_id]) for x in lignes]
     if f.statut:
         lignes = [x for x in lignes if x.statut == f.statut]
     return sorted(lignes, key=lambda x: (x.reference, x.entre_le, x.lot_id))
@@ -318,4 +347,8 @@ def ligne_du_lot(s: Session, lot: Lot) -> LotSolde:
     trouve = lister(s, FiltresLots(lot_id=lot.id, non_nuls=False))
     if trouve:
         return trouve[0]
-    return _completer(_nouveau(lire(s), lot), historique(s, {lot.id}).get(lot.id))
+    return _completer(
+        _nouveau(lire(s), lot),
+        historique(s, {lot.id}).get(lot.id),
+        version=versions(s, {lot.id})[lot.id],
+    )

@@ -25,7 +25,7 @@ from gestion_mp_pro.modeles import (
     Solde,
 )
 from gestion_mp_pro.modeles.enums import TypeMagasin
-from gestion_mp_pro.services import horloge
+from gestion_mp_pro.services import fonds_de_lot, horloge
 from gestion_mp_pro.services.conversions import Conditionnement, bobines, metres
 
 ZERO = Decimal(0)
@@ -140,6 +140,16 @@ class LotDisponible:
     quantite: Decimal
     entre_le: date
     poids_bobine: Decimal
+    fond_de_lot: bool = False
+    """Ce qu'il porte est sous le seuil de rebut : la proposition FIFO le saute (FOND-DE-LOT)."""
+
+
+def _marquer_les_fonds(s: Session, lignes: list[LotDisponible]) -> list[LotDisponible]:
+    """Pose la marque « fond de lot » sur les soldes sous le seuil de rebut."""
+    seuil = fonds_de_lot.seuil(s)
+    for x in lignes:
+        x.fond_de_lot = fonds_de_lot.est_fond(x.quantite, seuil)
+    return lignes
 
 
 def disponibles(
@@ -166,11 +176,11 @@ def disponibles(
         for lot, mag, q, code in s.execute(requete)
     ]
     if jour is None or jour >= horloge.aujourd_hui():
-        return lignes
+        return _marquer_les_fonds(s, lignes)
     au = presents_au(s, {(x.lot_id, x.magasin_id) for x in lignes}, jour)
     for x in lignes:
         x.quantite = au[(x.lot_id, x.magasin_id)]
-    return [x for x in lignes if x.quantite > 0]
+    return _marquer_les_fonds(s, [x for x in lignes if x.quantite > 0])
 
 
 @dataclass

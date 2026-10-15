@@ -23,7 +23,7 @@ describe('quarantaine (an. 2, (d))', () => {
     lotEssai({
       lot_id: 12,
       lot: 'L24-102',
-      magasins: [{ magasin_id: 2, magasin: 'QUAR', type: 'quarantaine', quantite: 95 }],
+      magasins: [{ magasin_id: 2, magasin: 'QUAR', type: 'quarantaine', quantite: 95, fond_de_lot: false }],
     }),
   ]
   const places = placesDeLots(lots)

@@ -171,6 +171,43 @@ describe('Stock › À valider', () => {
 })
 
 describe('Stock › Lots', () => {
+  it('achats : un fond de lot est marqué et compté ; « Mettre au rebut » envoie la version lue (route 258)', async () => {
+    const appels = servir('achats', {
+      'POST /lots/99/rebut': {
+        statut: 201,
+        corps: { id: 5, numero: 'AJU-2026-0001', statut: 'validee', type: 'ajustement', lignes: [] },
+      },
+    })
+    const u = userEvent.setup()
+    monterApp('/stock?onglet=lots')
+    expect((await screen.findAllByText('fond de lot (< 100 g)')).length).toBeGreaterThan(0)
+    expect(screen.getByText('Fonds de lot')).toBeInTheDocument()
+    expect(document.body.textContent).toMatch(/0,06\skg à mettre au rebut \(< 100 g\)/)
+    await u.click(screen.getByRole('button', { name: 'Mettre au rebut' }))
+    expect(screen.getByRole('group', { name: 'Confirmation' }).textContent).toMatch(
+      /Rebut : 56 g du lot HT-280502-0427 dans « Magasin principal » ?/,
+    )
+    await u.click(screen.getByRole('button', { name: 'Oui, mettre au rebut' }))
+    await waitFor(() =>
+      expect(appels.find((a) => a.methode === 'POST' && a.chemin === '/lots/99/rebut')?.corps).toEqual({
+        magasin_id: 1,
+        version: 1,
+        motif: '',
+      }),
+    )
+  })
+
+  it('alimentation : la marque, sans le geste ; « Fonds de lot seulement » ne garde que lui', async () => {
+    servir('alimentation')
+    const u = userEvent.setup()
+    monterApp('/stock?onglet=lots')
+    expect((await screen.findAllByText('fond de lot (< 100 g)')).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: 'Mettre au rebut' })).toBeNull()
+    await u.click(screen.getByRole('checkbox', { name: 'Fonds de lot seulement' }))
+    await waitFor(() => expect(screen.getAllByRole('checkbox', { name: /Étiquette du lot/ })).toHaveLength(1))
+    expect(screen.getByRole('checkbox', { name: 'Étiquette du lot HT-280502-0427' })).toBeInTheDocument()
+  })
+
   it('« Étiquettes (0) » grisé avec sa raison ; cocher un lot ouvre ses étiquettes', async () => {
     servir('alimentation')
     monterApp('/stock?onglet=lots')

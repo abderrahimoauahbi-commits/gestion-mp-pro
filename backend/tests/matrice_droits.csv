@@ -135,6 +135,7 @@ GET;/api/lots/disponibles;401;ok;ok;ok;403
 GET;/api/lots/scan;401;ok;ok;ok;403
 GET;/api/lots/{lot_id};401;ok;ok;ok;403
 PUT;/api/lots/{lot_id};401;ok;ok;403;403
+POST;/api/lots/{lot_id}/rebut;401;ok;ok;ok;403
 GET;/api/magasins;401;ok;ok;ok;403
 POST;/api/magasins;401;ok;403;403;403
 PUT;/api/magasins/{ident};401;ok;403;403;403

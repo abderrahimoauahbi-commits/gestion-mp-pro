@@ -56,6 +56,7 @@ export function contexteDe(role: Role, autres: Partial<Contexte> = {}): Contexte
     inventaires_ouverts: [],
     compteurs: { alerte_rouge: 7, anomalies: 3, a_approuver: 2, receptions_brouillon: 4 },
     alerte_serveur: null,
+    seuil_rebut: 0.1,
     ...autres,
   }
 }

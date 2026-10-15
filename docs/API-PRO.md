@@ -96,7 +96,7 @@ Colonnes : **N°** · **Méthode** · **Chemin** (sans `/api`) · **Rôles** · 
 |---|---|---|---|---|---|---|
 | 1 | GET | `/sante` | P | — | `Sante` {etat, version, schema (révision Alembic), schema_attendu, base_ms, sauvegarde_age_h, sauvegarde_alerte, taches `{tâche: "ok" \| "échec : …" \| "jamais" \| "en cours"}` (+ `restauration` dès qu'il y en a eu une), courriels_en_attente} | B1 |
 | 2 | GET | `/etat` | P | — | `EtatInstallation` {installe, societe, version} | B2 |
-| 3 | GET | `/contexte` | Tous | — | `Contexte` {moi, menu (entrées permises), heure_serveur, date_cloture, inventaires_ouverts [{numero, magasin, matieres}], societe, roles_au_metre, base_essai, compteurs {clé: nombre} (pastilles du menu), alerte_serveur (D, T)} | nouveau (remplace plusieurs lectures de démarrage) |
+| 3 | GET | `/contexte` | Tous | — | `Contexte` {moi, menu (entrées permises), heure_serveur, date_cloture, inventaires_ouverts [{numero, magasin, matieres}], societe, roles_au_metre, base_essai, compteurs {clé: nombre} (pastilles du menu), alerte_serveur (D, T), seuil_rebut (kg, lot FOND-DE-LOT : l'écran écrit la marque « fond de lot (< 100 g) »)} | nouveau (remplace plusieurs lectures de démarrage) |
 | 4 | GET | `/serveur` | D, T | — | `EtatServeur` (versions, base, réseau, tâches, sauvegardes, sessions par compte) | B22 |
 | 5 | GET | `/acces` | C | — | `Acces` {adresses, adresse_publique, adresse_qr, alerte_localhost} (schéma et port **de la requête**, port implicite omis : derrière HTTPS, `https://nom` sans « :8050 », G-13) | B28 |
 | 6 | GET | `/acces/qr` | C | `?adresse=` | SVG | B29 |
@@ -153,7 +153,10 @@ inconnue → 422), soit 56 clés semées par la révision 0002, dont `delai_frai
 (« Dossier sans frais à signaler après », famille Prix, jours, défaut 30, bornes 1–365 ; lu par C28)
 et `seuil_bc_urgent` (sans effet, gardé pour mémoire). `toler_tva_import` (« TVA d'importation à
 vérifier au-delà de », famille Prix, %, défaut 5 %, bornes 0–100 % ; lu par C29 et par la fiche du
-dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
+dossier, route 189) entre avec la révision **0003** (57 clés ensuite). `seuil_rebut` (« Seuil de
+rebut », famille Stock et inventaire, kg, défaut 0,1 = 100 g, bornes 0–1000, 0 = désactivé ; lu par
+la liste des lots 107, les disponibles 111, la proposition 134 et le rebut 258) entre avec la
+révision **0009** (58 clés ensuite ; lot FOND-DE-LOT, décision de Mohamed du 15/10/2026).
 
 ### 1.4 Exploitation (`api/exploitation`)
 
@@ -270,11 +273,11 @@ dossier, route 189) entre avec la révision **0003** (57 clés ensuite).
 | 104 | GET | `/stock/{matiere_id}` | C | `?date=` | `FicheStockMatiere` (ligne + d'où vient le besoin + lots + sur les métiers) | nouveau (agrège ce que la fenêtre « Fiche matière » lisait) |
 | 105 | GET | `/mouvements` | C (prix filtrés) | `?q=&matiere=&lot=&magasin=&type=&document=&du=&au=&avec_valeur=&apres=&limite=` | `Page[MouvementLigne]` | B24 |
 | 106 | GET | `/export/mouvements` | C (colonnes de prix absentes pour L) | mêmes filtres | xlsx | B101 |
-| 107 | GET | `/lots` | C | `?matiere=&magasin=&statut=&non_nuls=&q=` | `[LotSolde]` (soldes par magasin, statut calculé) | B25 |
+| 107 | GET | `/lots` | C | `?matiere=&magasin=&statut=&non_nuls=&q=` | `[LotSolde]` (soldes par magasin, statut calculé ; `fond_de_lot`, `fond_de_lot_kg`, `magasins[].fond_de_lot` : un solde > 0 sous le seuil de rebut ; `version` du lot — lot FOND-DE-LOT) | B25 |
 | 108 | GET | `/lots/{id}` | C (prix filtrés) | — | `LotFiche` (en-tête, soldes, mouvements, réception, poids de bobine, commentaire, version) | B26 |
 | 109 | PUT | `/lots/{id}` | D, A | `{commentaire, version}` | `LotFiche` | nouveau (`lot.commentaire`) |
 | 110 | GET | `/lots/scan` | C | `?code=` | `[LotResume]` (un même numéro peut exister pour deux matières) ; 404 si vide | B27 |
-| 111 | GET | `/lots/disponibles` | C | `?matiere=&date=&magasin=` | `[LotDisponible]` (présents à la date, hors quarantaine, FIFO) | B78 |
+| 111 | GET | `/lots/disponibles` | C | `?matiere=&date=&magasin=` | `[LotDisponible]` (présents à la date, hors quarantaine, FIFO ; `fond_de_lot` : sous le seuil de rebut) | B78 |
 | 112 | GET | `/tracabilite` | C | `?lot=&ordre=&matiere=` | `Tracabilite` (vocabulaire de la base, plus de codes ERP Fil à émojis) | B79 |
 | 113 | GET | `/controles/soldes` | D, A | — | `ControleSoldes` (libellés : référence, lot, magasin) | B31 |
 | 114 | GET | `/documents/etiquettes` | C | `?lots=1,2,3` | HTML, une étiquette QR de 100 × 70 mm par page (404 HTML « Aucun lot à étiqueter. ») | B30 |
@@ -331,7 +334,7 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 
 | N° | M | Chemin | Rôles | Entrée | Sortie | ← GMP |
 |---|---|---|---|---|---|---|
-| 134 | POST | `/ordres/proposition` | C (lecture en POST : corps structuré) | `DemandeProposition` {date (facultative : aujourd'hui), magasin_id, metier_id, qualites [{qualite_id, m2}]} ; magasin inconnu → 404 | `Proposition` {date, magasin_id, taux_perte, prevu (perte comprise), manque, lignes FIFO [{matiere_id, reference, designation, role, prevu, par_qualite [{qualite_id, qualite, kg}], kg_par_ml, poids_bobine, bobines_palette, lots, disponibles, manque}], manques, recettes_incompletes, blocages} | B49 |
+| 134 | POST | `/ordres/proposition` | C (lecture en POST : corps structuré) | `DemandeProposition` {date (facultative : aujourd'hui), magasin_id, metier_id, qualites [{qualite_id, m2}]} ; magasin inconnu → 404 | `Proposition` {date, magasin_id, taux_perte, prevu (perte comprise), manque, lignes FIFO [{matiere_id, reference, designation, role, prevu, par_qualite [{qualite_id, qualite, kg}], kg_par_ml, poids_bobine, bobines_palette, lots, disponibles (chaque lot avec `fond_de_lot`), manque}], manques, recettes_incompletes, blocages, fonds_de_lot [phrases]} ; un **fond de lot** (reste sous le seuil de rebut) n'est jamais dans `lots`, reste dans `disponibles` marqué, et est nommé dans `fonds_de_lot` (lot FOND-DE-LOT) | B49 |
 | 135 | GET | `/ordres` | C | `?statut=&q=&du=&au=&metier=&magasin=&qualite=&apres=&limite=` (ids ; filtres et recherche poussés en SQL ; curseur date puis n° d'entrée) ; `du > au` → 422 | `PageOrdres` = `Page[OrdreResume]` (net, écart, lots) — paginée | B50 |
 | 248 | GET | `/ordres/apercu` | C | mêmes filtres que 135 (sans `apres`/`limite`) | `ApercuOrdres` {brouillon, valide, annule (comptes par onglet sur la période), net, revenu, prevu, sorti (Σ du moteur des indicateurs), brouillons_periode, brouillons_bloques, qualites/metiers/magasins `[{valeur, libelle}]` (options des filtres liés)} | nouveau (pagination, lot PAGINATION3) |
 | 249 | GET | `/ordres/ouverts` | C | mêmes filtres que 135 (sans `apres`/`limite`) | `[OrdreResume]` — liste entière d'un statut, **plafonnée** (atelier, saisie des retours) | nouveau (pagination, lot PAGINATION3) |
@@ -495,6 +498,7 @@ dans `abandon_motif` (révision 0005), l'annulation (245) dans `annulation_motif
 | 242 | GET | `/export/plan-achat` | D, A | `?onglet=fournisseurs\|references&q=&date=` + les filtres liés de l'écran : `statut, priorite, abc, fournisseur` (onglet références), `urgence, devise, pays` (onglet fournisseurs) | xlsx (la liste affichée, filtres compris ; 151 reste le classeur complet) | nouveau |
 | 243 | GET | `/reprise` | D, T | — | `EtatMiroir` {dernières exécutions, signature de la source, à jour: bool, rapport} | nouveau (coexistence) |
 | 244 | POST | `/reprise` | D | `{mode: tout, remplacer_activite: true, confirmation: "REMPLACER"}` | 202 `ExecutionReprise` (tâche ; sauvegarde « avant reprise » d'abord) | nouveau (coexistence) |
+| 258 | POST | `/lots/{id}/rebut` | C (fond de lot : D, A, et L hors quarantaine ; au-dessus du seuil : D seule, motif exigé) | `RebutEntree` {magasin_id, version (du lot, 409 `conflit_version`), motif} | 201 `OperationFiche` : l'ajustement « Rebut » **validé** (numéro `AJU-…`) sur tout le reste du lot dans ce magasin, au coût moyen ; 409 `pas_un_fond_de_lot` si le reste ≥ seuil hors direction ; 403 pour l'alimentation sur une quarantaine ; période close, inventaire en cours comme tout ajustement | nouveau (lot FOND-DE-LOT, décision de Mohamed du 15/10/2026) |
 
 Précisions de corps retenues : `POST /operations` accepte `valider: true` (création et validation
 dans **une** transaction : déplacer un lot, libérer une quarantaine, retour des machines au
@@ -506,7 +510,7 @@ comprises) ; `GET /acces` et `GET /acces/qr` sont ouverts aussi à T ; `GET /ech
 reçoit `vue=consommation` ; `POST /commandes/{id}/approuver` reçoit `date` ; `PUT /dossiers/{id}/lignes/{lid}` accepte `cours: null` (« cours du jour ») ; `GET /dossiers/{id}` porte `a_rattacher` ; `GET /receptions/bobines` reçoit `matiere`. Le `PUT` d'une fiche reste un remplacement complet (l'écran envoie
 la fiche entière, y compris pour « désactiver ») : pas de corps partiel.
 
-**Total : 251 routes PRO** (253 et 254 ajoutées par le lot PLUSIEURS-FACTURES ; 255–257 par le lot UNITES-TITRAGE) (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
+**Total : 251 routes PRO** (253 et 254 ajoutées par le lot PLUSIEURS-FACTURES ; 255–257 par le lot UNITES-TITRAGE ; 258 par le lot FOND-DE-LOT) (dont 28 classeurs xlsx — modèle du tableur compris —, 4 documents HTML imprimables, 1 SVG), plus le
 service de l'écran (`GET /{chemin}` hors API, B « — »), `/api/docs` et `/api/openapi.json`.
 
 ---

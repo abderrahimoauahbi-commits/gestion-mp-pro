@@ -1,4 +1,4 @@
-"""Le registre des 57 réglages : libellé, famille, défaut, bornes, unité, aide (REGLAGES § 3).
+"""Le registre des 58 réglages : libellé, famille, défaut, bornes, unité, aide (REGLAGES § 3).
 
 Une seule déclaration, lue par la lecture et l'écriture des réglages (`services/reglages`), par
 l'écran (route 23, bornes contrôlées à la frappe) et par les essais. Elle déclare **exactement**
@@ -8,7 +8,8 @@ Reprise de `gestion_mp/parametres.py` corrigé (libellés, défauts, bornes à l
 d'écran de Gestion MP est versée dans la déclaration (une seule source, ECRANS-PRO P8) ; trois
 familles nouvelles : « Période close » (`date_cloture`, écrit par la route 26 seulement),
 « Technique » (`courriel_destinataires`, `adresse_publique` : direction et administrateur).
-`seuil_bc_urgent` reste lisible, sans effet, et ne se modifie plus (E-16).
+`seuil_bc_urgent` reste lisible, sans effet, et ne se modifie plus (E-16). `seuil_rebut`
+(révision 0009) : sous ce poids, un reste de lot est un fond de lot (lot FOND-DE-LOT).
 """
 
 from __future__ import annotations
@@ -197,6 +198,12 @@ _INVENTAIRE = (
     _n("tolerance_inventaire", "Tolérance d'écart d'inventaire", INVENTAIRE, 0.02, 0, 1, P, 100,
        aide="Proposée à l'ouverture d'un inventaire : au-delà, un écart de comptage se justifie "
             "avant la validation."),
+    _n("seuil_rebut", "Seuil de rebut", INVENTAIRE, 0.1, 0, 1000, "kg",
+       aide="Sous ce poids (100 g par défaut), ce qui reste d'un lot dans un magasin est un "
+            "« fond de lot » : la proposition « Envoyer aux machines » ne le propose plus (il "
+            "reste en stock, compté et valorisé), il est marqué dans le Stock et sur le "
+            "téléphone, et « Mettre au rebut » le sort du stock par un ajustement au motif "
+            "« Rebut ». 0 = désactivé : aucun fond de lot."),
 )  # fmt: skip
 
 _PRIX = (
@@ -269,7 +276,7 @@ REGLAGES: tuple[Reglage, ...] = (
     *_COUVERTURE, *_APPRO, *_CLASSES, *_ACHAT, *_RECEPTION, *_INVENTAIRE, *_PRIX, *_TRESO,
     *_SOCIETE,
 )  # fmt: skip
-"""Les 57 réglages, dans l'ordre de l'écran."""
+"""Les 58 réglages, dans l'ordre de l'écran."""
 
 PAR_CLE: dict[str, Reglage] = {r.cle: r for r in REGLAGES}
 
