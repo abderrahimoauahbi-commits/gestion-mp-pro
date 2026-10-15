@@ -119,7 +119,7 @@ def _un_frais(
     m: Monde, d: dict[str, Any], code: str, montant: float, **champs: Any
 ) -> dict[str, Any]:
     poste = m.catalogue.postes_frais.get(code)
-    if poste is None:
+    if poste is None or abs(montant) < 0.01:
         return d
     corps = {"version": d["version"], "poste_id": poste["id"], "montant": montant} | champs
     r = m.A.appeler("POST", f"/dossiers/{d['id']}/frais", corps, (200, 201), note=f"frais {code}")
