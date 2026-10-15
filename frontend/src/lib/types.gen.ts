@@ -710,6 +710,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/sauvegardes/{nom}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Supprimer une sauvegarde (et ses pièces) ; la plus récente de cette base se garde.
+     * @description Route 259 : journal « sauvegarde supprimée » ; la copie de sécurité n'est pas touchée.
+     */
+    delete: operations['supprimer_sauvegarde_api_sauvegardes__nom__delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/sauvegardes/{nom}/restaurer': {
     parameters: {
       query?: never
@@ -17035,6 +17055,73 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+    }
+  }
+  supprimer_sauvegarde_api_sauvegardes__nom__delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        nom: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EtatSauvegardes']
+        }
+      }
+      /** @description Non connecté */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Droit refusé */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Introuvable */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Conflit ou état */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErreurReponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

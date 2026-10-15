@@ -165,6 +165,7 @@ révision **0009** (58 clés ensuite ; lot FOND-DE-LOT, décision de Mohamed du 
 | 43 | GET | `/sauvegardes` | D, T | — | `EtatSauvegardes` {base, derniere, age_h, alerte, politique, dossier, copie, nb, autres, outils, fichiers [{nom, genre, nature, base, autre_base, taille, quand, tables, pieces, copie}]} | B20 |
 | 44 | POST | `/sauvegardes` | D, T | — | `EtatSauvegardes` | B21 |
 | 45 | POST | `/sauvegardes/{nom}/restaurer` | D, T | `Restauration` {confirmation: "RESTAURER" (casse indifférente, 422 `confirmation_requise` sinon), motif 3–300} | 202 `EtatRestauration` {etat, fichier, avant, debut, message} dès la sauvegarde « avant restauration » faite (refus tous synchrones : 404, 409, 422, 503) ; l'écran suit `/sante` → `taches.restauration` | B23 |
+| 259 | DELETE | `/sauvegardes/{nom}` | D, T | — | `EtatSauvegardes` ; efface le fichier et ses pièces (demande de Mohamed, 15/10/2026), journal « sauvegarde supprimée » ; 409 `derniere_sauvegarde` pour la plus récente de cette base, 409 `tache_en_cours` pendant une restauration, 404 nom inconnu ; la copie de sécurité n'est pas touchée | — |
 | 46 | GET | `/taches` | D, T | — | `[TacheEtat]` | nouveau |
 | 47 | GET | `/courriels` | D, T | — | `Page[CourrielFiche]` | nouveau |
 | 48 | GET | `/courriel/apercu` | D | — | `ApercuCourriel` {sujet, texte, serveur_configure, destinataires, illisibles} | B98 |
@@ -821,4 +822,4 @@ nouvelle absente de la matrice fait échouer l'essai ; l'essai structurel
 | Direction | toutes les routes métier et techniques (244 hors routes publiques) | aucune |
 | Achats | lectures et écritures achats, réceptions, importations, stock (sauf retour machine), inventaires, référentiels matières/fournisseurs/classification (valeurs, unités de titrage), devises, pilotage, suivi | approbation (158, 159), plan et recettes (84–90, 146), rôles, postes, codes, magasins, métiers (écriture), montage, ordres (écriture), comptes, sauvegardes, journal, période close |
 | Alimentation | lectures « C » (prix filtrés), ordres, retours machine, transferts, mise en quarantaine, montage, signalements, notifications, recherche | tout ce qui est D/A : commandes, réceptions, importations, plan d'achat, pilotage, réglages, devises, exports chiffrés |
-| Administrateur | 3, 4, 11–25 (techniques), 43–55 | toute route métier (403) : il ne lit ni stock, ni prix, ni documents |
+| Administrateur | 3, 4, 11–25 (techniques), 43–55, 259 | toute route métier (403) : il ne lit ni stock, ni prix, ni documents |

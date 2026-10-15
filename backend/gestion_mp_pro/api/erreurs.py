@@ -106,6 +106,7 @@ CODES: dict[str, Code] = {
             "sauvegarde_autre_base": "sauvegarde d'une autre base",
             "activite_presente": "activité saisie dans PRO : la reprise exige de la remplacer",
             "tache_en_cours": "la même tâche tourne déjà",
+            "derniere_sauvegarde": "la sauvegarde la plus récente de cette base se garde",
             "pas_un_fond_de_lot": "reste au-dessus du seuil de rebut (direction seule, avec motif)",
         },
     ),

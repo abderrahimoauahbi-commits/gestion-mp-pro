@@ -15,9 +15,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
 from gestion_mp_pro.modeles.enums import ObjetJournal
 from gestion_mp_pro.services import audit, execution, horloge
@@ -135,6 +137,42 @@ def sauvegarde_manuelle(s: Session, qui: audit.Qui) -> EtatSauvegardes:
     """« Sauvegarder maintenant » (route 44) : la sauvegarde, sa ligne au journal, l'état."""
     fichier = sauvegarder("manuelle", par_id=qui.id)
     audit.journal(s, qui, "sauvegarde", ObjetJournal.sauvegarde, detail=fichier.nom)
+    return etat(s)
+
+
+def _fichier(nom: str) -> Path:
+    """Le fichier nommé, dans le dossier de cette base seulement (pas de remontée de dossier)."""
+    fichier = dossier() / Path(nom).name
+    if not fichier.is_file() or o.lire_nom(fichier.name) is None:
+        raise Refus.introuvable("Sauvegarde introuvable.")
+    return fichier
+
+
+def supprimer(s: Session, qui: audit.Qui, nom: str) -> EtatSauvegardes:
+    """Supprimer une sauvegarde (demande de Mohamed, 15/10/2026) : le fichier et ses pièces.
+
+    La plus récente de cette base se garde toujours (il en reste au moins une à jour) ; rien ne
+    s'efface pendant une restauration ; la copie de sécurité, elle, n'est pas touchée. Journal
+    « sauvegarde supprimée ».
+    """
+    from gestion_mp_pro.services import restauration
+
+    fichier = _fichier(nom)
+    ici = [f for f in lister(s) if not f.autre_base]
+    if ici and ici[0].nom == fichier.name:
+        raise Refus.etat(
+            "C'est la sauvegarde la plus récente de cette base : elle se garde. "
+            "Supprimer une plus ancienne.",
+            code="derniere_sauvegarde",
+        )
+    verrou = restauration._prendre_le_verrou()
+    try:
+        fichier.unlink(missing_ok=True)
+        o.archive_de(fichier).unlink(missing_ok=True)
+    finally:
+        restauration._rendre_le_verrou(verrou)
+    registre.oublier(s, [fichier.name])
+    audit.journal(s, qui, "sauvegarde supprimée", ObjetJournal.sauvegarde, detail=fichier.name)
     return etat(s)
 
 

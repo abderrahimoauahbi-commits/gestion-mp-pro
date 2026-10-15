@@ -121,6 +121,26 @@ describe('Administration', () => {
     expect(post?.corps).toEqual({ confirmation: 'restaurer', motif: 'Essai' })
   }, 10000)
 
+  it('supprimer : confirmé sur la ligne, DELETE du fichier ; la plus récente est grisée', async () => {
+    const nom = 'gestion-mp-pro-2026-10-09-113410-manuelle.dump'
+    const appels = servir('direction', {
+      [`DELETE /sauvegardes/${nom}`]: { corps: { ...sauvegardes, fichiers: [sauvegardes.fichiers[0]] } },
+    })
+    monterApp('/administration?onglet=sauvegardes')
+    const tableau = await screen.findByRole('table', { name: 'Sauvegardes' })
+    const recente = within(tableau)
+      .getByText('gestion-mp-pro-2026-10-09-113440-avant-restauration.dump')
+      .closest('tr')
+    expect(within(recente as HTMLElement).getByRole('button', { name: 'Supprimer' })).toBeDisabled()
+    const ligne = within(tableau).getByText(nom).closest('tr') as HTMLElement
+    await userEvent.click(within(ligne).getByRole('button', { name: 'Supprimer' }))
+    expect(within(ligne).getByText(/Supprimer définitivement la sauvegarde du/)).toBeInTheDocument()
+    await userEvent.click(within(ligne).getByRole('button', { name: 'Oui, supprimer' }))
+    await waitFor(() =>
+      expect(appels.some((a) => a.methode === 'DELETE' && a.chemin === `/sauvegardes/${nom}`)).toBe(true),
+    )
+  })
+
   it('le journal montre l’avant et l’après, champ par champ', async () => {
     servir('direction')
     monterApp('/administration?onglet=journal')

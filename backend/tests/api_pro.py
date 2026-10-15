@@ -87,5 +87,5 @@ def route(methode: str, chemin: str) -> RouteCatalogue:
     return catalogue()[cle]
 
 
-TECHNIQUES = frozenset({3, 4, 5, 6, *range(11, 26), *range(43, 56), 243})
+TECHNIQUES = frozenset({3, 4, 5, 6, *range(11, 26), *range(43, 56), 243, 259})
 """Les routes où l'administrateur technique est nommé (API-PRO § 4, § 1.24)."""

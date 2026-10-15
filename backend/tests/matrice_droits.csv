@@ -242,6 +242,7 @@ POST;/api/reprise;401;ok;403;403;403
 GET;/api/sante;ok;ok;ok;ok;ok
 GET;/api/sauvegardes;401;ok;403;403;ok
 POST;/api/sauvegardes;401;ok;403;403;ok
+DELETE;/api/sauvegardes/{nom};401;ok;403;403;ok
 POST;/api/sauvegardes/{nom}/restaurer;401;ok;403;403;ok
 GET;/api/serveur;401;ok;403;403;ok
 GET;/api/signalements;401;ok;ok;ok;403

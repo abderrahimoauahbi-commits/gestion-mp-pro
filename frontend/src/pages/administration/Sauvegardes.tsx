@@ -1,7 +1,8 @@
 /**
  * Administration › Sauvegardes (`/administration?onglet=sauvegardes`) : les copies de cette base
  * (relues, pièces jointes comprises), leur conservation, « Sauvegarder maintenant », et revenir à
- * l'une d'elles — confirmé sur la ligne, puis lu et confirmé dans sa fenêtre (`Restauration`).
+ * l'une d'elles — confirmé sur la ligne, puis lu et confirmé dans sa fenêtre (`Restauration`) —, ou
+ * en supprimer une (confirmé sur la ligne ; la plus récente de cette base se garde, route 259).
  * Une sauvegarde d'une autre base ne se restaure pas ici (grisé, avec la raison). Direction et
  * administrateur technique.
  */
@@ -42,7 +43,20 @@ export function depuis(heures: number): string {
   return heures < 48 ? `${nombre(heures, 0)} h` : `${nombre(heures / 24, 0)} j`
 }
 
-function colonnes(e: Etat, restaurer: (f: FichierSauvegarde) => void): Colonne<FichierSauvegarde>[] {
+/** Pourquoi une sauvegarde ne se supprime pas (la plus récente de cette base se garde), ou rien. */
+export function supprimable(e: Etat, f: FichierSauvegarde): string | undefined {
+  const recente = e.fichiers.find((x) => !x.autre_base)
+  return recente?.nom === f.nom
+    ? 'La sauvegarde la plus récente de cette base se garde : supprimer une plus ancienne.'
+    : undefined
+}
+
+interface Gestes {
+  restaurer: (f: FichierSauvegarde) => void
+  supprimer: (f: FichierSauvegarde) => Promise<unknown>
+}
+
+function colonnes(e: Etat, g: Gestes): Colonne<FichierSauvegarde>[] {
   return [
     { cle: 'quand', titre: 'Faite le', rendu: (f) => horodatage(f.quand) },
     { cle: 'nature', titre: 'Nature' },
@@ -64,21 +78,35 @@ function colonnes(e: Etat, restaurer: (f: FichierSauvegarde) => void): Colonne<F
       triable: false,
       exporte: false,
       rendu: (f) => (
-        <Confirmer
-          taille="petit"
-          variante="danger"
-          grise={
-            f.autre_base
-              ? `Sauvegarde de la base « ${f.base} », pas de celle-ci (« ${e.base} ») : elle ne se restaure pas ici.`
-              : undefined
-          }
-          titre="Remplacer toute la base par cette sauvegarde (l’état actuel est d’abord sauvegardé)"
-          question={`Revenir à l’état du ${horodatage(f.quand)} ?`}
-          oui="Oui, continuer…"
-          onOui={() => restaurer(f)}
-        >
-          Restaurer…
-        </Confirmer>
+        <span className={styles.rangee}>
+          <Confirmer
+            taille="petit"
+            variante="danger"
+            grise={
+              f.autre_base
+                ? `Sauvegarde de la base « ${f.base} », pas de celle-ci (« ${e.base} ») : elle ne se restaure pas ici.`
+                : undefined
+            }
+            titre="Remplacer toute la base par cette sauvegarde (l’état actuel est d’abord sauvegardé)"
+            question={`Revenir à l’état du ${horodatage(f.quand)} ?`}
+            oui="Oui, continuer…"
+            onOui={() => g.restaurer(f)}
+          >
+            Restaurer…
+          </Confirmer>
+          <Confirmer
+            taille="petit"
+            variante="danger"
+            grise={supprimable(e, f)}
+            titre="Effacer ce fichier et ses pièces jointes du dossier (la copie de sécurité n’est pas touchée)"
+            question={`Supprimer définitivement la sauvegarde du ${horodatage(f.quand)} ?`}
+            oui="Oui, supprimer"
+            attente="Suppression…"
+            onOui={() => g.supprimer(f)}
+          >
+            Supprimer
+          </Confirmer>
+        </span>
       ),
     },
   ]
@@ -111,10 +139,20 @@ function IndicateursSauvegardes({ e }: { e: Etat }) {
   )
 }
 
+/** Supprimer une sauvegarde (route 259), puis le dire. */
+function useSupprimer() {
+  const effacer = useEcriture((nom: string) => api.supprimer<Etat>(`/sauvegardes/${encodeURIComponent(nom)}`))
+  return async (f: FichierSauvegarde) => {
+    await effacer.mutateAsync(f.nom)
+    dire(`Sauvegarde du ${horodatage(f.quand)} supprimée.`)
+  }
+}
+
 export function Sauvegardes() {
   const lu = useLecture<Etat>('/sauvegardes')
   const [restaurer, setRestaurer] = useState<FichierSauvegarde | null>(null)
   const sauver = useEcriture(() => api.post<Etat>('/sauvegardes'))
+  const supprimer = useSupprimer()
   if (lu.isPending) return <Chargement quoi="les sauvegardes" />
   if (lu.isError) return <Erreur erreur={lu.error} onReessayer={() => void lu.refetch()} />
   const e = lu.data
@@ -151,7 +189,7 @@ export function Sauvegardes() {
         <DataTable<FichierSauvegarde>
           libelle="Sauvegardes"
           lignes={e.fichiers}
-          colonnes={colonnes(e, setRestaurer)}
+          colonnes={colonnes(e, { restaurer: setRestaurer, supprimer })}
           cle={(f) => f.nom}
           recherche={false}
           triInitial={{ cle: 'quand', sens: -1 }}
