@@ -493,7 +493,7 @@ def unite_de_titrage(m: Monde, annee: int) -> None:
     r = m.A.appeler(
         "POST",
         "/classification/unites-titrage",
-        {"code": f"Ustr{chr(64 + annee % 26)}", "libelle": f"unité d'essai{SUFFIXE}"},
+        {"code": f"Ustr{chr(65 + annee % 26)}", "libelle": f"unité d'essai{SUFFIXE}"},
         CREE,
         note="unité (stress)",
     )

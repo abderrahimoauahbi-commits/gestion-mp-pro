@@ -62,7 +62,7 @@ def bon_depuis_le_plan(m: Monde, fid: int) -> list[dict[str, Any]]:
             }
         )
     delai = int(prep["delai_jours"] or 60)
-    promesse = m.jour + timedelta(days=delai + m.entier(-5, 10))
+    promesse = m.jour + timedelta(days=max(1, delai + m.entier(-5, 10)))
     corps = {
         "fournisseur_id": fid,
         "date_livraison_prevue": promesse.isoformat(),
