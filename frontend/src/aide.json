@@ -848,7 +848,7 @@
     },
     "sauvegarde_conservees": {
       "grandeur": "Sauvegardes conservées",
-      "texte": "Les fichiers de cette base dans le dossier des sauvegardes : une automatique par jour gardée 14 jours, puis la première de chaque mois gardée 12 mois ; les manuelles et « avant » ne s’effacent jamais seules."
+      "texte": "Les fichiers de cette base dans le dossier des sauvegardes. Automatiques, à 22 h (heure de l’usine) : une quotidienne chaque soir gardée 14 jours, une hebdomadaire le dimanche gardée 8 semaines, une mensuelle le dernier jour du mois gardée 12 mois (celle de fin décembre gardée toujours) ; serveur éteint à 22 h, elles se font à son retour. Les manuelles et « avant » ne s’effacent jamais seules. Le filtre « Nature » de la liste les sépare."
     },
     "sauvegarde_copie": {
       "grandeur": "Copie de sécurité",

@@ -297,9 +297,12 @@ class GenreCourriel(StrEnum):
 
 
 class GenreSauvegarde(StrEnum):
-    """Genre d'une sauvegarde de la base (`avant_vidage`, `avant_mise_a_jour` : révision 0004)."""
+    """Genre d'une sauvegarde de la base (`avant_vidage`, `avant_mise_a_jour` : révision 0004 ;
+    `hebdomadaire`, `mensuelle` : révision 0010, décision X7)."""
 
     quotidienne = "quotidienne"
+    hebdomadaire = "hebdomadaire"
+    mensuelle = "mensuelle"
     manuelle = "manuelle"
     avant_restauration = "avant_restauration"
     avant_reprise = "avant_reprise"

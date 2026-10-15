@@ -61,6 +61,8 @@ MOTIF_NOM = re.compile(r"^gestion-mp-pro-(\d{4}-\d{2}-\d{2})-(\d{6})-([a-z]+(?:-
 
 GENRES = (
     "quotidienne",
+    "hebdomadaire",
+    "mensuelle",
     "manuelle",
     "avant-restauration",
     "avant-reprise",
@@ -68,10 +70,12 @@ GENRES = (
     "avant-mise-a-jour",
     "reference-vide",
 )
-"""Les genres d'un fichier ; seules les quotidiennes sont purgées (décision X2)."""
+"""Les genres d'un fichier ; seuls les trois automatiques sont purgés (décision X7)."""
 
 LIBELLES = {
-    "quotidienne": "automatique",
+    "quotidienne": "quotidienne",
+    "hebdomadaire": "hebdomadaire",
+    "mensuelle": "mensuelle",
     "manuelle": "manuelle",
     "avant-restauration": "avant une restauration",
     "avant-reprise": "avant une reprise",

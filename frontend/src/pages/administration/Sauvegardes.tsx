@@ -1,7 +1,8 @@
 /**
  * Administration › Sauvegardes (`/administration?onglet=sauvegardes`) : les copies de cette base
- * (relues, pièces jointes comprises), leur conservation, « Sauvegarder maintenant », et revenir à
- * l'une d'elles — confirmé sur la ligne, puis lu et confirmé dans sa fenêtre (`Restauration`) —, ou
+ * (relues, pièces jointes comprises), leur nature (quotidienne, hebdomadaire, mensuelle, manuelle,
+ * avant…) et un filtre par nature (décision X7), leur conservation, « Sauvegarder maintenant », et
+ * revenir à l'une d'elles — confirmé sur la ligne, puis lu et confirmé dans sa fenêtre (`Restauration`) —, ou
  * en supprimer une (confirmé sur la ligne ; la plus récente de cette base se garde, route 259).
  * Une sauvegarde d'une autre base ne se restaure pas ici (grisé, avec la raison). Direction et
  * administrateur technique.
@@ -20,6 +21,7 @@ import { Bouton } from '../../composants/saisie/Bouton'
 import { Confirmer } from '../../composants/saisie/Confirmer'
 import type { Colonne } from '../../composants/tableaux/colonnes'
 import { DataTable } from '../../composants/tableaux/DataTable'
+import type { Filtre } from '../../composants/tableaux/filtrage'
 import { api } from '../../lib/api'
 import { formule } from '../../lib/aide'
 import { horodatage, nombre } from '../../lib/format'
@@ -49,6 +51,32 @@ export function supprimable(e: Etat, f: FichierSauvegarde): string | undefined {
   return recente?.nom === f.nom
     ? 'La sauvegarde la plus récente de cette base se garde : supprimer une plus ancienne.'
     : undefined
+}
+
+/** Les genres dans l'ordre où Mohamed les cherche : les automatiques, puis les autres. */
+const GENRES = [
+  'quotidienne',
+  'hebdomadaire',
+  'mensuelle',
+  'manuelle',
+  'avant-mise-a-jour',
+  'avant-restauration',
+  'avant-reprise',
+  'avant-vidage',
+  'reference-vide',
+]
+
+/** Le filtre « Nature : toutes », puis chaque nature présente avec son nombre. */
+export function filtreNature(fichiers: readonly FichierSauvegarde[]): Filtre<FichierSauvegarde> {
+  const natures = new Map(fichiers.map((f) => [f.genre, f.nature]))
+  return {
+    cle: 'nature',
+    libelle: 'Nature',
+    tous: 'toutes',
+    valeur: (f) => f.genre,
+    libelleValeur: (g) => natures.get(g) ?? g,
+    rang: (g) => (GENRES.includes(g) ? GENRES.indexOf(g) : GENRES.length),
+  }
 }
 
 interface Gestes {
@@ -125,7 +153,7 @@ function IndicateursSauvegardes({ e }: { e: Etat }) {
       <Kpi
         titre="Sauvegardes conservées"
         valeur={nombre(e.nb)}
-        detail="14 jours, puis une par mois sur 12 mois"
+        detail="à 22 h : chaque soir (14 jours), le dimanche (8 semaines), le dernier jour du mois (12 mois, fin décembre gardée)"
         formule={formule('sauvegarde_conservees')}
       />
       <Kpi
@@ -192,6 +220,8 @@ export function Sauvegardes() {
           colonnes={colonnes(e, { restaurer: setRestaurer, supprimer })}
           cle={(f) => f.nom}
           recherche={false}
+          filtres={[filtreNature(e.fichiers)]}
+          videFiltre="Aucune sauvegarde de cette nature."
           triInitial={{ cle: 'quand', sens: -1 }}
           vide="Aucune sauvegarde pour le moment."
         />

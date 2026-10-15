@@ -49,7 +49,9 @@ export function Filtres<T>({
             value={pose}
             onChange={(e) => onChoix(f.cle, e.target.value || null)}
           >
-            <option value="">{f.libelle} : tous</option>
+            <option value="">
+              {f.libelle} : {f.tous ?? 'tous'}
+            </option>
             {optionsLiees(lignes, filtres, choix, f, dansRecherche).map((o) => (
               <option key={o.valeur} value={o.valeur}>
                 {f.options ? o.libelle : `${o.libelle} (${nombre(o.nombre)})`}

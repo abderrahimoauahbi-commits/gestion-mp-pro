@@ -1,12 +1,14 @@
 """Sauvegardes de **cette** base : écrites, relues, avec leurs pièces, copiées, purgées.
 
-Lot D10 (ARCHITECTURE § 13.3 ; décision X2 de Mohamed) :
+Lot D10 (ARCHITECTURE § 13.3 ; décisions X2 et X7 de Mohamed) :
 
 - `pg_dump -Fc` dans un fichier provisoire, **relu** (`pg_restore --list` : autant de tables
   que la base en compte), puis renommé ; l'archive des pièces jointes à côté, relue ; la copie
   sur le second disque (`GESTIONMPPRO_SAUVEGARDES_COPIE/<base>`), vérifiée à la taille ;
-- purge : 14 quotidiennes + la première de chacun des 12 derniers mois, dans le dossier **et**
-  dans la copie (G-09) ; les manuelles et les « avant-* » ne s'effacent **jamais** seules ;
+- les automatiques (décision X7, `services/sauvegarde_calendrier.py`) : quotidienne chaque soir
+  à 22:00, hebdomadaire le dimanche, mensuelle le dernier jour du mois, rattrapées au passage
+  suivant ; purge 14 / 8 / 12 (mensuelle de fin décembre gardée), dans le dossier **et** dans la
+  copie (G-09) ; les manuelles et les « avant-* » ne s'effacent **jamais** seules ;
 - état et alerte calculés sur les seules sauvegardes de cette base (G-06), alerte à 26 h ;
   un échec ne se tait jamais (bandeau rouge de la direction, `/api/sante`).
 
@@ -21,7 +23,7 @@ import os
 import shutil
 import threading
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
@@ -34,21 +36,22 @@ from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
 from gestion_mp_pro.db import fabrique, moteur
 from gestion_mp_pro.services import horloge
+from gestion_mp_pro.services import sauvegarde_calendrier as calendrier
 from gestion_mp_pro.services import sauvegarde_outils as o
 from gestion_mp_pro.services import sauvegarde_registre as registre
 from gestion_mp_pro.services.sauvegarde_pieces import archiver
 
 JOURNAL = logging.getLogger("gestion_mp_pro.sauvegarde")
 
-QUOTIDIENNES = 14
-MENSUELLES = 12
 ALERTE_HEURES = 26
-FICHIERS_LISTES = 30
+FICHIERS_LISTES = 100
+"""Les fichiers listés à l'écran (les automatiques seules en gardent 34, plus fin décembre)."""
 POLITIQUE = (
-    "Une sauvegarde automatique par jour, relue, gardée 14 jours, puis la première de chaque "
-    "mois gardée 12 mois ; la copie de sécurité suit la même conservation ; les sauvegardes "
-    "manuelles et « avant » (restauration, reprise, vidage, mise à jour) ne s'effacent jamais "
-    "seules."
+    "Sauvegardes automatiques relues, à 22 h : une quotidienne chaque soir (gardée 14 jours), une "
+    "hebdomadaire le dimanche (8 semaines), une mensuelle le dernier jour du mois (12 mois, celle "
+    "de fin décembre gardée toujours) ; Mac éteint à 22 h, elles se font à son retour. La copie "
+    "de sécurité suit la même conservation ; les sauvegardes manuelles et « avant » "
+    "(restauration, reprise, vidage, mise à jour) ne s'effacent jamais seules."
 )
 _ECRITURE = threading.Lock()
 
@@ -235,53 +238,68 @@ def sauvegarder(
     return _fiche(cible, lecture.base, lecture.tables, entree.copie_externe)
 
 
-def du_jour() -> FichierSauvegarde | None:
-    """La quotidienne du jour si elle manque (puis la purge) ; `None` si elle est déjà faite."""
-    jour = horloge.aujourd_hui()
-    for f in dossier().glob(f"{o.PREFIXE}*-quotidienne{o.EXTENSION}"):
+def _automatiques_du_dossier(d: Path) -> list[tuple[Path, o.NomLu]]:
+    """Les sauvegardes automatiques d'un dossier (quotidiennes, hebdomadaires, mensuelles)."""
+    trouves = []
+    for f in d.glob(f"{o.PREFIXE}*{o.EXTENSION}"):
         lu = o.lire_nom(f.name)
-        if lu is not None and lu.jour == jour:
-            return None
-    fichier = sauvegarder("quotidienne")
-    purger()
-    return fichier
+        if lu is not None and lu.genre in calendrier.AUTOMATIQUES:
+            trouves.append((f, lu))
+    return trouves
 
 
-def _a_garder(jours: list[date], quotidiennes: int, mensuelles: int) -> set[date]:
-    """Les 14 jours les plus récents et le premier jour de chacun des 12 derniers mois."""
-    gardes = set(sorted(jours, reverse=True)[:quotidiennes])
-    premiers: dict[tuple[int, int], date] = {}
-    for j in sorted(jours):
-        premiers.setdefault((j.year, j.month), j)
-    gardes |= set(sorted(premiers.values(), reverse=True)[:mensuelles])
-    return gardes
+def automatiques() -> list[FichierSauvegarde]:
+    """Les automatiques dues (décision X7), au plus une par genre, puis la purge ; rend celles
+    faites. Une copie de sécurité manquée n'empêche pas les genres suivants : elle est relevée à
+    la fin (503, tâche en échec, alerte), comme pour le geste manuel."""
+    faites: dict[str, list[datetime]] = {g: [] for g in calendrier.AUTOMATIQUES}
+    if dossier().is_dir():
+        for _, lu in _automatiques_du_dossier(dossier()):
+            faites[lu.genre].append(lu.instant)
+    fichiers = [
+        sauvegarder(genre, exiger_copie=False)
+        for genre in calendrier.dues(faites, horloge.maintenant())
+    ]
+    if fichiers:
+        purger()
+    sans_copie = [f.nom for f in fichiers if dossier_copie() is not None and not f.copie]
+    if sans_copie:
+        raise Refus.indisponible(
+            f"La sauvegarde {', '.join(sans_copie)} est faite, mais sa copie de sécurité est "
+            f"impossible ({dossier_copie()}).",
+            code="sauvegarde_impossible",
+        )
+    return fichiers
 
 
-def _purger_dossier(d: Path, quotidiennes: int, mensuelles: int) -> list[str]:
-    """Purge les quotidiennes d'un dossier (et leurs pièces) ; rend les noms effacés."""
-    par_jour: dict[date, list[Path]] = {}
-    for f in d.glob(f"{o.PREFIXE}*-quotidienne{o.EXTENSION}"):
-        lu = o.lire_nom(f.name)
-        if lu is not None and lu.genre == "quotidienne":
-            par_jour.setdefault(lu.jour, []).append(f)
-    gardes = _a_garder(list(par_jour), quotidiennes, mensuelles)
-    effaces: list[str] = []
-    for jour, fichiers in par_jour.items():
-        if jour in gardes:
-            continue
-        for f in fichiers:
-            f.unlink(missing_ok=True)
-            o.archive_de(f).unlink(missing_ok=True)
-            effaces.append(f.name)
-    return sorted(effaces)
+def dernieres_automatiques() -> list[Path]:
+    """La plus récente sauvegarde de chaque genre automatique (pour refaire une copie manquée)."""
+    if not dossier().is_dir():
+        return []
+    dernieres: dict[str, tuple[datetime, Path]] = {}
+    for f, lu in _automatiques_du_dossier(dossier()):
+        if lu.genre not in dernieres or lu.instant > dernieres[lu.genre][0]:
+            dernieres[lu.genre] = (lu.instant, f)
+    return [f for _, f in dernieres.values()]
 
 
-def purger(quotidiennes: int = QUOTIDIENNES, mensuelles: int = MENSUELLES) -> list[str]:
-    """La rotation annoncée, dans le dossier et dans la copie de sécurité ; rend les effacés."""
-    effaces = _purger_dossier(dossier(), quotidiennes, mensuelles) if dossier().is_dir() else []
+def _purger_dossier(d: Path) -> list[str]:
+    """Purge les automatiques d'un dossier (et leurs pièces) ; rend les noms effacés."""
+    trouves = _automatiques_du_dossier(d)
+    effaces = calendrier.a_effacer((f.name, lu.genre, lu.instant) for f, lu in trouves)
+    for nom in effaces:
+        (d / nom).unlink(missing_ok=True)
+        o.archive_de(d / nom).unlink(missing_ok=True)
+    return effaces
+
+
+def purger() -> list[str]:
+    """La rotation annoncée (14 / 8 / 12, fin décembre gardée), dans le dossier et dans la copie
+    de sécurité ; rend les effacés du dossier."""
+    effaces = _purger_dossier(dossier()) if dossier().is_dir() else []
     copie = dossier_copie()
     if copie is not None and copie.is_dir():
-        _purger_dossier(copie, quotidiennes, mensuelles)
+        _purger_dossier(copie)
     if effaces:
         try:
             with fabrique()() as s, s.begin():

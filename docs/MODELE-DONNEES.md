@@ -153,7 +153,7 @@ puis 4 qui ferment des colonnes que ce document décrivait en texte (`TypeMotif`
 | `TonNotification` | `info`, `succes`, `alerte`, `danger` | `notification.ton` | — (nouveau) |
 | `StatutCourriel` | `en_attente`, `envoye`, `abandonne` | `courriel.statut` | — (nouveau) |
 | `GenreCourriel` | `lundi`, `alerte` | `courriel.genre` | — |
-| `GenreSauvegarde` | `quotidienne`, `manuelle`, `avant_restauration`, `avant_reprise`, `avant_vidage`, `avant_mise_a_jour` (ces deux : 0004, décision X2), `reference_vide` ; seules les quotidiennes sont purgées | `sauvegarde.genre` | nom du fichier |
+| `GenreSauvegarde` | `quotidienne`, `hebdomadaire`, `mensuelle` (ces deux : 0010, décision X7), `manuelle`, `avant_restauration`, `avant_reprise`, `avant_vidage`, `avant_mise_a_jour` (ces deux : 0004, décision X2), `reference_vide` ; seules les trois automatiques sont purgées (14 / 8 / 12) | `sauvegarde.genre` | nom du fichier |
 | `ObjetJournal` | liste fermée des objets (§ 3.1.5), dont `lot` (le commentaire de la fiche de lot a un historique) et `systeme` (défaut) | `journal.objet` | texte |
 | `TypeMotif` | les 5 valeurs de `TypeOperation` + `inventaire` | `motif.type_operation` | listes en dur (`api/operations.py`) |
 | `SourceReprise` | `gestion_mp`, `erp_fil` | `reprise_correspondance.source`, `reprise_execution.source` | — (nouveau) |
@@ -1260,6 +1260,9 @@ Outre les PK, UQ et FK (chaque FK a son index quand elle est lue dans ce sens) :
 - `0008_unites_de_titrage` (lot UNITES-TITRAGE) : table `unite_titrage` (§ 3.2.2 b) semée (six unités,
   puis celles que les titrages emploient déjà), `ObjetJournal` + `unite_titrage` (CHECK
   `ck_journal_objet_enum` remplacé). Retour arrière refusé si le journal cite une unité de titrage.
+- `0010_sauvegardes_hebdo_mensuelles` (lot SAUVEGARDES-CALENDRIER) : `GenreSauvegarde` + `hebdomadaire`,
+  `mensuelle` (CHECK `ck_sauvegarde_genre_enum` remplacé). Le retour arrière retire du registre les
+  sauvegardes des deux genres (leurs fichiers restent : le disque fait foi).
 - Les révisions suivantes : une par changement, avec `upgrade()` et `downgrade()`, numérotées à la suite
   (numéro réservé auprès du coordinateur), relues après autogénération : autogenerate ne voit ni les
   CHECK modifiés ni les déclencheurs (à écrire à la main) ; pas de `%` dans le texte d'un CHECK (utiliser `~`).
