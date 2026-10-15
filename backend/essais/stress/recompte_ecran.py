@@ -62,9 +62,10 @@ def _stock(p: Poste, adresse: str, lignes: list[dict[str, Any]]) -> None:
 
 
 def _realise(p: Poste, adresse: str, lignes: list[dict[str, Any]], jour: date) -> None:
-    """Plan et réalisé : les m² réalisés des douze mois, pour chaque année des dix."""
+    """Plan et réalisé : les m² réalisés des douze mois (le mois en cours jusqu'au jour de
+    référence), pour chaque année des dix."""
     for recul in range(10):
-        fin = date(jour.year - recul, jour.month, 1)
+        fin = date(jour.year - recul, jour.month, jour.day)
         r = p.get(f"/api/production/realise?date={fin.isoformat()}")
         mois = r.get("mois") or []
         if not mois:
@@ -74,10 +75,10 @@ def _realise(p: Poste, adresse: str, lignes: list[dict[str, Any]], jour: date) -
         total_sql = _sql(
             adresse,
             "SELECT coalesce(sum(oq.m2), 0) FROM ordre_qualite oq JOIN ordre o ON o.id = "
-            "oq.ordre_id WHERE o.statut = 'valide' AND to_char(o.date, 'YYYY-MM') "
-            "BETWEEN :a AND :b",
+            "oq.ordre_id WHERE o.statut = 'valide' AND to_char(o.date, 'YYYY-MM') >= :a "
+            "AND o.date <= :b",
             a=str(premier)[:7],
-            b=str(dernier)[:7],
+            b=min(date.fromisoformat(str(dernier)), fin),
         )
         _juger(lignes, f"Plan et réalisé {premier}→{dernier} : Σ m² réalisés", total_ecran,
                total_sql, M2 * max(1, len(r.get("lignes", []))))  # fmt: skip

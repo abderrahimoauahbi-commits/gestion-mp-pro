@@ -171,7 +171,7 @@ ws.addEventListener('message', (e) => {
     r.fin = m.params.timestamp
     r.octets = m.params.encodedDataLength
   }
-  if (m.method === 'Network.loadingFailed' && reseau.has(m.params.requestId)) {
+  if (m.method === 'Network.loadingFailed' && reseau.has(m.params.requestId) && !m.params.canceled) {
     const r = reseau.get(m.params.requestId)
     r.fin = m.params.timestamp
     r.statut = r.statut || 'échec'
@@ -335,11 +335,19 @@ async function chercher(url) {
 }
 
 // Lance un export ou un document depuis la page (même session) et le chronomètre.
+// Un même lien n'est lancé qu'une fois par rôle ; une même route (sans ses paramètres ni ses
+// identifiants) au plus trois fois par rôle et par écran (une liste met un bouton « Étiquettes »
+// sur chacune de ses 500 lignes).
 const DEJA = new Set()
+const PAR_ROUTE = new Map()
 async function telecharger(role, href, libelle, genre, ecran) {
   const cle = `${role} ${href}`
   if (DEJA.has(cle)) return null
   DEJA.add(cle)
+  const route = `${role} ${ecran} ${href.split('?')[0].replace(/\/\d+(?=\/|$)/g, '/N')}`
+  const vus = (PAR_ROUTE.get(route) ?? 0) + 1
+  PAR_ROUTE.set(route, vus)
+  if (vus > 3) return null
   const r = await evaluer(`(async()=>{const t0=performance.now();const ac=new AbortController();const to=setTimeout(()=>ac.abort(),90000);try{const r=await fetch(${JSON.stringify(href)},{headers:{'X-Gestion-MP-PRO':'1'},signal:ac.signal});const b=await r.arrayBuffer();clearTimeout(to);const type=r.headers.get('content-type')||'';let html='';if(type.includes('html')){html=new TextDecoder().decode(b).slice(0,400000)};return {statut:r.status, ms:Math.round(performance.now()-t0), octets:b.byteLength, type, traceback:/Traceback|Internal Server Error/.test(html), lignesHtml: html ? (html.match(/<tr/g)||[]).length : null}}catch(e){clearTimeout(to);return {statut:'échec '+e.name, ms:Math.round(performance.now()-t0), octets:0, type:'', traceback:false}}})()`)
   const out = { role, genre, href, libelle, ecran, ...(r ?? { statut: 'inconnu', ms: null, octets: 0 }) }
   resultat.telechargements.push(out)

@@ -161,8 +161,9 @@ def executer(args: argparse.Namespace) -> int:
             dossier = Path(tmp)
             serveur, port = _lancer_serveur(adresse, dossier, args.date)
             sys.stdout.write(f"Serveur jetable sur le port {port} ({adresse}).\n")
-            sortie = _tourner(args, adresse, port, dossier, codes)
-            sys.stdout.write(f"Résultat : {sortie}\n")
+            if not args.recompte_seul:
+                sortie = _tourner(args, adresse, port, dossier, codes)
+                sys.stdout.write(f"Résultat : {sortie}\n")
             _recompter(args, adresse, port, codes)
     finally:
         if serveur is not None:
@@ -182,6 +183,9 @@ def main() -> int:
     p.add_argument("--date", type=date.fromisoformat, help="jour auquel l'horloge est figée")
     p.add_argument("--roles", help="direction,achats,alimentation (défaut : les trois)")
     p.add_argument("--sans-onglets", action="store_true", help="écrans de base seulement")
+    p.add_argument(
+        "--recompte-seul", action="store_true", help="seulement le recompte SQL (pas de tournée)"
+    )
     args = p.parse_args()
     if args.base == "rapport":
         rapport.ecrire(RESULTATS, ICI / "tournee-ecran.md")
