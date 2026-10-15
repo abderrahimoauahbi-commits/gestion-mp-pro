@@ -2355,3 +2355,50 @@ Aucune correction en phase A : rien de CERTAIN sur une base qui n'est pas celle 
 la règle est de réfléchir avant de corriger. Les candidats à une correction certaine (essai
 avant/après, chiffres inchangés) sont le compte des pesées par agrégat SQL et les agrégats de
 `/ordres/apercu` ; ils seront décidés sur les chiffres de la phase B.
+
+### Phase B — année 0 de la simulation (`annee-0.dump`, horloge figée au 14/10/2027)
+
+Décision de Mohamed (relayée le 15/10) : le stress test se limite à **3 ans**. Base `annee-0`
+restaurée dans `gestion_mp_pro_stress_ecran_a0_essai` (+ `alembic upgrade head`, déjà à 0008) :
+15 746 mouvements, 340 lots, 986 OF (951 validés), 89 réceptions, 80 bons, 54 dossiers,
+88 factures, 331 opérations, 25 inventaires, 128 matières (les 4 ajoutées finissent par
+« (stress) » ; les 124 de Mohamed intactes).
+
+**Tenue : 378 écrans, aucune erreur, aucun écran > 3 s, 15 écrans entre 1 et 1,5 s**, médiane
+415 ms au bureau (≈ démarrage de l'écran) et 560 ms à l'atelier. Les 15 écrans « lents » sont
+tous ceux qui lisent **la liste entière des OF** : Sorties › Validés (`/ordres/apercu` 0,7 s), la
+fiche d'un OF et son retour (idem), « Nouvelle sortie » (`/ordres/ouverts` sans statut, 1,1 s),
+atelier Envoyer / Ordres / Retour (`/ordres/ouverts` 0,8 s). Profil en mémoire
+(`scratchpad/stress_profil_ordres.py`, cache chaud) : `ouverts(tous)` 290 ms, `apercu(valide)`
+340 ms, `lister(page)` 198 ms, `consommations(s)` 38 ms — le coût est le chargement ORM des
+986 OF avec leurs lignes et qualités (17 000 objets) puis `lire_un` par OF ; il est **linéaire
+au nombre d'OF depuis l'origine** (pas de borne de période), le serveur à 2 processus le rend
+à 2–3× (sérialisation, cache par processus). Les blocages, eux, ne coûtent rien hors brouillon.
+
+Exports et documents : 130, tous en 200 ; le plus long `export/mouvements` 2,2 s (15 746
+lignes, 1,2 Mo), tout le reste < 1 s ; bilan du mois 0,3 s, étiquettes, bon, feuille de comptage
+< 0,1 s. Recherche à la frappe : 100–400 ms partout ; recherche globale 8 résultats pour
+« HASIRCI » (0 pour l'alimentation : les fournisseurs lui sont fermés, voulu).
+
+Chiffres contre SQL : **recompte de l'écran 27 cas / 0 écart** (valorisation = Σ soldes ; stock par
+matière = valorisation, magasins et métiers ; cockpit = valorisation ; totaux des listes
+paginées = `count(*)` ; onglets des commandes ; échéancier (total, échu, factures des réceptions
+validées non réglées) ; plan et réalisé Σ m² jusqu'au jour de référence, pour les dix fenêtres
+d'un an). **Vérification indépendante V1** (`verification_chiffres.py --serveur`, 13 dates) :
+114 981 vérifications, 36 familles, **4 écarts**, tous dans « Échéancier » : frais 30, 33, 34, 35
+réglés le 01/01/2027 « attendus dans reglees, vus [] ». Cause lue : `calcul/suivi.py`
+`REGLEES_AU_PLUS = 300` — la vue « Réglées » ne garde que les 300 règlements les plus récents, et
+l'année 0 en compte déjà 304 ; **rien à l'écran ne dit que la liste est tronquée** (année 2 :
+889 réglées, donc 589 invisibles). Classé **PRÉSENTATION / QUESTION MÉTIER** : garder un plafond
+(et le dire : « 300 derniers règlements sur 889 »), ou paginer cette vue comme les autres listes.
+
+Deux faux positifs de mon pilote, corrigés (pas des défauts de PRO) : les appels que la page
+**annule elle-même** quand une fiche s'ouvre par-dessus sa liste (`/api/receptions?statut=validee`
+puis la même requête avec `limite=1`, `/api/operations?type=ouverture`) étaient comptés « en vol »
+ou « échec » ; ils sont maintenant « annulé », hors temps et hors fautes. Remarque d'INFORMATION :
+ouvrir une fiche de réception ou d'opération déclenche et annule une lecture de liste (coût
+serveur perdu, sans effet visible).
+
+Présentation (inchangé depuis la base vide) : mêmes tableaux plus larges que leur cadre à
+1 440 px ; rien d'écrasé ni de défilement caché dans les fenêtres ; aucun montant chez
+l'alimentation.
