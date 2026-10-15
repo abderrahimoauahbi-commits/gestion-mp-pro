@@ -1,6 +1,6 @@
 # Lot FOND-DE-LOT — les fonds de lot et leur mise au rebut
 
-Branche `fond-de-lot-rebut` (depuis main 6f6b82a, fusion de main a00150f avant remise). Révision
+Branche `fond-de-lot-rebut` (depuis main 6f6b82a, fusion de main 47cd679 avant remise). Révision
 Alembic **0009** (réservée par le coordinateur). Route **258** (`POST /lots/{id}/rebut`).
 
 ## La décision (Mohamed, 15 octobre 2026 — DECISIONS U22, O14)
@@ -90,9 +90,19 @@ un lot dont il ne restait qu'un fond (3,151 kg, moins qu'une bobine) ; 497 fois 
 
 ## Vérification à l'écran (copie de `gestion_mp_pro_stress_essai`, migrée 0009)
 
-Voir le rapport de remise : 10 fonds de lot sous 100 g (0,391 kg) dans la base « 3 ans », vus
-dans Stock › Lots (1 440 × 900) et dans « Stock des fils » (375 × 812) ; un rebut joué au bureau
-et un au téléphone sur la copie.
+Copie `gestion_mp_pro_fdl2_essai`, migrée 0009, serveur d'essai sur 8151 avec l'horloge figée au
+15/10/2029 (la base vit en 2029 : période close jusqu'au 30/09/2029). La base « 3 ans » porte
+**10 fonds de lot** sous 100 g (0,391 kg) : Stock › Lots (achats, 1 440 × 900) les montre avec
+le KPI « Fonds de lot 10 · 0,39 kg à mettre au rebut (< 100 g) », la case « Fonds de lot
+seulement » (8 lots, deux magasins pour certains), le badge sur le lot et « fond » sur le solde,
+« Mettre au rebut » par magasin dans la colonne des gestes (le tableau défile dans son cadre) ;
+le rebut de 62 g du lot CP-270108-0059 (Polyfashions) a écrit `AJU-2029-0007` (toast, KPI 9 ·
+0,33 kg, lot relu avec son seul solde Morocco 38 g) ; la fiche du lot (bureau) montre le badge,
+la carte « Fond de lot » et l'écriture « Ajustement d'inventaire · Rebut ». Au téléphone
+(Atelier 2029, 375 × 812) : « Stock des fils » marque le lot « fond de lot », la fiche montre
+« Mettre au rebut (38 g, Morocco) », la confirmation sur place, puis `AJU-2029-0008`, le lot
+« Épuisé », aucun montant nulle part. Avec l'horloge réelle (2026), la copie refuse tout rebut
+(période close, lots entrés en 2027–2029) : le refus est dit tel quel en bas de l'écran.
 
 ## Parité
 
