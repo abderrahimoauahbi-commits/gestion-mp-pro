@@ -109,7 +109,7 @@ function Garder-La-Base([string]$Nom) {
 }
 
 function Parties-De-Base([string]$Adresse) {
-    # postgresql+psycopg://role:motdepasse@hote:port/base → ses morceaux (pour psql).
+    # postgresql+psycopg://role:<mot de passe>@hote:port/base → ses morceaux (pour psql).
     if ($Adresse -notmatch '^[^:]+://([^:@/]+)(:([^@/]*))?@([^:/]+)(:(\d+))?/([^/?]+)') {
         Echouer 'GESTIONMPPRO_BASE illisible dans le fichier environnement.'
     }
