@@ -61,7 +61,8 @@ def _attendre_serveur(port: int, p: subprocess.Popen[bytes], journal: Path) -> N
     fin = time.monotonic() + DELAI_DEMARRAGE_S
     while time.monotonic() < fin:
         if p.poll() is not None:
-            raise SystemExit(f"Serveur arrêté au démarrage :\n{journal.read_text()[-3000:]}")
+            fin_du_journal = journal.read_text(encoding="utf-8")[-3000:]
+            raise SystemExit(f"Serveur arrêté au démarrage :\n{fin_du_journal}")
         with suppress(OSError, http.client.HTTPException):
             cnx = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
             cnx.request("GET", "/api/sante")

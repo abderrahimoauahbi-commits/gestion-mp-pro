@@ -178,12 +178,14 @@ while True:
 
 def _processus(sortie: Path) -> subprocess.Popen[bytes]:
     return subprocess.Popen(  # noqa: S603 — l'interpréteur des essais, un script à nous
-        [sys.executable, "-c", SCRIPT], cwd=DOSSIER_SERVEUR, stdout=sortie.open("w")
+        [sys.executable, "-c", SCRIPT],
+        cwd=DOSSIER_SERVEUR,
+        stdout=sortie.open("w", encoding="utf-8"),
     )
 
 
 def _dernier(sortie: Path) -> str:
-    lignes = sortie.read_text().split()
+    lignes = sortie.read_text(encoding="utf-8").split()
     return lignes[-1] if lignes else ""
 
 

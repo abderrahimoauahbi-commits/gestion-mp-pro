@@ -6,6 +6,13 @@ d'environnement n'est lue ni posée (essai `test_config`) : le mot de passe de l
 un fichier `passfile` temporaire (droits 0600) cité dans l'adresse de connexion, jamais sur la
 ligne de commande ni dans l'environnement.
 
+Serveur Windows (docs/INSTALLATION-WINDOWS.md) : les outils s'appellent `pg_dump.exe`… dans
+`C:\\Program Files\\PostgreSQL\\<version>\\bin` ; le chemin du `passfile` est encodé dans
+l'adresse (lecteur, `\\`, espaces d'un profil) ; la sortie des outils est lue en UTF-8 sans
+jamais échouer sur un message dans la page de code de la console. Les droits 0600 du `passfile`
+n'existent pas sous Windows (`touch(mode=…)` y est sans effet) : il est protégé par le dossier
+temporaire du compte du service, fermé aux autres comptes, et effacé aussitôt l'outil fini.
+
 Noms : `gestion-mp-pro-AAAA-MM-JJ-HHMMSS-<genre>.dump` (heure de l'usine, horloge du serveur),
 pièces jointes à côté dans `<même nom>.pieces.tar`. L'instant est lu dans le nom (pas dans la
 date du fichier, qu'une copie change).
@@ -17,14 +24,16 @@ import glob
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from pathlib import Path
+from urllib.parse import quote
 
-from sqlalchemy.engine import make_url
+from sqlalchemy.engine import URL, make_url
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
@@ -38,8 +47,12 @@ DOSSIERS = (
     "/usr/pgsql-*/bin",
     "/usr/bin",
     "/Applications/Postgres.app/Contents/Versions/latest/bin",
+    "C:/Program Files/PostgreSQL/*/bin",
 )
 """Où chercher les outils quand `GESTIONMPPRO_PG_BIN` n'est pas réglé (versions hautes d'abord)."""
+
+SUFFIXES = (".exe", "") if sys.platform == "win32" else ("",)
+"""Les suffixes d'un programme : `pg_dump.exe` sous Windows."""
 
 PREFIXE = "gestion-mp-pro-"
 EXTENSION = ".dump"
@@ -72,19 +85,32 @@ DELAI_LECTURE_S = 300
 LIGNES_EN_TETE = 12
 
 
+def _dans(dossier: Path, nom: str) -> Path | None:
+    """Le programme `nom` de ce dossier (`nom.exe` sous Windows), ou `None`."""
+    for suffixe in SUFFIXES:
+        candidat = dossier / f"{nom}{suffixe}"
+        if candidat.is_file():
+            return candidat
+    return None
+
+
+def _version_d_abord(dossier: str) -> tuple[int, ...]:
+    """Clé de tri : les numéros du chemin (`…/PostgreSQL/16/bin` avant `…/9.6/bin`)."""
+    return tuple(int(n) for n in re.findall(r"\d+", dossier))
+
+
 def outil(nom: str) -> Path | None:
     """Le chemin complet d'un outil de PostgreSQL (`pg_dump`, `pg_restore`, `psql`), ou `None`."""
     dossier = reglages().pg_bin
     if dossier is not None:
-        candidat = dossier / nom
-        return candidat if candidat.is_file() else None
+        return _dans(dossier, nom)
     trouve = shutil.which(nom)
     if trouve:
         return Path(trouve)
     for motif in DOSSIERS:
-        for d in sorted(glob.glob(motif), reverse=True):
-            if (Path(d) / nom).is_file():
-                return Path(d) / nom
+        for d in sorted(glob.glob(motif), key=_version_d_abord, reverse=True):
+            if (chemin := _dans(Path(d), nom)) is not None:
+                return chemin
     return None
 
 
@@ -106,7 +132,11 @@ def adresse_base(base: str | None = None) -> Iterator[str]:
     `passfile` éphémère."""
     url = make_url(base or reglages().base)
     mot_de_passe = url.password
-    sans_secret = url.set(drivername="postgresql", password=None)
+    # `URL.set(password=None)` laisse le mot de passe en place (None = « inchangé ») : il partait
+    # sur la ligne de commande de pg_dump, lisible des autres comptes. L'adresse est refaite sans.
+    sans_secret = URL.create(
+        "postgresql", url.username, None, url.host, url.port, url.database, url.query
+    )
     adresse = sans_secret.render_as_string(hide_password=False)
     if not mot_de_passe:
         yield adresse
@@ -117,14 +147,23 @@ def adresse_base(base: str | None = None) -> Iterator[str]:
         echappe = str(mot_de_passe).replace("\\", "\\\\").replace(":", "\\:")
         fichier.write_text(f"*:*:*:*:{echappe}\n", encoding="utf-8")
         separateur = "&" if "?" in adresse else "?"
-        yield f"{adresse}{separateur}passfile={fichier}"
+        # Encodé : libpq refuse un espace et lirait mal un `%` ou un `&` du chemin.
+        yield f"{adresse}{separateur}passfile={quote(str(fichier), safe='')}"
 
 
 def lancer(arguments: list[str], delai: int = DELAI_LECTURE_S) -> subprocess.CompletedProcess[str]:
     """Lance un outil et rend sa sortie (le code de retour est lu par l'appelant)."""
     # Arguments à nous seuls (outil trouvé par son chemin, fichiers du dossier) : pas de shell.
+    # UTF-8 quel que soit le système (Windows lirait la page de code de la console) ; un
+    # message d'outil dans une autre page de code est remplacé, jamais une exception.
     return subprocess.run(  # noqa: S603
-        arguments, capture_output=True, text=True, timeout=delai, check=False
+        arguments,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=delai,
+        check=False,
     )
 
 

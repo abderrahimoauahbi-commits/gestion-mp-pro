@@ -35,6 +35,7 @@ from gestion_mp_pro.api.erreurs import (
 )
 from gestion_mp_pro.config import ENTETE_ANTI_FALSIFICATION, Reglages, reglages
 from gestion_mp_pro.db import DISPONIBILITE, motif_indisponibilite
+from gestion_mp_pro.services.chemins import relatif_sur
 
 JOURNAL = journalisation.JOURNAL
 
@@ -133,10 +134,13 @@ def _servir_ecran(app: FastAPI, dossier: Path) -> None:
         """Un fichier de l'écran s'il existe sous son dossier, sinon l'application (SPA)."""
         if _est_api("/" + chemin):
             return reponse_erreur("route_inconnue", MESSAGE_ROUTE_INCONNUE)
-        fichier = (racine / chemin).resolve()
-        if chemin and fichier.is_file() and fichier.is_relative_to(racine):
-            entetes = {"Cache-Control": "no-cache"} if fichier.name in SANS_CACHE else None
-            return FileResponse(fichier, headers=entetes)
+        # Contrôle lexical d'abord : sous Windows, un partage réseau (`\\hôte\…`) n'est jamais
+        # interrogé (services/chemins.py).
+        if relatif_sur(chemin):
+            fichier = (racine / chemin).resolve()
+            if fichier.is_relative_to(racine) and fichier.is_file():
+                entetes = {"Cache-Control": "no-cache"} if fichier.name in SANS_CACHE else None
+                return FileResponse(fichier, headers=entetes)
         return FileResponse(racine / "index.html", headers={"Cache-Control": "no-cache"})
 
 

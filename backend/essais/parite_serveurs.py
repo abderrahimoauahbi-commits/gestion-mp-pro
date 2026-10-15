@@ -144,7 +144,8 @@ def _attendre(adresse: str, processus: subprocess.Popen[bytes], journal: Path) -
     fin = time.monotonic() + DELAI_S
     while time.monotonic() < fin:
         if processus.poll() is not None:
-            raise SystemExit(f"Serveur arrêté au démarrage :\n{journal.read_text()[-3000:]}")
+            fin_du_journal = journal.read_text(encoding="utf-8")[-3000:]
+            raise SystemExit(f"Serveur arrêté au démarrage :\n{fin_du_journal}")
         with suppress(OSError):
             with urllib.request.urlopen(adresse + "/api/sante", timeout=2):  # noqa: S310
                 return

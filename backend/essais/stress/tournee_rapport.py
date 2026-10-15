@@ -274,8 +274,8 @@ def ecrire(dossier_resultats: Path, cible: Path) -> None:
     """Régénère le rapport ; garde l'analyse manuelle qui suit `## Constats`."""
     resultats = _charger(dossier_resultats)
     manuel = ""
-    if cible.exists() and MARQUE_MANUELLE in cible.read_text():
-        manuel = cible.read_text().split(MARQUE_MANUELLE, 1)[1]
+    if cible.exists() and MARQUE_MANUELLE in cible.read_text(encoding="utf-8"):
+        manuel = cible.read_text(encoding="utf-8").split(MARQUE_MANUELLE, 1)[1]
     lignes = [
         "# Tournée d'écran — stress test « 10 ans » de Gestion MP PRO",
         "",
@@ -300,4 +300,4 @@ def ecrire(dossier_resultats: Path, cible: Path) -> None:
         MARQUE_MANUELLE
         + (manuel if manuel else "\n\n(À écrire à la main : analyse, classement, corrections.)\n")
     ]
-    cible.write_text("\n".join(lignes))
+    cible.write_text("\n".join(lignes), encoding="utf-8")

@@ -21,6 +21,7 @@ from pathlib import Path
 
 from gestion_mp_pro.api.erreurs import Refus
 from gestion_mp_pro.config import reglages
+from gestion_mp_pro.services.chemins import relatif_sur
 
 
 def dossier_pieces() -> Path:
@@ -68,7 +69,10 @@ def compter(archive: Path) -> int:
 
 
 def _sur(racine: Path, nom: str) -> Path | None:
-    """Le chemin d'un membre sous la racine, ou `None` s'il en sortirait (traversée refusée)."""
+    """Le chemin d'un membre sous la racine, ou `None` s'il en sortirait (traversée refusée ;
+    un lecteur ou un partage Windows est refusé avant tout accès au disque)."""
+    if not relatif_sur(nom):
+        return None
     chemin = (racine / nom).resolve()
     return chemin if chemin.is_relative_to(racine.resolve()) else None
 

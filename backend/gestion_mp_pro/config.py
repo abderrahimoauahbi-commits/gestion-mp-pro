@@ -8,8 +8,9 @@ endroit à comparer (ARCHITECTURE § 14.1).
 
 from __future__ import annotations
 
+import sys
 from functools import cached_property, lru_cache
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -33,6 +34,19 @@ NOM_BASE_DEFAUT = "gestion_mp_pro"
 
 NiveauJournal = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
+DONNEES_WINDOWS = PureWindowsPath(r"C:\ProgramData\Gestion MP PRO")
+"""Les données d'un serveur Windows (sauvegardes, pièces, journaux) : `%ProgramData%`, et non le
+profil d'un compte. L'environnement n'est pas lu ici (essai `test_config`) : le kit
+`deploiement/windows` écrit de toute façon les dossiers réels dans le fichier `environnement`."""
+
+
+def dossier_par_defaut(nom: str, plateforme: str = sys.platform) -> Path:
+    """Le dossier par défaut `nom` (`sauvegardes`, `pieces`) : `~/gestion-mp-pro-<nom>` sur le
+    Mac et sous Linux, `C:\\ProgramData\\Gestion MP PRO\\<nom>` sous Windows."""
+    if plateforme == "win32":
+        return Path(str(DONNEES_WINDOWS / nom))
+    return Path(f"~/gestion-mp-pro-{nom}")
+
 
 def _dossier(valeur: Path | str) -> Path:
     """Un dossier donné avec `~` est rendu absolu."""
@@ -55,9 +69,9 @@ class Reglages(BaseSettings):
     processus: int = Field(default=2, ge=1, le=64)
     taches: bool = True
     session_jours: int = Field(default=30, ge=1, le=3650)
-    sauvegardes: Path = Path("~/gestion-mp-pro-sauvegardes")
+    sauvegardes: Path = dossier_par_defaut("sauvegardes")
     sauvegardes_copie: Path | None = None
-    pieces: Path = Path("~/gestion-mp-pro-pieces")
+    pieces: Path = dossier_par_defaut("pieces")
     pg_bin: Path | None = None
     ecran: Path = RACINE / "frontend" / "dist"
     smtp_hote: str = ""

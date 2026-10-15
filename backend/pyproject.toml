@@ -16,6 +16,8 @@ dependencies = [
   "segno>=1.6",
   "openpyxl>=3.1",
   "python-multipart>=0.0.9",
+  # Windows n'a pas de base des fuseaux : zoneinfo la lit dans ce paquet (Africa/Casablanca).
+  "tzdata>=2024.1; sys_platform == 'win32'",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +49,11 @@ extend-exclude = [".venv"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "S", "PL", "C90", "DTZ", "T20", "D1"]
+# PLW1514 : tout open()/read_text()/write_text() dit son encodage (Windows lirait cp1252). Règle
+# encore « preview » dans ruff : elle seule est activée (explicit-preview-rules).
+extend-select = ["PLW1514"]
+preview = true
+explicit-preview-rules = true
 ignore = [
   "D105",    # méthodes magiques : leur sens est connu
   "D107",    # __init__ : documenté par la classe
