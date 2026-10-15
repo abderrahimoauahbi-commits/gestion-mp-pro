@@ -1887,4 +1887,80 @@ Recherche globale (coque) :
 
 ## Constats
 
-(À écrire à la main : analyse, classement, corrections.)
+### Phase A — mise au point (base « référentiels seuls » puis base ×30 de l'épreuve de charge)
+
+Méthode : serveur jetable uvicorn (2 processus, écran construit, port > 8100) sur une **copie**
+(`gestion_mp_pro_stress_ecran_ref_essai` = `pg_dump gestion_mp_pro` + `alembic upgrade head` ;
+`gestion_mp_pro_stress_ecran_charge_x30_essai` = `charge.py remplir`, ×30), comptes d'essai
+`stress-ecran-<rôle>` inscrits dans la copie puis désactivés, Chrome sans tête piloté par CDP.
+Les référentiels de la copie ne sont pas touchés (aucune écriture métier : la tournée ne fait que
+lire, chercher, exporter et imprimer).
+
+**Base « référentiels seuls » (l'état livré, activité vide) : aucun écran lent, aucune erreur.**
+307 écrans × onglets, 375 ms médiane (c'est le démarrage de l'écran construit : les appels `/api/`
+font 10 à 100 ms), 120 exports et documents tous en 200 et < 70 ms, recherche à la frappe ~100 ms,
+recherche globale 9 résultats pour « HASIRCI ». Les 69 remarques sont toutes de PRÉSENTATION,
+déjà connues ou attendues :
+
+- PRÉSENTATION (connu, « à trancher » dans AUDIT2) : au bureau 1 440 px, les tableaux à 12 mois
+  (Production › plan, glissant, plan et réalisé, besoins ; fiche « Besoin d'une matière ») et les
+  tableaux larges (Stock › par matière : 2 017 px pour 1 142 de cadre — les colonnes au-delà de
+  « Commandé » sont hors cadre ; Analyse › opportunités 1 170, fournisseurs 1 228 ; Administration
+  › journal 2 161, données brutes 3 049) débordent de leur cadre : la barre de défilement
+  horizontale est invisible sur Mac, l'utilisateur ne sait pas qu'il manque des colonnes.
+- INFORMATION : au téléphone (375 px), les écrans du **bureau** ouverts à l'alimentation
+  (stock, sorties, production, catalogue, qualités, métiers, aide) ont tous un tableau plus large
+  que l'écran ; l'**atelier** (ses 10 écrans), lui, tient parfaitement en 375 × 812, sans montant.
+- Aucun montant chez l'alimentation (bureau comme atelier) ; aucune fenêtre avec défilement caché
+  ni contenu écrasé ; pas de défilement horizontal de page.
+
+**Base ×30 (10 ans d'historique recopiés, 313 140 mouvements, 9 600 OF, 9 630 réceptions,
+2 700 dossiers, 50 520 lots dont 20 160 encore en stock).** C'est une base **plus dure que le
+réel** (les lots des années recopiées gardent leur solde, 1 740 bons restent « confirmés ») : elle
+sert à voir ce qui casse, pas à juger ; la phase B (base simulée « comme un humain ») tranche.
+368 écrans, médiane 1,1 s, 71 écrans entre 1 et 3 s, 121 au-delà de 3 s, aucun bloqué (> 30 s),
+aucune erreur 5xx, aucune erreur JavaScript, recompte SQL 26 cas / 0 écart (stock, valorisation,
+cockpit, listes paginées, échéancier, réalisé sur 10 ans). Profil à froid / à chaud (serveur dédié,
+1 processus, `scratchpad/stress_profil_routes.py`) :
+
+| Route | à froid | à chaud | Taille | Cause lue dans le code |
+|---|---|---|---|---|
+| `/api/contexte` (premier appel d'une session) | 9,0 s | 22 ms | 2 Ko | charge le moteur (`donnees_moteur.charger`) ; le cache dérivé est vidé à **chaque ligne de journal**, donc à chaque connexion et à chaque écriture |
+| `/api/cockpit` | 2,1 s | 9 ms | 7 Ko | idem (cache dérivé) |
+| `/api/qualites` | 3,7 s | 40 ms | 54 Ko | idem |
+| `/api/ordres/apercu?statut=valide` | 6,6 s | **5,8 s** | 2 Ko | `_agregats` relit **tous** les OF du filtre (9 570) par le moteur pour sommer net/revenu/prévu/sorti — appelé par Sorties, la fiche d'un OF, « Nouvelle sortie », le retour |
+| `/api/receptions/pesees?limite=1` | 3,6 s | **3,6 s** | 1 Ko | `receptions_pesees.pesees` reconstruit **toutes** les pesées (11 070) avant de couper la page ; appelé à **chaque** ouverture de Réceptions (compte de l'onglet « Pesées ») et de ses fiches |
+| `/api/ordres/consommation` | 3,4 s | 3,1 s | 10 Ko | tous les OF, non paginé (Stock › Ordres de fabrication, traçabilité, Analyse › Production) |
+| `/api/ordres/ouverts` | 4,8 s | 4,5 s | 5 Ko | 5 000 OF « ouverts » (artefact ×30 : au réel quelques-uns) — atelier Envoyer/Ordres/Retour |
+| `/api/ordres?statut=valide&q=…` | 2,5 s | 2,5 s | 1 Mo | la recherche serveur relit la page par le moteur |
+| `/api/documents/bilan?mois=…` | 7,0 s | 6,3 s | 12 Ko | `bilan.calculer` relit tous les mouvements, toutes les fabrications et `consommations(s)` (tous les OF) |
+| `/api/lots?non_nuls=true` | 1,6 s | 1,7 s | 20 Ko | 20 160 lots en stock (artefact ×30) ; l'écran les rend tous (DOM : 20 160 lignes) |
+| `/api/echeancier` | 1,2 s | 1,2 s | **8,9 Mo** | 9 480 factures non réglées (artefact ×30), toutes rendues (DOM : 9 480 lignes) |
+| `/api/prix/historique` | 0,8 s | 0,8 s | **18 Mo** | 43 290 prix payés, tous rendus (DOM : 43 290 lignes) |
+| `/api/stock`, `/api/brouillons`, `/api/metiers` | 0,26 s / 0,4 s / 0,24 s | idem | — | tiennent |
+
+Exports et documents à ×30 (direction) : `export/mouvements` 43,6 s (27,6 Mo, en flux : connu,
+V4/PAGINATION), `export/receptions/pesees` 11,1 s, `export/journal` 8,8 s, `export/prix` 5,6 s,
+`export/echeancier` 4,3 s, `export/lots` 4,0 s, `export/revient` 3,9 s, `export/ordres` 3,3 s ;
+le **bilan du mois** (document A4) 6,8 s ; tous les autres < 2,1 s. Tous en 200, sans trace.
+`export/commandes/{id}/bon` d'un bon soldé → 409 (refus attendu : plus rien à envoyer).
+
+Classement provisoire (à confirmer en phase B sur la base simulée, où le nombre d'OF validés
+sur 10 ans sera du même ordre, ~10 000, mais pas les lots en stock ni les bons ouverts) :
+
+- PROBABLE (structurel, croît avec l'historique, indépendant de l'artefact ×30) :
+  `/ordres/apercu` (O(N) OF validés), `/receptions/pesees?limite=1` (O(N) pesées à chaque
+  ouverture de Réceptions), `/ordres/consommation` et les trois onglets qui rendent tous les OF
+  (Stock › OF, traçabilité, Analyse › Production), **Prix payés** (tous les prix de 10 ans dans le
+  DOM, 18 Mo), **bilan du mois** (relit 10 ans pour un mois), premier écran après connexion
+  (cache dérivé à reconstruire, 9 s à ×30).
+- ARTEFACT ×30 (à revoir en phase B) : `/ordres/ouverts`, `/lots?non_nuls`, échéancier,
+  `/commandes/ouverts`, cockpit onglets « alertes »/« économies » (`/brouillons` 3,6 s sous
+  charge, 0,4 s seul).
+- PRÉSENTATION (comme sur la base vide) : tableaux plus larges que le cadre, dont « Dossiers
+  ouverts » (22 fois : colonnes « Coût hors TVA » et suivantes hors cadre à 1 440 px).
+
+Aucune correction en phase A : rien de CERTAIN sur une base qui n'est pas celle de l'usine, et
+la règle est de réfléchir avant de corriger. Les candidats à une correction certaine (essai
+avant/après, chiffres inchangés) sont le compte des pesées par agrégat SQL et les agrégats de
+`/ordres/apercu` ; ils seront décidés sur les chiffres de la phase B.
