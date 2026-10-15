@@ -21,12 +21,6 @@ export type QualiteResume = Schema<'QualiteResume'>
 export type Metier = Schema<'MetierFiche'>
 export type StatutOrdre = OrdreResume['statut']
 
-/**
- * La liste **entière** des ordres (plafonnée au serveur) pour la saisie, qui n'en lit que la date
- * du dernier ordre (`dernierOrdre`) ; l'écran Sorties, lui, pagine `/ordres` (`useListePaginee`).
- */
-export const useOrdres = () => useLecture<OrdreResume[]>('/ordres/ouverts')
-
 type Params = Record<string, string | number | boolean | null | undefined>
 
 /** L'aperçu de la liste des ordres (comptes d'onglet, agrégats, options des filtres liés). */

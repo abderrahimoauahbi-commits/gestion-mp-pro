@@ -9,8 +9,9 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { fauxServeur, monterApp, prechargerPages, stockageMemoire } from '../../essais/monter'
-import { donnees, MONETAIRE, reponsesAtelier } from './essaiAtelier'
-import { piedRetour } from './Retour'
+import { donnees, MONETAIRE, pageOrdres, reponsesAtelier } from './essaiAtelier'
+import { motsDe, piedRetour } from './Retour'
+import type { OrdreResume } from './types'
 
 beforeAll(prechargerPages)
 beforeEach(() => {
@@ -39,6 +40,39 @@ describe('Retour des machines', () => {
     await u.click(await screen.findByRole('link', { name: /OF-2026-0001/ }))
     await waitFor(() => expect(app.adresse()).toBe('/atelier/retour?ordre=1'))
     expect(await screen.findByRole('heading', { name: 'Retour — OF-2026-0001' })).toBeInTheDocument()
+  })
+
+  it('25 validés : les 10 derniers, le total, la suite et la recherche lus au serveur', async () => {
+    const valides: OrdreResume[] = Array.from({ length: 25 }, (_, i) => ({
+      ...donnees().ORDRE_VALIDE,
+      id: 100 + i,
+      numero: `OF-2026-${String(100 + i)}`,
+      date: `2026-10-${String(1 + i).padStart(2, '0')}`,
+    }))
+    const appels = fauxServeur(reponsesAtelier('alimentation', { 'GET /ordres': pageOrdres(valides) }))
+    const u = userEvent.setup()
+    monterApp('/atelier/retour')
+    expect(
+      await screen.findByText('les 10 derniers sur 25 : chercher un ordre plus ancien'),
+    ).toBeInTheDocument()
+    const cartes = screen.getAllByRole('listitem')
+    expect(cartes.map((c) => c.textContent?.slice(0, 11))).toEqual(
+      Array.from({ length: 10 }, (_, i) => `OF-2026-${String(124 - i)}`),
+    )
+    await u.click(screen.getByRole('button', { name: '10 sur 25 — charger les suivants' }))
+    expect(
+      await screen.findByText('les 20 derniers sur 25 : chercher un ordre plus ancien'),
+    ).toBeInTheDocument()
+    await u.type(screen.getByRole('searchbox', { name: 'Chercher un ordre' }), 'OF')
+    await waitFor(() => expect(appels.some((a) => a.chemin.includes('q=OF'))).toBe(true))
+    expect(appels.filter((a) => a.chemin.startsWith('/ordres?')).map((a) => a.chemin)).toEqual([
+      '/ordres?statut=valide&limite=10',
+      '/ordres?statut=valide&limite=20',
+      '/ordres?statut=valide&q=OF&limite=30',
+    ])
+    expect(appels.some((a) => a.chemin.startsWith('/ordres/ouverts'))).toBe(false)
+    expect(motsDe(['/ordres', { statut: 'valide', q: 'OF' }])).toBe('OF')
+    expect(motsDe(['/ordres'])).toBeUndefined()
   })
 
   it('« Tout ce qui est parti » en bobines arrondit vers le bas ; un seul envoi, validé', async () => {

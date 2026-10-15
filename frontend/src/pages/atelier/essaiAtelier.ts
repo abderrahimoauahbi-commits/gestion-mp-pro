@@ -15,6 +15,7 @@ import type {
   MetierFiche,
   Motifs,
   OrdreFiche,
+  OrdreResume,
   Proposition,
   QualiteResume,
 } from './types'
@@ -35,6 +36,21 @@ export interface Donnees {
 /** Une copie fraîche des données (chaque essai peut la modifier). */
 export function donnees(): Donnees {
   return JSON.parse(JSON.stringify(brut))
+}
+
+/**
+ * La route 135 (`/ordres`) sur une liste : le statut demandé, le plus récent d'abord (date, puis
+ * n° d'entrée), `limite` ordres et le total.
+ */
+export function pageOrdres(ordres: readonly OrdreResume[]): Reponse {
+  return (_c, url) => {
+    const statut = url.searchParams.get('statut')
+    const retenus = ordres
+      .filter((o) => !statut || o.statut === statut)
+      .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+    const limite = Number(url.searchParams.get('limite') ?? 500)
+    return { corps: { elements: retenus.slice(0, limite), total: retenus.length, suivant: null } }
+  }
 }
 
 /** Le faux serveur de l'atelier : les lectures communes, plus `autres`. */
@@ -58,6 +74,7 @@ export function reponsesAtelier(role: Role, autres: Record<string, Reponse> = {}
     'GET /ordres/ouverts': (_c, url) => ({
       corps: url.searchParams.get('statut') === 'brouillon' ? [brouillon] : [d.ORDRE_VALIDE, brouillon],
     }),
+    'GET /ordres': pageOrdres([d.ORDRE_VALIDE, brouillon]),
     'GET /ordres/1': { corps: d.ORDRE_VALIDE },
     'GET /ordres/5': { corps: brouillon },
     'GET /ordres/1/lots-sortis': { corps: d.LOTS_SORTIS },

@@ -18,19 +18,12 @@ import { Nombre } from '../../composants/saisie/Nombre'
 import { Saisie } from '../../composants/saisie/Saisie'
 import { Selecteur } from '../../composants/saisie/Selecteur'
 import { date, jourRelatif, kg, kgEtMetres } from '../../lib/format'
+import { useDernierOrdre } from '../../lib/dernierOrdre'
 import { ajouterJours } from '../../lib/heure'
 import { useSession } from '../../lib/session'
 import { fondsLaisses } from '../stock/fondsProposes'
 import styles from '../stock/stock.module.css'
-import {
-  dernierOrdre,
-  nomMetier,
-  useMetiers,
-  useOrdres,
-  useQualites,
-  type OrdreFiche,
-  type QualiteResume,
-} from './donnees'
+import { nomMetier, useMetiers, useQualites, type OrdreFiche, type QualiteResume } from './donnees'
 import { LignesSaisie } from './LignesSaisie'
 import { aEnvoyer } from '../../lib/ordre'
 import { useSaisieOrdre, type SaisieOrdre as Saisie_ } from './useSaisieOrdre'
@@ -51,8 +44,7 @@ function borneBasse(cloture: string | null, dernier: string | null) {
 function Demande({ s, sauf }: { s: Saisie_; sauf: number | null }) {
   const { contexte } = useSession()
   const metiers = useMetiers()
-  const ordres = useOrdres()
-  const borne = borneBasse(contexte.date_cloture, dernierOrdre(ordres.data, sauf))
+  const borne = borneBasse(contexte.date_cloture, useDernierOrdre(sauf))
   return (
     <Grille colonnes={4}>
       <Champ libelle="Date" obligatoire>
