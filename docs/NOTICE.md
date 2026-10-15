@@ -162,7 +162,7 @@ Menu « Analyse ». Chaque liste s’exporte en Excel ; chaque onglet a son adre
 | Opportunités d’économies (`/analyse?onglet=opportunites`) | Les fils comparables (même composition, type, titrage et, par défaut, même couleur) qui coûtent moins cher ailleurs à la même époque, au coût rendu usine ; et ce qui a été écarté (prix non datés, trop éloignés). |
 | Fournisseurs (`/analyse?onglet=fournisseurs`) | OTIF, retours, écart de pesée, score sur 100, classement et action conseillée ; les réceptions notées une à une. |
 | Coût de revient (`/analyse?onglet=revient`) | Ce que chaque fil a coûté rendu usine, par référence, caractéristique, qualité ou période. |
-| Échéancier (`/analyse?onglet=echeancier`) | Ce qu’il faudra payer, et quand : factures des fournisseurs et frais d’importation, en retard en rouge, par mois ; et ce qui est dû sans échéance (« À dater »). |
+| Échéancier (`/analyse?onglet=echeancier`) | Ce qu’il faudra payer, et quand : factures des fournisseurs et frais d’importation, en retard en rouge, par mois ; et ce qui est dû sans échéance (« À dater »). La vue « Réglées » montre les 300 derniers règlements et le dit ; pour tous les voir sur une période, poser « Du » et « Au » : la période s’applique alors à la date de règlement, et l’export Excel suit. |
 | Contrôles (`/analyse?onglet=controles`) | Trente-huit vérifications de cohérence, chacune avec ses lignes fautives et ce qu’il faut faire. |
 | Production (`/analyse?onglet=production`) | Le sorti net de chaque ordre face au prévu par la recette. Le plan et le réalisé par qualité sont dans Production & besoins. |
 

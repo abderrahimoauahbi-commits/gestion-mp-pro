@@ -103,6 +103,13 @@ class Echeancier(Sortie):
     a_dater: list[EcheanceLigne]  # type: ignore[valid-type]
     a_dater_mad: float
     reglees: list[EcheanceLigne]  # type: ignore[valid-type]
+    reglees_total: int = Field(
+        description="Pièces réglées retenues par les filtres, avant le plafond."
+    )
+    reglees_plafond: int | None = Field(
+        description="Sans période : `reglees` ne porte que ce nombre de règlements, les plus "
+        "récents (300). Avec une période du/au (date de règlement) : nul, toutes sont rendues."
+    )
     ecartees: list[EcheanceLigne]  # type: ignore[valid-type]
 
 

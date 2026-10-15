@@ -3,7 +3,7 @@
  * d'essai du lot F8) : onglet par défaut selon le rôle et ancienne adresse, compteurs des onglets
  * (`a_corriger` pour les contrôles, H-07), détail d'un contrôle à adresse stable et écart en
  * fraction formaté une seule fois (P8-3), huit matières au plus sur une courbe (P8-6), filtres de
- * l'échéancier envoyés au serveur (P8-21), mois du bilan.
+ * l'échéancier envoyés au serveur (P8-21), vue Réglées qui dit son plafond et sa période, mois du bilan.
  */
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -107,6 +107,40 @@ describe('Analyse', () => {
     await waitFor(() =>
       expect(appels.some((a) => a.chemin.startsWith('/echeancier?nature=frais'))).toBe(true),
     )
+  })
+
+  it('la vue Réglées dit son plafond (les 300 dernières) et la période part au serveur', async () => {
+    const appels = fauxServeur(
+      reponsesConnecte('direction', {
+        'GET /echeancier': { corps: { ...echeancier, reglees_total: 1540, reglees_plafond: 300 } },
+      }),
+    )
+    monterApp('/analyse?onglet=echeancier&evue=reglees')
+    expect(await screen.findByRole('button', { name: 'Réglées (les 300 dernières)' })).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Réglées : les 300 dernières sur 1 540. Pour toutes les voir, poser une période (Du / Au) : elle s’applique à la date de règlement.',
+      ),
+    ).toBeInTheDocument()
+    await userEvent.type(screen.getByLabelText('Du'), '2026-01-01')
+    await waitFor(() =>
+      expect(appels.some((a) => a.chemin.startsWith('/echeancier?du=2026-01-01'))).toBe(true),
+    )
+  })
+
+  it('la vue Réglées avec une période dit toutes les pièces réglées de la période', async () => {
+    fauxServeur(
+      reponsesConnecte('direction', {
+        'GET /echeancier': { corps: { ...echeancier, reglees_total: 412, reglees_plafond: null } },
+      }),
+    )
+    monterApp('/analyse?onglet=echeancier&evue=reglees&du=2026-01-01&au=2026-06-30')
+    expect(await screen.findByRole('button', { name: 'Réglées (0)' })).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Réglées : toutes les pièces réglées du 01/01/2026 au 30/06/2026 (412, date de règlement).',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('le fournisseur s’ouvre en fenêtre à adresse stable (&fournisseur=ID, P8-1)', async () => {
