@@ -81,6 +81,36 @@ def engagee(s: Session, f: Facture, reception_id: int | None) -> str:
     return ""
 
 
+def oublier_si_orpheline(
+    s: Session, qui: audit.Qui, facture_id: int | None, *, reception_id: int
+) -> None:
+    """La facture que la réception `reception_id` portait **seule** disparaît quand elle la
+    quitte (brouillon supprimé ou corrigé avec une autre facture, numéro détaché ou changé) :
+    rien ne la porte plus, elle n'est pas due — l'échéancier compterait sinon une dette que rien
+    n'étaye (trouvé par le simulateur « 10 ans », octobre 2026). Une facture réglée, portée par
+    une autre réception ou citée par un dossier d'importation (même annulé) reste."""
+    if facture_id is None:
+        return
+    f = s.get(Facture, facture_id)
+    if f is None or engagee(s, f, reception_id):
+        return
+    citee = s.scalar(
+        select(func.count()).select_from(DossierFacture).where(DossierFacture.facture_id == f.id)
+    )
+    if citee:
+        return
+    audit.suppression(
+        s,
+        qui,
+        "facture oubliée",
+        f,
+        numero=f.numero,
+        detail=f"{f.numero} · plus portée par aucune réception",
+    )
+    s.delete(f)
+    s.flush()
+
+
 def _date_de_facture(jour: date | None) -> None:
     """Une facture ne se date pas dans le futur (la date de facture a son plafond, anom. 4.16)."""
     if jour is not None and jour > horloge.aujourd_hui():

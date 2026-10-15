@@ -157,6 +157,7 @@ def modifier(s: Session, qui: audit.Qui, rid: int, version: int, e: Saisie) -> R
         r.date, r.fournisseur_id, r.devise = e.date, e.fournisseur_id, devise
         r.numero_bl, r.controle_par = e.numero_bl.strip(), e.controle_par.strip()
         r.observations = e.observations
+        ancienne = r.facture_id
         r.facture_id = factures.attacher(
             s, qui, f=prep.fournisseur, e=e.factures.get(devise), devise=devise, reception_id=r.id
         )
@@ -168,6 +169,8 @@ def modifier(s: Session, qui: audit.Qui, rid: int, version: int, e: Saisie) -> R
         toucher(r)
         s.flush()
         geste.detail = f"{nom_reception(r)} · {len(lignes)} ligne(s)"
+        if ancienne is not None and ancienne != r.facture_id:
+            factures.oublier_si_orpheline(s, qui, ancienne, reception_id=r.id)
     return r
 
 
@@ -181,8 +184,10 @@ def supprimer(s: Session, qui: audit.Qui, rid: int, version: int) -> None:
         annule="Une réception annulée ne se supprime pas : elle reste la trace du camion.",
     )
     audit.suppression(s, qui, "suppression réception", r, detail=nom_reception(r))
+    facture_id = r.facture_id
     s.delete(r)
     s.flush()
+    factures.oublier_si_orpheline(s, qui, facture_id, reception_id=rid)
 
 
 # ── Validation ───────────────────────────────────────────────────────────────
