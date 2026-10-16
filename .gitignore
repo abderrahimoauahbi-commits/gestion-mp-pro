@@ -24,3 +24,15 @@ frontend/tsconfig.tsbuildinfo
 # Épreuve d'écran du stress test : captures PNG (volumineuses), hors dépôt sauf blocages
 backend/essais/stress/captures/
 !backend/essais/stress/captures/blocages/
+
+# Métadonnées macOS / Windows (copie depuis un Mac)
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.idea/
+*.swp
